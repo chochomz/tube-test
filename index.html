@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Tube Audio Lab</title>
 
-  <!-- [Phase 1] 아이폰 전용 아이콘 및 PWA 설정 -->
   <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1384/1384060.png">
   <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/1384/1384060.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -19,13 +18,28 @@
       background-color: #121212;
       color: #ffffff;
       padding: 15px;
-      padding-bottom: 140px;
+      padding-bottom: 160px;
     }
-    h2 { text-align: center; margin-bottom: 15px; color: #ff0000; }
+    h2 { text-align: center; margin-bottom: 10px; color: #ff0000; }
+    
+    #debug-box {
+      background: #000;
+      border: 1px solid #333;
+      border-radius: 6px;
+      padding: 8px;
+      font-family: monospace;
+      font-size: 11px;
+      color: #00ff00;
+      margin-bottom: 15px;
+      max-height: 90px;
+      overflow-y: auto;
+      word-break: break-all;
+    }
+
     .search-box {
       display: flex;
       gap: 10px;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
       position: sticky;
       top: 10px;
       z-index: 10;
@@ -39,7 +53,7 @@
       color: #fff;
       font-size: 16px;
     }
-    button {
+    button.search-btn {
       padding: 12px 20px;
       border-radius: 8px;
       border: none;
@@ -60,8 +74,8 @@
     }
     .video-item:active { background: #333; }
     .video-item img {
-      width: 100px;
-      height: 56px;
+      width: 90px;
+      height: 50px;
       object-fit: cover;
       border-radius: 4px;
     }
@@ -72,7 +86,7 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      margin-bottom: 5px;
+      margin-bottom: 4px;
     }
     .video-channel { font-size: 12px; color: #aaa; }
     
@@ -97,88 +111,102 @@
       text-overflow: ellipsis;
     }
     audio { width: 100%; height: 35px; }
-    .status-msg { text-align: center; color: #aaa; margin-top: 20px; font-size: 14px; }
-    .err-text { color: #ff5252 !important; }
   </style>
 </head>
 <body>
 
   <h2>Tube Audio Lab</h2>
 
+  <!-- 실시간 진단 모니터 -->
+  <div id="debug-box">[시스템] CORS 터널 준비 완료</div>
+
   <div class="search-box">
-    <input type="text" id="query" placeholder="음악 또는 아티스트 검색" onkeyup="if(window.event.keyCode==13){search()}">
-    <button onclick="search()">검색</button>
+    <input type="text" id="query" placeholder="가수 또는 곡명 검색" onkeyup="if(window.event.keyCode==13){search()}">
+    <button class="search-btn" onclick="search()">검색</button>
   </div>
 
-  <div id="status" class="status-msg">검색어를 입력해보세요.</div>
   <div class="video-list" id="results"></div>
 
   <div class="player-container">
     <div id="nowPlaying" class="now-playing">대기 중...</div>
-    <audio id="audioPlayer" controls playsinline preload="auto"></audio>
+    <audio id="audioPlayer" controls playsinline></audio>
   </div>
 
   <script>
-    // [Phase 2] 전 세계 분산 Invidious 프록시 네트워크
-    const API_SERVERS = [
+    // Invidious 노드 목록
+    const NODES = [
       'https://inv.nadeko.net',
-      'https://invidious.nerdvpn.de',
-      'https://yewtu.be'
+      'https://yewtu.be',
+      'https://invidious.nerdvpn.de'
     ];
-    let activeServer = API_SERVERS[0];
+    let currentNode = NODES[0];
 
     const audioPlayer = document.getElementById('audioPlayer');
     const nowPlaying = document.getElementById('nowPlaying');
     const resultsContainer = document.getElementById('results');
-    const statusMsg = document.getElementById('status');
+    const debugBox = document.getElementById('debug-box');
 
-    // 1. 유튜브 검색 (살아있는 서버 자동 탐색)
+    function log(msg) {
+      console.log(msg);
+      debugBox.innerText = `> ${msg}\n` + debugBox.innerText.slice(0, 300);
+    }
+
+    // CORS 제한을 우회하여 JSON을 가져오는 스마트 터널 함수
+    async function fetchWithCors(targetUrl) {
+      // 1차 시도: 직접 통신
+      try {
+        const res = await fetch(targetUrl);
+        if (res.ok) return await res.json();
+      } catch (e) {
+        log("직접 연결 실패, CORS 우회 터널 작동...");
+      }
+
+      // 2차 시도: AllOrigins 프록시 터널 경유
+      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
+      const res2 = await fetch(proxyUrl);
+      if (!res2.ok) throw new Error(`터널 에러 (HTTP ${res2.status})`);
+      return await res2.json();
+    }
+
+    // 오디오 태그 에러 추적
+    audioPlayer.onerror = () => {
+      const err = audioPlayer.error;
+      log(`[오디오 오류] 코드 ${err ? err.code : '알수없음'}`);
+      nowPlaying.innerText = "재생 실패 (오디오 스트림 차단)";
+    };
+
+    // 1. 검색 (CORS 터널 통과)
     async function search() {
       const q = document.getElementById('query').value.trim();
       if (!q) return;
 
-      statusMsg.className = "status-msg";
-      statusMsg.innerText = "서버 연결 및 검색 중...";
+      log(`검색 시작: "${q}"`);
       resultsContainer.innerHTML = '';
 
-      let success = false;
-      for (let i = 0; i < API_SERVERS.length; i++) {
-        const server = API_SERVERS[i];
+      for (let i = 0; i < NODES.length; i++) {
+        currentNode = NODES[i];
         try {
-          const res = await fetch(`${server}/api/v1/search?q=${encodeURIComponent(q)}&type=video`);
-          if (!res.ok) throw new Error();
-          const items = await res.json();
+          const target = `${currentNode}/api/v1/search?q=${encodeURIComponent(q)}&type=video`;
+          log(`노드 요청: ${currentNode}`);
+          const items = await fetchWithCors(target);
           
-          activeServer = server; // 응답에 성공한 서버를 메인으로 채택
+          log(`검색 완료 (${items.length}개 수신)`);
           renderResults(items);
-          statusMsg.innerText = '';
-          success = true;
-          break;
+          return;
         } catch (e) {
-          console.warn(`${server} 실패, 다음 예비 서버로 전환...`);
+          log(`${currentNode} 실패: ${e.message}`);
         }
       }
-
-      if (!success) {
-        statusMsg.className = "status-msg err-text";
-        statusMsg.innerText = "모든 검색 서버가 응답하지 않습니다. 잠시 후 다시 시도해 주세요.";
-      }
+      log("모든 검색 경로가 차단되었습니다.");
     }
 
-    // 2. 검색 목록 렌더링
     function renderResults(items) {
-      if (!items || items.length === 0) {
-        statusMsg.innerText = "검색 결과가 없습니다.";
-        return;
-      }
-
       items.forEach(item => {
         const card = document.createElement('div');
         card.className = 'video-item';
         const thumb = item.videoThumbnails ? item.videoThumbnails[0].url : '';
         
-        // 클릭 즉시 실행
-        card.onclick = () => playAudio(item.videoId, item.title, item.author, thumb);
+        card.onclick = () => playStream(item.videoId, item.title, item.author, thumb);
 
         card.innerHTML = `
           <img src="${thumb}" loading="lazy" onerror="this.style.display='none'">
@@ -191,34 +219,47 @@
       });
     }
 
-    // 3. [Phase 2 핵심] 오디오 스트림 주입 및 사파리 백그라운드 재생
-    function playAudio(videoId, title, artist, artworkUrl) {
-      nowPlaying.innerText = `[연결 중] ${title}`;
-      statusMsg.innerText = "";
+    // 2. 오디오 스트림 추출 및 재생
+    async function playStream(videoId, title, artist, artworkUrl) {
+      log(`곡 선택: ${videoId}`);
+      nowPlaying.innerText = `[분석 중] ${title}`;
 
-      // 구글 차단 우회: local=true / 아이폰 호환 포맷: itag=140 (AAC)
-      const streamUrl = `${activeServer}/latest_version?id=${videoId}&itag=140&local=true`;
+      // 아이폰 보안 락 즉시 해제 (무음 버퍼)
+      audioPlayer.src = "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAIlYAAESsAAACABAAZGF0YQAAAAA=";
+      audioPlayer.play().catch(() => {});
 
-      // 대기 시간 없이 즉시 주입 (사파리 재생 제한 우회)
-      audioPlayer.src = streamUrl;
-      audioPlayer.play()
-        .then(() => {
-          nowPlaying.innerText = `[재생 중] ${title}`;
-          setupMediaSession(title, artist, artworkUrl);
-        })
-        .catch(err => {
-          console.log("버퍼링 또는 자동재생 대기:", err);
-        });
+      try {
+        const target = `${currentNode}/api/v1/videos/${videoId}`;
+        log("스트림 메타데이터 요청...");
+        const data = await fetchWithCors(target);
 
-      // 스트림 로드 오류 시 처리
-      audioPlayer.onerror = () => {
-        nowPlaying.innerText = "재생 실패 (해당 서버 스트림 차단)";
-        statusMsg.className = "status-msg err-text";
-        statusMsg.innerText = "음원을 불러오지 못했습니다. 다른 곡을 선택하거나 잠시 후 시도하세요.";
-      };
+        // 아이폰 사파리용 AAC/m4a 오디오 스트림 선별
+        let audioStream = null;
+        if (data.adaptiveFormats) {
+          audioStream = data.adaptiveFormats.find(f => f.type && f.type.includes('audio/mp4'));
+        }
+        if (!audioStream && data.formatStreams) {
+          audioStream = data.formatStreams[0];
+        }
+
+        if (!audioStream || !audioStream.url) {
+          throw new Error("오디오 스트림 없음");
+        }
+
+        log("음원 주소 확보. 사파리 재생 시작...");
+        audioPlayer.src = audioStream.url;
+        await audioPlayer.play();
+
+        nowPlaying.innerText = `[재생 중] ${title}`;
+        log("재생 성공!");
+        setupMediaSession(title, artist, artworkUrl);
+
+      } catch (e) {
+        log(`재생 실패 원인: ${e.message}`);
+        nowPlaying.innerText = "재생 실패";
+      }
     }
 
-    // 4. 모바일 백그라운드 & 잠금화면 제어 등록
     function setupMediaSession(title, artist, artworkUrl) {
       if ('mediaSession' in navigator) {
         navigator.mediaSession.metadata = new MediaMetadata({
