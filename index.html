@@ -2,193 +2,191 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Tube Audio Lab</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clean Tube Player</title>
 
-  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1384/1384060.png">
-  <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/1384/1384060.png">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="TubeAudio">
+  <!-- [공개 모듈] Plyr 오픈소스 플레이어 CSS -->
+  <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
 
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: #121212;
+      background-color: #0f0f0f;
       color: #ffffff;
-      padding: 15px;
-      padding-bottom: 160px;
+      padding: 20px;
+      max-width: 800px;
+      margin: 0 auto;
     }
-    h2 { text-align: center; margin-bottom: 10px; color: #ff0000; }
-    
-    #debug-box {
-      background: #000;
-      border: 1px solid #333;
-      border-radius: 6px;
-      padding: 8px;
-      font-family: monospace;
-      font-size: 11px;
-      color: #00ff00;
-      margin-bottom: 15px;
-      max-height: 90px;
-      overflow-y: auto;
-      word-break: break-all;
-    }
+    h2 { text-align: center; margin-bottom: 20px; color: #ff0000; letter-spacing: 1px; }
 
+    /* 검색창 영역 */
     .search-box {
       display: flex;
       gap: 10px;
-      margin-bottom: 15px;
-      position: sticky;
-      top: 10px;
-      z-index: 10;
+      margin-bottom: 25px;
     }
     input {
       flex: 1;
-      padding: 12px;
+      padding: 14px;
       border-radius: 8px;
       border: 1px solid #333;
-      background: #222;
+      background: #1e1e1e;
       color: #fff;
       font-size: 16px;
+      outline: none;
     }
-    button.search-btn {
-      padding: 12px 20px;
+    input:focus { border-color: #ff0000; }
+    button {
+      padding: 14px 24px;
       border-radius: 8px;
       border: none;
       background: #ff0000;
       color: white;
       font-weight: bold;
+      font-size: 15px;
       cursor: pointer;
+      transition: background 0.2s;
     }
-    .video-list { display: flex; flex-direction: column; gap: 15px; }
+    button:hover { background: #cc0000; }
+
+    /* 플레이어 영역 (군더더기 없는 미니멀 디자인) */
+    .player-wrapper {
+      background: #1a1a1a;
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 25px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    }
+    .track-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 12px;
+      color: #00ff88;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* 검색 결과 리스트 */
+    .video-list { display: flex; flex-direction: column; gap: 10px; }
     .video-item {
       display: flex;
-      gap: 12px;
-      background: #1e1e1e;
+      gap: 15px;
+      background: #181818;
       padding: 10px;
       border-radius: 8px;
       cursor: pointer;
       align-items: center;
+      transition: background 0.2s;
     }
-    .video-item:active { background: #333; }
+    .video-item:hover { background: #282828; }
     .video-item img {
-      width: 90px;
-      height: 50px;
+      width: 120px;
+      height: 68px;
       object-fit: cover;
-      border-radius: 4px;
+      border-radius: 6px;
     }
     .video-info { flex: 1; overflow: hidden; }
     .video-title {
       font-size: 14px;
-      font-weight: bold;
+      font-weight: 600;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      margin-bottom: 4px;
+      margin-bottom: 6px;
     }
-    .video-channel { font-size: 12px; color: #aaa; }
-    
-    .player-container {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: #1e1e1e;
-      border-top: 1px solid #333;
-      padding: 12px 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      box-shadow: 0 -4px 10px rgba(0,0,0,0.5);
-    }
-    .now-playing {
-      font-size: 13px;
-      color: #4CAF50;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    audio { width: 100%; height: 35px; }
+    .video-channel { font-size: 12px; color: #888; }
+    .status-msg { text-align: center; color: #888; margin-top: 20px; font-size: 14px; }
   </style>
 </head>
 <body>
 
-  <h2>Tube Audio Lab</h2>
+  <h2>Tube Audio Lab (Clean UI)</h2>
 
-  <!-- 진단 모니터 -->
-  <div id="debug-box">[시스템] 고속 스트림 터널 준비 완료</div>
-
+  <!-- 1. 검색 바 -->
   <div class="search-box">
-    <input type="text" id="query" placeholder="가수 또는 곡명 검색" onkeyup="if(window.event.keyCode==13){search()}">
-    <button class="search-btn" onclick="search()">검색</button>
+    <input type="text" id="query" placeholder="노트북에서 들을 곡 또는 가수 입력" onkeyup="if(window.event.keyCode==13){search()}">
+    <button onclick="search()">검색</button>
   </div>
 
+  <!-- 2. 오픈소스 모듈 기반 클린 플레이어 -->
+  <div class="player-wrapper">
+    <div id="trackTitle" class="track-title">재생할 곡을 선택해주세요</div>
+    <!-- Plyr 오픈소스 모듈이 장착될 컨테이너 -->
+    <div id="player" data-plyr-provider="youtube" data-plyr-embed-id="M7lc1UVf-VE"></div>
+  </div>
+
+  <div id="status" class="status-msg">검색어를 입력하고 검색 버튼을 누르세요.</div>
   <div class="video-list" id="results"></div>
 
-  <div class="player-container">
-    <div id="nowPlaying" class="now-playing">대기 중...</div>
-    <audio id="audioPlayer" controls playsinline preload="auto"></audio>
-  </div>
+  <!-- [공개 모듈] Plyr 오픈소스 자바스크립트 엔진 -->
+  <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
 
   <script>
-    // 검증된 검색용 API 엔드포인트
-    const SEARCH_APIS = [
-      'https://api.piped.private.coffee',
-      'https://pipedapi.kavin.rocks'
-    ];
-    let activeApi = SEARCH_APIS[0];
-
-    const audioPlayer = document.getElementById('audioPlayer');
-    const nowPlaying = document.getElementById('nowPlaying');
+    const statusMsg = document.getElementById('status');
+    const trackTitle = document.getElementById('trackTitle');
     const resultsContainer = document.getElementById('results');
-    const debugBox = document.getElementById('debug-box');
 
-    function log(msg) {
-      console.log(msg);
-      debugBox.innerText = `> ${msg}\n` + debugBox.innerText.slice(0, 300);
-    }
+    // 1. [공개 모듈 초기화] 유튜브의 군더더기 UI를 모듈 레벨에서 싹 걷어냅니다.
+    const player = new Plyr('#player', {
+      controls: ['play', 'progress', 'current-time', 'duration', 'mute', 'volume'],
+      youtube: {
+        noCookie: true,
+        rel: 0,          // 추천 영상 표시 안 함
+        showinfo: 0,     // 영상 정보 바 숨김
+        iv_load_policy: 3, // 특수효과/주석 숨김
+        modestbranding: 1  // 유튜브 로고 최소화
+      }
+    });
 
-    audioPlayer.onerror = () => {
-      const err = audioPlayer.error;
-      log(`[오디오 에러] 코드: ${err ? err.code : '알수없음'}`);
-      nowPlaying.innerText = "재생 실패 (스트림 터널 재시도 필요)";
-    };
-
-    // 1. 검증된 Piped 검색 엔진 복구
+    // 2. 검색 엔진 (안정적인 공개 검색 프록시)
     async function search() {
       const q = document.getElementById('query').value.trim();
       if (!q) return;
 
-      log(`검색 시작: "${q}"`);
+      statusMsg.innerText = "유튜브 검색 중...";
       resultsContainer.innerHTML = '';
 
-      for (let i = 0; i < SEARCH_APIS.length; i++) {
-        activeApi = SEARCH_APIS[i];
-        try {
-          log(`검색 API 접속: ${activeApi}`);
-          const res = await fetch(`${activeApi}/search?q=${encodeURIComponent(q)}&filter=videos`);
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          const data = await res.json();
-          
-          log(`검색 성공 (${data.items.length}개 발견)`);
-          renderResults(data.items);
-          return;
-        } catch (e) {
-          log(`${activeApi} 실패: ${e.message}`);
-        }
+      try {
+        const res = await fetch(`https://api.piped.private.coffee/search?q=${encodeURIComponent(q)}&filter=videos`);
+        const data = await res.json();
+        
+        statusMsg.innerText = '';
+        renderResults(data.items);
+      } catch (e) {
+        statusMsg.innerText = "검색 일시 오류. 다시 시도해 주세요.";
       }
-      log("검색 서버 응답 없음. 잠시 후 시도하세요.");
     }
 
+    // 3. 검색 결과 렌더링
     function renderResults(items) {
+      if (!items || items.length === 0) {
+        statusMsg.innerText = "검색 결과가 없습니다.";
+        return;
+      }
+
       items.forEach(item => {
         const videoId = item.url.replace('/watch?v=', '');
         const card = document.createElement('div');
         card.className = 'video-item';
         
-        card.onclick = () => fetchAndPlay(videoId, item.title, item.uploaderName, item.thumbnail);
+        // 클릭 시 모듈을 통해 영상 교체 및 자동 재생
+        card.onclick = () => {
+          trackTitle.innerText = `[재생 중] ${item.title}`;
+          
+          // Plyr 모듈의 소스 변경 함수 (공식 스트림으로 전환)
+          player.source = {
+            type: 'video',
+            sources: [{
+              src: videoId,
+              provider: 'youtube',
+            }],
+          };
+          
+          player.play();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
 
         card.innerHTML = `
           <img src="${item.thumbnail}" loading="lazy">
@@ -199,59 +197,6 @@
         `;
         resultsContainer.appendChild(card);
       });
-    }
-
-    // 2. 스트림 추출 및 사파리 IP 차단 우회 재생
-    async function fetchAndPlay(videoId, title, artist, artworkUrl) {
-      log(`곡 선택: ${videoId}`);
-      nowPlaying.innerText = `[스트림 추출 중] ${title}`;
-
-      // [아이폰 핵심] 터치 즉시 무음 오디오로 브라우저 락을 해제
-      audioPlayer.src = "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAIlYAAESsAAACABAAZGF0YQAAAAA=";
-      audioPlayer.play().catch(() => {});
-
-      try {
-        log("메타데이터 요청 중...");
-        const res = await fetch(`${activeApi}/streams/${videoId}`);
-        if (!res.ok) throw new Error(`스트림 응답 에러 (${res.status})`);
-        const data = await res.json();
-
-        // 아이폰 친화 포맷(m4a/aac) 우선 필터
-        let stream = data.audioStreams.find(s => s.mimeType && s.mimeType.includes('audio/mp4')) 
-                     || data.audioStreams[0];
-
-        if (!stream || !stream.url) {
-          throw new Error("오디오 스트림을 찾을 수 없음");
-        }
-
-        // [핵심] 구글 CDN의 403 Forbidden 차단을 뚫어주는 초고속 터널링
-        const tunneledUrl = `https://corsproxy.io/?${encodeURIComponent(stream.url)}`;
-
-        log("고속 터널 연결 완료. 재생 시작...");
-        audioPlayer.src = tunneledUrl;
-        await audioPlayer.play();
-
-        nowPlaying.innerText = `[재생 중] ${title}`;
-        log("재생 성공!");
-        setupMediaSession(title, artist, artworkUrl);
-
-      } catch (e) {
-        log(`실패: ${e.message}`);
-        nowPlaying.innerText = "재생 실패";
-      }
-    }
-
-    function setupMediaSession(title, artist, artworkUrl) {
-      if ('mediaSession' in navigator) {
-        navigator.mediaSession.metadata = new MediaMetadata({
-          title: title,
-          artist: artist,
-          artwork: [{ src: artworkUrl, sizes: '512x512', type: 'image/jpeg' }]
-        });
-
-        navigator.mediaSession.setActionHandler('play', () => audioPlayer.play());
-        navigator.mediaSession.setActionHandler('pause', () => audioPlayer.pause());
-      }
     }
   </script>
 </body>
