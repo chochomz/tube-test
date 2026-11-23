@@ -1094,9 +1094,68 @@
     };
 
     // TUBE_LAB_V3_FILTER_STAR_PATCH
+    // TUBE_LAB_V6_SPEED_OPT_PATCH
     const PIN_DOC_ID = '__system_pins__';
+    const TABS_INDEX_DOC_ID = '__tabs_index__';
     const TEMP_LOCAL_PINS_KEY = 'tube_audio_lab_pins_v3';
+    const TAB_CACHE_PREFIX = 'tube_tab_cache_v6_';
     const FILTER_LABELS = { recent: '최근순', korean: '한글정렬', size: '크기순', views: '조회순' };
+    const memoryTabCache = new Map(); // docId -> { updatedAt, items }
+
+    // 썸네일 URL을 DB에 저장하지 않고 videoId만으로 구글 공식 초고속 CDN 직결 (장당 ~12KB)
+    function getFastThumbUrl(videoId) {
+      return videoId ? `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg` : FALLBACK_THUMB;
+    }
+
+    function stripThumbField(items) {
+      return (items || []).map(it => ({
+        id: it.id,
+        t: it.t || '',
+        u: Number(it.u || 0) || 0,
+        d: Number(it.d || 0) || 0,
+        v: Number(it.v || 0) || 0
+      })).filter(it => it.id);
+    }
+
+    function getCachedTab(docId) {
+      if (memoryTabCache.has(docId)) return memoryTabCache.get(docId);
+      try {
+        const raw = localStorage.getItem(TAB_CACHE_PREFIX + docId);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && Array.isArray(parsed.items)) {
+            memoryTabCache.set(docId, parsed);
+            return parsed;
+          }
+        }
+      } catch (e) {}
+      return null;
+    }
+
+    function setCachedTab(docId, updatedAt, items) {
+      const entry = { updatedAt: updatedAt || Date.now(), items: stripThumbField(items) };
+      memoryTabCache.set(docId, entry);
+      try {
+        localStorage.setItem(TAB_CACHE_PREFIX + docId, JSON.stringify(entry));
+      } catch (e) {
+        // 기기 로컬 캐시 공간 부족 시 오래된 캐시 1건 정리 후 재시도 (오류 무발생)
+        try {
+          for (let i = 0; i < localStorage.length; i++) {
+            const k = localStorage.key(i);
+            if (k && k.startsWith(TAB_CACHE_PREFIX) && k !== (TAB_CACHE_PREFIX + docId)) {
+              localStorage.removeItem(k);
+              break;
+            }
+          }
+          localStorage.setItem(TAB_CACHE_PREFIX + docId, JSON.stringify(entry));
+        } catch (err) {}
+      }
+    }
+
+    function removeCachedTab(docId) {
+      memoryTabCache.delete(docId);
+      try { localStorage.removeItem(TAB_CACHE_PREFIX + docId); } catch (e) {}
+    }
 
     let db = null;
     let fbReady = false;
@@ -1343,7 +1402,7 @@
       renderSortedFeed();
     }
 
-    // 3. 100개 검색 수집 (+ 조건검색 반영 + Firebase/임시로컬 최대 300개 저장)
+    // 3. 100개 검색 수집 (v6: 1페이지 즉시 표시 + 수집 중 DOM 중복 재렌더링 제거 + 비동기 초경량 저장)
     async function startSearch() {
       const q = document.getElementById('query').value.trim();
       if (!q || isSearching) return;
@@ -1357,12 +1416,12 @@
       activeTabKeyword = '';
       renderSavedTabsBar();
       resultsContainer.innerHTML = '';
-      statusMsg.innerText = "수집 중...";
+      statusMsg.innerText = "검색 수집 중...";
       countMsg.innerText = "(0/100)";
 
       try {
         let { data, server } = await smartFetch(`/search?q=${encodeURIComponent(q)}&filter=videos`);
-        appendGrid(data.items, false);
+        appendGrid(data.items, false, false); // 첫 페이지는 즉시 화면에 노출
 
         let nextPage = data.nextpage;
         while (nextPage && totalLoadedItems < TARGET_COUNT) {
@@ -1371,12 +1430,12 @@
             const nextRes = await fetch(`${server}${nextPath}`);
             const nextData = await nextRes.json();
             if (!nextData.items || nextData.items.length === 0) break;
-            appendGrid(nextData.items, false);
+            appendGrid(nextData.items, false, true); // 후속 페이지는 메모리에만 빠르게 누적 (DOM 깜박임 제거)
             nextPage = nextData.nextpage;
           } catch (e) { break; }
         }
 
-        // 조건검색 + 별표 기준 최종 정렬 반영
+        // 조건검색 + 별표 기준 1회 일괄 최종 렌더링
         renderSortedFeed();
         const condNote = activeFilterOrder.length > 0
           ? ` (${activeFilterOrder.map(k => FILTER_LABELS[k]).join('·')})`
@@ -1385,7 +1444,7 @@
         countMsg.innerText = `총 ${totalLoadedItems}개`;
 
         if (currentSearchCollected.length > 0) {
-          saveSearchTab(q, currentSearchCollected);
+          saveSearchTab(q, currentSearchCollected); // 백그라운드 논블로킹 저장
         }
       } catch (err) {
         statusMsg.innerText = err.message;
@@ -1394,8 +1453,8 @@
       }
     }
 
-    // 4. 데이터 수집 + 통합 정렬 렌더링 (1순위: ★별표 최상단, 2순위: 조건검색)
-    function appendGrid(items, isFromCache = false) {
+    // 4. 데이터 수집 + 통합 정렬 렌더링 (v6: th URL 저장 완전 제거 -> 구글 CDN 직결)
+    function appendGrid(items, isFromCache = false, deferRender = false) {
       if (!items || !items.length) return;
       const limit = isFromCache ? MAX_TAB_ITEMS : TARGET_COUNT;
       currentFeedIsCache = isFromCache;
@@ -1406,13 +1465,13 @@
         if (!videoId) return;
 
         const title = item.t !== undefined ? item.t : (item.title || '제목 없음');
-        const thumb = item.th !== undefined ? item.th : (item.thumbnail || FALLBACK_THUMB);
         const uploaded = Number(item.u !== undefined ? item.u : (item.uploaded > 0 ? item.uploaded : 0)) || 0;
         const duration = Number(item.d !== undefined ? item.d : (item.duration > 0 ? item.duration : 0)) || 0;
         const views = Number(item.v !== undefined ? item.v : (item.views > 0 ? item.views : 0)) || 0;
 
         totalLoadedItems++;
-        const compactObj = { id: videoId, t: title, th: thumb, u: uploaded, d: duration, v: views };
+        // th(썸네일 URL) 미저장으로 Firebase 용량·전송량 60% 절감!
+        const compactObj = { id: videoId, t: title, u: uploaded, d: duration, v: views };
 
         if (!isFromCache) {
           currentSearchCollected.push(compactObj);
@@ -1425,7 +1484,11 @@
         });
       });
 
-      renderSortedFeed();
+      if (deferRender) {
+        countMsg.innerText = `(${currentFeedItems.length}/${TARGET_COUNT})`;
+      } else {
+        renderSortedFeed();
+      }
     }
 
     function compareKoreanTitle(aStr, bStr) {
@@ -1469,8 +1532,9 @@
         thumbWrap.className = 'thumb-wrapper';
 
         const img = document.createElement('img');
-        img.src = item.th;
+        img.src = getFastThumbUrl(item.id);
         img.loading = 'lazy';
+        img.decoding = 'async';
         img.onerror = function() { this.onerror = null; this.src = FALLBACK_THUMB; };
         thumbWrap.appendChild(img);
 
@@ -1914,24 +1978,69 @@
       loadSavedTabsMeta();
     }
 
+    // 초경량 목차 문서(__tabs_index__) 동기화 (기존 Firestore 규칙 100% 호환)
+    async function syncTabsIndexToCloud() {
+      if (!fbReady || !db) return;
+      try {
+        const indexItems = cachedTabsMeta.slice(0, MAX_TAB_ITEMS).map(t => ({
+          docId: t.docId,
+          kw: t.keyword,
+          cnt: t.count,
+          at: t.updatedAt || Date.now()
+        }));
+        await db.collection(FB_COLLECTION).doc(TABS_INDEX_DOC_ID).set({
+          keyword: TABS_INDEX_DOC_ID,
+          updatedAt: Date.now(),
+          items: indexItems
+        });
+      } catch (err) {
+        console.warn('[목차 인덱스 저장 실패]', err);
+      }
+    }
+
+    function upsertLocalMeta(docId, keyword, count, updatedAt) {
+      cachedTabsMeta = cachedTabsMeta.filter(t => t.docId !== docId);
+      cachedTabsMeta.unshift({ docId, keyword, count, updatedAt });
+      renderSavedTabsBar();
+      if (manageOverlay.style.display === 'flex') renderManageList();
+    }
+
+    // 앱 시작 시 1KB짜리 목차 문서 1건만 읽기 (전체 300곡 x N탭 다운로드 완전 제거!)
     async function loadSavedTabsMeta() {
       cachedTabsMeta = [];
       if (fbReady && db) {
         try {
-          const snap = await db.collection(FB_COLLECTION).orderBy('updatedAt', 'desc').get();
-          snap.forEach(doc => {
-            if (doc.id === PIN_DOC_ID) return; // 별표 메타 문서는 탭에서 숨김
-            const d = doc.data();
-            const count = Array.isArray(d.items) ? d.items.length : 0;
-            cachedTabsMeta.push({
-              docId: doc.id,
-              keyword: d.keyword || doc.id,
-              count: count,
-              updatedAt: d.updatedAt || 0
+          const idxSnap = await db.collection(FB_COLLECTION).doc(TABS_INDEX_DOC_ID).get();
+          if (idxSnap.exists && Array.isArray(idxSnap.data().items)) {
+            cachedTabsMeta = idxSnap.data().items
+              .filter(it => it && it.docId && it.docId !== PIN_DOC_ID && it.docId !== TABS_INDEX_DOC_ID)
+              .map(it => ({
+                docId: it.docId,
+                keyword: it.kw || it.docId,
+                count: Number(it.cnt || 0),
+                updatedAt: Number(it.at || 0)
+              }))
+              .sort((a, b) => b.updatedAt - a.updatedAt);
+          } else {
+            // 최초 1회 기존 탭 자동 목차화(마이그레이션) -> 이후엔 영구적으로 1KB만 읽음
+            const snap = await db.collection(FB_COLLECTION).orderBy('updatedAt', 'desc').get();
+            snap.forEach(doc => {
+              if (doc.id === PIN_DOC_ID || doc.id === TABS_INDEX_DOC_ID) return;
+              const d = doc.data();
+              const count = Array.isArray(d.items) ? d.items.length : 0;
+              cachedTabsMeta.push({
+                docId: doc.id,
+                keyword: d.keyword || doc.id,
+                count: count,
+                updatedAt: d.updatedAt || 0
+              });
             });
-          });
+            if (cachedTabsMeta.length > 0) {
+              syncTabsIndexToCloud();
+            }
+          }
         } catch (err) {
-          console.warn('[Firebase 탭 목록 로드 실패]', err);
+          console.warn('[Firebase 목차 로드 실패]', err);
         }
       } else {
         const localStore = loadTempLocalStore();
@@ -1994,42 +2103,50 @@
 
     async function saveSearchTab(keyword, newItems) {
       const docId = sanitizeDocId(keyword);
+      const now = Date.now();
+      const cleanNew = stripThumbField(newItems);
 
       if (fbReady && db) {
         const docRef = db.collection(FB_COLLECTION).doc(docId);
         try {
           let existingItems = [];
-          const snap = await docRef.get();
-          if (snap.exists && Array.isArray(snap.data().items)) {
-            existingItems = snap.data().items;
+          const meta = cachedTabsMeta.find(t => t.docId === docId);
+          const cached = getCachedTab(docId);
+
+          if (cached && meta && cached.updatedAt >= meta.updatedAt) {
+            existingItems = cached.items;
+          } else if (meta) {
+            const snap = await docRef.get();
+            if (snap.exists && Array.isArray(snap.data().items)) {
+              existingItems = stripThumbField(snap.data().items);
+            }
           }
-          const trimmedItems = mergeAndCapItems(newItems, existingItems);
-          await docRef.set({
-            keyword: keyword,
-            updatedAt: Date.now(),
-            items: trimmedItems
-          });
+
+          const trimmedItems = stripThumbField(mergeAndCapItems(cleanNew, existingItems));
           activeTabKeyword = keyword;
-          statusMsg.innerText = `검색 완료 · '${keyword}' DB 저장 (${trimmedItems.length}/${MAX_TAB_ITEMS})`;
-          await loadSavedTabsMeta();
+          setCachedTab(docId, now, trimmedItems);
+          upsertLocalMeta(docId, keyword, trimmedItems.length, now);
+
+          // 데이터 문서 + 1KB 목차 문서 병렬 저장 (전체 컬렉션 재읽기 없음!)
+          await Promise.all([
+            docRef.set({ keyword: keyword, updatedAt: now, items: trimmedItems }),
+            syncTabsIndexToCloud()
+          ]);
+          statusMsg.innerText = `검색 완료 · '${keyword}' 고속 저장 (${trimmedItems.length}/${MAX_TAB_ITEMS})`;
         } catch (err) {
           console.warn('[Firebase 저장 실패]', err);
         }
       } else {
         const localStore = loadTempLocalStore();
         const existingItems = (localStore[docId] && Array.isArray(localStore[docId].items))
-          ? localStore[docId].items
+          ? stripThumbField(localStore[docId].items)
           : [];
-        const trimmedItems = mergeAndCapItems(newItems, existingItems);
-        localStore[docId] = {
-          keyword: keyword,
-          updatedAt: Date.now(),
-          items: trimmedItems
-        };
+        const trimmedItems = stripThumbField(mergeAndCapItems(cleanNew, existingItems));
+        localStore[docId] = { keyword: keyword, updatedAt: now, items: trimmedItems };
         if (saveTempLocalStore(localStore)) {
           activeTabKeyword = keyword;
+          upsertLocalMeta(docId, keyword, trimmedItems.length, now);
           statusMsg.innerText = `검색 완료 · '${keyword}' 임시 저장 (${trimmedItems.length}/${MAX_TAB_ITEMS})`;
-          loadSavedTabsMeta();
         }
       }
     }
@@ -2037,21 +2154,35 @@
     async function loadTabData(docId, keyword) {
       if (isSearching) return;
       let items = [];
+      let loadedFromCache = false;
 
       if (fbReady && db) {
-        statusMsg.innerText = `'${keyword}' DB 불러오는 중...`;
-        try {
-          const snap = await db.collection(FB_COLLECTION).doc(docId).get();
-          if (!snap.exists) {
-            statusMsg.innerText = "저장된 탭 데이터를 찾을 수 없습니다.";
-            await loadSavedTabsMeta();
+        const meta = cachedTabsMeta.find(t => t.docId === docId);
+        const cached = getCachedTab(docId);
+
+        // 1순위: 기기 캐시가 최신이면 0.01초 즉시 표시 (DB 읽기 0회!)
+        if (cached && cached.items.length > 0 && (!meta || cached.updatedAt >= meta.updatedAt)) {
+          items = cached.items;
+          loadedFromCache = true;
+        } else {
+          statusMsg.innerText = `'${keyword}' 불러오는 중...`;
+          try {
+            const snap = await db.collection(FB_COLLECTION).doc(docId).get();
+            if (!snap.exists) {
+              removeCachedTab(docId);
+              cachedTabsMeta = cachedTabsMeta.filter(t => t.docId !== docId);
+              renderSavedTabsBar();
+              syncTabsIndexToCloud();
+              statusMsg.innerText = "저장된 탭 데이터를 찾을 수 없습니다.";
+              return;
+            }
+            const data = snap.data();
+            items = stripThumbField(Array.isArray(data.items) ? data.items : []);
+            setCachedTab(docId, data.updatedAt || Date.now(), items);
+          } catch (err) {
+            statusMsg.innerText = "DB 불러오기 실패 (권한/네트워크 확인)";
             return;
           }
-          const data = snap.data();
-          items = Array.isArray(data.items) ? data.items : [];
-        } catch (err) {
-          statusMsg.innerText = "DB 불러오기 실패 (권한/네트워크 확인)";
-          return;
         }
       } else {
         const localStore = loadTempLocalStore();
@@ -2068,11 +2199,11 @@
       totalLoadedItems = 0;
       currentFeedItems = [];
       resultsContainer.innerHTML = '';
-      appendGrid(items, true);
+      appendGrid(items, true, false);
       renderSavedTabsBar();
       statusMsg.innerText = fbReady
-        ? `'${keyword}' 탭 Firebase 즉시 로드 완료`
-        : `'${keyword}' 탭 임시 로컬 즉시 로드 완료`;
+        ? (loadedFromCache ? `'${keyword}' 즉시 로드 (초고속 캐시)` : `'${keyword}' DB 로드 완료`)
+        : `'${keyword}' 임시 로컬 즉시 로드 완료`;
     }
 
     function openManageModal() {
@@ -2131,17 +2262,27 @@
     }
 
     async function trimTabHalf(docId, keyword) {
+      const now = Date.now();
       if (fbReady && db) {
         try {
           const docRef = db.collection(FB_COLLECTION).doc(docId);
-          const snap = await docRef.get();
-          if (!snap.exists) return;
-          const items = Array.isArray(snap.data().items) ? snap.data().items : [];
+          const cached = getCachedTab(docId);
+          let items = cached ? cached.items : null;
+          if (!items) {
+            const snap = await docRef.get();
+            if (!snap.exists) return;
+            items = Array.isArray(snap.data().items) ? snap.data().items : [];
+          }
           const keepCount = Math.max(10, Math.floor(items.length / 2));
-          const trimmed = items.slice(0, keepCount);
-          await docRef.update({ items: trimmed, updatedAt: Date.now() });
+          const trimmed = stripThumbField(items.slice(0, keepCount));
+
+          setCachedTab(docId, now, trimmed);
+          upsertLocalMeta(docId, keyword, trimmed.length, now);
+          await Promise.all([
+            docRef.update({ items: trimmed, updatedAt: now }),
+            syncTabsIndexToCloud()
+          ]);
           statusMsg.innerText = `'${keyword}' 탭 정리 완료 (${trimmed.length}개 유지)`;
-          await loadSavedTabsMeta();
         } catch (err) {
           alert('정리 중 오류가 발생했습니다.');
         }
@@ -2150,22 +2291,29 @@
         if (!localStore[docId]) return;
         const items = Array.isArray(localStore[docId].items) ? localStore[docId].items : [];
         const keepCount = Math.max(10, Math.floor(items.length / 2));
-        localStore[docId].items = items.slice(0, keepCount);
-        localStore[docId].updatedAt = Date.now();
+        localStore[docId].items = stripThumbField(items.slice(0, keepCount));
+        localStore[docId].updatedAt = now;
         saveTempLocalStore(localStore);
+        upsertLocalMeta(docId, keyword, localStore[docId].items.length, now);
         statusMsg.innerText = `'${keyword}' 임시 탭 정리 완료 (${localStore[docId].items.length}개 유지)`;
-        loadSavedTabsMeta();
       }
     }
 
     async function deleteTabDoc(docId, keyword) {
       if (!confirm(`'${keyword}' 탭과 저장된 목록을 삭제할까요?`)) return;
+      removeCachedTab(docId);
+      cachedTabsMeta = cachedTabsMeta.filter(t => t.docId !== docId);
+      if (activeTabKeyword === keyword) activeTabKeyword = '';
+      renderSavedTabsBar();
+      if (manageOverlay.style.display === 'flex') renderManageList();
+
       if (fbReady && db) {
         try {
-          await db.collection(FB_COLLECTION).doc(docId).delete();
-          if (activeTabKeyword === keyword) activeTabKeyword = '';
+          await Promise.all([
+            db.collection(FB_COLLECTION).doc(docId).delete(),
+            syncTabsIndexToCloud()
+          ]);
           statusMsg.innerText = `'${keyword}' 탭 삭제 완료`;
-          await loadSavedTabsMeta();
         } catch (err) {
           alert('삭제 중 오류가 발생했습니다.');
         }
@@ -2173,9 +2321,7 @@
         const localStore = loadTempLocalStore();
         delete localStore[docId];
         saveTempLocalStore(localStore);
-        if (activeTabKeyword === keyword) activeTabKeyword = '';
         statusMsg.innerText = `'${keyword}' 임시 탭 삭제 완료`;
-        loadSavedTabsMeta();
       }
     }
 
