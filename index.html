@@ -505,67 +505,184 @@
       display: block;
     }
 
-    /* 4각 모서리 리사이즈 핸들 */
-    .resizer {
-      position: absolute;
-      width: 18px;
-      height: 18px;
-      z-index: 20;
-    }
-    .resizer.tl { top: 0; left: 0; cursor: nwse-resize; }
-    .resizer.tr { top: 0; right: 0; cursor: nesw-resize; }
-    .resizer.bl { bottom: 0; left: 0; cursor: nesw-resize; }
-    .resizer.br {
-      bottom: 0; right: 0; cursor: nwse-resize;
-      background: linear-gradient(135deg, transparent 55%, rgba(255,255,255,0.8) 55%);
-    }
-
-    /* 4. [핵심] 하부 겹쳐지는 책갈피 탭 구조 (Overlapping Bookmark Tabs) */
-    .modal-bottom-tabs {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      width: 100%;
-      padding: 0 4px;
-      margin-top: -1px; /* 메인 흰색 테두리와 밀착 */
+    /* 드래그·리사이즈 중 iframe 간섭 차단 및 책갈피 오프스크린 숨김(재생 유지) */
+    #floating-player-modal.interacting .scale-stage iframe {
       pointer-events: none;
     }
-    .tab-group-left {
+    #floating-player-modal.docked-hidden {
+      opacity: 0 !important;
+      pointer-events: none !important;
+      left: -9999px !important;
+    }
+
+    /* 상단 투명 드래그 핸들 바 (원하는 위치 이동 & 화면 밖 날리기) */
+    .player-drag-bar {
+      position: absolute;
+      top: 0;
+      left: 26px;
+      right: 26px;
+      height: 24px;
+      z-index: 18;
+      cursor: grab;
+      touch-action: none;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding-top: 4px;
+    }
+    .player-drag-bar:active { cursor: grabbing; }
+    .player-drag-pill {
+      width: 34px;
+      height: 3.5px;
+      border-radius: 3px;
+      background: rgba(255, 255, 255, 0.58);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.85);
+      pointer-events: none;
+    }
+
+    /* 4각 모서리 두꺼운 L자 꺾기 리사이즈 핸들 */
+    .resizer {
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      z-index: 22;
+      touch-action: none;
+    }
+    .resizer::after {
+      content: "";
+      position: absolute;
+      width: 13px;
+      height: 13px;
+      box-sizing: border-box;
+      filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.9));
+      pointer-events: none;
+    }
+    .resizer.tl { top: 0; left: 0; cursor: nwse-resize; }
+    .resizer.tl::after {
+      top: 0; left: 0;
+      border-top: 3.5px solid rgba(255, 255, 255, 0.95);
+      border-left: 3.5px solid rgba(255, 255, 255, 0.95);
+      border-top-left-radius: 3px;
+    }
+    .resizer.tr { top: 0; right: 0; cursor: nesw-resize; }
+    .resizer.tr::after {
+      top: 0; right: 0;
+      border-top: 3.5px solid rgba(255, 255, 255, 0.95);
+      border-right: 3.5px solid rgba(255, 255, 255, 0.95);
+      border-top-right-radius: 3px;
+    }
+    .resizer.bl { bottom: 0; left: 0; cursor: nesw-resize; }
+    .resizer.bl::after {
+      bottom: 0; left: 0;
+      border-bottom: 3.5px solid rgba(255, 255, 255, 0.95);
+      border-left: 3.5px solid rgba(255, 255, 255, 0.95);
+      border-bottom-left-radius: 3px;
+    }
+    .resizer.br { bottom: 0; right: 0; cursor: nwse-resize; }
+    .resizer.br::after {
+      bottom: 0; right: 0;
+      border-bottom: 3.5px solid rgba(255, 255, 255, 0.95);
+      border-right: 3.5px solid rgba(255, 255, 255, 0.95);
+      border-bottom-right-radius: 3px;
+    }
+
+    /* 4. [핵심] 소형 우측 책갈피 탭 구조 (Drag 삭제, mp3 + ✕ 우측 밀착) */
+    .modal-bottom-tabs {
+      display: flex;
+      justify-content: flex-end;
+      align-items: flex-start;
+      width: 100%;
+      padding: 0 3px;
+      margin-top: -1px;
+      pointer-events: none;
+    }
+    .bottom-drag-spacer {
+      flex: 1;
+      height: 18px;
+      pointer-events: auto;
+      cursor: grab;
+      touch-action: none;
+    }
+    .bottom-drag-spacer:active { cursor: grabbing; }
+    .tab-group-right {
       display: flex;
       align-items: flex-start;
       pointer-events: auto;
     }
     .bookmark-tab {
       pointer-events: auto;
-      background: rgba(255, 255, 255, 0.5); /* 흰색 50% 투명도 */
+      background: rgba(255, 255, 255, 0.55);
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
       color: #111;
-      font-size: 11px;
+      font-size: 9.5px;
       font-weight: 700;
-      padding: 5px 14px;
-      border-radius: 0 0 11px 11px;
-      border: 1px solid rgba(255, 255, 255, 0.8);
+      padding: 3px 9px;
+      border-radius: 0 0 8px 8px;
+      border: 1px solid rgba(255, 255, 255, 0.85);
       border-top: none;
-      box-shadow: 2px 4px 10px rgba(0,0,0,0.45);
+      box-shadow: 1px 3px 8px rgba(0, 0, 0, 0.45);
       cursor: pointer;
       position: relative;
       transition: background 0.15s;
       white-space: nowrap;
+      line-height: 1.2;
     }
     .bookmark-tab:active {
-      background: rgba(255, 255, 255, 0.85);
+      background: rgba(255, 255, 255, 0.9);
     }
-    /* 책갈피가 서로 겹쳐지는 스타일 */
-    .bookmark-tab.tab-1 {
+    .bookmark-tab.tab-mp3 {
       z-index: 4;
-      cursor: grab;
+      background: rgba(240, 248, 255, 0.62);
     }
-    .bookmark-tab.tab-2 {
+    .bookmark-tab.tab-close {
       z-index: 3;
-      margin-left: -8px; /* 왼쪽 탭 밑으로 부드럽게 겹침 */
-      padding-left: 16px;
-      background: rgba(240, 248, 255, 0.55);
+      margin-left: -5px;
+      padding-left: 11px;
+      padding-right: 9px;
+    }
+
+    /* 4-2. 화면 밖 날리기 시 나타나는 연분홍색 투명도 70% 음표 책갈피 */
+    #mini-music-bookmark {
+      position: fixed;
+      top: 43%;
+      z-index: 9500;
+      width: 38px;
+      height: 48px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 182, 203, 0.70); /* 연한 분홍색 투명도 70% */
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1.5px solid rgba(255, 255, 255, 0.88);
+      color: #ffffff;
+      font-size: 20px;
+      font-weight: 700;
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.15s;
+    }
+    #mini-music-bookmark:active { transform: scale(0.92); }
+    #mini-music-bookmark.dock-left {
+      left: 0;
+      border-left: none;
+      border-radius: 0 14px 14px 0;
+    }
+    #mini-music-bookmark.dock-right {
+      right: 0;
+      border-right: none;
+      border-radius: 14px 0 0 14px;
+    }
+    @keyframes notePulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.16); opacity: 0.78; }
+    }
+    #mini-music-bookmark.bg-active .note-icon {
+      display: inline-block;
+      animation: notePulse 1.5s ease-in-out infinite;
     }
 
     /* 5. [신규] MP3 / 320kbps 음원추출 전용 모달 */
@@ -720,7 +837,12 @@
   <!-- 3. 16:9 밀착형 독립 부유창 (Floating Window) -->
   <div id="floating-player-modal">
     <div class="modal-main-window" id="modalWindow">
-      <!-- 4각 모서리 리사이즈 핸들 -->
+      <!-- 상단 자유 이동 & 화면 밖 날리기 드래그 바 -->
+      <div class="player-drag-bar" id="playerDragBar" title="드래그하여 이동 · 화면 밖으로 날리면 책갈피 최소화">
+        <div class="player-drag-pill"></div>
+      </div>
+
+      <!-- 4각 모서리 두꺼운 L자 꺾기 리사이즈 핸들 -->
       <div class="resizer tl" data-dir="tl"></div>
       <div class="resizer tr" data-dir="tr"></div>
       <div class="resizer bl" data-dir="bl"></div>
@@ -732,22 +854,27 @@
       </div>
     </div>
 
-    <!-- 하부 겹쳐지는 책갈피 탭 -->
+    <!-- 하부 소형 우측 책갈피 탭 (mp3 + ✕) -->
     <div class="modal-bottom-tabs">
-      <div class="tab-group-left">
-        <div class="bookmark-tab tab-1" id="dragTab">
-          <span>✥ Drag</span>
+      <div class="bottom-drag-spacer" id="bottomDragSpacer"></div>
+      <div class="tab-group-right">
+        <div class="bookmark-tab tab-mp3" onclick="openMp3Modal()">
+          <span>mp3</span>
         </div>
-        <div class="bookmark-tab tab-2" onclick="openMp3Modal()">
-          <span>♪ 음원추출</span>
+        <div class="bookmark-tab tab-close" onclick="closePlayerModal()" title="닫기">
+          <span>✕</span>
         </div>
-      </div>
-
-      <div class="bookmark-tab" onclick="closePlayerModal()">
-        <span>✕ 닫기</span>
       </div>
     </div>
   </div>
+
+  <!-- 3-2. 화면 밖 날리기 시 나타나는 연분홍색 투명도 70% 음표 책갈피 -->
+  <div id="mini-music-bookmark" class="dock-right" onclick="restorePlayerFromBookmark()" title="터치하면 화면 정중앙에 재생창 복귀">
+    <span class="note-icon">♪</span>
+  </div>
+
+  <!-- 3-3. 브라우저 백그라운드 오디오 재생 유지용 네이티브 오디오 요소 -->
+  <audio id="bgAudioPlayer" playsinline preload="auto" style="display:none;"></audio>
 
   <!-- 4. MP3 / 320kbps 전용 음원추출 모달 -->
   <div id="mp3-modal-overlay">
@@ -805,8 +932,12 @@
     const modal = document.getElementById('floating-player-modal');
     const modalWindow = document.getElementById('modalWindow');
     const scaleStage = document.getElementById('scaleStage');
+    // TUBE_LAB_V4_PLAYER_BG_PATCH
     const ytHolder = document.getElementById('yt-iframe-holder');
-    const dragTab = document.getElementById('dragTab');
+    const playerDragBar = document.getElementById('playerDragBar');
+    const bottomDragSpacer = document.getElementById('bottomDragSpacer');
+    const miniBookmark = document.getElementById('mini-music-bookmark');
+    const bgAudio = document.getElementById('bgAudioPlayer');
     const savedTabsList = document.getElementById('savedTabsList');
     const manageOverlay = document.getElementById('manage-modal-overlay');
     const manageTabList = document.getElementById('manageTabList');
@@ -855,17 +986,17 @@
     let currentVideoId = '';
     let currentVideoTitle = '';
 
-    // 1. 16:9 비율 완벽 유지 및 내부 요소 비례 스케일링 함수
+    // 1. 16:9 비율 완벽 유지 및 내부 요소 비례 스케일링 함수 (v4: 4각 모서리 보정용 치수 반환)
     function apply16by9Scale(newWidth) {
-      const clampedW = Math.max(200, Math.min(newWidth, window.innerWidth - 16));
+      const clampedW = Math.max(180, Math.min(newWidth, window.innerWidth - 12));
       const exactH = Math.round(clampedW * (9 / 16)); // 16:9 칼비율
 
       modal.style.width = `${clampedW}px`;
       modalWindow.style.height = `${exactH}px`;
 
-      // 창 크기에 비례하여 내부 제목과 유튜브 고유 컨트롤을 함께 스케일링
       const scaleRatio = clampedW / BASE_STAGE_WIDTH;
       scaleStage.style.transform = `scale(${scaleRatio})`;
+      return { width: clampedW, height: exactH };
     }
 
     // 초기 320px 기준 16:9 세팅
@@ -1248,21 +1379,122 @@
         : (isSearching ? `(${currentFeedItems.length}/${TARGET_COUNT})` : `총 ${currentFeedItems.length}개`);
     }
 
-    // 5. 부유창 재생 (상단 겹침 제목 제거, 유튜브 고유 전체화면 fs=1 유지)
+    // 5. 부유창 재생 (v4: enablejsapi=1 시간 추적 + 백그라운드 오디오 사전 프리페치)
+    let isDockedToBookmark = false;
+    let dockSide = 'right';
+    let isBgAudioPlaying = false;
+    let lastKnownPlaySec = 0;
+    let prefetchedAudioUrl = '';
+    let prefetchedVideoId = '';
+    let pendingBgSeekSec = 0;
+
+    function sendYtCommand(func, args = []) {
+      const frame = document.getElementById('ytPlayerFrame');
+      if (!frame || !frame.contentWindow) return;
+      try {
+        frame.contentWindow.postMessage(JSON.stringify({ event: 'command', func, args }), '*');
+      } catch (e) {}
+    }
+
+    function stopBgAudioClean() {
+      try {
+        bgAudio.pause();
+        bgAudio.removeAttribute('src');
+        bgAudio.load();
+      } catch (e) {}
+      isBgAudioPlaying = false;
+      miniBookmark.classList.remove('bg-active');
+    }
+
+    function setupMediaSession(title, videoId) {
+      if (!('mediaSession' in navigator)) return;
+      try {
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: simplifyTitle(title),
+          artist: 'Tube Audio Lab',
+          artwork: [
+            { src: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`, sizes: '480x360', type: 'image/jpeg' }
+          ]
+        });
+        navigator.mediaSession.setActionHandler('play', () => {
+          if (isDockedToBookmark && bgAudio.src) {
+            bgAudio.play().catch(() => {});
+          } else {
+            sendYtCommand('playVideo');
+          }
+        });
+        navigator.mediaSession.setActionHandler('pause', () => {
+          if (isBgAudioPlaying) bgAudio.pause();
+          else sendYtCommand('pauseVideo');
+        });
+      } catch (e) {}
+    }
+
+    async function prefetchBgAudio(videoId) {
+      prefetchedAudioUrl = '';
+      prefetchedVideoId = '';
+      try {
+        const { data } = await smartFetch(`/streams/${videoId}`);
+        if (currentVideoId !== videoId) return;
+        const streams = (data.audioStreams || []).filter(s => s && s.url);
+        if (!streams.length) return;
+
+        // iOS Safari + Android Chrome 모두 네이티브 백그라운드 재생되는 MP4/M4A 우선 선별
+        const mp4Streams = streams
+          .filter(s => /mp4|m4a/i.test(s.mimeType || '') || /mp4a/i.test(s.codec || ''))
+          .sort((a, b) => (b.bitrate || 0) - (a.bitrate || 0));
+        const fallbackStreams = [...streams].sort((a, b) => (b.bitrate || 0) - (a.bitrate || 0));
+        const chosen = mp4Streams[0] || fallbackStreams[0];
+
+        if (chosen && chosen.url) {
+          prefetchedAudioUrl = chosen.url;
+          prefetchedVideoId = videoId;
+        }
+      } catch (e) {
+        console.warn('[백그라운드 오디오 프리페치 생략 - iframe 폴백 유지]');
+      }
+    }
+
     function openPlayerModal(videoId, title) {
+      stopBgAudioClean();
+      isDockedToBookmark = false;
+      lastKnownPlaySec = 0;
+      miniBookmark.style.display = 'none';
+      modal.classList.remove('docked-hidden', 'interacting');
+
       currentVideoId = videoId;
       currentVideoTitle = title;
       modal.style.display = 'block';
-      apply16by9Scale(modal.offsetWidth || 320);
+      const dims = apply16by9Scale(modal.offsetWidth || 320);
 
-      // controls=1 & fs=1 로 터치 시 유튜브 고유의 확대/축소 화살표 노출
+      // 화면 밖 좌표에 남아있었다면 정중앙 배치
+      const curLeft = modal.offsetLeft;
+      const curTop = modal.offsetTop;
+      if (curLeft < -20 || curLeft > window.innerWidth - 40 || curTop < -20 || curTop > window.innerHeight - 40) {
+        modal.style.left = `${Math.max(6, Math.round((window.innerWidth - dims.width) / 2))}px`;
+        modal.style.top = `${Math.max(12, Math.round((window.innerHeight - (dims.height + 24)) / 2))}px`;
+      }
+
       ytHolder.innerHTML = `
         <iframe
-          src="https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&controls=1&fs=1&modestbranding=1&rel=0&playsinline=1"
+          id="ytPlayerFrame"
+          src="https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&controls=1&fs=1&enablejsapi=1&modestbranding=1&rel=0&playsinline=1"
           allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
           allowfullscreen>
         </iframe>
       `;
+
+      const frame = document.getElementById('ytPlayerFrame');
+      if (frame) {
+        frame.addEventListener('load', () => {
+          try {
+            frame.contentWindow.postMessage(JSON.stringify({ event: 'listening', id: 1 }), '*');
+          } catch (e) {}
+        });
+      }
+
+      setupMediaSession(title, videoId);
+      prefetchBgAudio(videoId);
     }
 
     // 5-2. Firebase / 임시 로컬 듀얼 저장소 엔진 (300개 캡 + 즉시 로드 + 용량 정리)
@@ -1633,8 +1865,13 @@
     initFirebase();
 
     function closePlayerModal() {
+      stopBgAudioClean();
+      isDockedToBookmark = false;
+      lastKnownPlaySec = 0;
       ytHolder.innerHTML = '';
+      modal.classList.remove('docked-hidden', 'interacting');
       modal.style.display = 'none';
+      miniBookmark.style.display = 'none';
     }
 
     // 6. MP3 / 320kbps 전용 추출 모달 제어
@@ -1681,53 +1918,196 @@
       }
     }
 
-    // 7. Drag 탭 이동 로직
-    let isDragging = false;
-    let startX, startY, initLeft, initTop;
+    // 7. YouTube 현재 재생 초 수신 + 백그라운드 오디오 메타데이터 동기화
+    window.addEventListener('message', (e) => {
+      if (!e.data || typeof e.data !== 'string') return;
+      try {
+        const msg = JSON.parse(e.data);
+        if (msg.event === 'infoDelivery' && msg.info && typeof msg.info.currentTime === 'number') {
+          lastKnownPlaySec = msg.info.currentTime;
+        }
+      } catch (err) {}
+    });
 
-    dragTab.addEventListener('pointerdown', (e) => {
+    bgAudio.addEventListener('loadedmetadata', () => {
+      if (pendingBgSeekSec > 0 && isFinite(bgAudio.duration) && pendingBgSeekSec < bgAudio.duration) {
+        try { bgAudio.currentTime = pendingBgSeekSec; } catch (e) {}
+      }
+      pendingBgSeekSec = 0;
+    });
+
+    bgAudio.addEventListener('ended', () => {
+      isBgAudioPlaying = false;
+      miniBookmark.classList.remove('bg-active');
+    });
+
+    // 화면 바깥으로 날리기 -> 연분홍 70% 음표 책갈피 도킹 + 백그라운드 오디오 핸드오프
+    function dockPlayerToBookmark(side) {
+      isDockedToBookmark = true;
+      dockSide = side === 'left' ? 'left' : 'right';
+
+      modal.classList.add('docked-hidden');
+      miniBookmark.classList.remove('dock-left', 'dock-right', 'bg-active');
+      miniBookmark.classList.add(dockSide === 'left' ? 'dock-left' : 'dock-right');
+      miniBookmark.style.display = 'flex';
+
+      // 사용자 제스처(pointerup) 시점에 즉시 네이티브 <audio>로 핸드오프 -> 브라우저 백그라운드에서도 계속 재생!
+      if (prefetchedVideoId === currentVideoId && prefetchedAudioUrl) {
+        try {
+          pendingBgSeekSec = Math.floor(lastKnownPlaySec || 0);
+          bgAudio.src = prefetchedAudioUrl;
+          const playPromise = bgAudio.play();
+          if (playPromise && typeof playPromise.then === 'function') {
+            playPromise.then(() => {
+              isBgAudioPlaying = true;
+              sendYtCommand('pauseVideo');
+              miniBookmark.classList.add('bg-active');
+              setupMediaSession(currentVideoTitle, currentVideoId);
+              statusMsg.innerText = '백그라운드 오디오 모드 활성 (브라우저 내려도 계속 재생)';
+            }).catch(() => {
+              // 스트림 재생 실패 시 iframe 오프스크린 유지로 소리 끊김 방지
+              isBgAudioPlaying = false;
+            });
+          }
+        } catch (e) {
+          isBgAudioPlaying = false;
+        }
+      } else {
+        statusMsg.innerText = '미니 음표 책갈피 모드 (터치 시 정중앙 복귀)';
+      }
+    }
+
+    // 연분홍 음표 책갈피 터치 -> 화면 정중앙 복귀 + 재생 위치 이어받기
+    function restorePlayerFromBookmark() {
+      isDockedToBookmark = false;
+      miniBookmark.style.display = 'none';
+      miniBookmark.classList.remove('bg-active');
+
+      modal.classList.remove('docked-hidden', 'interacting');
+      modal.style.display = 'block';
+
+      const dims = apply16by9Scale(modal.offsetWidth || 320);
+      const centerLeft = Math.max(6, Math.round((window.innerWidth - dims.width) / 2));
+      const centerTop = Math.max(12, Math.round((window.innerHeight - (dims.height + 24)) / 2));
+      modal.style.left = `${centerLeft}px`;
+      modal.style.top = `${centerTop}px`;
+
+      if (isBgAudioPlaying) {
+        const resumeSec = Math.floor(bgAudio.currentTime || lastKnownPlaySec || 0);
+        lastKnownPlaySec = resumeSec;
+        stopBgAudioClean();
+        sendYtCommand('seekTo', [resumeSec, true]);
+        sendYtCommand('playVideo');
+      }
+    }
+
+    // 7-2. 자유 드래그 이동 & 화면 밖 날리기(Flick/Slide Off-Screen)
+    let isDragging = false;
+    let startX = 0, startY = 0, initLeft = 0, initTop = 0;
+    let lastMoveX = 0, lastMoveTime = 0, velocityX = 0;
+
+    function startPlayerDrag(e) {
+      if (isResizing) return;
       isDragging = true;
-      dragTab.setPointerCapture(e.pointerId);
+      modal.classList.add('interacting');
+      if (e.currentTarget && e.currentTarget.setPointerCapture) {
+        try { e.currentTarget.setPointerCapture(e.pointerId); } catch (err) {}
+      }
       startX = e.clientX;
       startY = e.clientY;
       initLeft = modal.offsetLeft;
       initTop = modal.offsetTop;
-    });
+      lastMoveX = e.clientX;
+      lastMoveTime = Date.now();
+      velocityX = 0;
+      e.preventDefault();
+    }
 
-    window.addEventListener('pointermove', (e) => {
-      if (!isDragging) return;
-      const dx = e.clientX - startX;
-      const dy = e.clientY - startY;
-      modal.style.left = `${Math.max(0, initLeft + dx)}px`;
-      modal.style.top = `${Math.max(0, initTop + dy)}px`;
-    });
+    playerDragBar.addEventListener('pointerdown', startPlayerDrag);
+    bottomDragSpacer.addEventListener('pointerdown', startPlayerDrag);
 
-    window.addEventListener('pointerup', () => { isDragging = false; });
-
-    // 8. 4각 모서리 16:9 비율 연동 확대/축소 로직
+    // 8. 4각 모서리 16:9 정밀 확대/축소 로직 (반대편 대각선 모서리 완벽 고정)
     let isResizing = false;
     let resizeDir = '';
-    let startW, resizeStartX;
+    let startW = 320, startH = 180, resizeStartX = 0, resizeStartY = 0;
 
     document.querySelectorAll('.resizer').forEach(resizer => {
       resizer.addEventListener('pointerdown', (e) => {
         isResizing = true;
         resizeDir = resizer.getAttribute('data-dir');
-        resizer.setPointerCapture(e.pointerId);
+        modal.classList.add('interacting');
+        try { resizer.setPointerCapture(e.pointerId); } catch (err) {}
         startW = modal.offsetWidth;
+        startH = modalWindow.offsetHeight;
+        initLeft = modal.offsetLeft;
+        initTop = modal.offsetTop;
         resizeStartX = e.clientX;
+        resizeStartY = e.clientY;
         e.stopPropagation();
+        e.preventDefault();
       });
     });
 
     window.addEventListener('pointermove', (e) => {
-      if (!isResizing) return;
-      const dx = e.clientX - resizeStartX;
-      const targetW = resizeDir.includes('l') ? (startW - dx) : (startW + dx);
-      apply16by9Scale(targetW);
+      if (isDragging) {
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        const now = Date.now();
+        const dt = Math.max(1, now - lastMoveTime);
+        velocityX = (e.clientX - lastMoveX) / dt;
+        lastMoveX = e.clientX;
+        lastMoveTime = now;
+
+        // 좌/우는 제한 없이 화면 밖으로 날릴 수 있게 허용
+        modal.style.left = `${initLeft + dx}px`;
+        modal.style.top = `${Math.max(-30, Math.min(window.innerHeight - 55, initTop + dy))}px`;
+        return;
+      }
+
+      if (isResizing) {
+        const dx = e.clientX - resizeStartX;
+        const dy = e.clientY - resizeStartY;
+        const wFromX = resizeDir.includes('l') ? (startW - dx) : (startW + dx);
+        const hFromY = resizeDir.includes('t') ? (startH - dy) : (startH + dy);
+        const wFromY = hFromY * (16 / 9);
+        const targetW = Math.abs(dx) >= Math.abs(dy) ? wFromX : wFromY;
+
+        const dims = apply16by9Scale(targetW);
+
+        // 좌측/상단 모서리 조작 시 반대편 우측/하단 모서리를 제자리에 고정
+        if (resizeDir.includes('l')) {
+          modal.style.left = `${initLeft + startW - dims.width}px`;
+        }
+        if (resizeDir.includes('t')) {
+          modal.style.top = `${initTop + startH - dims.height}px`;
+        }
+      }
     });
 
-    window.addEventListener('pointerup', () => { isResizing = false; });
+    function finishPointerInteraction() {
+      if (isDragging) {
+        isDragging = false;
+        modal.classList.remove('interacting');
+        const rect = modal.getBoundingClientRect();
+
+        // 창의 절반 가까이 좌/우 화면 바깥으로 나가거나 빠르게 좌/우로 날렸을 때 책갈피로 도킹
+        if (rect.left + rect.width * 0.45 < 0 || (velocityX < -0.65 && rect.left < 28)) {
+          dockPlayerToBookmark('left');
+        } else if (rect.right - rect.width * 0.45 > window.innerWidth || (velocityX > 0.65 && rect.right > window.innerWidth - 28)) {
+          dockPlayerToBookmark('right');
+        } else {
+          // 화면 안에 머물렀다면 상단 이탈만 부드럽게 보정
+          if (rect.top < 0) modal.style.top = '4px';
+        }
+      }
+      if (isResizing) {
+        isResizing = false;
+        modal.classList.remove('interacting');
+      }
+    }
+
+    window.addEventListener('pointerup', finishPointerInteraction);
+    window.addEventListener('pointercancel', finishPointerInteraction);
   </script>
 </body>
 </html>
