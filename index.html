@@ -117,8 +117,8 @@
 
   <h2>Tube Audio Lab</h2>
 
-  <!-- 실시간 진단 모니터 -->
-  <div id="debug-box">[시스템] CORS 터널 준비 완료</div>
+  <!-- 진단 모니터 -->
+  <div id="debug-box">[시스템] 고속 스트림 터널 준비 완료</div>
 
   <div class="search-box">
     <input type="text" id="query" placeholder="가수 또는 곡명 검색" onkeyup="if(window.event.keyCode==13){search()}">
@@ -129,17 +129,16 @@
 
   <div class="player-container">
     <div id="nowPlaying" class="now-playing">대기 중...</div>
-    <audio id="audioPlayer" controls playsinline></audio>
+    <audio id="audioPlayer" controls playsinline preload="auto"></audio>
   </div>
 
   <script>
-    // Invidious 노드 목록
-    const NODES = [
-      'https://inv.nadeko.net',
-      'https://yewtu.be',
-      'https://invidious.nerdvpn.de'
+    // 검증된 검색용 API 엔드포인트
+    const SEARCH_APIS = [
+      'https://api.piped.private.coffee',
+      'https://pipedapi.kavin.rocks'
     ];
-    let currentNode = NODES[0];
+    let activeApi = SEARCH_APIS[0];
 
     const audioPlayer = document.getElementById('audioPlayer');
     const nowPlaying = document.getElementById('nowPlaying');
@@ -151,31 +150,13 @@
       debugBox.innerText = `> ${msg}\n` + debugBox.innerText.slice(0, 300);
     }
 
-    // CORS 제한을 우회하여 JSON을 가져오는 스마트 터널 함수
-    async function fetchWithCors(targetUrl) {
-      // 1차 시도: 직접 통신
-      try {
-        const res = await fetch(targetUrl);
-        if (res.ok) return await res.json();
-      } catch (e) {
-        log("직접 연결 실패, CORS 우회 터널 작동...");
-      }
-
-      // 2차 시도: AllOrigins 프록시 터널 경유
-      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
-      const res2 = await fetch(proxyUrl);
-      if (!res2.ok) throw new Error(`터널 에러 (HTTP ${res2.status})`);
-      return await res2.json();
-    }
-
-    // 오디오 태그 에러 추적
     audioPlayer.onerror = () => {
       const err = audioPlayer.error;
-      log(`[오디오 오류] 코드 ${err ? err.code : '알수없음'}`);
-      nowPlaying.innerText = "재생 실패 (오디오 스트림 차단)";
+      log(`[오디오 에러] 코드: ${err ? err.code : '알수없음'}`);
+      nowPlaying.innerText = "재생 실패 (스트림 터널 재시도 필요)";
     };
 
-    // 1. 검색 (CORS 터널 통과)
+    // 1. 검증된 Piped 검색 엔진 복구
     async function search() {
       const q = document.getElementById('query').value.trim();
       if (!q) return;
@@ -183,71 +164,71 @@
       log(`검색 시작: "${q}"`);
       resultsContainer.innerHTML = '';
 
-      for (let i = 0; i < NODES.length; i++) {
-        currentNode = NODES[i];
+      for (let i = 0; i < SEARCH_APIS.length; i++) {
+        activeApi = SEARCH_APIS[i];
         try {
-          const target = `${currentNode}/api/v1/search?q=${encodeURIComponent(q)}&type=video`;
-          log(`노드 요청: ${currentNode}`);
-          const items = await fetchWithCors(target);
+          log(`검색 API 접속: ${activeApi}`);
+          const res = await fetch(`${activeApi}/search?q=${encodeURIComponent(q)}&filter=videos`);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
           
-          log(`검색 완료 (${items.length}개 수신)`);
-          renderResults(items);
+          log(`검색 성공 (${data.items.length}개 발견)`);
+          renderResults(data.items);
           return;
         } catch (e) {
-          log(`${currentNode} 실패: ${e.message}`);
+          log(`${activeApi} 실패: ${e.message}`);
         }
       }
-      log("모든 검색 경로가 차단되었습니다.");
+      log("검색 서버 응답 없음. 잠시 후 시도하세요.");
     }
 
     function renderResults(items) {
       items.forEach(item => {
+        const videoId = item.url.replace('/watch?v=', '');
         const card = document.createElement('div');
         card.className = 'video-item';
-        const thumb = item.videoThumbnails ? item.videoThumbnails[0].url : '';
         
-        card.onclick = () => playStream(item.videoId, item.title, item.author, thumb);
+        card.onclick = () => fetchAndPlay(videoId, item.title, item.uploaderName, item.thumbnail);
 
         card.innerHTML = `
-          <img src="${thumb}" loading="lazy" onerror="this.style.display='none'">
+          <img src="${item.thumbnail}" loading="lazy">
           <div class="video-info">
             <div class="video-title">${item.title}</div>
-            <div class="video-channel">${item.author}</div>
+            <div class="video-channel">${item.uploaderName}</div>
           </div>
         `;
         resultsContainer.appendChild(card);
       });
     }
 
-    // 2. 오디오 스트림 추출 및 재생
-    async function playStream(videoId, title, artist, artworkUrl) {
+    // 2. 스트림 추출 및 사파리 IP 차단 우회 재생
+    async function fetchAndPlay(videoId, title, artist, artworkUrl) {
       log(`곡 선택: ${videoId}`);
-      nowPlaying.innerText = `[분석 중] ${title}`;
+      nowPlaying.innerText = `[스트림 추출 중] ${title}`;
 
-      // 아이폰 보안 락 즉시 해제 (무음 버퍼)
+      // [아이폰 핵심] 터치 즉시 무음 오디오로 브라우저 락을 해제
       audioPlayer.src = "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAIlYAAESsAAACABAAZGF0YQAAAAA=";
       audioPlayer.play().catch(() => {});
 
       try {
-        const target = `${currentNode}/api/v1/videos/${videoId}`;
-        log("스트림 메타데이터 요청...");
-        const data = await fetchWithCors(target);
+        log("메타데이터 요청 중...");
+        const res = await fetch(`${activeApi}/streams/${videoId}`);
+        if (!res.ok) throw new Error(`스트림 응답 에러 (${res.status})`);
+        const data = await res.json();
 
-        // 아이폰 사파리용 AAC/m4a 오디오 스트림 선별
-        let audioStream = null;
-        if (data.adaptiveFormats) {
-          audioStream = data.adaptiveFormats.find(f => f.type && f.type.includes('audio/mp4'));
-        }
-        if (!audioStream && data.formatStreams) {
-          audioStream = data.formatStreams[0];
-        }
+        // 아이폰 친화 포맷(m4a/aac) 우선 필터
+        let stream = data.audioStreams.find(s => s.mimeType && s.mimeType.includes('audio/mp4')) 
+                     || data.audioStreams[0];
 
-        if (!audioStream || !audioStream.url) {
-          throw new Error("오디오 스트림 없음");
+        if (!stream || !stream.url) {
+          throw new Error("오디오 스트림을 찾을 수 없음");
         }
 
-        log("음원 주소 확보. 사파리 재생 시작...");
-        audioPlayer.src = audioStream.url;
+        // [핵심] 구글 CDN의 403 Forbidden 차단을 뚫어주는 초고속 터널링
+        const tunneledUrl = `https://corsproxy.io/?${encodeURIComponent(stream.url)}`;
+
+        log("고속 터널 연결 완료. 재생 시작...");
+        audioPlayer.src = tunneledUrl;
         await audioPlayer.play();
 
         nowPlaying.innerText = `[재생 중] ${title}`;
@@ -255,7 +236,7 @@
         setupMediaSession(title, artist, artworkUrl);
 
       } catch (e) {
-        log(`재생 실패 원인: ${e.message}`);
+        log(`실패: ${e.message}`);
         nowPlaying.innerText = "재생 실패";
       }
     }
