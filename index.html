@@ -41,8 +41,8 @@
       width: 100%;
     }
     .header-left-slot {
-      flex: 0 0 50%;
-      max-width: 50%;
+      flex: 0 0 64%;
+      max-width: 64%;
       min-width: 0;
     }
     .header-right-slot {
@@ -51,6 +51,152 @@
       display: flex;
       align-items: center;
       justify-content: flex-end;
+      gap: 4px;
+    }
+
+    /* 조건검색 토글 버튼 & 풀다운 슬라이드 체크박스 패널 */
+    .filter-toggle-btn {
+      padding: 7px 10px;
+      border-radius: 7px;
+      border: 1px solid #353535;
+      background: #1d1d1d;
+      color: #e5e5e5;
+      font-size: 11.5px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .filter-toggle-btn:active { background: #2c2c2c; }
+    .filter-toggle-btn.has-active {
+      border-color: #ff4444;
+      background: rgba(255, 0, 0, 0.16);
+      color: #fff;
+    }
+    .filter-slide-wrap {
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      margin-top: 0;
+      transition: max-height 0.24s ease, opacity 0.2s ease, margin-top 0.2s ease;
+    }
+    .filter-slide-wrap.open {
+      max-height: 220px;
+      opacity: 1;
+      margin-top: 7px;
+    }
+    .filter-slide-inner {
+      background: #171717;
+      border: 1px solid #333;
+      border-radius: 9px;
+      padding: 10px 11px;
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.65);
+    }
+    .filter-panel-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: #bbb;
+      margin-bottom: 8px;
+    }
+    .filter-order-hint {
+      font-size: 10px;
+      color: #ff7777;
+      font-weight: 700;
+    }
+    .filter-check-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 5px;
+      margin-bottom: 9px;
+    }
+    .filter-check-item {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      padding: 6px 4px;
+      border-radius: 7px;
+      background: #222;
+      border: 1px solid #323232;
+      color: #ddd;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .filter-check-item input[type="checkbox"] {
+      accent-color: #ff0000;
+      width: 13px;
+      height: 13px;
+      cursor: pointer;
+      margin: 0;
+    }
+    .filter-check-item.checked {
+      background: rgba(255, 0, 0, 0.16);
+      border-color: #ff4444;
+      color: #fff;
+    }
+    .filter-panel-foot {
+      display: flex;
+      justify-content: flex-end;
+      gap: 6px;
+    }
+    .filter-reset-btn {
+      padding: 5px 10px;
+      border-radius: 6px;
+      border: 1px solid #444;
+      background: transparent;
+      color: #aaa;
+      font-size: 11px;
+      cursor: pointer;
+    }
+    .filter-apply-btn {
+      padding: 5px 12px;
+      border-radius: 6px;
+      border: none;
+      background: #ff0000;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* 썸네일 우측 상단 작은 흰색 별표(★) 고정 체크박스 */
+    .video-card.pinned-card {
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.45);
+      background: #1d1d1d;
+    }
+    .star-pin-btn {
+      position: absolute;
+      top: 3px;
+      right: 3px;
+      z-index: 4;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      background: rgba(0, 0, 0, 0.52);
+      color: rgba(255, 255, 255, 0.78);
+      font-size: 11px;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 0;
+      transition: transform 0.12s, background 0.15s, border-color 0.15s;
+    }
+    .star-pin-btn:active { transform: scale(0.9); }
+    .star-pin-btn.pinned {
+      background: rgba(255, 255, 255, 0.24);
+      border-color: #ffffff;
+      color: #ffffff;
+      text-shadow: 0 0 6px rgba(255, 255, 255, 0.95);
     }
     .search-box { display: flex; gap: 4px; width: 100%; }
     input, textarea {
@@ -516,7 +662,41 @@
         </div>
       </div>
       <div class="header-right-slot" id="headerRightSlot">
-        <!-- 추후 로그인 및 기능 확장용 빈 공간 -->
+        <button class="filter-toggle-btn" id="filterToggleBtn" onclick="toggleFilterPanel()">
+          <span id="filterBtnLabel">▾ 조건검색</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 조건검색 풀다운 슬라이드 체크박스 패널 -->
+    <div class="filter-slide-wrap" id="filterSlidePanel">
+      <div class="filter-slide-inner">
+        <div class="filter-panel-head">
+          <span>정렬 · 조건 검색 (체크 순 반영)</span>
+          <span id="filterOrderHint" class="filter-order-hint">기본 검색순</span>
+        </div>
+        <div class="filter-check-grid">
+          <label class="filter-check-item" id="fLabel-recent">
+            <input type="checkbox" value="recent" onchange="onFilterCheckChange(this)">
+            <span>최근순</span>
+          </label>
+          <label class="filter-check-item" id="fLabel-korean">
+            <input type="checkbox" value="korean" onchange="onFilterCheckChange(this)">
+            <span>한글정렬</span>
+          </label>
+          <label class="filter-check-item" id="fLabel-size">
+            <input type="checkbox" value="size" onchange="onFilterCheckChange(this)">
+            <span>크기순</span>
+          </label>
+          <label class="filter-check-item" id="fLabel-views">
+            <input type="checkbox" value="views" onchange="onFilterCheckChange(this)">
+            <span>조회순</span>
+          </label>
+        </div>
+        <div class="filter-panel-foot">
+          <button class="filter-reset-btn" onclick="resetFilterConditions()">초기화</button>
+          <button class="filter-apply-btn" onclick="closeFilterPanel()">적용 · 닫기</button>
+        </div>
       </div>
     </div>
 
@@ -656,11 +836,20 @@
       "appId": "1:892351379651:web:ae4e8e40dfc55c933e4a76"
     };
 
+    // TUBE_LAB_V3_FILTER_STAR_PATCH
+    const PIN_DOC_ID = '__system_pins__';
+    const TEMP_LOCAL_PINS_KEY = 'tube_audio_lab_pins_v3';
+    const FILTER_LABELS = { recent: '최근순', korean: '한글정렬', size: '크기순', views: '조회순' };
+
     let db = null;
     let fbReady = false;
     let cachedTabsMeta = [];
     let activeTabKeyword = '';
     let currentSearchCollected = [];
+    let currentFeedItems = [];
+    let currentFeedIsCache = false;
+    let pinnedVideoIds = new Set();
+    let activeFilterOrder = [];
     let totalLoadedItems = 0;
     let isSearching = false;
     let currentVideoId = '';
@@ -733,14 +922,181 @@
       }
     }
 
-    // 3. 100개 검색 수집 (+ Firebase 또는 임시 로컬 자동 누적 저장, 탭당 최대 300개)
+    // 심플 제목 정제 (장식/이모지/중복문자/앞 괄호 태그 배제 -> 핵심 제목 앞으로)
+    function simplifyTitle(rawTitle) {
+      let s = String(rawTitle || '').trim();
+      if (!s) return '제목 없음';
+
+      // 1) 이모지 및 장식 기호 제거
+      s = s.replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\u{FE00}-\u{FE0F}\u{200D}]/gu, ' ');
+      s = s.replace(/[★☆♥♡♪♫♬♩◆◇■□●○▶▷◀◁•※✦✧✔✓｜丨]/g, ' ');
+
+      // 2) 앞부분 말머리 괄호 태그([Playlist], [4K], 【HD】 등) 제거해 핵심 제목을 맨 앞으로
+      const leadStripped = s.replace(/^\s*(?:[\[\(【《「<][^\]\)】》」>]{1,30}[\]\)】》」>]\s*)+/, '').trim();
+      if (leadStripped.length >= 2) s = leadStripped;
+
+      // 3) 뒷부분 부가 괄호 태그 정리
+      const tailStripped = s.replace(/(?:\s*[\[\(【《「<][^\]\)】》」>]{1,28}[\]\)】》」>]\s*)+$/, '').trim();
+      if (tailStripped.length >= 2) s = tailStripped;
+
+      // 4) 연속 중복 특수문자 축약
+      s = s.replace(/([!?~._=,])\1+/g, '$1');
+      s = s.replace(/[~_=]{2,}/g, ' ');
+
+      // 5) 구분자(|, /, -, ·) 기준 중복 구절 배제
+      const parts = s.split(/\s*[|\/·]\s*|\s+-\s+/).map(p => p.trim()).filter(Boolean);
+      const uniqueParts = [];
+      parts.forEach(part => {
+        const norm = part.replace(/\s+/g, '').toLowerCase();
+        if (!norm) return;
+        const isDup = uniqueParts.some(kept => {
+          const kNorm = kept.replace(/\s+/g, '').toLowerCase();
+          return kNorm === norm || kNorm.includes(norm);
+        });
+        if (!isDup) uniqueParts.push(part);
+      });
+      if (uniqueParts.length > 0) s = uniqueParts.join(' ');
+
+      // 6) 인접 중복 단어 배제
+      const words = s.split(/\s+/).filter(Boolean);
+      const dedupWords = [];
+      words.forEach(w => {
+        const prev = dedupWords[dedupWords.length - 1];
+        if (!prev || prev.toLowerCase() !== w.toLowerCase()) {
+          dedupWords.push(w);
+        }
+      });
+      s = dedupWords.join(' ').trim();
+
+      return s.length >= 2 ? s : String(rawTitle || '').trim();
+    }
+
+    // 조건검색 풀다운 슬라이드 모달 제어
+    function toggleFilterPanel() {
+      const panel = document.getElementById('filterSlidePanel');
+      if (panel) panel.classList.toggle('open');
+    }
+
+    function closeFilterPanel() {
+      const panel = document.getElementById('filterSlidePanel');
+      if (panel) panel.classList.remove('open');
+    }
+
+    function updateFilterUI() {
+      const btn = document.getElementById('filterToggleBtn');
+      const label = document.getElementById('filterBtnLabel');
+      const hint = document.getElementById('filterOrderHint');
+
+      if (activeFilterOrder.length > 0) {
+        btn.classList.add('has-active');
+        label.textContent = `▾ 조건(${activeFilterOrder.length})`;
+        hint.textContent = activeFilterOrder.map(k => FILTER_LABELS[k]).join(' → ');
+      } else {
+        btn.classList.remove('has-active');
+        label.textContent = '▾ 조건검색';
+        hint.textContent = '기본 검색순';
+      }
+
+      ['recent', 'korean', 'size', 'views'].forEach(key => {
+        const lbl = document.getElementById(`fLabel-${key}`);
+        if (!lbl) return;
+        const checked = activeFilterOrder.includes(key);
+        lbl.classList.toggle('checked', checked);
+        const inp = lbl.querySelector('input');
+        if (inp) inp.checked = checked;
+      });
+    }
+
+    function onFilterCheckChange(checkbox) {
+      const val = checkbox.value;
+      if (checkbox.checked) {
+        if (!activeFilterOrder.includes(val)) activeFilterOrder.push(val);
+      } else {
+        activeFilterOrder = activeFilterOrder.filter(k => k !== val);
+      }
+      updateFilterUI();
+      if (currentFeedItems.length > 0) {
+        renderSortedFeed();
+      }
+    }
+
+    function resetFilterConditions() {
+      activeFilterOrder = [];
+      updateFilterUI();
+      if (currentFeedItems.length > 0) {
+        renderSortedFeed();
+      }
+    }
+
+    // 별표(★) 최상단 고정 저장/로드 (기존 Firestore 규칙 무수정 호환: __system_pins__)
+    function loadLocalPinsImmediate() {
+      try {
+        const raw = localStorage.getItem(TEMP_LOCAL_PINS_KEY);
+        if (raw) {
+          const arr = JSON.parse(raw);
+          if (Array.isArray(arr)) pinnedVideoIds = new Set(arr);
+        }
+      } catch (e) {}
+    }
+
+    function saveLocalPinsOnly() {
+      try {
+        localStorage.setItem(TEMP_LOCAL_PINS_KEY, JSON.stringify(Array.from(pinnedVideoIds).slice(0, MAX_TAB_ITEMS)));
+      } catch (e) {}
+    }
+
+    async function syncPinsFromFirebase() {
+      if (!fbReady || !db) return;
+      try {
+        const snap = await db.collection(FB_COLLECTION).doc(PIN_DOC_ID).get();
+        if (snap.exists && Array.isArray(snap.data().items)) {
+          const ids = snap.data().items.map(it => it && it.id).filter(Boolean);
+          pinnedVideoIds = new Set(ids);
+          saveLocalPinsOnly();
+          if (currentFeedItems.length > 0) renderSortedFeed();
+        }
+      } catch (err) {
+        console.warn('[별표 동기화 로드 실패]', err);
+      }
+    }
+
+    async function savePinsToCloud() {
+      saveLocalPinsOnly();
+      if (!fbReady || !db) return;
+      try {
+        const pinList = Array.from(pinnedVideoIds).slice(0, MAX_TAB_ITEMS).map(id => ({ id }));
+        await db.collection(FB_COLLECTION).doc(PIN_DOC_ID).set({
+          keyword: PIN_DOC_ID,
+          updatedAt: Date.now(),
+          items: pinList
+        });
+      } catch (err) {
+        console.warn('[별표 클라우드 저장 실패]', err);
+      }
+    }
+
+    function togglePinVideo(videoId) {
+      if (!videoId) return;
+      if (pinnedVideoIds.has(videoId)) {
+        pinnedVideoIds.delete(videoId);
+      } else {
+        pinnedVideoIds.add(videoId);
+      }
+      savePinsToCloud();
+      renderSortedFeed();
+    }
+
+    // 3. 100개 검색 수집 (+ 조건검색 반영 + Firebase/임시로컬 최대 300개 저장)
     async function startSearch() {
       const q = document.getElementById('query').value.trim();
       if (!q || isSearching) return;
 
+      closeFilterPanel();
       isSearching = true;
       totalLoadedItems = 0;
       currentSearchCollected = [];
+      currentFeedItems = [];
+      currentFeedIsCache = false;
       activeTabKeyword = '';
       renderSavedTabsBar();
       resultsContainer.innerHTML = '';
@@ -762,7 +1118,13 @@
             nextPage = nextData.nextpage;
           } catch (e) { break; }
         }
-        statusMsg.innerText = "검색 완료";
+
+        // 조건검색 + 별표 기준 최종 정렬 반영
+        renderSortedFeed();
+        const condNote = activeFilterOrder.length > 0
+          ? ` (${activeFilterOrder.map(k => FILTER_LABELS[k]).join('·')})`
+          : '';
+        statusMsg.innerText = `검색 완료${condNote}`;
         countMsg.innerText = `총 ${totalLoadedItems}개`;
 
         if (currentSearchCollected.length > 0) {
@@ -775,10 +1137,11 @@
       }
     }
 
-    // 4. 4열 바둑판 렌더링 (Piped 원본 & 저장 탭 캐시 겸용)
+    // 4. 데이터 수집 + 통합 정렬 렌더링 (1순위: ★별표 최상단, 2순위: 조건검색)
     function appendGrid(items, isFromCache = false) {
       if (!items || !items.length) return;
       const limit = isFromCache ? MAX_TAB_ITEMS : TARGET_COUNT;
+      currentFeedIsCache = isFromCache;
 
       items.forEach(item => {
         if (totalLoadedItems >= limit) return;
@@ -787,39 +1150,102 @@
 
         const title = item.t !== undefined ? item.t : (item.title || '제목 없음');
         const thumb = item.th !== undefined ? item.th : (item.thumbnail || FALLBACK_THUMB);
+        const uploaded = Number(item.u !== undefined ? item.u : (item.uploaded > 0 ? item.uploaded : 0)) || 0;
+        const duration = Number(item.d !== undefined ? item.d : (item.duration > 0 ? item.duration : 0)) || 0;
+        const views = Number(item.v !== undefined ? item.v : (item.views > 0 ? item.views : 0)) || 0;
 
         totalLoadedItems++;
+        const compactObj = { id: videoId, t: title, th: thumb, u: uploaded, d: duration, v: views };
+
         if (!isFromCache) {
-          currentSearchCollected.push({ id: videoId, t: title, th: thumb });
+          currentSearchCollected.push(compactObj);
         }
 
+        currentFeedItems.push({
+          ...compactObj,
+          _clean: simplifyTitle(title),
+          _idx: currentFeedItems.length
+        });
+      });
+
+      renderSortedFeed();
+    }
+
+    function compareKoreanTitle(aStr, bStr) {
+      const aKo = /^[가-힣]/.test(aStr) ? 0 : 1;
+      const bKo = /^[가-힣]/.test(bStr) ? 0 : 1;
+      if (aKo !== bKo) return aKo - bKo;
+      return aStr.localeCompare(bStr, 'ko', { numeric: true });
+    }
+
+    function renderSortedFeed() {
+      const sorted = [...currentFeedItems].sort((a, b) => {
+        // 1순위: 흰색 별표(★) 체크된 영상은 무조건 최상단 배치
+        const aPin = pinnedVideoIds.has(a.id) ? 1 : 0;
+        const bPin = pinnedVideoIds.has(b.id) ? 1 : 0;
+        if (aPin !== bPin) return bPin - aPin;
+
+        // 2순위: 사용자가 체크한 조건 순서대로 정렬
+        for (const cond of activeFilterOrder) {
+          let diff = 0;
+          if (cond === 'recent') diff = (b.u || 0) - (a.u || 0);
+          else if (cond === 'korean') diff = compareKoreanTitle(a._clean, b._clean);
+          else if (cond === 'size') diff = (b.d || 0) - (a.d || 0);
+          else if (cond === 'views') diff = (b.v || 0) - (a.v || 0);
+          if (diff !== 0) return diff;
+        }
+
+        // 3순위: 원래 검색 순위 유지
+        return (a._idx || 0) - (b._idx || 0);
+      });
+
+      resultsContainer.innerHTML = '';
+      const frag = document.createDocumentFragment();
+
+      sorted.forEach(item => {
+        const isPinned = pinnedVideoIds.has(item.id);
         const card = document.createElement('div');
-        card.className = 'video-card';
-        card.onclick = () => openPlayerModal(videoId, title);
+        card.className = 'video-card' + (isPinned ? ' pinned-card' : '');
+        card.onclick = () => openPlayerModal(item.id, item.t);
 
         const thumbWrap = document.createElement('div');
         thumbWrap.className = 'thumb-wrapper';
+
         const img = document.createElement('img');
-        img.src = thumb;
+        img.src = item.th;
         img.loading = 'lazy';
         img.onerror = function() { this.onerror = null; this.src = FALLBACK_THUMB; };
         thumbWrap.appendChild(img);
+
+        // 우측 상단 작은 흰색 별표 체크박스 버튼
+        const starBtn = document.createElement('button');
+        starBtn.type = 'button';
+        starBtn.className = 'star-pin-btn' + (isPinned ? ' pinned' : '');
+        starBtn.textContent = isPinned ? '★' : '☆';
+        starBtn.title = isPinned ? '상단 고정 해제' : '최상단 고정';
+        starBtn.onclick = (e) => {
+          e.stopPropagation();
+          togglePinVideo(item.id);
+        };
+        thumbWrap.appendChild(starBtn);
 
         const info = document.createElement('div');
         info.className = 'card-info';
         const titleEl = document.createElement('div');
         titleEl.className = 'video-title';
-        titleEl.textContent = title;
+        titleEl.textContent = item._clean;
+        titleEl.title = item.t;
         info.appendChild(titleEl);
 
         card.appendChild(thumbWrap);
         card.appendChild(info);
-        resultsContainer.appendChild(card);
+        frag.appendChild(card);
       });
 
-      countMsg.innerText = isFromCache
-        ? `총 ${totalLoadedItems}개 (최대 ${MAX_TAB_ITEMS})`
-        : `(${totalLoadedItems}/${TARGET_COUNT})`;
+      resultsContainer.appendChild(frag);
+      countMsg.innerText = currentFeedIsCache
+        ? `총 ${currentFeedItems.length}개 (최대 ${MAX_TAB_ITEMS})`
+        : (isSearching ? `(${currentFeedItems.length}/${TARGET_COUNT})` : `총 ${currentFeedItems.length}개`);
     }
 
     // 5. 부유창 재생 (상단 겹침 제목 제거, 유튜브 고유 전체화면 fs=1 유지)
@@ -920,6 +1346,7 @@
         fbConnBadge.textContent = 'Firebase 연결됨';
         fbConnBadge.style.color = '#4ade80';
       }
+      syncPinsFromFirebase();
       loadSavedTabsMeta();
     }
 
@@ -929,6 +1356,7 @@
         try {
           const snap = await db.collection(FB_COLLECTION).orderBy('updatedAt', 'desc').get();
           snap.forEach(doc => {
+            if (doc.id === PIN_DOC_ID) return; // 별표 메타 문서는 탭에서 숨김
             const d = doc.data();
             const count = Array.isArray(d.items) ? d.items.length : 0;
             cachedTabsMeta.push({
@@ -1074,6 +1502,7 @@
       activeTabKeyword = keyword;
       document.getElementById('query').value = keyword;
       totalLoadedItems = 0;
+      currentFeedItems = [];
       resultsContainer.innerHTML = '';
       appendGrid(items, true);
       renderSavedTabsBar();
@@ -1198,7 +1627,9 @@
       setTimeout(() => renderManageList(), 400);
     }
 
-    // 앱 시작 시 자동 초기화 (키가 있으면 Firebase, 없으면 임시 로컬 모드)
+    // 앱 시작 시 로컬 별표 즉시 로드 + Firebase 자동 초기화
+    loadLocalPinsImmediate();
+    updateFilterUI();
     initFirebase();
 
     function closePlayerModal() {
