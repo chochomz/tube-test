@@ -5,9 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Tube Audio Lab</title>
 
-  <!-- [공개 모듈] Plyr 오픈소스 CSS -->
-  <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" 
-        onerror="this.onerror=null;this.href='https://cdnjs.cloudflare.com/ajax/libs/plyr/3.7.8/plyr.css';" />
+  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1384/1384060.png">
+  <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/1384/1384060.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -20,7 +21,7 @@
       user-select: none;
     }
 
-    /* 1. 최상단 검색창 */
+    /* 1. 최상단 고정 검색창 */
     .top-header {
       position: sticky;
       top: 0;
@@ -99,106 +100,210 @@
       word-break: break-all;
     }
 
-    /* 3. [핵심] 독립 이동/확대축소 부유창 (Floating Modal) */
+    /* 3. [핵심] 16:9 원본 밀착형 부유창 */
     #floating-player-modal {
       position: fixed;
-      top: 15%;
-      left: 5%;
-      width: 320px;
-      min-width: 180px;
-      min-height: 120px;
-      z-index: 9999;
-      display: none; /* 클릭 전에는 숨김 */
+      top: 14%;
+      left: 6%;
+      width: 320px; /* 초기 가로 (세로는 16:9인 180px로 JS가 자동 고정) */
+      z-index: 9000;
+      display: none;
       touch-action: none;
     }
 
-    /* 가는 흰색 실선 테두리 메인창 */
+    /* 가는 흰색 실선 테두리 (영상 원본 비율에 100% 밀착) */
     .modal-main-window {
       width: 100%;
-      height: 100%;
+      height: 180px; /* JS에서 16:9 비율로 실시간 동기화 */
       background: #000;
-      border: 1px solid rgba(255, 255, 255, 0.9); /* 요구사항: 가는 흰색 실선 */
-      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.95);
+      border-radius: 4px;
       overflow: hidden;
       position: relative;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.85);
-      display: flex;
-      flex-direction: column;
+      box-shadow: 0 12px 34px rgba(0,0,0,0.85);
     }
 
-    /* 내부 비디오 컨테이너 */
-    .player-inner {
-      width: 100%;
-      height: 100%;
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    /* 내부 비례 스케일링 스테이지 (800x450 기준 -> 창 크기에 맞춰 통째로 축소/확대) */
+    .scale-stage {
+      width: 800px;
+      height: 450px;
+      transform-origin: 0 0;
+      position: relative;
       background: #000;
     }
-    .player-inner .plyr {
-      width: 100%;
-      height: 100%;
+    .scale-stage iframe {
+      width: 800px;
+      height: 450px;
+      border: none;
+      display: block;
     }
 
-    /* 4. 사각 모서리 리사이즈 핸들 */
+    /* 창 크기에 비례해서 함께 커지고 작아지는 상단 미니 제목 오버레이 */
+    .proportional-title-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 10px 16px;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.75), transparent);
+      color: rgba(255,255,255,0.9);
+      font-size: 18px; /* 320px 창에서는 0.4배인 7.2px로 아주 작게 시작! 확대 시 같이 커짐 */
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    /* 4각 모서리 리사이즈 핸들 */
     .resizer {
       position: absolute;
-      width: 16px;
-      height: 16px;
-      z-index: 10;
+      width: 18px;
+      height: 18px;
+      z-index: 20;
     }
     .resizer.tl { top: 0; left: 0; cursor: nwse-resize; }
     .resizer.tr { top: 0; right: 0; cursor: nesw-resize; }
     .resizer.bl { bottom: 0; left: 0; cursor: nesw-resize; }
-    .resizer.br { 
+    .resizer.br {
       bottom: 0; right: 0; cursor: nwse-resize;
-      background: linear-gradient(135deg, transparent 50%, rgba(255,255,255,0.7) 50%);
-      border-bottom-right-radius: 4px;
+      background: linear-gradient(135deg, transparent 55%, rgba(255,255,255,0.8) 55%);
     }
 
-    /* 5. [요구사항] 테두리 하부 책갈피 컨트롤 (Drag & 닫기) */
+    /* 4. [핵심] 하부 겹쳐지는 책갈피 탭 구조 (Overlapping Bookmark Tabs) */
     .modal-bottom-tabs {
       display: flex;
       justify-content: space-between;
+      align-items: flex-start;
       width: 100%;
-      padding: 0 8px;
-      margin-top: -1px; /* 메인 테두리와 자연스럽게 결합 */
+      padding: 0 4px;
+      margin-top: -1px; /* 메인 흰색 테두리와 밀착 */
       pointer-events: none;
+    }
+    .tab-group-left {
+      display: flex;
+      align-items: flex-start;
+      pointer-events: auto;
     }
     .bookmark-tab {
       pointer-events: auto;
-      background: rgba(255, 255, 255, 0.5); /* 요구사항: 흰색 50% 투명도 */
+      background: rgba(255, 255, 255, 0.5); /* 흰색 50% 투명도 */
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
       color: #111;
       font-size: 11px;
       font-weight: 700;
-      padding: 4px 14px;
-      border-radius: 0 0 10px 10px; /* 요구사항: 부드러운 곡선 책갈피 스타일 */
-      border: 1px solid rgba(255, 255, 255, 0.7);
+      padding: 5px 14px;
+      border-radius: 0 0 11px 11px;
+      border: 1px solid rgba(255, 255, 255, 0.8);
       border-top: none;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      box-shadow: 2px 4px 10px rgba(0,0,0,0.45);
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      transition: background 0.2s, transform 0.1s;
+      position: relative;
+      transition: background 0.15s, padding-top 0.15s;
+      white-space: nowrap;
     }
     .bookmark-tab:active {
-      background: rgba(255, 255, 255, 0.8);
-      transform: scale(0.96);
+      background: rgba(255, 255, 255, 0.85);
     }
-    .drag-zone {
+    /* 책갈피가 서로 겹쳐지는 스타일 */
+    .bookmark-tab.tab-1 {
+      z-index: 4;
       cursor: grab;
-      user-select: none;
     }
-    .drag-zone:active { cursor: grabbing; }
+    .bookmark-tab.tab-2 {
+      z-index: 3;
+      margin-left: -8px; /* 왼쪽 탭 밑으로 부드럽게 겹침 */
+      padding-left: 16px;
+      background: rgba(240, 248, 255, 0.55);
+    }
+
+    /* 5. [신규] MP3 / 320kbps 음원추출 전용 모달 */
+    #mp3-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(5px);
+      z-index: 10000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .mp3-modal-box {
+      width: 100%;
+      max-width: 340px;
+      background: #161616;
+      border: 1px solid rgba(255, 255, 255, 0.85);
+      border-radius: 12px;
+      padding: 18px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.9);
+      text-align: center;
+    }
+    .mp3-modal-header {
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 12px;
+    }
+    .mp3-track-name {
+      font-size: 12px;
+      color: #ccc;
+      background: #222;
+      padding: 8px 10px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .mp3-quality-badge {
+      display: inline-block;
+      background: rgba(255, 0, 0, 0.15);
+      border: 1px solid #ff3333;
+      color: #ff5555;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 5px 14px;
+      border-radius: 20px;
+      margin-bottom: 15px;
+    }
+    .mp3-widget-frame {
+      width: 100%;
+      height: 62px;
+      border: none;
+      border-radius: 8px;
+      background: #111;
+      margin-bottom: 12px;
+    }
+    .mp3-action-btn {
+      width: 100%;
+      padding: 11px;
+      border-radius: 8px;
+      border: none;
+      background: #ffffff;
+      color: #000;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      margin-bottom: 8px;
+    }
+    .mp3-close-btn {
+      width: 100%;
+      padding: 9px;
+      border-radius: 8px;
+      border: 1px solid #444;
+      background: transparent;
+      color: #aaa;
+      font-size: 12px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
 
-  <!-- 최상단 고정 검색창 -->
+  <!-- 1. 최상단 검색 헤더 -->
   <div class="top-header">
     <div class="search-box">
       <input type="text" id="query" placeholder="가수 또는 곡명 검색" onkeyup="if(window.event.keyCode==13){startSearch()}">
@@ -210,12 +315,11 @@
     </div>
   </div>
 
-  <!-- 가로 5칸 바둑판 피드 -->
+  <!-- 2. 가로 5칸 바둑판 피드 -->
   <div class="video-grid" id="results"></div>
 
-  <!-- [신규] 독립 이동 및 크기조절 부유창 (Floating Window) -->
+  <!-- 3. 16:9 밀착형 독립 부유창 (Floating Window) -->
   <div id="floating-player-modal">
-    <!-- 메인 윈도우 (가는 흰색 실선) -->
     <div class="modal-main-window" id="modalWindow">
       <!-- 4각 모서리 리사이즈 핸들 -->
       <div class="resizer tl" data-dir="tl"></div>
@@ -223,26 +327,46 @@
       <div class="resizer bl" data-dir="bl"></div>
       <div class="resizer br" data-dir="br"></div>
 
-      <!-- 내부 재생 영역 (함께 확대/축소) -->
-      <div class="player-inner">
-        <div id="player" data-plyr-provider="youtube" data-plyr-embed-id="M7lc1UVf-VE"></div>
+      <!-- 800x450 비례 스케일링 스테이지 (화면 확대/축소 시 내부 제목과 유튜브 버튼이 함께 확대/축소됨) -->
+      <div class="scale-stage" id="scaleStage">
+        <div class="proportional-title-bar" id="propTitle">재생 대기 중</div>
+        <div id="yt-iframe-holder"></div>
       </div>
     </div>
 
-    <!-- 하부 책갈피 컨트롤 (흰색 투명도 50% 곡선) -->
+    <!-- 하부 겹쳐지는 책갈피 탭 -->
     <div class="modal-bottom-tabs">
-      <div class="bookmark-tab drag-zone" id="dragTab">
-        <span>✥ Drag</span>
+      <div class="tab-group-left">
+        <div class="bookmark-tab tab-1" id="dragTab">
+          <span>✥ Drag</span>
+        </div>
+        <div class="bookmark-tab tab-2" onclick="openMp3Modal()">
+          <span>♪ 음원추출</span>
+        </div>
       </div>
+
       <div class="bookmark-tab" onclick="closePlayerModal()">
         <span>✕ 닫기</span>
       </div>
     </div>
   </div>
 
-  <!-- [공개 모듈] Plyr 오픈소스 JS -->
-  <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js" 
-          onerror="this.onerror=null;document.write('<script src=\'https://cdnjs.cloudflare.com/ajax/libs/plyr/3.7.8/plyr.polyfilled.js\'><\/script>')"></script>
+  <!-- 4. MP3 / 320kbps 전용 음원추출 모달 -->
+  <div id="mp3-modal-overlay">
+    <div class="mp3-modal-box">
+      <div class="mp3-modal-header">고음질 음원 추출</div>
+      <div class="mp3-track-name" id="mp3TrackTitle">곡 제목</div>
+      <div class="mp3-quality-badge">고정 포맷 : MP3 / 320kbps</div>
+
+      <!-- 320kbps MP3 즉시 변환 모듈 -->
+      <iframe id="mp3WidgetFrame" class="mp3-widget-frame" scrolling="no"></iframe>
+
+      <button class="mp3-action-btn" id="directStreamBtn" onclick="extractDirectAudio()">
+        ⬇ 다이렉트 음원 스트림 추출 (320k)
+      </button>
+      <button class="mp3-close-btn" onclick="closeMp3Modal()">닫기</button>
+    </div>
+  </div>
 
   <script>
     const SEARCH_SERVERS = [
@@ -255,20 +379,43 @@
     const statusMsg = document.getElementById('status');
     const countMsg = document.getElementById('count');
     const resultsContainer = document.getElementById('results');
+    
     const modal = document.getElementById('floating-player-modal');
+    const modalWindow = document.getElementById('modalWindow');
+    const scaleStage = document.getElementById('scaleStage');
+    const ytHolder = document.getElementById('yt-iframe-holder');
+    const propTitle = document.getElementById('propTitle');
     const dragTab = document.getElementById('dragTab');
 
+    const mp3Overlay = document.getElementById('mp3-modal-overlay');
+    const mp3TrackTitle = document.getElementById('mp3TrackTitle');
+    const mp3WidgetFrame = document.getElementById('mp3WidgetFrame');
+    const directStreamBtn = document.getElementById('directStreamBtn');
+
     const TARGET_COUNT = 100;
+    const BASE_STAGE_WIDTH = 800; // 기준 해상도 800x450 (16:9)
     let totalLoadedItems = 0;
     let isSearching = false;
+    let currentVideoId = '';
+    let currentVideoTitle = '';
 
-    // 1. Plyr 모듈 초기화
-    const player = new Plyr('#player', {
-      controls: ['play', 'progress', 'current-time', 'mute', 'volume'],
-      youtube: { noCookie: true, rel: 0, showinfo: 0, iv_load_policy: 3, modestbranding: 1 }
-    });
+    // 1. 16:9 비율 완벽 유지 및 내부 요소 비례 스케일링 함수
+    function apply16by9Scale(newWidth) {
+      const clampedW = Math.max(200, Math.min(newWidth, window.innerWidth - 16));
+      const exactH = Math.round(clampedW * (9 / 16)); // 16:9 칼비율
 
-    // 2. 검색 서버 페일오버 호출
+      modal.style.width = `${clampedW}px`;
+      modalWindow.style.height = `${exactH}px`;
+
+      // 창 크기에 비례하여 내부 제목과 유튜브 고유 컨트롤을 함께 스케일링
+      const scaleRatio = clampedW / BASE_STAGE_WIDTH;
+      scaleStage.style.transform = `scale(${scaleRatio})`;
+    }
+
+    // 초기 320px 기준 16:9 세팅
+    apply16by9Scale(320);
+
+    // 2. 다중 검색 서버 페일오버
     async function smartFetch(path) {
       for (let i = 0; i < SEARCH_SERVERS.length; i++) {
         const serverIdx = (activeServerIndex + i) % SEARCH_SERVERS.length;
@@ -280,13 +427,13 @@
           activeServerIndex = serverIdx;
           return { data, server };
         } catch (e) {
-          console.warn(`[서버 우회] ${server}`);
+          console.warn(`[서버 전환] ${server}`);
         }
       }
-      throw new Error("모든 검색 서버가 응답하지 않습니다.");
+      throw new Error("검색 서버 응답 없음");
     }
 
-    // 3. 100개 검색 실행
+    // 3. 100개 검색 수집
     async function startSearch() {
       const q = document.getElementById('query').value.trim();
       if (!q || isSearching) return;
@@ -321,7 +468,7 @@
       }
     }
 
-    // 4. 5열 바둑판 피드 렌더링
+    // 4. 5열 바둑판 렌더링
     function appendGrid(items) {
       if (!items) return;
 
@@ -333,8 +480,7 @@
         const card = document.createElement('div');
         card.className = 'video-card';
 
-        // 카드 클릭 시 독립 부유창으로 오픈 & 재생
-        card.onclick = () => openPlayerModal(videoId);
+        card.onclick = () => openPlayerModal(videoId, item.title);
 
         card.innerHTML = `
           <div class="thumb-wrapper">
@@ -350,22 +496,74 @@
       countMsg.innerText = `(${totalLoadedItems}/${TARGET_COUNT})`;
     }
 
-    // 5. [신규] 부유창 열기 및 닫기
-    function openPlayerModal(videoId) {
+    // 5. 부유창 재생 (유튜브 고유 전체화면 화살표 fs=1 활성화)
+    function openPlayerModal(videoId, title) {
+      currentVideoId = videoId;
+      currentVideoTitle = title;
+      propTitle.innerText = title;
       modal.style.display = 'block';
-      player.source = {
-        type: 'video',
-        sources: [{ src: videoId, provider: 'youtube' }],
-      };
-      player.play();
+      apply16by9Scale(modal.offsetWidth || 320);
+
+      // controls=1 & fs=1 로 터치 시 유튜브 고유의 확대/축소 화살표 노출
+      ytHolder.innerHTML = `
+        <iframe
+          src="https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&controls=1&fs=1&modestbranding=1&rel=0&playsinline=1"
+          allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+          allowfullscreen>
+        </iframe>
+      `;
     }
 
     function closePlayerModal() {
-      player.pause();
+      ytHolder.innerHTML = '';
       modal.style.display = 'none';
     }
 
-    // 6. [핵심] Drag 존을 이용한 자유 이동 로직 (Touch & Mouse 완벽 호환)
+    // 6. MP3 / 320kbps 전용 추출 모달 제어
+    function openMp3Modal() {
+      if (!currentVideoId) return;
+      mp3TrackTitle.innerText = currentVideoTitle;
+      directStreamBtn.innerText = "⬇ 다이렉트 음원 스트림 추출 (320k)";
+      
+      // 320kbps MP3 전용 변환 버튼 위젯 로드
+      const ytUrl = `https://www.youtube.com/watch?v=${currentVideoId}`;
+      mp3WidgetFrame.src = `https://loader.to/api/button/?url=${encodeURIComponent(ytUrl)}&f=mp3&color=ff0000`;
+      
+      mp3Overlay.style.display = 'flex';
+    }
+
+    function closeMp3Modal() {
+      mp3Overlay.style.display = 'none';
+      mp3WidgetFrame.src = '';
+    }
+
+    async function extractDirectAudio() {
+      if (!currentVideoId) return;
+      directStreamBtn.innerText = "음원 스트림 추출 중...";
+      try {
+        const { data } = await smartFetch(`/streams/${currentVideoId}`);
+        // 최고 음질 오디오 스트림 선별
+        const sortedAudio = (data.audioStreams || []).sort((a, b) => (b.bitrate || 0) - (a.bitrate || 0));
+        const bestStream = sortedAudio[0];
+
+        if (bestStream && bestStream.url) {
+          const a = document.createElement('a');
+          a.href = bestStream.url;
+          a.target = '_blank';
+          a.download = `${currentVideoTitle}.mp3`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          directStreamBtn.innerText = "✓ 추출 완료 (새 창에서 저장)";
+        } else {
+          throw new Error();
+        }
+      } catch (e) {
+        directStreamBtn.innerText = "위 빨간색 MP3 변환 버튼을 눌러 저장하세요";
+      }
+    }
+
+    // 7. Drag 탭 이동 로직
     let isDragging = false;
     let startX, startY, initLeft, initTop;
 
@@ -388,10 +586,10 @@
 
     window.addEventListener('pointerup', () => { isDragging = false; });
 
-    // 7. [핵심] 4각 모서리 확대/축소 로직
+    // 8. 4각 모서리 16:9 비율 연동 확대/축소 로직
     let isResizing = false;
     let resizeDir = '';
-    let startW, startH, resizeStartX, resizeStartY;
+    let startW, resizeStartX;
 
     document.querySelectorAll('.resizer').forEach(resizer => {
       resizer.addEventListener('pointerdown', (e) => {
@@ -399,9 +597,7 @@
         resizeDir = resizer.getAttribute('data-dir');
         resizer.setPointerCapture(e.pointerId);
         startW = modal.offsetWidth;
-        startH = modal.offsetHeight;
         resizeStartX = e.clientX;
-        resizeStartY = e.clientY;
         e.stopPropagation();
       });
     });
@@ -409,22 +605,8 @@
     window.addEventListener('pointermove', (e) => {
       if (!isResizing) return;
       const dx = e.clientX - resizeStartX;
-      const dy = e.clientY - resizeStartY;
-
-      if (resizeDir.includes('r')) {
-        modal.style.width = `${Math.max(180, startW + dx)}px`;
-      }
-      if (resizeDir.includes('b')) {
-        modal.style.height = `${Math.max(120, startH + dy)}px`;
-      }
-      if (resizeDir.includes('l')) {
-        const newW = Math.max(180, startW - dx);
-        modal.style.width = `${newW}px`;
-      }
-      if (resizeDir.includes('t')) {
-        const newH = Math.max(120, startH - dy);
-        modal.style.height = `${newH}px`;
-      }
+      const targetW = resizeDir.includes('l') ? (startW - dx) : (startW + dx);
+      apply16by9Scale(targetW);
     });
 
     window.addEventListener('pointerup', () => { isResizing = false; });
