@@ -21,38 +21,55 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background-color: #0d0d0d;
       color: #ffffff;
-      padding: 10px;
+      padding: 0 calc(env(safe-area-inset-right, 0px) + 10px) calc(env(safe-area-inset-bottom, 0px) + 14px) calc(env(safe-area-inset-left, 0px) + 10px);
       -webkit-tap-highlight-color: transparent;
       user-select: none;
     }
 
-    /* 1. 최상단 고정 검색창 (좌측 50% 축소 배치 + 우측 50% 확장 슬롯 + 하단 가로 탭) */
+    /* 1. 최상단 고정 검색창 (iOS 노치/다이나믹 아일랜드 안전 여백 + 검색·조건 밀착 + 최우측 ⚙) */
     .top-header {
       position: sticky;
       top: 0;
       z-index: 100;
       background: #0d0d0d;
-      padding: 4px 0 6px 0;
+      padding: calc(env(safe-area-inset-top, 0px) + 8px) 0 6px 0;
     }
     .header-top-row {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 5px;
       width: 100%;
     }
     .header-left-slot {
-      flex: 0 0 64%;
-      max-width: 64%;
-      min-width: 0;
-    }
-    .header-right-slot {
       flex: 1;
       min-width: 0;
       display: flex;
       align-items: center;
-      justify-content: flex-end;
       gap: 4px;
     }
+    .header-right-slot {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+    }
+    .header-gear-btn {
+      width: 31px;
+      height: 31px;
+      border-radius: 7px;
+      border: 1px solid #353535;
+      background: #1d1d1d;
+      color: #e0e0e0;
+      font-size: 15px;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    .header-gear-btn:active { background: #333; }
 
     /* 조건검색 토글 버튼 & 풀다운 슬라이드 체크박스 패널 */
     .filter-toggle-btn {
@@ -509,10 +526,76 @@
     #floating-player-modal.interacting .scale-stage iframe {
       pointer-events: none;
     }
+    /* iOS WebKit은 opacity:0 또는 화면밖(-9999px) iframe을 강제 정지하므로 화면내 2px/0.01로 재생 유지 */
     #floating-player-modal.docked-hidden {
-      opacity: 0 !important;
+      opacity: 0.01 !important;
       pointer-events: none !important;
-      left: -9999px !important;
+      left: auto !important;
+      top: auto !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      width: 2px !important;
+      height: 2px !important;
+      overflow: hidden !important;
+    }
+
+    /* 🎧 백그라운드 오디오 전용 플레이어 오버레이 (창 내부 표시) */
+    .bg-audio-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 15;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: radial-gradient(circle at center, #261420 0%, #0d0d10 85%);
+      color: #fff;
+      padding: 26px 14px 12px 14px;
+      text-align: center;
+    }
+    .bg-audio-overlay.active { display: flex; }
+    .bg-overlay-badge {
+      font-size: 9.5px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: rgba(255, 182, 203, 0.22);
+      border: 1px solid rgba(255, 182, 203, 0.65);
+      color: #ffd1df;
+    }
+    .bg-overlay-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: #eee;
+      max-width: 92%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .bg-overlay-ctrl {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .bg-play-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(255, 255, 255, 0.85);
+      background: rgba(255, 182, 203, 0.35);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .bg-time-text {
+      font-size: 10.5px;
+      color: #ccc;
+      font-variant-numeric: tabular-nums;
     }
 
     /* 상단 투명 드래그 핸들 바 (원하는 위치 이동 & 화면 밖 날리기) */
@@ -631,50 +714,80 @@
     .bookmark-tab:active {
       background: rgba(255, 255, 255, 0.9);
     }
+    .bookmark-tab.tab-bg {
+      z-index: 5;
+      background: rgba(255, 230, 240, 0.58);
+      padding: 3px 8px;
+    }
+    .bookmark-tab.tab-bg.bg-ready {
+      border-color: rgba(74, 222, 128, 0.9);
+    }
+    .bookmark-tab.tab-bg.bg-on {
+      background: rgba(255, 130, 175, 0.88);
+      color: #fff;
+      border-color: #fff;
+    }
     .bookmark-tab.tab-mp3 {
       z-index: 4;
+      margin-left: -5px;
+      padding-left: 10px;
       background: rgba(240, 248, 255, 0.62);
     }
     .bookmark-tab.tab-close {
       z-index: 3;
       margin-left: -5px;
-      padding-left: 11px;
+      padding-left: 10px;
       padding-right: 9px;
     }
 
-    /* 4-2. 화면 밖 날리기 시 나타나는 연분홍색 투명도 70% 음표 책갈피 */
+    /* 4-2. 화면 밖 날리기 시 나타나는 연분홍색 투명도 60% 소형(2/3) 음표 책갈피 (길게 눌러 자유 이동) */
     #mini-music-bookmark {
       position: fixed;
       top: 43%;
       z-index: 9500;
-      width: 38px;
-      height: 48px;
+      width: 26px;
+      height: 32px;
       display: none;
       align-items: center;
       justify-content: center;
-      background: rgba(255, 182, 203, 0.70); /* 연한 분홍색 투명도 70% */
+      background: rgba(255, 182, 203, 0.60); /* 연한 분홍색 투명도 60% */
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
-      border: 1.5px solid rgba(255, 255, 255, 0.88);
+      border: 1.2px solid rgba(255, 255, 255, 0.85);
       color: #ffffff;
-      font-size: 20px;
+      font-size: 14px;
       font-weight: 700;
-      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.42);
       cursor: pointer;
       user-select: none;
-      transition: transform 0.15s;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      touch-action: none;
+      transition: transform 0.14s, background 0.14s, box-shadow 0.14s;
     }
-    #mini-music-bookmark:active { transform: scale(0.92); }
     #mini-music-bookmark.dock-left {
       left: 0;
+      right: auto;
       border-left: none;
-      border-radius: 0 14px 14px 0;
+      border-radius: 0 10px 10px 0;
     }
     #mini-music-bookmark.dock-right {
       right: 0;
+      left: auto;
       border-right: none;
-      border-radius: 14px 0 0 14px;
+      border-radius: 10px 0 0 10px;
+    }
+    #mini-music-bookmark.dock-free {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+    }
+    #mini-music-bookmark.dragging-bookmark {
+      transform: scale(1.22);
+      background: rgba(255, 182, 203, 0.88);
+      border-color: #ffffff;
+      box-shadow: 0 0 16px rgba(255, 182, 203, 0.95);
     }
     @keyframes notePulse {
       0%, 100% { transform: scale(1); opacity: 1; }
@@ -777,11 +890,12 @@
           <input type="text" id="query" placeholder="곡명·가수 검색" onkeydown="if(event.key==='Enter'){startSearch()}">
           <button class="search-btn" onclick="startSearch()">검색</button>
         </div>
+        <button class="filter-toggle-btn" id="filterToggleBtn" onclick="toggleFilterPanel()">
+          <span id="filterBtnLabel">▾ 조건</span>
+        </button>
       </div>
       <div class="header-right-slot" id="headerRightSlot">
-        <button class="filter-toggle-btn" id="filterToggleBtn" onclick="toggleFilterPanel()">
-          <span id="filterBtnLabel">▾ 조건검색</span>
-        </button>
+        <button class="header-gear-btn" id="headerGearBtn" onclick="openManageModal()" title="저장 탭 정리 및 Firebase 설정">⚙</button>
       </div>
     </div>
 
@@ -817,12 +931,11 @@
       </div>
     </div>
 
-    <!-- 저장 검색어 가로 탭 바 (Firebase 연동 / 미설정 시 임시 로컬 자동 동작) -->
+    <!-- 저장 검색어 가로 탭 바 (화면 100% 폭 사용) -->
     <div class="saved-tabs-row">
       <div class="tabs-scroll-area" id="savedTabsList">
         <span class="tabs-placeholder" onclick="openManageModal()">검색 시 탭 자동 저장</span>
       </div>
-      <button class="tab-manage-btn" onclick="openManageModal()">⚙ 정리</button>
     </div>
 
     <div class="status-bar">
@@ -852,12 +965,25 @@
       <div class="scale-stage" id="scaleStage">
         <div id="yt-iframe-holder"></div>
       </div>
+
+      <!-- 🎧 백그라운드 오디오 모드 활성 시 창 내부 표시 -->
+      <div class="bg-audio-overlay" id="bgAudioOverlay">
+        <div class="bg-overlay-badge">🎧 백그라운드 오디오 재생 중</div>
+        <div class="bg-overlay-title" id="bgOverlayTitle">재생 중</div>
+        <div class="bg-overlay-ctrl">
+          <button type="button" class="bg-play-btn" id="bgPlayToggleBtn" onclick="toggleBgAudioPlayPause()">❚❚</button>
+          <span class="bg-time-text" id="bgTimeText">0:00 / 0:00</span>
+        </div>
+      </div>
     </div>
 
-    <!-- 하부 소형 우측 책갈피 탭 (mp3 + ✕) -->
+    <!-- 하부 소형 우측 책갈피 탭 ([🎧][mp3][✕]) -->
     <div class="modal-bottom-tabs">
       <div class="bottom-drag-spacer" id="bottomDragSpacer"></div>
       <div class="tab-group-right">
+        <div class="bookmark-tab tab-bg" id="bgModeTab" onclick="toggleBgAudioMode()" title="iOS 백그라운드 오디오 모드 전환">
+          <span>🎧</span>
+        </div>
         <div class="bookmark-tab tab-mp3" onclick="openMp3Modal()">
           <span>mp3</span>
         </div>
@@ -868,8 +994,8 @@
     </div>
   </div>
 
-  <!-- 3-2. 화면 밖 날리기 시 나타나는 연분홍색 투명도 70% 음표 책갈피 -->
-  <div id="mini-music-bookmark" class="dock-right" onclick="restorePlayerFromBookmark()" title="터치하면 화면 정중앙에 재생창 복귀">
+  <!-- 3-2. 화면 밖 날리기 시 나타나는 연분홍색 투명도 60% 소형(2/3) 음표 책갈피 (짧은 터치: 복귀 / 길게 눌러 이동) -->
+  <div id="mini-music-bookmark" class="dock-right" title="터치: 정중앙 복귀 / 길게 누름: 위치 이동">
     <span class="note-icon">♪</span>
   </div>
 
@@ -1124,7 +1250,7 @@
         hint.textContent = activeFilterOrder.map(k => FILTER_LABELS[k]).join(' → ');
       } else {
         btn.classList.remove('has-active');
-        label.textContent = '▾ 조건검색';
+        label.textContent = '▾ 조건';
         hint.textContent = '기본 검색순';
       }
 
@@ -1379,14 +1505,47 @@
         : (isSearching ? `(${currentFeedItems.length}/${TARGET_COUNT})` : `총 ${currentFeedItems.length}개`);
     }
 
-    // 5. 부유창 재생 (v4: enablejsapi=1 시간 추적 + 백그라운드 오디오 사전 프리페치)
+    // TUBE_LAB_V5_IOS_BG_PATCH
+    // 5. 부유창 재생 + iOS 26.3.1 무중단 백그라운드 오디오 엔진 (Piped+Invidious 다중 페일오버)
+    const STREAM_PIPED_SERVERS = [
+      'https://api.piped.private.coffee',
+      'https://pipedapi.kavin.rocks',
+      'https://api.piped.privacydev.net',
+      'https://pipedapi.adminforge.de',
+      'https://pipedapi.leptons.xyz'
+    ];
+    const STREAM_INVIDIOUS_SERVERS = [
+      'https://inv.nadeko.net',
+      'https://yewtu.be',
+      'https://invidious.nerdvpn.de'
+    ];
+    const SILENT_WAV_URI = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
+
+    const bgModeTab = document.getElementById('bgModeTab');
+    const bgAudioOverlay = document.getElementById('bgAudioOverlay');
+    const bgOverlayTitle = document.getElementById('bgOverlayTitle');
+    const bgPlayToggleBtn = document.getElementById('bgPlayToggleBtn');
+    const bgTimeText = document.getElementById('bgTimeText');
+
     let isDockedToBookmark = false;
     let dockSide = 'right';
+    let lastWindowWidth = 320;
     let isBgAudioPlaying = false;
+    let userPausedBg = false;
+    let iosAudioUnlocked = false;
     let lastKnownPlaySec = 0;
-    let prefetchedAudioUrl = '';
+    let prefetchedAudioCandidates = [];
     let prefetchedVideoId = '';
+    let prefetchPromise = null;
+    let activeCandidateIdx = 0;
     let pendingBgSeekSec = 0;
+
+    function formatSec(sec) {
+      const s = Math.max(0, Math.floor(sec || 0));
+      const m = Math.floor(s / 60);
+      const r = s % 60;
+      return `${m}:${r < 10 ? '0' : ''}${r}`;
+    }
 
     function sendYtCommand(func, args = []) {
       const frame = document.getElementById('ytPlayerFrame');
@@ -1396,6 +1555,41 @@
       } catch (e) {}
     }
 
+    // iOS Safari / 홈화면 PWA 오디오 제스처 선행 잠금해제 (사용자 터치 내부에서 실행)
+    function unlockIosAudioOnce() {
+      if (iosAudioUnlocked || isBgAudioPlaying) return;
+      try {
+        bgAudio.muted = true;
+        bgAudio.src = SILENT_WAV_URI;
+        const p = bgAudio.play();
+        if (p && typeof p.then === 'function') {
+          p.then(() => {
+            bgAudio.pause();
+            bgAudio.muted = false;
+            iosAudioUnlocked = true;
+          }).catch(() => { bgAudio.muted = false; });
+        }
+      } catch (e) { bgAudio.muted = false; }
+    }
+
+    function updateBgModeUI() {
+      const hasReady = (prefetchedVideoId === currentVideoId && prefetchedAudioCandidates.length > 0);
+      if (bgModeTab) {
+        bgModeTab.classList.toggle('bg-ready', hasReady && !isBgAudioPlaying);
+        bgModeTab.classList.toggle('bg-on', isBgAudioPlaying);
+      }
+      if (bgAudioOverlay) {
+        bgAudioOverlay.classList.toggle('active', isBgAudioPlaying && !isDockedToBookmark);
+      }
+      if (bgOverlayTitle) {
+        bgOverlayTitle.textContent = simplifyTitle(currentVideoTitle);
+      }
+      if (bgPlayToggleBtn) {
+        bgPlayToggleBtn.textContent = bgAudio.paused ? '▶' : '❚❚';
+      }
+      miniBookmark.classList.toggle('bg-active', isBgAudioPlaying && !bgAudio.paused);
+    }
+
     function stopBgAudioClean() {
       try {
         bgAudio.pause();
@@ -1403,7 +1597,12 @@
         bgAudio.load();
       } catch (e) {}
       isBgAudioPlaying = false;
-      miniBookmark.classList.remove('bg-active');
+      userPausedBg = false;
+      pendingBgSeekSec = 0;
+      if ('mediaSession' in navigator) {
+        try { navigator.mediaSession.playbackState = 'none'; } catch (e) {}
+      }
+      updateBgModeUI();
     }
 
     function setupMediaSession(title, videoId) {
@@ -1412,50 +1611,184 @@
         navigator.mediaSession.metadata = new MediaMetadata({
           title: simplifyTitle(title),
           artist: 'Tube Audio Lab',
+          album: 'Background Audio',
           artwork: [
             { src: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`, sizes: '480x360', type: 'image/jpeg' }
           ]
         });
         navigator.mediaSession.setActionHandler('play', () => {
-          if (isDockedToBookmark && bgAudio.src) {
+          userPausedBg = false;
+          if (bgAudio.src && (isBgAudioPlaying || isDockedToBookmark)) {
             bgAudio.play().catch(() => {});
           } else {
             sendYtCommand('playVideo');
           }
         });
         navigator.mediaSession.setActionHandler('pause', () => {
+          userPausedBg = true;
           if (isBgAudioPlaying) bgAudio.pause();
           else sendYtCommand('pauseVideo');
+        });
+        navigator.mediaSession.setActionHandler('seekbackward', () => {
+          if (isBgAudioPlaying) bgAudio.currentTime = Math.max(0, bgAudio.currentTime - 10);
+        });
+        navigator.mediaSession.setActionHandler('seekforward', () => {
+          if (isBgAudioPlaying && isFinite(bgAudio.duration)) {
+            bgAudio.currentTime = Math.min(bgAudio.duration, bgAudio.currentTime + 10);
+          }
         });
       } catch (e) {}
     }
 
-    async function prefetchBgAudio(videoId) {
-      prefetchedAudioUrl = '';
-      prefetchedVideoId = '';
+    async function fetchJsonWithTimeout(url, timeoutMs = 5500) {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), timeoutMs);
       try {
-        const { data } = await smartFetch(`/streams/${videoId}`);
-        if (currentVideoId !== videoId) return;
-        const streams = (data.audioStreams || []).filter(s => s && s.url);
-        if (!streams.length) return;
-
-        // iOS Safari + Android Chrome 모두 네이티브 백그라운드 재생되는 MP4/M4A 우선 선별
-        const mp4Streams = streams
-          .filter(s => /mp4|m4a/i.test(s.mimeType || '') || /mp4a/i.test(s.codec || ''))
-          .sort((a, b) => (b.bitrate || 0) - (a.bitrate || 0));
-        const fallbackStreams = [...streams].sort((a, b) => (b.bitrate || 0) - (a.bitrate || 0));
-        const chosen = mp4Streams[0] || fallbackStreams[0];
-
-        if (chosen && chosen.url) {
-          prefetchedAudioUrl = chosen.url;
-          prefetchedVideoId = videoId;
-        }
-      } catch (e) {
-        console.warn('[백그라운드 오디오 프리페치 생략 - iframe 폴백 유지]');
+        const res = await fetch(url, { signal: ctrl.signal });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return await res.json();
+      } finally {
+        clearTimeout(timer);
       }
     }
 
+    // 다중 Piped + Invidious 페일오버로 iOS 네이티브 재생 가능(M4A/HLS/MP4) 오디오 후보 수집
+    async function prefetchBgAudio(videoId) {
+      prefetchedAudioCandidates = [];
+      prefetchedVideoId = '';
+      activeCandidateIdx = 0;
+      updateBgModeUI();
+
+      const candidates = [];
+      const addUnique = (u) => {
+        if (u && typeof u === 'string' && !candidates.includes(u)) candidates.push(u);
+      };
+
+      // 1순위: Piped 다중 서버 (M4A AAC + iOS 네이티브 HLS .m3u8)
+      for (const server of STREAM_PIPED_SERVERS) {
+        if (currentVideoId !== videoId) return [];
+        try {
+          const data = await fetchJsonWithTimeout(`${server}/streams/${videoId}`, 5000);
+          const streams = (data.audioStreams || []).filter(s => s && s.url);
+          const mp4 = streams
+            .filter(s => /mp4|m4a/i.test(s.mimeType || '') || /mp4a/i.test(s.codec || ''))
+            .sort((a, b) => (b.bitrate || 0) - (a.bitrate || 0));
+          mp4.forEach(s => addUnique(s.url));
+          if (data.hls) addUnique(data.hls); // iOS Safari/PWA 네이티브 HLS 초강력 지원
+          if (candidates.length > 0) break;
+        } catch (e) {}
+      }
+
+      // 2순위: Invidious 다중 서버 프록시 폴백 (local=true로 모바일 IP 차단 우회)
+      if (candidates.length === 0) {
+        for (const inv of STREAM_INVIDIOUS_SERVERS) {
+          if (currentVideoId !== videoId) return [];
+          try {
+            const data = await fetchJsonWithTimeout(`${inv}/api/v1/videos/${videoId}?fields=adaptiveFormats,formatStreams`, 5500);
+            const adapt = (data.adaptiveFormats || [])
+              .filter(f => /audio\/mp4/i.test(f.type || ''))
+              .sort((a, b) => Number(b.bitrate || 0) - Number(a.bitrate || 0));
+            adapt.forEach(f => {
+              if (f.itag) addUnique(`${inv}/latest_version?id=${videoId}&itag=${f.itag}&local=true`);
+            });
+            const fmts = (data.formatStreams || []).filter(f => /video\/mp4/i.test(f.type || ''));
+            fmts.forEach(f => {
+              if (f.itag) addUnique(`${inv}/latest_version?id=${videoId}&itag=${f.itag}&local=true`);
+            });
+            if (candidates.length > 0) break;
+          } catch (e) {}
+        }
+      }
+
+      if (currentVideoId !== videoId) return [];
+      prefetchedAudioCandidates = candidates;
+      prefetchedVideoId = candidates.length > 0 ? videoId : '';
+      updateBgModeUI();
+
+      // 이미 책갈피로 날린 상태에서 스트림이 도착했다면 자동 백그라운드 핸드오프 시도
+      if (isDockedToBookmark && !isBgAudioPlaying && candidates.length > 0) {
+        activateBgAudioStream(lastKnownPlaySec);
+      }
+      return candidates;
+    }
+
+    // 무중단 백그라운드 오디오 전환 (실제 'playing' 확인 전까지 YouTube iframe 절대 정지 안 함!)
+    async function activateBgAudioStream(startSec = 0) {
+      if (!currentVideoId) return false;
+      if (prefetchedVideoId !== currentVideoId || prefetchedAudioCandidates.length === 0) {
+        statusMsg.innerText = '백그라운드 오디오 스트림 연결 중...';
+        if (prefetchPromise) await prefetchPromise;
+        if (prefetchedVideoId !== currentVideoId || prefetchedAudioCandidates.length === 0) {
+          await prefetchBgAudio(currentVideoId);
+        }
+      }
+      if (prefetchedAudioCandidates.length === 0) {
+        statusMsg.innerText = '공용 스트림 지연 · 인앱 책갈피 재생 유지 중';
+        return false;
+      }
+
+      activeCandidateIdx = 0;
+      userPausedBg = false;
+      pendingBgSeekSec = Math.floor(startSec || 0);
+      return tryPlayCandidateAt(0);
+    }
+
+    function tryPlayCandidateAt(idx) {
+      if (idx >= prefetchedAudioCandidates.length) {
+        isBgAudioPlaying = false;
+        updateBgModeUI();
+        statusMsg.innerText = '오디오 스트림 전환 지연 · 기존 재생 유지';
+        return false;
+      }
+      activeCandidateIdx = idx;
+      try {
+        bgAudio.muted = false;
+        bgAudio.src = prefetchedAudioCandidates[idx];
+        const p = bgAudio.play();
+        if (p && typeof p.catch === 'function') {
+          p.catch(() => {
+            tryPlayCandidateAt(idx + 1);
+          });
+        }
+        return true;
+      } catch (e) {
+        return tryPlayCandidateAt(idx + 1);
+      }
+    }
+
+    // 재생창 하단 [🎧] 원터치 백그라운드 오디오 모드 토글
+    function toggleBgAudioMode() {
+      if (!currentVideoId) return;
+      unlockIosAudioOnce();
+
+      if (isBgAudioPlaying) {
+        // BG 오디오 -> YouTube 영상 모드로 복귀
+        const resumeSec = Math.floor(bgAudio.currentTime || lastKnownPlaySec || 0);
+        lastKnownPlaySec = resumeSec;
+        stopBgAudioClean();
+        sendYtCommand('seekTo', [resumeSec, true]);
+        sendYtCommand('playVideo');
+        statusMsg.innerText = '영상 모드로 복귀';
+      } else {
+        // YouTube 영상 -> iOS 백그라운드 오디오 모드로 즉시 전환
+        activateBgAudioStream(lastKnownPlaySec);
+      }
+    }
+
+    function toggleBgAudioPlayPause() {
+      if (!isBgAudioPlaying) return;
+      if (bgAudio.paused) {
+        userPausedBg = false;
+        bgAudio.play().catch(() => {});
+      } else {
+        userPausedBg = true;
+        bgAudio.pause();
+      }
+      updateBgModeUI();
+    }
+
     function openPlayerModal(videoId, title) {
+      unlockIosAudioOnce(); // iOS Safari/PWA 오디오 세션 선행 잠금해제!
       stopBgAudioClean();
       isDockedToBookmark = false;
       lastKnownPlaySec = 0;
@@ -1465,14 +1798,13 @@
       currentVideoId = videoId;
       currentVideoTitle = title;
       modal.style.display = 'block';
-      const dims = apply16by9Scale(modal.offsetWidth || 320);
+      const dims = apply16by9Scale(lastWindowWidth || modal.offsetWidth || 320);
 
-      // 화면 밖 좌표에 남아있었다면 정중앙 배치
       const curLeft = modal.offsetLeft;
       const curTop = modal.offsetTop;
       if (curLeft < -20 || curLeft > window.innerWidth - 40 || curTop < -20 || curTop > window.innerHeight - 40) {
         modal.style.left = `${Math.max(6, Math.round((window.innerWidth - dims.width) / 2))}px`;
-        modal.style.top = `${Math.max(12, Math.round((window.innerHeight - (dims.height + 24)) / 2))}px`;
+        modal.style.top = `${Math.max(48, Math.round((window.innerHeight - (dims.height + 24)) / 2))}px`;
       }
 
       ytHolder.innerHTML = `
@@ -1494,7 +1826,7 @@
       }
 
       setupMediaSession(title, videoId);
-      prefetchBgAudio(videoId);
+      prefetchPromise = prefetchBgAudio(videoId);
     }
 
     // 5-2. Firebase / 임시 로컬 듀얼 저장소 엔진 (300개 캡 + 즉시 로드 + 용량 정리)
@@ -1918,7 +2250,7 @@
       }
     }
 
-    // 7. YouTube 현재 재생 초 수신 + 백그라운드 오디오 메타데이터 동기화
+    // 7. YouTube 재생 초 수신 + 무중단 백그라운드 오디오 이벤트 + iOS 백그라운드 유지
     window.addEventListener('message', (e) => {
       if (!e.data || typeof e.data !== 'string') return;
       try {
@@ -1930,76 +2262,227 @@
     });
 
     bgAudio.addEventListener('loadedmetadata', () => {
+      if (bgAudio.src === SILENT_WAV_URI) return;
       if (pendingBgSeekSec > 0 && isFinite(bgAudio.duration) && pendingBgSeekSec < bgAudio.duration) {
         try { bgAudio.currentTime = pendingBgSeekSec; } catch (e) {}
       }
       pendingBgSeekSec = 0;
     });
 
-    bgAudio.addEventListener('ended', () => {
-      isBgAudioPlaying = false;
-      miniBookmark.classList.remove('bg-active');
+    // ★ 실제 소리가 나오기 시작한 순간('playing')에만 YouTube iframe 일시정지 -> 끊김 0%!
+    bgAudio.addEventListener('playing', () => {
+      if (bgAudio.src === SILENT_WAV_URI) return;
+      isBgAudioPlaying = true;
+      sendYtCommand('pauseVideo');
+      setupMediaSession(currentVideoTitle, currentVideoId);
+      if ('mediaSession' in navigator) {
+        try { navigator.mediaSession.playbackState = 'playing'; } catch (e) {}
+      }
+      updateBgModeUI();
+      statusMsg.innerText = '🎧 백그라운드 오디오 활성 (화면 잠금/백그라운드 재생 가능)';
     });
 
-    // 화면 바깥으로 날리기 -> 연분홍 70% 음표 책갈피 도킹 + 백그라운드 오디오 핸드오프
+    bgAudio.addEventListener('pause', () => {
+      if (bgAudio.src === SILENT_WAV_URI) return;
+      if ('mediaSession' in navigator && isBgAudioPlaying) {
+        try { navigator.mediaSession.playbackState = 'paused'; } catch (e) {}
+      }
+      updateBgModeUI();
+    });
+
+    bgAudio.addEventListener('timeupdate', () => {
+      if (!isBgAudioPlaying || bgAudio.src === SILENT_WAV_URI) return;
+      lastKnownPlaySec = bgAudio.currentTime || lastKnownPlaySec;
+      if (bgTimeText) {
+        bgTimeText.textContent = `${formatSec(bgAudio.currentTime)} / ${formatSec(bgAudio.duration)}`;
+      }
+      if ('mediaSession' in navigator && isFinite(bgAudio.duration) && bgAudio.duration > 0) {
+        try {
+          navigator.mediaSession.setPositionState({
+            duration: bgAudio.duration,
+            playbackRate: bgAudio.playbackRate || 1,
+            position: Math.min(bgAudio.currentTime, bgAudio.duration)
+          });
+        } catch (e) {}
+      }
+    });
+
+    bgAudio.addEventListener('error', () => {
+      if (!currentVideoId || bgAudio.src === SILENT_WAV_URI || !bgAudio.src) return;
+      if (activeCandidateIdx + 1 < prefetchedAudioCandidates.length) {
+        tryPlayCandidateAt(activeCandidateIdx + 1);
+      } else {
+        isBgAudioPlaying = false;
+        updateBgModeUI();
+      }
+    });
+
+    bgAudio.addEventListener('ended', () => {
+      isBgAudioPlaying = false;
+      updateBgModeUI();
+    });
+
+    // 브라우저/홈화면 앱이 백그라운드로 내려갈 때 자동 오디오 보호
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden' && currentVideoId) {
+        if (isBgAudioPlaying && bgAudio.paused && !userPausedBg) {
+          bgAudio.play().catch(() => {});
+        } else if (!isBgAudioPlaying && !userPausedBg && iosAudioUnlocked && prefetchedVideoId === currentVideoId && prefetchedAudioCandidates.length > 0) {
+          activateBgAudioStream(lastKnownPlaySec);
+        }
+      }
+    });
+
+    // 책갈피 위치 저장 상태
+    let savedBookmarkPos = null; // { mode: 'left'|'right'|'free', left, top }
+
+    function applyBookmarkPosition(defaultSide) {
+      miniBookmark.classList.remove('dock-left', 'dock-right', 'dock-free');
+      if (savedBookmarkPos) {
+        if (savedBookmarkPos.mode === 'left') {
+          miniBookmark.classList.add('dock-left');
+          miniBookmark.style.left = '0px';
+          miniBookmark.style.right = 'auto';
+          miniBookmark.style.top = `${savedBookmarkPos.top}px`;
+        } else if (savedBookmarkPos.mode === 'right') {
+          miniBookmark.classList.add('dock-right');
+          miniBookmark.style.left = 'auto';
+          miniBookmark.style.right = '0px';
+          miniBookmark.style.top = `${savedBookmarkPos.top}px`;
+        } else {
+          miniBookmark.classList.add('dock-free');
+          miniBookmark.style.left = `${savedBookmarkPos.left}px`;
+          miniBookmark.style.right = 'auto';
+          miniBookmark.style.top = `${savedBookmarkPos.top}px`;
+        }
+      } else {
+        const side = defaultSide === 'left' ? 'left' : 'right';
+        miniBookmark.classList.add(side === 'left' ? 'dock-left' : 'dock-right');
+        miniBookmark.style.left = side === 'left' ? '0px' : 'auto';
+        miniBookmark.style.right = side === 'right' ? '0px' : 'auto';
+        miniBookmark.style.top = '43%';
+      }
+    }
+
+    // 화면 바깥으로 날리기 -> 연분홍 60% 소형 음표 책갈피 도킹 + 무중단 백그라운드 오디오 핸드오프
     function dockPlayerToBookmark(side) {
+      lastWindowWidth = modal.offsetWidth || lastWindowWidth || 320;
       isDockedToBookmark = true;
       dockSide = side === 'left' ? 'left' : 'right';
 
       modal.classList.add('docked-hidden');
-      miniBookmark.classList.remove('dock-left', 'dock-right', 'bg-active');
-      miniBookmark.classList.add(dockSide === 'left' ? 'dock-left' : 'dock-right');
+      applyBookmarkPosition(dockSide);
       miniBookmark.style.display = 'flex';
+      updateBgModeUI();
 
-      // 사용자 제스처(pointerup) 시점에 즉시 네이티브 <audio>로 핸드오프 -> 브라우저 백그라운드에서도 계속 재생!
-      if (prefetchedVideoId === currentVideoId && prefetchedAudioUrl) {
-        try {
-          pendingBgSeekSec = Math.floor(lastKnownPlaySec || 0);
-          bgAudio.src = prefetchedAudioUrl;
-          const playPromise = bgAudio.play();
-          if (playPromise && typeof playPromise.then === 'function') {
-            playPromise.then(() => {
-              isBgAudioPlaying = true;
-              sendYtCommand('pauseVideo');
-              miniBookmark.classList.add('bg-active');
-              setupMediaSession(currentVideoTitle, currentVideoId);
-              statusMsg.innerText = '백그라운드 오디오 모드 활성 (브라우저 내려도 계속 재생)';
-            }).catch(() => {
-              // 스트림 재생 실패 시 iframe 오프스크린 유지로 소리 끊김 방지
-              isBgAudioPlaying = false;
-            });
-          }
-        } catch (e) {
-          isBgAudioPlaying = false;
+      // 이미 백그라운드 오디오 재생 중이면 그대로 유지, 아니면 무중단 전환 시도
+      if (!isBgAudioPlaying) {
+        if (prefetchedVideoId === currentVideoId && prefetchedAudioCandidates.length > 0) {
+          activateBgAudioStream(lastKnownPlaySec);
+        } else {
+          statusMsg.innerText = '음표 책갈피 모드 (터치: 정중앙 복귀 / 길게 눌러 이동)';
         }
-      } else {
-        statusMsg.innerText = '미니 음표 책갈피 모드 (터치 시 정중앙 복귀)';
       }
     }
 
-    // 연분홍 음표 책갈피 터치 -> 화면 정중앙 복귀 + 재생 위치 이어받기
+    // 연분홍 음표 책갈피 짧은 터치 -> 화면 정중앙 복귀
     function restorePlayerFromBookmark() {
       isDockedToBookmark = false;
       miniBookmark.style.display = 'none';
-      miniBookmark.classList.remove('bg-active');
-
       modal.classList.remove('docked-hidden', 'interacting');
       modal.style.display = 'block';
 
-      const dims = apply16by9Scale(modal.offsetWidth || 320);
+      const dims = apply16by9Scale(lastWindowWidth || 320);
       const centerLeft = Math.max(6, Math.round((window.innerWidth - dims.width) / 2));
-      const centerTop = Math.max(12, Math.round((window.innerHeight - (dims.height + 24)) / 2));
+      const centerTop = Math.max(52, Math.round((window.innerHeight - (dims.height + 24)) / 2));
       modal.style.left = `${centerLeft}px`;
       modal.style.top = `${centerTop}px`;
+      updateBgModeUI();
+    }
 
-      if (isBgAudioPlaying) {
-        const resumeSec = Math.floor(bgAudio.currentTime || lastKnownPlaySec || 0);
-        lastKnownPlaySec = resumeSec;
-        stopBgAudioClean();
-        sendYtCommand('seekTo', [resumeSec, true]);
-        sendYtCommand('playVideo');
+    // 음표 책갈피 제스처 컨트롤러 (짧은 터치: 정중앙 복귀 / 0.24초 길게 누름: 좌·우·상·하 자유 이동)
+    let bmPressTimer = null;
+    let bmIsDragging = false;
+    let bmStartX = 0, bmStartY = 0, bmInitLeft = 0, bmInitTop = 0;
+
+    miniBookmark.addEventListener('contextmenu', (e) => e.preventDefault());
+
+    miniBookmark.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      try { miniBookmark.setPointerCapture(e.pointerId); } catch (err) {}
+
+      const rect = miniBookmark.getBoundingClientRect();
+      bmStartX = e.clientX;
+      bmStartY = e.clientY;
+      bmInitLeft = rect.left;
+      bmInitTop = rect.top;
+      bmIsDragging = false;
+
+      clearTimeout(bmPressTimer);
+      bmPressTimer = setTimeout(() => {
+        bmIsDragging = true;
+        miniBookmark.classList.add('dragging-bookmark');
+        if (navigator.vibrate) { try { navigator.vibrate(15); } catch (err) {} }
+      }, 240);
+    });
+
+    miniBookmark.addEventListener('pointermove', (e) => {
+      const dx = e.clientX - bmStartX;
+      const dy = e.clientY - bmStartY;
+
+      if (!bmIsDragging) {
+        if (Math.hypot(dx, dy) > 14) {
+          clearTimeout(bmPressTimer);
+        }
+        return;
+      }
+
+      const maxLeft = window.innerWidth - 30;
+      const maxTop = window.innerHeight - 40;
+      const newLeft = Math.max(0, Math.min(maxLeft, bmInitLeft + dx));
+      const newTop = Math.max(44, Math.min(maxTop, bmInitTop + dy));
+
+      miniBookmark.style.left = `${newLeft}px`;
+      miniBookmark.style.right = 'auto';
+      miniBookmark.style.top = `${newTop}px`;
+
+      miniBookmark.classList.remove('dock-left', 'dock-right', 'dock-free');
+      if (newLeft <= 22) miniBookmark.classList.add('dock-left');
+      else if (newLeft >= maxLeft - 22) miniBookmark.classList.add('dock-right');
+      else miniBookmark.classList.add('dock-free');
+    });
+
+    function finishBookmarkPointer(e) {
+      clearTimeout(bmPressTimer);
+      if (bmIsDragging) {
+        bmIsDragging = false;
+        miniBookmark.classList.remove('dragging-bookmark');
+
+        const rect = miniBookmark.getBoundingClientRect();
+        const maxLeft = window.innerWidth - 30;
+        const clampedTop = Math.max(44, Math.min(window.innerHeight - 40, Math.round(rect.top)));
+
+        miniBookmark.classList.remove('dock-left', 'dock-right', 'dock-free');
+        if (rect.left <= 22) {
+          savedBookmarkPos = { mode: 'left', left: 0, top: clampedTop };
+        } else if (rect.left >= maxLeft - 22) {
+          savedBookmarkPos = { mode: 'right', left: maxLeft, top: clampedTop };
+        } else {
+          savedBookmarkPos = { mode: 'free', left: Math.round(rect.left), top: clampedTop };
+        }
+        applyBookmarkPosition(dockSide);
+      } else if (e.type === 'pointerup') {
+        const dx = e.clientX - bmStartX;
+        const dy = e.clientY - bmStartY;
+        if (Math.hypot(dx, dy) <= 14) {
+          restorePlayerFromBookmark();
+        }
       }
     }
+
+    miniBookmark.addEventListener('pointerup', finishBookmarkPointer);
+    miniBookmark.addEventListener('pointercancel', finishBookmarkPointer);
 
     // 7-2. 자유 드래그 이동 & 화면 밖 날리기(Flick/Slide Off-Screen)
     let isDragging = false;
