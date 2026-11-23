@@ -2,10 +2,10 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Clean Tube Player</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Tube Audio Lab</title>
 
-  <!-- [CDN 이중화] 1순위 plyr.io 실패 시 Cloudflare CDN으로 자동 대체 -->
+  <!-- [공개 모듈] Plyr 오픈소스 CSS (이중화) -->
   <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" 
         onerror="this.onerror=null;this.href='https://cdnjs.cloudflare.com/ajax/libs/plyr/3.7.8/plyr.css';" />
 
@@ -13,128 +13,165 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: #0f0f0f;
+      background-color: #0d0d0d;
       color: #ffffff;
-      padding: 20px;
-      max-width: 800px;
-      margin: 0 auto;
+      padding: 10px;
+      padding-bottom: 220px; /* 하단 고정 플레이어 공간 확보 */
+      -webkit-tap-highlight-color: transparent;
     }
-    h2 { text-align: center; margin-bottom: 20px; color: #ff0000; letter-spacing: 1px; }
 
+    /* 1. 최상단 검색창 고정 영역 */
+    .top-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: #0d0d0d;
+      padding: 5px 0 10px 0;
+    }
     .search-box {
       display: flex;
-      gap: 10px;
-      margin-bottom: 15px;
+      gap: 6px;
     }
     input {
       flex: 1;
-      padding: 14px;
+      padding: 10px 12px;
       border-radius: 8px;
-      border: 1px solid #333;
-      background: #1e1e1e;
+      border: 1px solid #2a2a2a;
+      background: #1c1c1c;
       color: #fff;
-      font-size: 16px;
+      font-size: 14px;
       outline: none;
     }
     input:focus { border-color: #ff0000; }
-    button {
-      padding: 14px 24px;
+    button.search-btn {
+      padding: 10px 16px;
       border-radius: 8px;
       border: none;
       background: #ff0000;
       color: white;
       font-weight: bold;
-      font-size: 15px;
+      font-size: 14px;
       cursor: pointer;
-      transition: background 0.2s;
-    }
-    button:hover { background: #cc0000; }
-
-    .player-wrapper {
-      background: #1a1a1a;
-      border-radius: 12px;
-      padding: 15px;
-      margin-bottom: 20px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-    }
-    .track-title {
-      font-size: 16px;
-      font-weight: bold;
-      margin-bottom: 12px;
-      color: #00ff88;
       white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
+    button.search-btn:active { background: #cc0000; }
 
+    /* 상태 표시 바 */
     .status-bar {
       display: flex;
       justify-content: space-between;
-      font-size: 13px;
-      color: #aaa;
-      margin-bottom: 15px;
-      padding: 0 5px;
+      font-size: 11px;
+      color: #888;
+      padding: 4px 2px 8px 2px;
     }
 
-    .video-list { display: flex; flex-direction: column; gap: 10px; }
-    .video-item {
+    /* 2. [핵심] 가로 5칸 바둑판 그리드 피드 */
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr); /* 정확히 가로 5등분 */
+      gap: 5px; /* 모바일 폭에 맞춘 최적 간격 */
+    }
+    .video-card {
       display: flex;
-      gap: 15px;
-      background: #181818;
-      padding: 10px;
-      border-radius: 8px;
+      flex-direction: column;
       cursor: pointer;
-      align-items: center;
-      transition: background 0.2s;
+      background: #161616;
+      border-radius: 4px;
+      overflow: hidden;
+      transition: transform 0.1s;
     }
-    .video-item:hover { background: #282828; }
-    .video-item img {
-      width: 120px;
-      height: 68px;
+    .video-card:active {
+      transform: scale(0.96);
+      background: #252525;
+    }
+    
+    /* 16:9 비율 썸네일 박스 */
+    .thumb-wrapper {
+      position: relative;
+      width: 100%;
+      padding-top: 56.25%; /* 16:9 고정 비율 */
+      background: #222;
+    }
+    .thumb-wrapper img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       object-fit: cover;
-      border-radius: 6px;
-      background: #333;
     }
-    .video-info { flex: 1; overflow: hidden; }
+
+    /* 모바일 5칸 맞춤형 초소형 텍스트 */
+    .card-info {
+      padding: 4px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
     .video-title {
-      font-size: 14px;
+      font-size: 9.5px;
+      font-weight: 500;
+      line-height: 1.25;
+      color: #ddd;
+      display: -webkit-box;
+      -webkit-line-clamp: 2; /* 2줄 초과 시 ... 말줄임 */
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      word-break: break-all;
+    }
+
+    /* 3. 하단 고정 플레이어 */
+    .bottom-player-container {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 200;
+      background: #141414;
+      border-top: 1px solid #282828;
+      padding: 8px 12px 14px 12px;
+      box-shadow: 0 -4px 16px rgba(0,0,0,0.7);
+    }
+    .now-playing-title {
+      font-size: 12px;
       font-weight: 600;
+      color: #00ff88;
+      margin-bottom: 6px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      margin-bottom: 6px;
     }
-    .video-channel { font-size: 12px; color: #888; }
-    .video-index { font-size: 12px; color: #555; width: 25px; text-align: center; }
   </style>
 </head>
 <body>
 
-  <h2>Tube Audio Lab (Clean UI)</h2>
-
-  <div class="search-box">
-    <input type="text" id="query" placeholder="검색할 곡 또는 가수 입력" onkeyup="if(window.event.keyCode==13){startSearch()}">
-    <button onclick="startSearch()">검색</button>
+  <!-- 최상단 고정 검색 바 -->
+  <div class="top-header">
+    <div class="search-box">
+      <input type="text" id="query" placeholder="가수 또는 곡명 검색" onkeyup="if(window.event.keyCode==13){startSearch()}">
+      <button class="search-btn" onclick="startSearch()">검색</button>
+    </div>
+    <div class="status-bar">
+      <span id="status">원하는 음악을 검색해보세요.</span>
+      <span id="count"></span>
+    </div>
   </div>
 
-  <div class="player-wrapper">
-    <div id="trackTitle" class="track-title">재생할 곡을 선택해주세요</div>
+  <!-- [요구사항 반영] 바둑판 모양 가로 5칸 피드 -->
+  <div class="video-grid" id="results"></div>
+
+  <!-- 하단 고정형 클린 플레이어 (Plyr 모듈) -->
+  <div class="bottom-player-container">
+    <div id="nowPlaying" class="now-playing-title">재생할 곡을 터치하세요</div>
     <div id="player" data-plyr-provider="youtube" data-plyr-embed-id="M7lc1UVf-VE"></div>
   </div>
 
-  <div class="status-bar">
-    <span id="status">검색어를 입력하세요.</span>
-    <span id="count"></span>
-  </div>
-
-  <div class="video-list" id="results"></div>
-
-  <!-- [JS CDN 이중화] 1순위 실패 시 2순위 Cloudflare CDN 즉시 로드 -->
+  <!-- [공개 모듈] Plyr 오픈소스 JS (이중화) -->
   <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js" 
           onerror="this.onerror=null;document.write('<script src=\'https://cdnjs.cloudflare.com/ajax/libs/plyr/3.7.8/plyr.polyfilled.js\'><\/script>')"></script>
 
   <script>
-    // [핵심] 전 세계 분산 예비 검색 API 서버 풀 (차단 대비 3중망)
     const SEARCH_SERVERS = [
       'https://api.piped.private.coffee',
       'https://pipedapi.kavin.rocks',
@@ -144,16 +181,16 @@
 
     const statusMsg = document.getElementById('status');
     const countMsg = document.getElementById('count');
-    const trackTitle = document.getElementById('trackTitle');
+    const nowPlaying = document.getElementById('nowPlaying');
     const resultsContainer = document.getElementById('results');
 
     const TARGET_COUNT = 100;
     let totalLoadedItems = 0;
     let isSearching = false;
 
-    // Plyr 모듈 초기화
+    // 모바일 맞춤형 슬림 컨트롤러 초기화
     const player = new Plyr('#player', {
-      controls: ['play', 'progress', 'current-time', 'duration', 'mute', 'volume'],
+      controls: ['play', 'progress', 'current-time', 'mute', 'volume'],
       youtube: {
         noCookie: true,
         rel: 0,
@@ -163,7 +200,7 @@
       }
     });
 
-    // 살아있는 서버로 스마트하게 호출하는 페일오버 함수
+    // 다중 예비 서버 페일오버 통신
     async function smartFetch(path) {
       for (let i = 0; i < SEARCH_SERVERS.length; i++) {
         const serverIdx = (activeServerIndex + i) % SEARCH_SERVERS.length;
@@ -172,15 +209,16 @@
           const res = await fetch(`${server}${path}`);
           if (!res.ok) throw new Error();
           const data = await res.json();
-          activeServerIndex = serverIdx; // 성공한 서버를 메인으로 유지
+          activeServerIndex = serverIdx;
           return { data, server };
         } catch (e) {
-          console.warn(`[서버 다운 감지] ${server} ➔ 다음 예비 서버로 자동 전환`);
+          console.warn(`[서버 우회] ${server} 오류 ➔ 다음 서버 시도`);
         }
       }
-      throw new Error("모든 검색 예비 서버가 응답하지 않습니다.");
+      throw new Error("모든 검색 서버가 응답하지 않습니다.");
     }
 
+    // 100개 검색 수집 루프
     async function startSearch() {
       const q = document.getElementById('query').value.trim();
       if (!q || isSearching) return;
@@ -188,15 +226,13 @@
       isSearching = true;
       totalLoadedItems = 0;
       resultsContainer.innerHTML = '';
-      statusMsg.innerText = "검색 수집 중...";
-      countMsg.innerText = "(0 / 100)";
+      statusMsg.innerText = "수집 중...";
+      countMsg.innerText = "(0/100)";
 
       try {
-        // 1. 첫 페이지 호출 (서버 다운 시 자동 우회)
         let { data, server } = await smartFetch(`/search?q=${encodeURIComponent(q)}&filter=videos`);
-        appendResults(data.items);
+        appendGrid(data.items);
 
-        // 2. 100개 채울 때까지 백그라운드 수집
         let nextPage = data.nextpage;
         while (nextPage && totalLoadedItems < TARGET_COUNT) {
           try {
@@ -205,7 +241,7 @@
             const nextData = await nextRes.json();
 
             if (!nextData.items || nextData.items.length === 0) break;
-            appendResults(nextData.items);
+            appendGrid(nextData.items);
             nextPage = nextData.nextpage;
           } catch (e) {
             break;
@@ -213,7 +249,7 @@
         }
 
         statusMsg.innerText = "검색 완료";
-        countMsg.innerText = `총 ${totalLoadedItems}개 결과`;
+        countMsg.innerText = `총 ${totalLoadedItems}개`;
       } catch (err) {
         statusMsg.innerText = err.message;
       } finally {
@@ -221,7 +257,8 @@
       }
     }
 
-    function appendResults(items) {
+    // 가로 5열 바둑판 피드 생성
+    function appendGrid(items) {
       if (!items) return;
 
       items.forEach(item => {
@@ -229,31 +266,32 @@
 
         totalLoadedItems++;
         const videoId = item.url.replace('/watch?v=', '');
+        
         const card = document.createElement('div');
-        card.className = 'video-item';
+        card.className = 'video-card';
 
+        // 카드 클릭 시 하단 플레이어에서 즉시 재생
         card.onclick = () => {
-          trackTitle.innerText = `[재생 중] ${item.title}`;
+          nowPlaying.innerText = `[재생 중] ${item.title}`;
           player.source = {
             type: 'video',
             sources: [{ src: videoId, provider: 'youtube' }],
           };
           player.play();
-          window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
         card.innerHTML = `
-          <div class="video-index">${totalLoadedItems}</div>
-          <img src="${item.thumbnail}" loading="lazy" onerror="this.src='https://via.placeholder.com/120x68/222/555?text=No+Image'">
-          <div class="video-info">
+          <div class="thumb-wrapper">
+            <img src="${item.thumbnail}" loading="lazy" onerror="this.src='https://via.placeholder.com/120x68/222/555?text=No'">
+          </div>
+          <div class="card-info">
             <div class="video-title">${item.title}</div>
-            <div class="video-channel">${item.uploaderName}</div>
           </div>
         `;
         resultsContainer.appendChild(card);
       });
 
-      countMsg.innerText = `(${totalLoadedItems} / ${TARGET_COUNT})`;
+      countMsg.innerText = `(${totalLoadedItems}/${TARGET_COUNT})`;
     }
   </script>
 </body>
