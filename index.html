@@ -2,8 +2,16 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>유튜브 백그라운드 오디오 실험실</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Tube Audio Lab</title>
+
+  <!-- [Phase 1] 아이폰 전용 아이콘 및 PWA 설정 -->
+  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1384/1384060.png">
+  <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/1384/1384060.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="TubeAudio">
+
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -11,7 +19,7 @@
       background-color: #121212;
       color: #ffffff;
       padding: 15px;
-      padding-bottom: 120px; /* 플레이어 공간 확보 */
+      padding-bottom: 140px;
     }
     h2 { text-align: center; margin-bottom: 15px; color: #ff0000; }
     .search-box {
@@ -68,7 +76,6 @@
     }
     .video-channel { font-size: 12px; color: #aaa; }
     
-    /* 하단 고정 플레이어 */
     .player-container {
       position: fixed;
       bottom: 0;
@@ -90,58 +97,75 @@
       text-overflow: ellipsis;
     }
     audio { width: 100%; height: 35px; }
-    .status-msg { text-align: center; color: #888; margin-top: 30px; }
+    .status-msg { text-align: center; color: #aaa; margin-top: 20px; font-size: 14px; }
+    .err-text { color: #ff5252 !important; }
   </style>
 </head>
 <body>
 
   <h2>Tube Audio Lab</h2>
 
-  <!-- 검색 영역 -->
   <div class="search-box">
-    <input type="text" id="query" placeholder="검색할 음악 또는 영상 입력" onkeyup="if(window.event.keyCode==13){search()}">
+    <input type="text" id="query" placeholder="음악 또는 아티스트 검색" onkeyup="if(window.event.keyCode==13){search()}">
     <button onclick="search()">검색</button>
   </div>
 
-  <!-- 검색 결과 목록 -->
   <div id="status" class="status-msg">검색어를 입력해보세요.</div>
   <div class="video-list" id="results"></div>
 
-  <!-- 하단 고정 오디오 플레이어 -->
   <div class="player-container">
     <div id="nowPlaying" class="now-playing">대기 중...</div>
-    <audio id="audioPlayer" controls autoplay></audio>
+    <audio id="audioPlayer" controls playsinline preload="auto"></audio>
   </div>
 
   <script>
-    // 공개 Piped API 서버 (필요 시 다른 인스턴스로 교체 가능)
-    const API_BASE = 'https://api.piped.private.coffee';
+    // [Phase 2] 전 세계 분산 Invidious 프록시 네트워크
+    const API_SERVERS = [
+      'https://inv.nadeko.net',
+      'https://invidious.nerdvpn.de',
+      'https://yewtu.be'
+    ];
+    let activeServer = API_SERVERS[0];
+
     const audioPlayer = document.getElementById('audioPlayer');
     const nowPlaying = document.getElementById('nowPlaying');
     const resultsContainer = document.getElementById('results');
     const statusMsg = document.getElementById('status');
 
-    // 1. 유튜브 검색
+    // 1. 유튜브 검색 (살아있는 서버 자동 탐색)
     async function search() {
       const q = document.getElementById('query').value.trim();
       if (!q) return;
 
-      statusMsg.innerText = "검색 중입니다...";
+      statusMsg.className = "status-msg";
+      statusMsg.innerText = "서버 연결 및 검색 중...";
       resultsContainer.innerHTML = '';
 
-      try {
-        const res = await fetch(`${API_BASE}/search?q=${encodeURIComponent(q)}&filter=videos`);
-        const data = await res.json();
-        
-        statusMsg.innerText = '';
-        renderResults(data.items);
-      } catch (err) {
-        console.error(err);
-        statusMsg.innerText = "검색에 실패했습니다. (API 서버 응답 오류)";
+      let success = false;
+      for (let i = 0; i < API_SERVERS.length; i++) {
+        const server = API_SERVERS[i];
+        try {
+          const res = await fetch(`${server}/api/v1/search?q=${encodeURIComponent(q)}&type=video`);
+          if (!res.ok) throw new Error();
+          const items = await res.json();
+          
+          activeServer = server; // 응답에 성공한 서버를 메인으로 채택
+          renderResults(items);
+          statusMsg.innerText = '';
+          success = true;
+          break;
+        } catch (e) {
+          console.warn(`${server} 실패, 다음 예비 서버로 전환...`);
+        }
+      }
+
+      if (!success) {
+        statusMsg.className = "status-msg err-text";
+        statusMsg.innerText = "모든 검색 서버가 응답하지 않습니다. 잠시 후 다시 시도해 주세요.";
       }
     }
 
-    // 2. 검색 결과 화면 렌더링
+    // 2. 검색 목록 렌더링
     function renderResults(items) {
       if (!items || items.length === 0) {
         statusMsg.innerText = "검색 결과가 없습니다.";
@@ -149,57 +173,52 @@
       }
 
       items.forEach(item => {
-        // Piped url 형태: "/watch?v=VIDEO_ID"
-        const videoId = item.url.replace('/watch?v=', '');
-        
         const card = document.createElement('div');
         card.className = 'video-item';
-        card.onclick = () => playAudio(videoId, item.title, item.uploaderName, item.thumbnail);
+        const thumb = item.videoThumbnails ? item.videoThumbnails[0].url : '';
+        
+        // 클릭 즉시 실행
+        card.onclick = () => playAudio(item.videoId, item.title, item.author, thumb);
 
         card.innerHTML = `
-          <img src="${item.thumbnail}" loading="lazy">
+          <img src="${thumb}" loading="lazy" onerror="this.style.display='none'">
           <div class="video-info">
             <div class="video-title">${item.title}</div>
-            <div class="video-channel">${item.uploaderName}</div>
+            <div class="video-channel">${item.author}</div>
           </div>
         `;
         resultsContainer.appendChild(card);
       });
     }
 
-    // 3. 오디오 스트림 추출 및 재생 (광고 제거 핵심)
-    async function playAudio(videoId, title, artist, artworkUrl) {
-      nowPlaying.innerText = `[로딩 중] ${title}`;
-      
-      try {
-        // 스트림 메타데이터 요청
-        const res = await fetch(`${API_BASE}/streams/${videoId}`);
-        const data = await res.json();
+    // 3. [Phase 2 핵심] 오디오 스트림 주입 및 사파리 백그라운드 재생
+    function playAudio(videoId, title, artist, artworkUrl) {
+      nowPlaying.innerText = `[연결 중] ${title}`;
+      statusMsg.innerText = "";
 
-        // 오디오 스트림 목록 중 m4a(아이폰 호환용) 우선 선택, 없으면 첫 번째 오디오 선택
-        let stream = data.audioStreams.find(s => s.mimeType.includes('audio/mp4')) || data.audioStreams[0];
+      // 구글 차단 우회: local=true / 아이폰 호환 포맷: itag=140 (AAC)
+      const streamUrl = `${activeServer}/latest_version?id=${videoId}&itag=140&local=true`;
 
-        if (!stream) {
-          alert("재생할 수 있는 오디오 스트림이 없습니다.");
-          return;
-        }
+      // 대기 시간 없이 즉시 주입 (사파리 재생 제한 우회)
+      audioPlayer.src = streamUrl;
+      audioPlayer.play()
+        .then(() => {
+          nowPlaying.innerText = `[재생 중] ${title}`;
+          setupMediaSession(title, artist, artworkUrl);
+        })
+        .catch(err => {
+          console.log("버퍼링 또는 자동재생 대기:", err);
+        });
 
-        // HTML5 Audio에 주입 후 재생 (광고 없이 바로 실행)
-        audioPlayer.src = stream.url;
-        await audioPlayer.play();
-
-        nowPlaying.innerText = `[재생 중] ${title}`;
-
-        // 4. 모바일 백그라운드 재생 & 잠금화면 컨트롤(Media Session API)
-        setupMediaSession(title, artist, artworkUrl);
-
-      } catch (err) {
-        console.error(err);
-        nowPlaying.innerText = "재생 오류가 발생했습니다.";
-      }
+      // 스트림 로드 오류 시 처리
+      audioPlayer.onerror = () => {
+        nowPlaying.innerText = "재생 실패 (해당 서버 스트림 차단)";
+        statusMsg.className = "status-msg err-text";
+        statusMsg.innerText = "음원을 불러오지 못했습니다. 다른 곡을 선택하거나 잠시 후 시도하세요.";
+      };
     }
 
-    // 4. 백그라운드 잠금화면 컨트롤러 등록
+    // 4. 모바일 백그라운드 & 잠금화면 제어 등록
     function setupMediaSession(title, artist, artworkUrl) {
       if ('mediaSession' in navigator) {
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -208,11 +227,8 @@
           artwork: [{ src: artworkUrl, sizes: '512x512', type: 'image/jpeg' }]
         });
 
-        // 스마트폰 잠금화면, 알림바의 재생/정지 버튼과 동기화
         navigator.mediaSession.setActionHandler('play', () => audioPlayer.play());
         navigator.mediaSession.setActionHandler('pause', () => audioPlayer.pause());
-        navigator.mediaSession.setActionHandler('seekbackward', () => { audioPlayer.currentTime -= 10; });
-        navigator.mediaSession.setActionHandler('seekforward', () => { audioPlayer.currentTime += 10; });
       }
     }
   </script>
