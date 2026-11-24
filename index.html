@@ -843,42 +843,6 @@
       cursor: pointer;
       white-space: nowrap;
     }
-    .play-history-list {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-      max-height: 135px;
-      overflow-y: auto;
-      margin-bottom: 10px;
-    }
-    .play-history-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 5px 7px;
-      border-radius: 6px;
-      background: #1c1c20;
-      border: 1px solid #2b2b30;
-      cursor: pointer;
-    }
-    .play-history-item:active { background: #2b2b32; }
-    .play-history-thumb {
-      width: 44px;
-      height: 25px;
-      border-radius: 3px;
-      object-fit: cover;
-      flex-shrink: 0;
-      background: #222;
-    }
-    .play-history-title {
-      flex: 1;
-      min-width: 0;
-      font-size: 11px;
-      color: #e5e5e5;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
     .admin-divider {
       border-top: 1px solid #2c2c2c;
       margin-top: 10px;
@@ -1763,7 +1727,7 @@
   <!-- 0-2. 설정 진입 2차 'Code 작은창' -->
   <div id="settings-auth-overlay" onclick="if(event.target===this){closeSettingsAuthModal()}">
     <div class="settings-auth-box">
-      <input type="password" id="settingsAuthCodeInput" class="auth-gate-input" style="width:100%;" placeholder="CODE" autocomplete="off" onkeydown="if(event.key==='Enter'){submitSettingsAuthCode()}">
+      <input type="password" id="settingsAuthCodeInput" class="auth-gate-input" maxlength="4" inputmode="numeric" style="width:100%;" placeholder="CODE" autocomplete="off" onkeydown="if(event.key==='Enter'){submitSettingsAuthCode()}">
       <div class="auth-gate-err" id="settingsAuthErr" style="min-height:13px; margin-top:5px;"></div>
       <div class="settings-auth-actions">
         <button type="button" class="settings-auth-cancel" onclick="closeSettingsAuthModal()">취소</button>
@@ -1791,7 +1755,7 @@
         </div>
       </div>
 
-      <!-- 검색창 바로 밑 가로 구분 실선 -->
+      <!-- 검색창 바로 밑 가는 점선 구분 -->
       <div class="header-mid-divider"></div>
 
       <!-- 2행: 검색어(하단 중앙 각주 MM.DD-00 · 세로점선 · 1회 확대선택/2회 즉시로드) + 우측 밀착 회색 이모지 2개 -->
@@ -1884,7 +1848,7 @@
       </div>
     </div>
 
-    <!-- 하부 소형 우측 책갈피 탭 ([🎧][mp3][✕]) -->
+    <!-- 하부 소형 우측 닫기 탭 ([✕]) -->
     <div class="modal-bottom-tabs">
       <div class="bottom-drag-spacer" id="bottomDragSpacer"></div>
       <div class="tab-group-right">
@@ -2081,7 +2045,7 @@
       "appId": "1:892351379651:web:ae4e8e40dfc55c933e4a76"
     };
 
-    // TUBE_LAB_V12_1_HEADPHONE_BM_PATCH
+    // TUBE_LAB_V12_2_FINAL_CLEAN_PATCH
     const REMEMBER_NAME_KEY = 'mytube_remember_name_v12';
     const AUTH_DOC_ID = 'sys_auth';
     const PIN_DOC_ID = 'sys_pins';
@@ -2096,7 +2060,6 @@
     const PENDING_SYNC_PREFIX = 'mytube_pending_sync_v8_';
     const TEMP_LOCAL_PINS_KEY = 'tube_audio_lab_pins_v3';
     const TAB_CACHE_PREFIX = 'tube_tab_cache_v7_';
-    const PLAY_HISTORY_LOCAL_PREFIX = 'tube_play_hist_v7_';
     const FILTER_LABELS = { recent: '최근순', korean: '한글정렬', size: '크기순', views: '조회순', hq: '고화질순' };
     const memoryTabCache = new Map();
 
@@ -2129,7 +2092,7 @@
       }
     })();
 
-    // 12개 모듈 색상 메타 정의
+    // 14개 모듈 색상 메타 정의
     const THEME_MODULES = {
       appBg:           { label: '전체배경',    cssVar: '--app-bg',               def: '#0d0d0d' },
       headerBorder:    { label: '외곽점선',    cssVar: '--header-border-color',  def: '#ffffff' },
@@ -2155,7 +2118,6 @@
 
     let authData = { adminCode: _p4(_d0()), users: [] };
     let currentUser = null;
-    let currentPlayHistory = [];
     let currentFeedMode = 'grid';
     let currentGridCols = 2;
     let fbVerified = false;
@@ -2319,24 +2281,6 @@
 
     function sanitizeDocId(keyword) {
       return keyword.trim().replace(/[\/.#$\[\]]/g, '_').slice(0, 80);
-    }
-
-    // 임시 로컬 저장소 헬퍼 (Firebase 미연결 시에도 탭 기능 100% 동작)
-    function loadTempLocalStore() {
-      try {
-        const raw = localStorage.getItem(TEMP_LOCAL_TABS_KEY);
-        return raw ? JSON.parse(raw) : {};
-      } catch (e) { return {}; }
-    }
-
-    function saveTempLocalStore(storeObj) {
-      try {
-        localStorage.setItem(TEMP_LOCAL_TABS_KEY, JSON.stringify(storeObj));
-        return true;
-      } catch (e) {
-        statusMsg.innerText = '임시 로컬 용량 부족 - ⚙ 정리에서 탭을 정리하세요';
-        return false;
-      }
     }
 
     // 심플 제목 정제 (장식/이모지/중복문자/앞 괄호 태그 배제 -> 핵심 제목 앞으로)
@@ -3548,6 +3492,8 @@
         frame.addEventListener('load', () => {
           try {
             frame.contentWindow.postMessage(JSON.stringify({ event: 'listening', id: 1 }), '*');
+            frame.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'addEventListener', args: ['onError'] }), '*');
+            frame.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'addEventListener', args: ['onStateChange'] }), '*');
           } catch (e) {}
         });
       }
@@ -3555,7 +3501,7 @@
       hideYtPauseMask();
       isYtVideoPlaying = true;
       updateSearchBtnState();
-      if (typeof updateSlideBookmarkPlayUI === 'function') updateSlideBookmarkPlayUI();
+      if (typeof showSlideBookmark === 'function') showSlideBookmark(dockSide || 'right');
       setupMediaSession(title, videoId);
       prefetchPromise = prefetchBgAudio(videoId);
       recordUserPlay(videoId, title);
@@ -4004,7 +3950,6 @@
       currentFeedItems = [];
       dbFeedPool = [];
       activeSearchSession = null;
-      currentPlayHistory = [];
       lastViewedFeed = null;
       pinnedVideoIds = new Set();
       memoryTabCache.clear();
@@ -4045,7 +3990,6 @@
     }
 
     async function loadUserProfileFromCloud() {
-      currentPlayHistory = [];
       if (!currentUser || !fbReady || !db) return;
       try {
         const snap = await db.collection(FB_COLLECTION).doc(getPlayInfoDocId()).get();
@@ -4601,7 +4545,7 @@
         currentUser.code = wrapped;
         try {
           localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({
-            id: currentUser.id, role: currentUser.role, code: wrapped
+            id: currentUser.id, role: currentUser.role, name: currentUser.name, code: wrapped
           }));
         } catch (e) {}
       }
