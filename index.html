@@ -530,15 +530,8 @@
       0%, 100% { opacity: 1; transform: scale(1); }
       50% { opacity: 0.28; transform: scale(0.9); }
     }
-    @keyframes ytPlaySlowBlink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.25; }
-    }
     button.search-btn.state-working .yt-btn-icon {
       animation: ytWorkBlink 0.65s ease-in-out infinite;
-    }
-    button.search-btn.state-playing .yt-btn-icon {
-      animation: ytPlaySlowBlink 1.8s ease-in-out infinite;
     }
 
     /* 1-2. 2행: 검색창 바로 밑 가로 실선 구분 + 검색어(세로점선·하단각주·2단계터치) + 우측 이모지 밀착 */
@@ -691,11 +684,11 @@
       display: none;
       align-items: center;
       justify-content: center;
-      padding: 10px;
+      padding: 6px;
     }
     .manage-modal-box {
       width: min(96vw, 420px);
-      height: min(92dvh, 690px);
+      height: min(96dvh, 760px);
       overscroll-behavior: contain;
       display: flex;
       flex-direction: column;
@@ -704,7 +697,7 @@
       color: var(--settings-modal-fg);
       border: 1px solid rgba(255, 255, 255, 0.75);
       border-radius: 12px;
-      padding: 11px 12px;
+      padding: 9px 11px;
       box-shadow: 0 15px 40px rgba(0,0,0,0.9);
     }
     .settings-tabs-header {
@@ -1197,13 +1190,18 @@
       gap: 4px;
       flex-shrink: 0;
     }
+    #settings-pane-color {
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+    }
     .palette-256-grid {
       display: grid;
       grid-template-columns: repeat(16, 1fr);
       grid-template-rows: repeat(16, 1fr);
       gap: 1.5px;
-      flex: 1;
-      min-height: 0;
+      flex: 1 0 auto;
+      min-height: 224px;
       background: #111;
       padding: 3px;
       border-radius: 7px;
@@ -1212,11 +1210,56 @@
     .palette-cell {
       width: 100%;
       height: 100%;
-      min-height: 8px;
+      min-height: 12px;
       border: none;
       border-radius: 2px;
       padding: 0;
       cursor: pointer;
+    }
+    /* 배터리 절약 순수 검정(#000000) 절전 오버레이 */
+    #battery-blackout-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 30000;
+      background: #000000;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    #battery-blackout-overlay.active {
+      display: flex;
+    }
+    .blackout-hint {
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.6s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .blackout-hint.visible {
+      opacity: 1;
+    }
+    .blackout-hint-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.28);
+      max-width: 82vw;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .blackout-hint-sub {
+      font-size: 11px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.20);
     }
     .palette-cell.selected {
       outline: 2px solid #ffffff;
@@ -2061,9 +2104,17 @@
     <div class="sb-grip" id="sbDragGrip" title="드래그: 좌·우 이동"><span class="sb-grip-bar"></span></div>
     <button type="button" class="sb-btn sb-btn-note" id="sbNoteBtn" onclick="togglePlayerFromNote()" title="재생창 열기/접기"><span class="sb-note-icon"><svg class="sb-win-svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><rect x="6.5" y="2.5" width="11" height="9.5" rx="1.6"/><path d="M13.5 12v3.5a1.5 1.5 0 0 1-1.5 1.5H4a1.5 1.5 0 0 1-1.5-1.5V8A1.5 1.5 0 0 1 4 6.5h2.5"/></svg></span></button>
     <button type="button" class="sb-btn sb-btn-play" onclick="togglePlayFromBookmark()" title="재생/정지"><span class="sb-tri-icon" id="sbPlayIcon">▶</span></button>
-    <button type="button" class="sb-btn sb-btn-bg" id="bgModeTab" onclick="toggleBgAudioMode()" title="백그라운드 오디오 모드">🎧</button>
+    <button type="button" class="sb-btn sb-btn-bg" id="bgModeTab" onclick="enterBlackoutMode()" title="화면 끄기 (배터리 절전)">🎧</button>
     <button type="button" class="sb-btn sb-btn-mp3" onclick="openMp3FromBookmark()" title="MP3">MP3</button>
     <button type="button" class="sb-btn sb-btn-gear" onclick="requestOpenSettings('search')" title="설정">⚙</button>
+  </div>
+
+  <!-- 3-2b. 배터리 절약 순수 검정(#000000) 절전 화면 오버레이 -->
+  <div id="battery-blackout-overlay" onclick="onBlackoutOverlayTap()">
+    <div class="blackout-hint" id="blackoutHint">
+      <div class="blackout-hint-title" id="blackoutTitle">배터리 절전 모드 · 재생 유지 중</div>
+      <div class="blackout-hint-sub">화면을 두 번 터치하면 켜집니다</div>
+    </div>
   </div>
 
   <!-- 3-3. 브라우저 백그라운드 오디오 재생 유지용 네이티브 오디오 요소 -->
@@ -2632,15 +2683,11 @@
       const iconBox = document.getElementById('searchStateIcon');
       if (!btn || !iconBox) return;
 
-      btn.classList.remove('state-working', 'state-playing');
-      const playingNow = isYtVideoPlaying || (typeof isBgAudioPlaying !== 'undefined' && isBgAudioPlaying && !bgAudio.paused);
+      btn.classList.remove('state-working');
 
       if (isAppWorking) {
         btn.classList.add('state-working');
         iconBox.innerHTML = '<svg viewBox="0 0 20 20" width="15" height="15"><polygon points="5,3 17,10 5,17" fill="#7dd3fc"/></svg>';
-      } else if (playingNow) {
-        btn.classList.add('state-playing');
-        iconBox.innerHTML = '<svg viewBox="0 0 20 20" width="15" height="15"><polygon points="5,3 17,10 5,17" fill="#ffffff"/></svg>';
       } else if (fbVerified) {
         iconBox.innerHTML = '<svg viewBox="0 0 20 20" width="15" height="15"><polygon points="5,3 17,10 5,17" fill="#4ade80"/></svg>';
       } else {
@@ -3858,16 +3905,23 @@
       stopBgAudioClean();
       clearTimeout(ytAutoplayWatchdog);
       ytConfirmedPlaying = false;
-      isDockedToBookmark = true;
+      isDockedToBookmark = false;
       lastKnownPlaySec = 0;
 
       currentVideoId = videoId;
       currentVideoTitle = title;
-      apply16by9Scale(220);
 
-      // 음악 우선: 220x124 투명 도킹 상태로 즉시 재생 → 책갈피 슬라이드 등장
-      modal.classList.remove('interacting');
-      modal.classList.add('docked-hidden');
+      // 검색창 외곽 테두리 바로 밑에 모바일 가로폭 딱 맞는 최대 16:9 크기로 즉시 오픈
+      const headerBox = document.querySelector('.header-unified-box');
+      const topPos = headerBox ? Math.max(52, Math.round(headerBox.getBoundingClientRect().bottom + 6)) : 96;
+      const maxH = Math.max(140, window.innerHeight - topPos - 36);
+      const fitWidth = Math.max(MIN_PLAYER_WIDTH, Math.min(window.innerWidth - 12, Math.round(maxH * (16 / 9))));
+      const dims = apply16by9Scale(fitWidth);
+      const leftPos = Math.max(6, Math.round((window.innerWidth - dims.width) / 2));
+
+      modal.classList.remove('interacting', 'docked-hidden');
+      modal.style.left = leftPos + 'px';
+      modal.style.top = topPos + 'px';
       modal.style.display = 'block';
 
       ytHolder.innerHTML = '<iframe id="ytPlayerFrame" src="https://www.youtube-nocookie.com/embed/' + videoId + '?autoplay=1&controls=1&fs=1&enablejsapi=1&modestbranding=1&rel=0&playsinline=1&iv_load_policy=3&cc_load_policy=0&disablekb=1" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>';
@@ -5573,6 +5627,59 @@
       updateSlideBookmarkPlayUI();
       scheduleSlideBookmarkHide(2600);
     }
+
+    let blackoutHintTimer = null;
+    let lastBlackoutTapTime = 0;
+
+    function showBlackoutHintBriefly(ms = 2400) {
+      const hint = document.getElementById('blackoutHint');
+      const titleEl = document.getElementById('blackoutTitle');
+      if (titleEl) {
+        titleEl.textContent = currentVideoTitle
+          ? (simplifyTitle(currentVideoTitle) + ' · 절전 재생 중')
+          : '배터리 절전 모드 · 화면 꺼짐';
+      }
+      if (!hint) return;
+      hint.classList.add('visible');
+      clearTimeout(blackoutHintTimer);
+      blackoutHintTimer = setTimeout(() => {
+        hint.classList.remove('visible');
+      }, ms);
+    }
+
+    function enterBlackoutMode() {
+      const ov = document.getElementById('battery-blackout-overlay');
+      if (!ov) return;
+      lastBlackoutTapTime = 0;
+      lockBackgroundScroll();
+      ov.classList.add('active');
+      showBlackoutHintBriefly(2500);
+    }
+
+    function exitBlackoutMode() {
+      const ov = document.getElementById('battery-blackout-overlay');
+      if (!ov || !ov.classList.contains('active')) return;
+      clearTimeout(blackoutHintTimer);
+      const hint = document.getElementById('blackoutHint');
+      if (hint) hint.classList.remove('visible');
+      ov.classList.remove('active');
+      unlockBackgroundScroll();
+    }
+
+    function onBlackoutOverlayTap() {
+      const now = Date.now();
+      if (now - lastBlackoutTapTime <= 380) {
+        lastBlackoutTapTime = 0;
+        exitBlackoutMode();
+      } else {
+        lastBlackoutTapTime = now;
+        showBlackoutHintBriefly(2000);
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') exitBlackoutMode();
+    });
 
     function openMp3FromBookmark() {
       if (!currentVideoId) {
