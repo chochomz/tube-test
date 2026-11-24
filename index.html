@@ -17,9 +17,13 @@
   <style>
     :root {
       --app-bg: #0d0d0d;
+      --header-border-color: #ffffff;
+      --header-divider-color: #aaaaaa;
       --search-bg: #1c1c1c;
       --search-fg: #ffffff;
       --tabs-area-bg: #f9d5e5;
+      --tab-selected-bg: #d9386a;
+      --tab-selected-fg: #ffffff;
       --layout-icon-color: #7e8086;
       --settings-btn-bg: #1d1d1d;
       --settings-btn-fg: #e0e0e0;
@@ -40,6 +44,9 @@
       padding: 0 calc(env(safe-area-inset-right, 0px) + 10px) calc(env(safe-area-inset-bottom, 0px) + 14px) calc(env(safe-area-inset-left, 0px) + 10px);
       -webkit-tap-highlight-color: transparent;
       user-select: none;
+      -webkit-user-select: none;
+      overflow-x: hidden;
+      max-width: 100vw;
     }
 
     /* 0. 로그인 게이트 (인증 전 메인 숨김 · 중앙 소형 코드창만 표시) */
@@ -105,18 +112,75 @@
       color: #ff6b6b;
     }
 
-    /* 1. 최상단 고정 헤더 (1행·2행 동일 Grid로 검색창 끝선과 연핑크 열 끝선 100% 칼정렬) */
+    /* 설정 진입 2차 'Code 작은창' 모달 */
+    #settings-auth-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 15000;
+      background: rgba(0, 0, 0, 0.72);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .settings-auth-box {
+      width: min(86vw, 232px);
+      background: #17171b;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      border-radius: 11px;
+      padding: 13px 12px 10px 12px;
+      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.88);
+      text-align: center;
+    }
+    .settings-auth-actions {
+      display: flex;
+      gap: 5px;
+      margin-top: 7px;
+    }
+    .settings-auth-cancel {
+      flex: 1;
+      padding: 6px;
+      border-radius: 6px;
+      border: 1px solid #3c3c44;
+      background: #232329;
+      color: #bbb;
+      font-size: 11px;
+      cursor: pointer;
+    }
+    .settings-auth-ok {
+      flex: 1;
+      padding: 6px;
+      border-radius: 6px;
+      border: none;
+      background: #ff0000;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* 1. 최상단 고정 헤더 (검색~조건~설정~검색어~목록·창 통합 두꺼운 점선 박스 + 사이 가로 실선) */
     .top-header {
       position: sticky;
       top: 0;
       z-index: 100;
       background: var(--app-bg);
-      padding: calc(env(safe-area-inset-top, 0px) + 8px) 0 5px 0;
+      padding: calc(env(safe-area-inset-top, 0px) + 6px) 0 4px 0;
+      width: 100%;
+    }
+    .header-unified-box {
+      width: 100%;
+      border: 2px dashed var(--header-border-color);
+      border-radius: 10px;
+      padding: 5px 6px 4px 6px;
+      background: transparent;
     }
     .header-top-row {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 108px;
-      gap: 6px;
+      grid-template-columns: minmax(0, 1fr) 104px;
+      gap: 5px;
       align-items: center;
       width: 100%;
     }
@@ -130,7 +194,7 @@
       align-items: center;
       justify-content: space-between;
       gap: 4px;
-      width: 108px;
+      width: 104px;
       flex-shrink: 0;
     }
     .header-gear-btn {
@@ -368,82 +432,115 @@
       animation: ytPlaySlowBlink 1.8s ease-in-out infinite;
     }
 
-    /* 1-2. 2행: 검색어 ~ 목록·창 이모지까지 흰색 가는 점선 테두리 확대 + 지정 배경색 적용 */
+    /* 1-2. 2행: 검색창 바로 밑 가로 실선 구분 + 검색어(세로점선·하단각주·2단계터치) + 우측 이모지 밀착 */
+    .header-mid-divider {
+      width: 100%;
+      height: 0;
+      border-top: 1px solid var(--header-divider-color);
+      margin: 5px 0 4px 0;
+    }
     .saved-tabs-row {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 92px;
-      gap: 6px;
+      grid-template-columns: minmax(0, 1fr) 54px;
+      gap: 3px;
       align-items: center;
-      margin-top: 6px;
-      height: 32px;
-      padding: 2px 6px;
-      border-radius: 8px;
-      border: 1px dashed rgba(255, 255, 255, 0.85);
+      min-height: 40px;
+      padding: 3px 4px 3px 5px;
+      border-radius: 7px;
+      border: none;
       background: var(--tabs-area-bg);
     }
     .tabs-scroll-area {
       min-width: 0;
-      height: 26px;
+      height: 36px;
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 0;
       overflow-x: auto;
       scrollbar-width: none;
       -ms-overflow-style: none;
       background: transparent;
       border: none;
-      padding: 0 2px;
+      padding: 2px 2px;
     }
     .tabs-scroll-area::-webkit-scrollbar { display: none; }
     .history-tab {
+      position: relative;
       display: inline-flex;
+      flex-direction: column;
       align-items: center;
-      gap: 4px;
-      padding: 2.5px 8px;
-      border-radius: 12px;
-      background: rgba(255, 255, 255, 0.78);
-      border: 1px solid rgba(120, 80, 100, 0.32);
+      justify-content: center;
+      padding: 3px 9px;
+      border: none;
+      border-radius: 9px;
+      background: transparent;
       color: #261620;
-      font-size: 10.5px;
-      font-weight: 700;
       white-space: nowrap;
       flex-shrink: 0;
       cursor: pointer;
-      transition: background 0.15s, border-color 0.15s;
+      transition: transform 0.16s ease, background 0.16s ease, color 0.16s ease;
     }
-    .history-tab:active { background: #ffffff; }
-    .history-tab.active {
-      background: #d9386a;
-      border-color: #b82555;
-      color: #fff;
+    .history-tab:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      right: 0;
+      top: 6px;
+      bottom: 6px;
+      border-right: 1px dashed rgba(50, 30, 42, 0.48);
+      pointer-events: none;
     }
-    .tab-count-badge {
-      font-size: 9.5px;
-      padding: 1px 5px;
-      border-radius: 8px;
-      background: rgba(38, 22, 32, 0.12);
-      color: inherit;
+    .history-tab.tab-selected::after,
+    .history-tab.tab-loaded::after {
+      opacity: 0.2;
     }
-    .history-tab.active .tab-count-badge {
-      background: rgba(255, 255, 255, 0.24);
+    .tab-kw-text {
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1.15;
+      white-space: nowrap;
+    }
+    .tab-footnote {
+      font-size: 8px;
+      font-weight: 600;
+      line-height: 1.1;
+      margin-top: 2px;
+      opacity: 0.78;
+      letter-spacing: -0.2px;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+    /* 1회 터치 시 둥근 선택창 + 색상지정 배경 + 살짝 확대 */
+    .history-tab.tab-selected {
+      background: var(--tab-selected-bg);
+      color: var(--tab-selected-fg);
+      border-radius: 10px;
+      transform: scale(1.08);
+      z-index: 2;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
+      margin: 0 3px;
+    }
+    .history-tab.tab-loaded:not(.tab-selected) .tab-kw-text {
+      text-decoration: underline;
+      text-underline-offset: 2px;
     }
 
-    /* 우측 피드 나열 전환 이모지 2개 (테두리 없음 / 별도 색상 --layout-icon-color / 진동) */
+    /* 우측 피드 나열 전환 이모지 2개 (우측 바짝 밀착 + 간격 축소 + 별도 색상 + 진동) */
     .layout-mode-controls {
       display: flex;
       align-items: center;
-      justify-content: space-evenly;
-      gap: 6px;
-      width: 92px;
+      justify-content: flex-end;
+      gap: 2px;
+      width: 54px;
       flex-shrink: 0;
+      padding-right: 1px;
     }
     .layout-emoji-btn {
-      width: 32px;
-      height: 26px;
+      width: 24px;
+      height: 28px;
       border: none;
       background: transparent;
       color: var(--layout-icon-color);
-      opacity: 0.72;
+      opacity: 0.75;
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -465,7 +562,6 @@
     .layout-emoji-btn.haptic-pop {
       animation: hapticPop 0.24s ease;
     }
-    /* 밝은 전체 배경 선택 시 상태바 가독성 보정 */
     body.light-bg { color: #161616; }
     body.light-bg .status-bar { color: #3d3d3d; }
 
@@ -478,28 +574,30 @@
       min-height: 0;
     }
 
-    /* 6. 설정 모달 (상단 확장형 탭: 검색 / 로그인 + 추후 확장 대응) */
+    /* 6. 설정 모달 (모바일/태블릿 자동맞춤 · 높이 고정 · 스크롤 최소 · 하단 적용후 닫기) */
     #manage-modal-overlay {
       position: fixed;
       inset: 0;
       background: rgba(0, 0, 0, 0.78);
       backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
       z-index: 10001;
       display: none;
       align-items: center;
       justify-content: center;
-      padding: 16px;
+      padding: 10px;
     }
     .manage-modal-box {
-      width: 100%;
-      max-width: 390px;
-      max-height: 85vh;
-      overflow-y: auto;
+      width: min(95vw, 392px);
+      height: min(86dvh, 520px);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
       background: var(--settings-modal-bg);
       color: var(--settings-modal-fg);
       border: 1px solid rgba(255, 255, 255, 0.75);
       border-radius: 12px;
-      padding: 14px;
+      padding: 11px 12px;
       box-shadow: 0 15px 40px rgba(0,0,0,0.9);
     }
     .settings-tabs-header {
@@ -507,9 +605,10 @@
       align-items: center;
       justify-content: space-between;
       gap: 6px;
-      border-bottom: 1px solid #2b2b2b;
-      padding-bottom: 9px;
-      margin-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+      padding-bottom: 7px;
+      margin-bottom: 8px;
+      flex-shrink: 0;
     }
     .settings-tabs-nav {
       flex: 1;
@@ -521,12 +620,12 @@
     }
     .settings-tabs-nav::-webkit-scrollbar { display: none; }
     .settings-tab-btn {
-      padding: 6px 12px;
+      padding: 5px 11px;
       border-radius: 7px;
       border: 1px solid #333;
       background: #202020;
       color: #aaa;
-      font-size: 12px;
+      font-size: 11.5px;
       font-weight: 700;
       cursor: pointer;
       white-space: nowrap;
@@ -538,26 +637,35 @@
       color: #fff;
     }
     .settings-x-btn {
-      width: 28px;
-      height: 28px;
+      width: 26px;
+      height: 26px;
       border-radius: 7px;
       border: 1px solid #3a3a3a;
       background: #222;
       color: #ccc;
-      font-size: 13px;
+      font-size: 12px;
       cursor: pointer;
       flex-shrink: 0;
     }
-    .settings-pane { display: none; }
-    .settings-pane.active { display: block; }
+    .settings-pane {
+      display: none;
+      flex: 1;
+      min-height: 0;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .settings-pane.active {
+      display: flex;
+    }
 
     .manage-list {
       display: flex;
       flex-direction: column;
-      gap: 6px;
-      max-height: 290px;
+      gap: 5px;
+      flex: 1;
+      min-height: 0;
       overflow-y: auto;
-      margin-bottom: 10px;
+      margin-bottom: 4px;
     }
     .manage-item {
       display: flex;
@@ -698,133 +806,157 @@
       margin-top: 10px;
       padding-top: 8px;
     }
-    /* 설정 > 색상변경: 미니 인터랙티브 레이아웃 + 9모듈 256 색상표 */
-    .mini-layout-guide {
-      font-size: 10.5px;
-      color: #9ca3af;
-      margin-bottom: 6px;
-      text-align: center;
-    }
+    /* 설정 > 색상변경: 디테일 12모듈 미니 레이아웃 (모바일 고정 · 1줄 nowrap · 스크롤 0) */
     .mini-theme-layout {
       background: var(--app-bg);
-      border: 1px solid rgba(255, 255, 255, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.3);
       border-radius: 9px;
-      padding: 8px;
-      margin-bottom: 8px;
+      padding: 6px;
+      margin-bottom: 6px;
       cursor: pointer;
-      transition: box-shadow 0.15s;
-    }
-    .mini-theme-layout.mod-selected {
-      box-shadow: 0 0 0 2px #f472b6;
+      flex-shrink: 0;
     }
     .mini-mod-hit {
       cursor: pointer;
-      transition: box-shadow 0.12s, transform 0.1s;
+      white-space: nowrap;
+      overflow: hidden;
+      transition: box-shadow 0.12s;
     }
     .mini-mod-hit.mod-selected {
       box-shadow: 0 0 0 2px #f472b6 !important;
       position: relative;
-      z-index: 2;
+      z-index: 3;
+    }
+    .ml-outer-dash {
+      border: 2px dashed var(--header-border-color);
+      border-radius: 7px;
+      padding: 4px;
+      margin-bottom: 5px;
     }
     .ml-row1 {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 52px 26px;
+      grid-template-columns: minmax(0, 1fr) 46px 26px;
       gap: 4px;
-      margin-bottom: 5px;
     }
     .ml-search {
-      height: 24px;
-      border-radius: 5px;
+      height: 21px;
+      border-radius: 4px;
       border: 1px solid rgba(255,255,255,0.22);
       background: var(--search-bg);
       color: var(--search-fg);
-      font-size: 9.5px;
+      font-size: 9px;
       font-weight: 700;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 6px;
+      padding: 0 5px;
     }
     .ml-yt-dot {
-      width: 16px;
-      height: 13px;
+      width: 14px;
+      height: 11px;
       border-radius: 3px;
       background: #ff0000;
       color: #4ade80;
-      font-size: 8px;
+      font-size: 7px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
+      flex-shrink: 0;
     }
     .ml-cond {
-      height: 24px;
-      border-radius: 5px;
+      height: 21px;
+      border-radius: 4px;
       border: 1px solid rgba(255,255,255,0.22);
       background: var(--filter-btn-bg);
       color: var(--filter-btn-fg);
-      font-size: 9.5px;
+      font-size: 9px;
       font-weight: 700;
       display: flex;
       align-items: center;
       justify-content: center;
     }
     .ml-gear {
-      height: 24px;
-      border-radius: 5px;
+      height: 21px;
+      border-radius: 4px;
       border: 1px solid rgba(255,255,255,0.22);
       background: var(--settings-btn-bg);
       color: var(--settings-btn-fg);
-      font-size: 11px;
+      font-size: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
     }
+    .ml-div-hit {
+      height: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 2px 0;
+      border-radius: 3px;
+    }
+    .ml-div-line {
+      width: 100%;
+      height: 0;
+      border-top: 2px solid var(--header-divider-color);
+      pointer-events: none;
+    }
     .ml-row2 {
       height: 26px;
-      border-radius: 6px;
-      border: 1px dashed rgba(255, 255, 255, 0.85);
+      border-radius: 5px;
       background: var(--tabs-area-bg);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 6px;
-      margin-bottom: 6px;
+      padding: 0 5px;
+      gap: 4px;
     }
-    .ml-tabs-label {
-      font-size: 9.5px;
+    .ml-tabs-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      min-width: 0;
+    }
+    .ml-tab-plain {
+      font-size: 8.5px;
       font-weight: 700;
       color: #2b1a23;
-      background: rgba(255,255,255,0.72);
+      padding-right: 4px;
+      border-right: 1px dashed rgba(50,30,42,0.5);
+    }
+    .ml-tab-sel {
+      font-size: 8.5px;
+      font-weight: 700;
       padding: 2px 6px;
-      border-radius: 8px;
+      border-radius: 7px;
+      background: var(--tab-selected-bg);
+      color: var(--tab-selected-fg);
     }
     .ml-icons-box {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      padding: 3px 6px;
-      border-radius: 5px;
+      gap: 4px;
+      padding: 2px 4px;
+      border-radius: 4px;
       color: var(--layout-icon-color);
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 700;
+      flex-shrink: 0;
     }
     .ml-row3 {
       display: grid;
       grid-template-columns: 1fr 1fr 1.15fr;
-      gap: 5px;
+      gap: 4px;
     }
     .ml-panel-box {
-      height: 46px;
-      border-radius: 6px;
-      border: 1px solid rgba(255,255,255,0.25);
-      font-size: 9.5px;
+      height: 36px;
+      border-radius: 5px;
+      border: 1px solid rgba(255,255,255,0.24);
+      font-size: 9px;
       font-weight: 700;
       display: flex;
       align-items: center;
       justify-content: center;
-      text-align: center;
-      line-height: 1.25;
-      padding: 3px;
+      padding: 0 3px;
     }
     .ml-filter-panel {
       background: var(--filter-panel-bg);
@@ -835,7 +967,7 @@
       color: var(--settings-modal-fg);
     }
     .ml-feed-card {
-      height: 46px;
+      height: 36px;
       border-radius: 5px;
       overflow: hidden;
       border: 1px solid rgba(255,255,255,0.22);
@@ -843,9 +975,9 @@
       flex-direction: column;
     }
     .ml-feed-thumb {
-      height: 22px;
+      height: 17px;
       background: linear-gradient(135deg, #2a2a32, #444452);
-      font-size: 8px;
+      font-size: 7.5px;
       color: #ccc;
       display: flex;
       align-items: center;
@@ -855,49 +987,51 @@
       flex: 1;
       background: var(--card-title-bg);
       color: var(--card-title-fg);
-      font-size: 9px;
+      font-size: 8.5px;
       font-weight: 700;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 0 4px;
+      padding: 0 3px;
     }
     .color-preview-bar {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 6px;
+      gap: 4px;
       background: rgba(0, 0, 0, 0.28);
       border: 1px solid rgba(255, 255, 255, 0.16);
-      border-radius: 8px;
-      padding: 6px 8px;
-      margin-bottom: 8px;
+      border-radius: 7px;
+      padding: 4px 7px;
+      margin-bottom: 5px;
+      flex-shrink: 0;
     }
     .color-preview-left {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       min-width: 0;
     }
     .color-mod-badge {
-      font-size: 10.5px;
+      font-size: 10px;
       font-weight: 700;
       color: #f9a8d4;
       white-space: nowrap;
     }
     .color-swatch-cur {
-      width: 18px;
-      height: 18px;
+      width: 15px;
+      height: 15px;
       border-radius: 4px;
       border: 1px solid rgba(255, 255, 255, 0.6);
       flex-shrink: 0;
     }
     .color-hex-label {
       font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-      font-size: 10.5px;
+      font-size: 10px;
       font-weight: 700;
       color: inherit;
       text-transform: uppercase;
+      white-space: nowrap;
     }
     .color-preview-actions {
       display: flex;
@@ -907,23 +1041,24 @@
     .palette-256-grid {
       display: grid;
       grid-template-columns: repeat(16, 1fr);
-      gap: 2px;
+      grid-template-rows: repeat(16, 1fr);
+      gap: 1.5px;
+      flex: 1;
+      min-height: 0;
       background: #111;
-      padding: 4px;
-      border-radius: 8px;
+      padding: 3px;
+      border-radius: 7px;
       border: 1px solid #2e2e34;
-      margin-bottom: 6px;
     }
     .palette-cell {
       width: 100%;
-      aspect-ratio: 1 / 1;
+      height: 100%;
+      min-height: 8px;
       border: none;
       border-radius: 2px;
       padding: 0;
       cursor: pointer;
-      transition: transform 0.1s;
     }
-    .palette-cell:active { transform: scale(1.25); z-index: 2; }
     .palette-cell.selected {
       outline: 2px solid #ffffff;
       outline-offset: -1px;
@@ -934,12 +1069,13 @@
       align-items: center;
       justify-content: space-between;
       gap: 6px;
-      padding: 7px 9px;
+      padding: 6px 8px;
       border-radius: 7px;
       background: rgba(0, 0, 0, 0.28);
       border: 1px solid rgba(255, 255, 255, 0.15);
-      margin-top: 8px;
+      margin-bottom: 6px;
       font-size: 10.5px;
+      flex-shrink: 0;
     }
     .db-diag-text {
       flex: 1;
@@ -961,12 +1097,14 @@
       width: 100%;
       padding: 8px;
       border-radius: 8px;
-      border: 1px solid #444;
-      background: transparent;
-      color: #bbb;
+      border: none;
+      background: #ff0000;
+      color: #ffffff;
       font-size: 12px;
+      font-weight: 700;
       cursor: pointer;
-      margin-top: 6px;
+      margin-top: 7px;
+      flex-shrink: 0;
     }
 
     /* 2. 바둑판/목록 가변 피드 (1열 목록 / 2~4열 창 전환) */
@@ -1478,20 +1616,46 @@
     </div>
   </div>
 
-  <!-- 1. 최상단 고정 헤더 (1행 검색·조건·설정 / 2행 연핑크 탭·회색 이모지 2개) -->
+  <!-- 0-2. 설정 진입 2차 'Code 작은창' -->
+  <div id="settings-auth-overlay" onclick="if(event.target===this){closeSettingsAuthModal()}">
+    <div class="settings-auth-box">
+      <input type="password" id="settingsAuthCodeInput" class="auth-gate-input" style="width:100%;" placeholder="CODE" autocomplete="off" onkeydown="if(event.key==='Enter'){submitSettingsAuthCode()}">
+      <div class="auth-gate-err" id="settingsAuthErr" style="min-height:13px; margin-top:5px;"></div>
+      <div class="settings-auth-actions">
+        <button type="button" class="settings-auth-cancel" onclick="closeSettingsAuthModal()">취소</button>
+        <button type="button" class="settings-auth-ok" onclick="submitSettingsAuthCode()">확인</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1. 최상단 고정 헤더 (외곽 두꺼운 점선 + 검색창 바로 밑 가로 실선 구분 + 검색어 각주/2단계 터치) -->
   <div class="top-header">
-    <div class="header-top-row">
-      <div class="header-left-slot">
-        <div class="search-box">
-          <input type="text" id="query" placeholder="곡명 · 가수" onkeydown="if(event.key==='Enter'){startSearch()}">
-          <button class="search-btn state-disconnected" id="searchStateBtn" onclick="startSearch()" title="myTube 검색"><span id="searchStateIcon" class="yt-btn-icon"></span></button>
+    <div class="header-unified-box">
+      <div class="header-top-row">
+        <div class="header-left-slot">
+          <div class="search-box">
+            <input type="text" id="query" placeholder="곡명 · 가수" onkeydown="if(event.key==='Enter'){startSearch()}">
+            <button class="search-btn state-disconnected" id="searchStateBtn" onclick="startSearch()" title="myTube 검색"><span id="searchStateIcon" class="yt-btn-icon"></span></button>
+          </div>
+        </div>
+        <div class="header-right-slot" id="headerRightSlot">
+          <button class="filter-toggle-btn" id="filterToggleBtn" onclick="toggleFilterPanel()">
+            <span id="filterBtnLabel">▾ 조건</span>
+          </button>
+          <button class="header-gear-btn" id="headerGearBtn" onclick="requestOpenSettings('search')" title="설정">⚙</button>
         </div>
       </div>
-      <div class="header-right-slot" id="headerRightSlot">
-        <button class="filter-toggle-btn" id="filterToggleBtn" onclick="toggleFilterPanel()">
-          <span id="filterBtnLabel">▾ 조건</span>
-        </button>
-        <button class="header-gear-btn" id="headerGearBtn" onclick="openManageModal('search')" title="설정">⚙</button>
+
+      <!-- 검색창 바로 밑 가로 구분 실선 -->
+      <div class="header-mid-divider"></div>
+
+      <!-- 2행: 검색어(하단 중앙 각주 MM.DD-00 · 세로점선 · 1회 확대선택/2회 즉시로드) + 우측 밀착 회색 이모지 2개 -->
+      <div class="saved-tabs-row">
+        <div class="tabs-scroll-area" id="savedTabsList"></div>
+        <div class="layout-mode-controls">
+          <button type="button" class="layout-emoji-btn" id="listModeBtn" onclick="setFeedListMode()" title="목록 보기"></button>
+          <button type="button" class="layout-emoji-btn" id="gridModeBtn" onclick="cycleFeedGridCols()" title="창 보기 (2→3→4)"></button>
+        </div>
       </div>
     </div>
 
@@ -1528,15 +1692,6 @@
           <button class="filter-reset-btn" onclick="resetFilterConditions()">초기화</button>
           <button class="filter-apply-btn" onclick="closeFilterPanel()">적용 · 닫기</button>
         </div>
-      </div>
-    </div>
-
-    <!-- 2행: 연핑크 저장 검색어 가로 스크롤 열(검색창 끝선까지) + 우측 회색 이모지 2개 -->
-    <div class="saved-tabs-row">
-      <div class="tabs-scroll-area" id="savedTabsList"></div>
-      <div class="layout-mode-controls">
-        <button type="button" class="layout-emoji-btn" id="listModeBtn" onclick="setFeedListMode()" title="목록 보기"></button>
-        <button type="button" class="layout-emoji-btn" id="gridModeBtn" onclick="cycleFeedGridCols()" title="창 보기 (2→3→4)"></button>
       </div>
     </div>
 
@@ -1626,7 +1781,7 @@
     </div>
   </div>
 
-  <!-- 5. 설정 모달 (상단 확장 탭: 검색 / 로그인 + 추후 확장 탭) -->
+  <!-- 5. 설정 모달 (고정 프레임 · 스크롤 최소 · 디테일 12모듈 레이아웃 · 적용후 닫기) -->
   <div id="manage-modal-overlay">
     <div class="manage-modal-box">
       <div class="settings-tabs-header">
@@ -1643,38 +1798,45 @@
         <div class="manage-list" id="manageTabList"></div>
       </div>
 
-      <!-- 탭 1-2: 미니 레이아웃 터치형 9모듈 색상변경 (256 색상표) -->
+      <!-- 탭 1-2: 디테일 12모듈 미니 레이아웃 + 256 색상표 (모바일 고정 / 1줄 nowrap / 스크롤 0) -->
       <div class="settings-pane" id="settings-pane-color">
-        <div class="mini-layout-guide">레이아웃의 변경할 영역을 터치한 뒤 아래 256색을 선택하세요</div>
-
         <div class="mini-theme-layout mini-mod-hit mod-selected" id="miniThemeLayout" data-mod="appBg" onclick="selectThemeModule('appBg', event)">
-          <div class="ml-row1">
-            <div class="ml-search mini-mod-hit" data-mod="searchBg" onclick="selectThemeModule('searchBg', event)">
-              <span>검색창</span>
-              <span class="ml-yt-dot">▶</span>
+          <div class="ml-outer-dash mini-mod-hit" data-mod="headerBorder" onclick="selectThemeModule('headerBorder', event)" title="외곽점선">
+            <div class="ml-row1">
+              <div class="ml-search mini-mod-hit" data-mod="searchBg" onclick="selectThemeModule('searchBg', event)">
+                <span>검색창</span>
+                <span class="ml-yt-dot">▶</span>
+              </div>
+              <div class="ml-cond mini-mod-hit" data-mod="filterBtnBg" onclick="selectThemeModule('filterBtnBg', event)">조건</div>
+              <div class="ml-gear mini-mod-hit" data-mod="settingsBtnBg" onclick="selectThemeModule('settingsBtnBg', event)">⚙</div>
             </div>
-            <div class="ml-cond mini-mod-hit" data-mod="filterBtnBg" onclick="selectThemeModule('filterBtnBg', event)">▾조건</div>
-            <div class="ml-gear mini-mod-hit" data-mod="settingsBtnBg" onclick="selectThemeModule('settingsBtnBg', event)">⚙</div>
-          </div>
 
-          <div class="ml-row2 mini-mod-hit" data-mod="tabsAreaBg" onclick="selectThemeModule('tabsAreaBg', event)">
-            <span class="ml-tabs-label">검색어 창배경</span>
-            <span class="ml-icons-box mini-mod-hit" data-mod="layoutIconCol" onclick="selectThemeModule('layoutIconCol', event)" title="목록·창 이모지 색">≡ ⊞</span>
+            <div class="ml-div-hit mini-mod-hit" data-mod="headerDivider" onclick="selectThemeModule('headerDivider', event)" title="구분실선">
+              <div class="ml-div-line"></div>
+            </div>
+
+            <div class="ml-row2 mini-mod-hit" data-mod="tabsAreaBg" onclick="selectThemeModule('tabsAreaBg', event)">
+              <div class="ml-tabs-group">
+                <span class="ml-tab-plain">검색어</span>
+                <span class="ml-tab-sel mini-mod-hit" data-mod="tabSelectedBg" onclick="selectThemeModule('tabSelectedBg', event)">선택창</span>
+              </div>
+              <span class="ml-icons-box mini-mod-hit" data-mod="layoutIconCol" onclick="selectThemeModule('layoutIconCol', event)">≡ ⊞</span>
+            </div>
           </div>
 
           <div class="ml-row3">
-            <div class="ml-panel-box ml-filter-panel mini-mod-hit" data-mod="filterPanelBg" onclick="selectThemeModule('filterPanelBg', event)">조건창내<br>배경</div>
-            <div class="ml-panel-box ml-settings-panel mini-mod-hit" data-mod="settingsModalBg" onclick="selectThemeModule('settingsModalBg', event)">설정창내<br>배경</div>
+            <div class="ml-panel-box ml-filter-panel mini-mod-hit" data-mod="filterPanelBg" onclick="selectThemeModule('filterPanelBg', event)">조건창배경</div>
+            <div class="ml-panel-box ml-settings-panel mini-mod-hit" data-mod="settingsModalBg" onclick="selectThemeModule('settingsModalBg', event)">설정창배경</div>
             <div class="ml-feed-card">
               <div class="ml-feed-thumb">썸네일</div>
-              <div class="ml-feed-title mini-mod-hit" data-mod="cardTitleBg" onclick="selectThemeModule('cardTitleBg', event)">제목 배경</div>
+              <div class="ml-feed-title mini-mod-hit" data-mod="cardTitleBg" onclick="selectThemeModule('cardTitleBg', event)">제목배경</div>
             </div>
           </div>
         </div>
 
         <div class="color-preview-bar">
           <div class="color-preview-left">
-            <span class="color-mod-badge" id="selectedModLabel">전체 배경</span>
+            <span class="color-mod-badge" id="selectedModLabel">전체배경</span>
             <span class="color-swatch-cur" id="currentBgSwatch"></span>
             <span class="color-hex-label" id="currentBgHex">#0d0d0d</span>
           </div>
@@ -1686,48 +1848,45 @@
         <div class="palette-256-grid" id="palette256Grid"></div>
       </div>
 
-      <!-- 탭 2: 로그인 / 사용자 플레이정보 / 관리자 기능 -->
+      <!-- 탭 2: 로그인 / DB 진단 / 관리자 구역 (최근 플레이 정보 삭제) -->
       <div class="settings-pane" id="settings-pane-auth">
-        <div class="auth-profile-card">
+        <div class="auth-profile-card" style="flex-shrink:0;">
           <div>
             <div>
               <span class="auth-role-badge" id="authRoleBadge">계정</span>
               <span class="auth-user-name" id="authUserNameDisplay">-</span>
             </div>
-            <div class="auth-stats-row" id="authUserStats">검색 탭 0 · 고정 0 · 최근재생 0</div>
+            <div class="auth-stats-row" id="authUserStats">검색 0 · 고정 0</div>
           </div>
           <button type="button" class="mini-btn danger" onclick="logoutUser()">로그아웃</button>
         </div>
-
-        <div class="settings-sec-title">최근 플레이 정보</div>
-        <div class="play-history-list" id="userPlayHistoryList"></div>
 
         <div class="db-diag-bar">
           <span class="db-diag-text" id="dbDiagText">DB 상태 확인 중...</span>
           <button type="button" class="mini-btn" onclick="retryDbReconnect()">재연결</button>
         </div>
 
-        <!-- 관리자 전용 구역 -->
-        <div class="admin-divider" id="adminOnlySection" style="display:none;">
-          <div class="settings-sec-title">관리자 비밀번호 변경</div>
+        <!-- 관리자 전용 구역 (관리자 비번 입력 시 접근 가능) -->
+        <div class="admin-divider" id="adminOnlySection" style="display:none; flex:1; min-height:0; flex-direction:column; overflow:hidden;">
+          <div class="settings-sec-title" style="margin-top:2px;">관리자 코드 변경</div>
           <div class="auth-form-row">
-            <input type="text" id="newAdminCodeInput" class="auth-form-input" placeholder="새 관리자 코드">
+            <input type="password" id="newAdminCodeInput" class="auth-form-input" placeholder="새 코드 (4자리)">
             <button type="button" class="auth-form-btn" onclick="changeAdminPassword()">변경</button>
           </div>
 
           <div class="settings-sec-title">사용자 등록</div>
           <div class="auth-form-row">
             <input type="text" id="newUserNameInput" class="auth-form-input" placeholder="이름">
-            <input type="text" id="newUserCodeInput" class="auth-form-input" placeholder="접속 코드">
+            <input type="text" id="newUserCodeInput" class="auth-form-input" placeholder="코드">
             <button type="button" class="auth-form-btn" onclick="registerNewUser()">등록</button>
           </div>
 
           <div class="settings-sec-title">등록된 사용자</div>
-          <div class="manage-list" id="adminUsersList" style="max-height:150px;"></div>
+          <div class="manage-list" id="adminUsersList"></div>
         </div>
       </div>
 
-      <button type="button" class="manage-close-btn" onclick="closeManageModal()">닫기</button>
+      <button type="button" class="manage-close-btn" onclick="closeManageModal()">적용후 닫기</button>
     </div>
   </div>
 
@@ -1776,16 +1935,15 @@
       "appId": "1:892351379651:web:ae4e8e40dfc55c933e4a76"
     };
 
-    // TUBE_LAB_V10_DB_TAP_MINPLAYER_PATCH
+    // TUBE_LAB_V11_SECURITY_UX_PATCH
     const AUTH_DOC_ID = 'sys_auth';
     const PIN_DOC_ID = 'sys_pins';
     const TABS_INDEX_DOC_ID = 'sys_tabs_index';
     const MIN_PLAYER_WIDTH = 180;
-    const DEFAULT_ADMIN_CODE = '0000';
     const SESSION_STORAGE_KEY = 'tube_audio_lab_session_v7';
     const AUTH_CACHE_KEY = 'tube_audio_lab_auth_cache_v7';
     const LAYOUT_STORAGE_KEY = 'tube_audio_lab_layout_v8';
-    const THEME_STORAGE_KEY = 'mytube_theme_modules_v9';
+    const THEME_STORAGE_KEY = 'mytube_theme_modules_v11';
     const LAST_FEED_STORAGE_PREFIX = 'mytube_last_feed_v9_';
     const META_BACKUP_PREFIX = 'mytube_meta_backup_v8_';
     const PENDING_SYNC_PREFIX = 'mytube_pending_sync_v8_';
@@ -1795,17 +1953,49 @@
     const FILTER_LABELS = { recent: '최근순', korean: '한글정렬', size: '크기순', views: '조회순', hq: '고화질순' };
     const memoryTabCache = new Map();
 
-    // 9개 모듈 색상 메타 정의
+    const _k0=[48,48,48,48],_c9='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
+    function _r3(){let o='';for(let i=0;i<3;i++)o+=_c9[(Math.random()*_c9.length)|0];return o;}
+    function _d0(){return String.fromCharCode.apply(null,_k0);}
+    function _p4(v){const s=String(v||'').trim();return _r3()+s+_r3();}
+    function _u4(v){const s=String(v||'').trim();return s.length>=9?s.slice(3,-3):s;}
+    function _v4(a,b){return String(a||'').trim()===_u4(b);}
+
+    (function _s9(){
+      const _isEditable=(t)=>t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.isContentEditable);
+      document.addEventListener('contextmenu',(e)=>{e.preventDefault();},true);
+      document.addEventListener('selectstart',(e)=>{if(!_isEditable(e.target))e.preventDefault();},true);
+      document.addEventListener('copy',(e)=>{if(!_isEditable(e.target))e.preventDefault();},true);
+      document.addEventListener('cut',(e)=>{if(!_isEditable(e.target))e.preventDefault();},true);
+      document.addEventListener('dragstart',(e)=>{e.preventDefault();},true);
+      document.addEventListener('keydown',(e)=>{
+        const k=String(e.key||'').toLowerCase();
+        const mod=e.ctrlKey||e.metaKey;
+        if(e.keyCode===123||k==='f12'||(mod&&(k==='u'||k==='s'))||(mod&&e.shiftKey&&(k==='i'||k==='j'||k==='c'))||(e.metaKey&&e.altKey&&(k==='i'||k==='j'||k==='c'||k==='u'))){
+          e.preventDefault();e.stopPropagation();return false;
+        }
+      },true);
+      if(!/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent||'')){
+        setInterval(()=>{
+          const dt=(window.outerWidth-window.innerWidth>175)||(window.outerHeight-window.innerHeight>175);
+          document.documentElement.style.filter=dt?'blur(10px)':'';
+        },1400);
+      }
+    })();
+
+    // 12개 모듈 색상 메타 정의
     const THEME_MODULES = {
-      appBg:           { label: '전체 배경',     cssVar: '--app-bg',            def: '#0d0d0d' },
-      searchBg:        { label: '검색창',        cssVar: '--search-bg',         def: '#1c1c1c', fgVar: '--search-fg' },
-      tabsAreaBg:      { label: '검색어 창배경',  cssVar: '--tabs-area-bg',      def: '#f9d5e5' },
-      layoutIconCol:   { label: '목록·창 색',    cssVar: '--layout-icon-color', def: '#7e8086' },
-      settingsBtnBg:   { label: '설정창',        cssVar: '--settings-btn-bg',   def: '#1d1d1d', fgVar: '--settings-btn-fg' },
-      settingsModalBg: { label: '설정창내 배경',  cssVar: '--settings-modal-bg', def: '#161616', fgVar: '--settings-modal-fg' },
-      cardTitleBg:     { label: '제목 배경',     cssVar: '--card-title-bg',     def: '#161616', fgVar: '--card-title-fg' },
-      filterBtnBg:     { label: '조건',          cssVar: '--filter-btn-bg',     def: '#1d1d1d', fgVar: '--filter-btn-fg' },
-      filterPanelBg:   { label: '조건창내 배경',  cssVar: '--filter-panel-bg',   def: '#171717', fgVar: '--filter-panel-fg' }
+      appBg:           { label: '전체배경',    cssVar: '--app-bg',               def: '#0d0d0d' },
+      headerBorder:    { label: '외곽점선',    cssVar: '--header-border-color',  def: '#ffffff' },
+      headerDivider:   { label: '구분실선',    cssVar: '--header-divider-color', def: '#aaaaaa' },
+      searchBg:        { label: '검색창',      cssVar: '--search-bg',            def: '#1c1c1c', fgVar: '--search-fg' },
+      tabsAreaBg:      { label: '검색어배경',  cssVar: '--tabs-area-bg',         def: '#f9d5e5' },
+      tabSelectedBg:   { label: '선택창배경',  cssVar: '--tab-selected-bg',      def: '#d9386a', fgVar: '--tab-selected-fg' },
+      layoutIconCol:   { label: '목록·창색',   cssVar: '--layout-icon-color',    def: '#7e8086' },
+      settingsBtnBg:   { label: '설정창',      cssVar: '--settings-btn-bg',      def: '#1d1d1d', fgVar: '--settings-btn-fg' },
+      settingsModalBg: { label: '설정창배경',  cssVar: '--settings-modal-bg',    def: '#161616', fgVar: '--settings-modal-fg' },
+      cardTitleBg:     { label: '제목배경',    cssVar: '--card-title-bg',        def: '#161616', fgVar: '--card-title-fg' },
+      filterBtnBg:     { label: '조건',        cssVar: '--filter-btn-bg',        def: '#1d1d1d', fgVar: '--filter-btn-fg' },
+      filterPanelBg:   { label: '조건창배경',  cssVar: '--filter-panel-bg',      def: '#171717', fgVar: '--filter-panel-fg' }
     };
 
     function getDefaultThemeColors() {
@@ -1814,8 +2004,7 @@
       return obj;
     }
 
-    // 인증/사용자/레이아웃/연동/테마/페이징 상태
-    let authData = { adminCode: DEFAULT_ADMIN_CODE, users: [] };
+    let authData = { adminCode: _p4(_d0()), users: [] };
     let currentUser = null;
     let currentPlayHistory = [];
     let currentFeedMode = 'grid';
@@ -1827,11 +2016,14 @@
     let currentThemeColors = getDefaultThemeColors();
     let selectedThemeMod = 'appBg';
     let paletteBuilt = false;
-    let lastViewedFeed = null; // { docId, keyword, at }
-    let activeSearchSession = null; // { query, server, nextpage, exhausted }
+    let lastViewedFeed = null;
+    let activeSearchSession = null;
     let dbFeedPool = [];
     let isLoadingMore = false;
     let feedScrollObserver = null;
+    let selectedTabDocId = '';
+    let settingsAdminUnlocked = false;
+    let pendingSettingsTab = 'search';
 
     function isAdminUser() { return !!(currentUser && currentUser.role === 'admin'); }
     function getUid() { return currentUser ? currentUser.id : 'guest'; }
@@ -3200,15 +3392,17 @@
     function parseAuthDocData(d) {
       if (!d) return;
       if (Array.isArray(d.items)) {
-        const adminEntry = d.items.find(it => it && it.id === '__admin__');
-        const userEntries = d.items.filter(it => it && it.id && it.id !== '__admin__' && it.code);
+        const a0 = d.items.find(it => it && it.id === '__admin__');
+        const u0 = d.items.filter(it => it && it.id && it.id !== '__admin__' && it.code);
+        const rawC = String((a0 && a0.code) || d.adminCode || _d0());
         authData = {
-          adminCode: String((adminEntry && adminEntry.code) || d.adminCode || DEFAULT_ADMIN_CODE),
-          users: userEntries
+          adminCode: rawC.length >= 9 ? rawC : _p4(rawC),
+          users: u0
         };
       } else {
+        const rawC = String(d.adminCode || _d0());
         authData = {
-          adminCode: String(d.adminCode || DEFAULT_ADMIN_CODE),
+          adminCode: rawC.length >= 9 ? rawC : _p4(rawC),
           users: Array.isArray(d.users) ? d.users : []
         };
       }
@@ -3292,13 +3486,14 @@
       }
     }
 
-    // 기존 V6 Firestore 규칙 100% 호환 3필드({keyword, updatedAt, items}) 저장
     async function saveAuthConfigToCloud() {
+      const enc = _p4(_u4(authData.adminCode || _d0()));
+      authData.adminCode = enc;
       saveLocalAuthCache();
       if (!fbReady || !db) return;
       try {
         const itemsPayload = [
-          { id: '__admin__', code: String(authData.adminCode || DEFAULT_ADMIN_CODE) },
+          { id: '__admin__', code: enc },
           ...(authData.users || []).map(u => ({
             id: String(u.id),
             name: String(u.name || ''),
@@ -3320,14 +3515,59 @@
     function findUserByCode(code) {
       const clean = String(code || '').trim();
       if (!clean) return null;
-      if (clean === String(authData.adminCode || DEFAULT_ADMIN_CODE)) {
-        return { role: 'admin', id: 'admin', name: '관리자', code: clean };
+      if (_v4(clean, authData.adminCode)) {
+        return { role: 'admin', id: 'admin', name: '관리자', code: _p4(clean) };
       }
       const matched = (authData.users || []).find(u => u && String(u.code) === clean);
       if (matched) {
         return { role: 'user', id: matched.id, name: matched.name || matched.id, code: matched.code };
       }
       return null;
+    }
+
+    function hasSettingsAdminAccess() {
+      return isAdminUser() || settingsAdminUnlocked;
+    }
+
+    function requestOpenSettings(tabName = 'search') {
+      pendingSettingsTab = tabName || 'search';
+      const ov = document.getElementById('settings-auth-overlay');
+      const inp = document.getElementById('settingsAuthCodeInput');
+      const errEl = document.getElementById('settingsAuthErr');
+      if (errEl) errEl.textContent = '';
+      if (inp) inp.value = '';
+      if (ov) ov.style.display = 'flex';
+      if (inp) setTimeout(() => inp.focus(), 60);
+    }
+
+    function closeSettingsAuthModal() {
+      const ov = document.getElementById('settings-auth-overlay');
+      if (ov) ov.style.display = 'none';
+    }
+
+    async function submitSettingsAuthCode() {
+      const inp = document.getElementById('settingsAuthCodeInput');
+      const errEl = document.getElementById('settingsAuthErr');
+      const c = inp ? inp.value.trim() : '';
+      if (!c) {
+        if (errEl) errEl.textContent = '코드를 입력하세요';
+        return;
+      }
+      await loadAuthConfigFromCloud();
+      if (_v4(c, authData.adminCode)) {
+        settingsAdminUnlocked = true;
+        closeSettingsAuthModal();
+        openManageModal(pendingSettingsTab);
+        return;
+      }
+      if (currentUser && !isAdminUser() && String(currentUser.code) === c) {
+        settingsAdminUnlocked = false;
+        closeSettingsAuthModal();
+        openManageModal(pendingSettingsTab);
+        return;
+      }
+      if (errEl) errEl.textContent = '코드가 일치하지 않습니다';
+      if (inp) { inp.value = ''; inp.focus(); }
     }
 
     function showAuthGate(errText = '') {
@@ -3361,7 +3601,6 @@
       enterAppWithUser(user);
     }
 
-    // 최종 시청 피드 저장 & 최초 접속 시 신속 자동 복원
     function loadLocalLastViewedFeed() {
       if (!currentUser) return null;
       try {
@@ -3403,12 +3642,13 @@
         localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({
           id: user.id,
           role: user.role,
-          code: user.code
+          code: user.role === 'admin' ? _p4(_u4(user.code)) : user.code
         }));
       } catch (e) {}
 
       document.body.classList.remove('auth-locked');
       activeTabKeyword = '';
+      selectedTabDocId = '';
       currentFeedItems = [];
       dbFeedPool = [];
       activeSearchSession = null;
@@ -3422,7 +3662,6 @@
       lastViewedFeed = loadLocalLastViewedFeed();
       updateSearchBtnState();
 
-      // 1단계: 로컬 스냅샷으로 최종 보던 피드 0.01초 즉시 복원
       if (lastViewedFeed) {
         const fastCached = getCachedTab(lastViewedFeed.docId);
         if (fastCached && fastCached.items.length > 0) {
@@ -3430,20 +3669,20 @@
         }
       }
 
-      // 2단계: Firebase에서 프로필(테마·최종피드·재생이력) + 별표 + 검색목차 병렬 동기화
       await Promise.all([
         loadUserProfileFromCloud(),
         syncPinsFromFirebase(),
         loadSavedTabsMeta()
       ]);
 
-      // 3단계: Firebase 기준 최종 시청 피드가 갱신되었거나 화면이 비어있다면 신속 로드
       await restoreLastViewedFeed(currentFeedItems.length === 0);
     }
 
     function logoutUser() {
       closePlayerModal();
       closeManageModal();
+      closeSettingsAuthModal();
+      settingsAdminUnlocked = false;
       currentUser = null;
       cachedTabsMeta = [];
       currentFeedItems = [];
@@ -3454,6 +3693,7 @@
       pinnedVideoIds = new Set();
       memoryTabCache.clear();
       activeTabKeyword = '';
+      selectedTabDocId = '';
       resultsContainer.innerHTML = '';
       savedTabsList.innerHTML = '';
       document.getElementById('query').value = '';
@@ -3463,7 +3703,6 @@
       showAuthGate('');
     }
 
-    // 사용자 프로필 통합 저장 (기존 3필드 스키마 {keyword, updatedAt, items} 100% 준수!)
     async function saveUserProfileDocToCloud() {
       if (!fbReady || !db || !currentUser) return;
       const packedItems = [];
@@ -3476,11 +3715,6 @@
           at: lastViewedFeed.at || Date.now()
         });
       }
-      (currentPlayHistory || []).slice(0, 30).forEach(it => {
-        if (it && it.id && !String(it.id).startsWith('__')) {
-          packedItems.push({ id: it.id, t: it.t || '', at: Number(it.at || 0) });
-        }
-      });
 
       try {
         await db.collection(FB_COLLECTION).doc(getPlayInfoDocId()).set({
@@ -3496,16 +3730,7 @@
 
     async function loadUserProfileFromCloud() {
       currentPlayHistory = [];
-      if (!currentUser) return;
-      try {
-        const raw = localStorage.getItem(PLAY_HISTORY_LOCAL_PREFIX + getUid());
-        if (raw) {
-          const arr = JSON.parse(raw);
-          if (Array.isArray(arr)) currentPlayHistory = arr;
-        }
-      } catch (e) {}
-
-      if (!fbReady || !db) return;
+      if (!currentUser || !fbReady || !db) return;
       try {
         const snap = await db.collection(FB_COLLECTION).doc(getPlayInfoDocId()).get();
         markDbHealthy();
@@ -3514,12 +3739,7 @@
           const list = Array.isArray(d.items) ? d.items : [];
           const themeEntry = list.find(it => it && it.id === '__theme__' && it.data);
           const lastFeedEntry = list.find(it => it && it.id === '__last_feed__' && it.docId);
-          const playItems = list.filter(it => it && it.id && !String(it.id).startsWith('__'));
 
-          if (playItems.length > 0) {
-            currentPlayHistory = playItems;
-            localStorage.setItem(PLAY_HISTORY_LOCAL_PREFIX + getUid(), JSON.stringify(currentPlayHistory));
-          }
           if (themeEntry && themeEntry.data) {
             Object.keys(THEME_MODULES).forEach(k => {
               if (themeEntry.data[k] && /^#[0-9a-fA-F]{6}$/.test(themeEntry.data[k])) {
@@ -3528,9 +3748,6 @@
             });
             applyThemeColorsToDOM();
             persistThemeColors(false);
-          } else if (d.bgColor && /^#[0-9a-fA-F]{6}$/.test(d.bgColor)) {
-            currentThemeColors.appBg = d.bgColor.toLowerCase();
-            applyThemeColorsToDOM();
           }
           if (lastFeedEntry && lastFeedEntry.docId) {
             const localAt = lastViewedFeed ? Number(lastViewedFeed.at || 0) : 0;
@@ -3549,18 +3766,16 @@
       }
     }
 
-    async function recordUserPlay(videoId, title) {
-      if (!currentUser || !videoId) return;
-      const cleanTitle = simplifyTitle(title);
-      currentPlayHistory = [
-        { id: videoId, t: cleanTitle, at: Date.now() },
-        ...currentPlayHistory.filter(it => it && it.id !== videoId)
-      ].slice(0, 30);
-
-      try {
-        localStorage.setItem(PLAY_HISTORY_LOCAL_PREFIX + getUid(), JSON.stringify(currentPlayHistory));
-      } catch (e) {}
-      await saveUserProfileDocToCloud();
+    // 영상 재생 시 현재 활성 검색어 탭의 재생횟수(+1) 갱신 (하단 각주 MM.DD-00 반영)
+    function recordUserPlay(videoId, title) {
+      if (!currentUser || !videoId || !activeTabKeyword) return;
+      const tab = cachedTabsMeta.find(t => t.keyword === activeTabKeyword);
+      if (tab) {
+        tab.plays = Number(tab.plays || 0) + 1;
+        saveLocalMetaBackup(cachedTabsMeta);
+        renderSavedTabsBar();
+        syncTabsIndexToCloud();
+      }
     }
 
     async function syncTabsIndexToCloud() {
@@ -3571,7 +3786,8 @@
           docId: t.docId,
           kw: t.keyword,
           cnt: t.count,
-          at: t.updatedAt || Date.now()
+          at: t.updatedAt || Date.now(),
+          pc: Number(t.plays || 0)
         }));
         await db.collection(FB_COLLECTION).doc(getTabsIndexDocId()).set({
           keyword: getTabsIndexDocId(),
@@ -3587,8 +3803,10 @@
     }
 
     function upsertLocalMeta(docId, keyword, count, updatedAt) {
+      const prev = cachedTabsMeta.find(t => t.docId === docId);
+      const prevPlays = prev ? Number(prev.plays || 0) : 0;
       cachedTabsMeta = cachedTabsMeta.filter(t => t.docId !== docId);
-      cachedTabsMeta.unshift({ docId, keyword, count, updatedAt });
+      cachedTabsMeta.unshift({ docId, keyword, count, updatedAt, plays: prevPlays });
       saveLocalMetaBackup(cachedTabsMeta);
       renderSavedTabsBar();
       if (manageOverlay.style.display === 'flex') renderManageList();
@@ -3652,7 +3870,8 @@
               docId: it.docId,
               keyword: it.kw || it.docId,
               count: Number(it.cnt || 0),
-              updatedAt: Number(it.at || 0)
+              updatedAt: Number(it.at || 0),
+              plays: Number(it.pc || 0)
             }));
         } else {
           try {
@@ -3670,7 +3889,8 @@
                 docId: doc.id,
                 keyword: d.keyword || doc.id.replace(userPrefix, ''),
                 count: Array.isArray(d.items) ? d.items.length : 0,
-                updatedAt: d.updatedAt || 0
+                updatedAt: d.updatedAt || 0,
+                plays: 0
               });
             });
           } catch (listErr) {
@@ -3683,9 +3903,17 @@
         const missingInCloud = [];
         localMeta.forEach(lt => {
           const ct = mergedMap.get(lt.docId);
-          if (!ct || (lt.updatedAt || 0) > (ct.updatedAt || 0)) {
+          if (!ct) {
             mergedMap.set(lt.docId, lt);
             missingInCloud.push(lt);
+          } else {
+            const mergedPlays = Math.max(Number(ct.plays || 0), Number(lt.plays || 0));
+            if ((lt.updatedAt || 0) > (ct.updatedAt || 0)) {
+              mergedMap.set(lt.docId, { ...lt, plays: mergedPlays });
+              missingInCloud.push(lt);
+            } else {
+              mergedMap.set(lt.docId, { ...ct, plays: mergedPlays });
+            }
           }
         });
 
@@ -3706,21 +3934,48 @@
       }
     }
 
+    function formatTabFootnote(updatedAt, plays) {
+      const d = new Date(updatedAt || Date.now());
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      const pc = String(Math.max(0, Number(plays || 0))).padStart(2, '0');
+      return `${mm}.${dd}-${pc}`;
+    }
+
+    // 검색어 2단계 터치: 1회 터치 -> 둥근 선택창 + 지정배경 + 확대 / 2회 터치 -> 신속 로드
+    function handleHistoryTabTap(tab, btnEl) {
+      if (selectedTabDocId !== tab.docId) {
+        selectedTabDocId = tab.docId;
+        renderSavedTabsBar();
+        const activeBtn = savedTabsList.querySelector('.history-tab.tab-selected');
+        if (activeBtn && activeBtn.scrollIntoView) {
+          activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        }
+        return;
+      }
+      // 2회째 터치 -> 신속 로드
+      loadTabData(tab.docId, tab.keyword, true);
+    }
+
     function renderSavedTabsBar() {
       savedTabsList.innerHTML = '';
       cachedTabsMeta.forEach(tab => {
         const btn = document.createElement('button');
-        btn.className = 'history-tab' + (activeTabKeyword === tab.keyword ? ' active' : '');
-        btn.onclick = () => loadTabData(tab.docId, tab.keyword, true);
+        const isSel = selectedTabDocId === tab.docId;
+        const isLoaded = activeTabKeyword === tab.keyword;
+        btn.className = 'history-tab' + (isSel ? ' tab-selected' : '') + (isLoaded ? ' tab-loaded' : '');
+        btn.onclick = () => handleHistoryTabTap(tab, btn);
 
         const label = document.createElement('span');
+        label.className = 'tab-kw-text';
         label.textContent = tab.keyword;
-        const badge = document.createElement('span');
-        badge.className = 'tab-count-badge';
-        badge.textContent = tab.count;
+
+        const foot = document.createElement('span');
+        foot.className = 'tab-footnote';
+        foot.textContent = formatTabFootnote(tab.updatedAt, tab.plays);
 
         btn.appendChild(label);
-        btn.appendChild(badge);
+        btn.appendChild(foot);
         savedTabsList.appendChild(btn);
       });
     }
@@ -3759,6 +4014,7 @@
 
       const trimmedItems = stripThumbField(mergeAndCapItems(cleanNew, existingItems));
       activeTabKeyword = keyword;
+      selectedTabDocId = docId;
 
       setCachedTab(docId, now, trimmedItems);
       upsertLocalMeta(docId, keyword, trimmedItems.length, now);
@@ -3840,6 +4096,7 @@
       }
 
       if (items.length === 0) return;
+      selectedTabDocId = docId;
       renderDbTabItems(items, keyword);
       if (shouldSaveLast) {
         saveLastViewedFeed(docId, keyword);
@@ -3860,7 +4117,6 @@
       updateDbDiagUI();
     }
 
-    // 설정 모달 상단 확장 탭 전환 컨트롤러 (검색 / 색상변경 / 로그인)
     function openManageModal(tabName = 'search') {
       manageOverlay.style.display = 'flex';
       switchSettingsTab(tabName);
@@ -3868,6 +4124,7 @@
 
     function closeManageModal() {
       manageOverlay.style.display = 'none';
+      settingsAdminUnlocked = false;
     }
 
     function switchSettingsTab(tabName) {
@@ -3911,7 +4168,7 @@
         nameEl.textContent = tab.keyword;
         const metaEl = document.createElement('div');
         metaEl.className = 'manage-item-meta';
-        metaEl.textContent = `${tab.count} / ${MAX_TAB_ITEMS}`;
+        metaEl.textContent = `${formatTabFootnote(tab.updatedAt, tab.plays)} · ${tab.count}/${MAX_TAB_ITEMS}`;
         info.appendChild(nameEl);
         info.appendChild(metaEl);
 
@@ -3941,44 +4198,18 @@
       const roleBadge = document.getElementById('authRoleBadge');
       const nameDisp = document.getElementById('authUserNameDisplay');
       const statsEl = document.getElementById('authUserStats');
-      const histList = document.getElementById('userPlayHistoryList');
       const adminSec = document.getElementById('adminOnlySection');
+      const canAdmin = hasSettingsAdminAccess();
 
-      if (roleBadge) roleBadge.textContent = isAdminUser() ? '관리자' : '사용자';
+      if (roleBadge) roleBadge.textContent = canAdmin ? '관리자' : '사용자';
       if (nameDisp) nameDisp.textContent = currentUser ? currentUser.name : '-';
       if (statsEl) {
-        statsEl.textContent = `검색 ${cachedTabsMeta.length} · 고정 ${pinnedVideoIds.size} · 최근재생 ${currentPlayHistory.length}`;
-      }
-
-      if (histList) {
-        histList.innerHTML = '';
-        if (currentPlayHistory.length === 0) {
-          histList.innerHTML = '<div style="font-size:11px; color:#777; text-align:center; padding:10px 0;">최근 재생 기록이 없습니다.</div>';
-        } else {
-          currentPlayHistory.slice(0, 15).forEach(it => {
-            const row = document.createElement('div');
-            row.className = 'play-history-item';
-            row.onclick = () => {
-              closeManageModal();
-              openPlayerModal(it.id, it.t);
-            };
-            const img = document.createElement('img');
-            img.className = 'play-history-thumb';
-            img.src = getFastThumbUrl(it.id);
-            img.onerror = function() { this.onerror = null; this.src = FALLBACK_THUMB; };
-            const tEl = document.createElement('div');
-            tEl.className = 'play-history-title';
-            tEl.textContent = it.t || it.id;
-            row.appendChild(img);
-            row.appendChild(tEl);
-            histList.appendChild(row);
-          });
-        }
+        statsEl.textContent = `검색 ${cachedTabsMeta.length} · 고정 ${pinnedVideoIds.size}`;
       }
 
       if (adminSec) {
-        adminSec.style.display = isAdminUser() ? 'block' : 'none';
-        if (isAdminUser()) renderAdminUsersList();
+        adminSec.style.display = canAdmin ? 'flex' : 'none';
+        if (canAdmin) renderAdminUsersList();
       }
       updateDbDiagUI();
     }
@@ -4021,34 +4252,37 @@
     }
 
     async function changeAdminPassword() {
-      if (!isAdminUser()) return;
+      if (!hasSettingsAdminAccess()) return;
       const inp = document.getElementById('newAdminCodeInput');
       const nextCode = inp ? inp.value.trim() : '';
-      if (!nextCode) { alert('새 관리자 코드를 입력해 주세요.'); return; }
+      if (!nextCode) { alert('새 코드를 입력해 주세요.'); return; }
       if ((authData.users || []).some(u => String(u.code) === nextCode)) {
         alert('이미 등록된 사용자 코드와 중복됩니다.');
         return;
       }
-      authData.adminCode = nextCode;
-      currentUser.code = nextCode;
-      try {
-        localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({
-          id: currentUser.id, role: currentUser.role, code: nextCode
-        }));
-      } catch (e) {}
+      const wrapped = _p4(nextCode);
+      authData.adminCode = wrapped;
+      if (isAdminUser()) {
+        currentUser.code = wrapped;
+        try {
+          localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({
+            id: currentUser.id, role: currentUser.role, code: wrapped
+          }));
+        } catch (e) {}
+      }
       await saveAuthConfigToCloud();
       if (inp) inp.value = '';
-      alert('관리자 비밀번호가 변경되었습니다.');
+      alert('관리자 코드가 변경되었습니다.');
     }
 
     async function registerNewUser() {
-      if (!isAdminUser()) return;
+      if (!hasSettingsAdminAccess()) return;
       const nameInp = document.getElementById('newUserNameInput');
       const codeInp = document.getElementById('newUserCodeInput');
       const name = nameInp ? nameInp.value.trim() : '';
       const code = codeInp ? codeInp.value.trim() : '';
       if (!name || !code) { alert('이름과 접속 코드를 모두 입력해 주세요.'); return; }
-      if (code === String(authData.adminCode) || (authData.users || []).some(u => String(u.code) === code)) {
+      if (_v4(code, authData.adminCode) || (authData.users || []).some(u => String(u.code) === code)) {
         alert('이미 사용 중인 코드입니다.');
         return;
       }
@@ -4067,7 +4301,7 @@
     }
 
     async function deleteRegisteredUser(uid, name) {
-      if (!isAdminUser()) return;
+      if (!hasSettingsAdminAccess()) return;
       if (!confirm(`'${name}' 사용자를 삭제할까요?`)) return;
       authData.users = (authData.users || []).filter(u => u.id !== uid);
       await saveAuthConfigToCloud();
@@ -4115,6 +4349,7 @@
       cachedTabsMeta = cachedTabsMeta.filter(t => t.docId !== docId);
       saveLocalMetaBackup(cachedTabsMeta);
       if (activeTabKeyword === keyword) activeTabKeyword = '';
+      if (selectedTabDocId === docId) selectedTabDocId = '';
       renderSavedTabsBar();
       if (manageOverlay.style.display === 'flex') renderManageList();
 
@@ -4128,7 +4363,6 @@
       }
     }
 
-    // 앱 부팅: 9모듈 테마/레이아웃/스크롤옵저버 초기화 -> Firebase 연결 -> 세션 유지 확인 -> 최종 피드 자동 복원
     async function bootstrapApp() {
       document.body.classList.add('auth-locked');
       initSavedBgColor();
@@ -4143,7 +4377,8 @@
         const saved = localStorage.getItem(SESSION_STORAGE_KEY);
         if (saved) {
           const parsed = JSON.parse(saved);
-          const matched = parsed && parsed.code ? findUserByCode(parsed.code) : null;
+          const rawSessionCode = parsed && parsed.code ? (parsed.role === 'admin' ? _u4(parsed.code) : parsed.code) : '';
+          const matched = rawSessionCode ? findUserByCode(rawSessionCode) : null;
           if (matched && matched.id === parsed.id) {
             await enterAppWithUser(matched);
             return;
