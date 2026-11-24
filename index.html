@@ -35,6 +35,8 @@
       --filter-btn-fg: #e5e5e5;
       --filter-panel-bg: #171717;
       --filter-panel-fg: #dddddd;
+      --bookmark-bg: #ffb6cb;
+      --bookmark-border: #ffffff;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -67,14 +69,76 @@
     body.auth-locked #auth-gate-overlay {
       display: flex;
     }
+    body.modal-scroll-locked {
+      position: fixed !important;
+      left: 0 !important;
+      right: 0 !important;
+      width: 100% !important;
+      overflow: hidden !important;
+      touch-action: none !important;
+    }
     .auth-gate-box {
-      width: 236px;
+      width: 248px;
       background: #17171a;
-      border: 1px solid rgba(255, 255, 255, 0.22);
+      border: 1px solid rgba(255, 255, 255, 0.24);
       border-radius: 12px;
-      padding: 16px 14px;
+      padding: 15px 14px 12px 14px;
       box-shadow: 0 14px 36px rgba(0, 0, 0, 0.85);
       text-align: center;
+    }
+    .auth-name-block {
+      margin-bottom: 7px;
+    }
+    .auth-name-input {
+      width: 100%;
+      padding: 7px 10px;
+      border-radius: 7px;
+      border: 1px solid #333;
+      background: #101012;
+      color: #fff;
+      font-size: 12.5px;
+      text-align: center;
+      outline: none;
+    }
+    .auth-name-input:focus { border-color: #f472b6; }
+    .auth-remember-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      margin-top: 6px;
+      font-size: 11px;
+      color: #bdbdbd;
+      cursor: pointer;
+    }
+    .auth-remember-row input {
+      accent-color: #ff0000;
+      width: 13px;
+      height: 13px;
+      margin: 0;
+      cursor: pointer;
+    }
+    .auth-saved-name-bar {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      background: #202026;
+      border: 1px solid #32323c;
+      border-radius: 7px;
+      padding: 5px 9px;
+      margin-bottom: 7px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #f9a8d4;
+    }
+    .auth-change-name-btn {
+      border: 1px solid #444;
+      background: #2a2a30;
+      color: #ccc;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 5px;
+      cursor: pointer;
     }
     .auth-gate-input-row {
       display: flex;
@@ -89,13 +153,13 @@
       background: #101012;
       color: #fff;
       font-size: 13px;
-      letter-spacing: 2px;
+      letter-spacing: 3px;
       text-align: center;
       outline: none;
     }
     .auth-gate-input:focus { border-color: #f472b6; }
     .auth-gate-btn {
-      padding: 8px 12px;
+      padding: 8px 11px;
       border-radius: 7px;
       border: none;
       background: #ff0000;
@@ -171,11 +235,24 @@
       width: 100%;
     }
     .header-unified-box {
+      position: relative;
       width: 100%;
-      border: 2px dashed var(--header-border-color);
+      border: none;
       border-radius: 10px;
-      padding: 5px 6px 4px 6px;
+      padding: 6px 7px 5px 7px;
       background: transparent;
+    }
+    .header-dash-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .header-unified-box > :not(.header-dash-svg) {
+      position: relative;
+      z-index: 2;
     }
     .header-top-row {
       display: grid;
@@ -436,7 +513,7 @@
     .header-mid-divider {
       width: 100%;
       height: 0;
-      border-top: 1px solid var(--header-divider-color);
+      border-top: 1px dashed var(--header-divider-color);
       margin: 5px 0 4px 0;
     }
     .saved-tabs-row {
@@ -504,7 +581,7 @@
       font-weight: 600;
       line-height: 1.1;
       margin-top: 2px;
-      opacity: 0.78;
+      opacity: 0.48;
       letter-spacing: -0.2px;
       font-variant-numeric: tabular-nums;
       white-space: nowrap;
@@ -590,6 +667,7 @@
     .manage-modal-box {
       width: min(95vw, 392px);
       height: min(86dvh, 520px);
+      overscroll-behavior: contain;
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -897,7 +975,7 @@
     .ml-div-line {
       width: 100%;
       height: 0;
-      border-top: 2px solid var(--header-divider-color);
+      border-top: 1.5px dashed var(--header-divider-color);
       pointer-events: none;
     }
     .ml-row2 {
@@ -942,10 +1020,30 @@
       font-weight: 700;
       flex-shrink: 0;
     }
-    .ml-row3 {
+    .ml-row3-v12 {
       display: grid;
-      grid-template-columns: 1fr 1fr 1.15fr;
+      grid-template-columns: 1fr 1fr 1.05fr 0.78fr;
       gap: 4px;
+    }
+    .ml-bm-border {
+      height: 36px;
+      border-radius: 6px;
+      border: 2px solid var(--bookmark-border);
+      padding: 2px;
+      background: rgba(0,0,0,0.25);
+      display: flex;
+      align-items: stretch;
+    }
+    .ml-bm-bg {
+      flex: 1;
+      border-radius: 4px;
+      background: var(--bookmark-bg);
+      color: #111;
+      font-size: 8.5px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .ml-panel-box {
       height: 36px;
@@ -1177,6 +1275,21 @@
       line-height: 1.35;
       -webkit-line-clamp: 2;
     }
+    .video-meta {
+      margin-top: 2px;
+      text-align: left;
+      font-size: 7.5px;
+      line-height: 1.2;
+      color: var(--card-title-fg);
+      opacity: 0.56;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-variant-numeric: tabular-nums;
+    }
+    .video-grid.cols-3 .video-meta { font-size: 8.5px; }
+    .video-grid.cols-2 .video-meta { font-size: 9.5px; }
+    .video-grid.cols-1 .video-meta { font-size: 10.5px; margin-top: 4px; }
 
     /* 3. [핵심] 16:9 원본 밀착형 부유창 */
     #floating-player-modal {
@@ -1437,88 +1550,108 @@
     .bookmark-tab:active {
       background: rgba(255, 255, 255, 0.9);
     }
-    .bookmark-tab.tab-bg {
-      z-index: 5;
-      background: rgba(255, 230, 240, 0.58);
-      padding: 3px 8px;
-    }
-    .bookmark-tab.tab-bg.bg-ready {
-      border-color: rgba(74, 222, 128, 0.9);
-    }
-    .bookmark-tab.tab-bg.bg-on {
-      background: rgba(255, 130, 175, 0.88);
-      color: #fff;
-      border-color: #fff;
-    }
-    .bookmark-tab.tab-mp3 {
-      z-index: 4;
-      margin-left: -5px;
-      padding-left: 10px;
-      background: rgba(240, 248, 255, 0.62);
-    }
+
     .bookmark-tab.tab-close {
       z-index: 3;
-      margin-left: -5px;
-      padding-left: 10px;
-      padding-right: 9px;
+      padding: 3px 10px;
     }
 
-    /* 4-2. 화면 밖 날리기 시 나타나는 연분홍색 투명도 60% 소형(2/3) 음표 책갈피 (길게 눌러 자유 이동) */
-    #mini-music-bookmark {
+    /* 4-2. 슬라이드 책갈피 (스크롤 시 상시 표시 · 투명도 70% · 좌/우 한 손 이동 · ⚙/🎧/MP3/▶깜박) */
+    #slide-bookmark {
       position: fixed;
-      top: 43%;
+      top: 38%;
       z-index: 9500;
-      width: 26px;
-      height: 32px;
+      width: 34px;
       display: none;
+      flex-direction: column;
       align-items: center;
-      justify-content: center;
-      background: rgba(255, 182, 203, 0.60); /* 연한 분홍색 투명도 60% */
+      gap: 4px;
+      padding: 5px 2px 6px 2px;
+      opacity: 0.70;
+      background: var(--bookmark-bg);
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
-      border: 1.2px solid rgba(255, 255, 255, 0.85);
-      color: #ffffff;
-      font-size: 14px;
-      font-weight: 700;
-      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.42);
-      cursor: pointer;
+      border: 1.5px solid var(--bookmark-border);
+      box-shadow: 0 5px 16px rgba(0, 0, 0, 0.45);
       user-select: none;
       -webkit-user-select: none;
       -webkit-touch-callout: none;
       touch-action: none;
-      transition: transform 0.14s, background 0.14s, box-shadow 0.14s;
+      transition: transform 0.14s, opacity 0.14s, box-shadow 0.14s;
     }
-    #mini-music-bookmark.dock-left {
+    body.auth-locked #slide-bookmark {
+      display: none !important;
+    }
+    #slide-bookmark.dock-left {
       left: 0;
       right: auto;
       border-left: none;
-      border-radius: 0 10px 10px 0;
+      border-radius: 0 11px 11px 0;
     }
-    #mini-music-bookmark.dock-right {
+    #slide-bookmark.dock-right {
       right: 0;
       left: auto;
       border-right: none;
-      border-radius: 10px 0 0 10px;
+      border-radius: 11px 0 0 11px;
     }
-    #mini-music-bookmark.dock-free {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
+    #slide-bookmark.dock-free {
+      border-radius: 11px;
     }
-    #mini-music-bookmark.dragging-bookmark {
-      transform: scale(1.22);
-      background: rgba(255, 182, 203, 0.88);
-      border-color: #ffffff;
-      box-shadow: 0 0 16px rgba(255, 182, 203, 0.95);
+    #slide-bookmark.dragging-bookmark {
+      opacity: 0.92;
+      transform: scale(1.08);
+      box-shadow: 0 0 18px rgba(255, 182, 203, 0.95);
     }
-    @keyframes notePulse {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.16); opacity: 0.78; }
+    .sb-grip {
+      width: 100%;
+      height: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: grab;
+      touch-action: none;
     }
-    #mini-music-bookmark.bg-active .note-icon {
+    .sb-grip:active { cursor: grabbing; }
+    .sb-grip-bar {
+      width: 16px;
+      height: 3px;
+      border-radius: 2px;
+      background: rgba(255, 255, 255, 0.85);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    }
+    .sb-btn {
+      width: 26px;
+      height: 24px;
+      border: none;
+      border-radius: 7px;
+      background: rgba(0, 0, 0, 0.24);
+      color: #ffffff;
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 0;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
+      transition: transform 0.1s, background 0.15s, box-shadow 0.15s;
+    }
+    .sb-btn:active { transform: scale(0.9); background: rgba(0, 0, 0, 0.42); }
+    .sb-btn-gear { font-size: 13px; }
+    .sb-btn-bg { font-size: 12px; }
+    .sb-btn-bg.bg-ready { box-shadow: inset 0 0 0 1.2px rgba(74, 222, 128, 0.95); }
+    .sb-btn-bg.bg-on {
+      background: rgba(255, 70, 140, 0.92);
+      box-shadow: 0 0 0 1.2px #ffffff;
+    }
+    .sb-btn-mp3 { font-size: 8px; letter-spacing: -0.3px; }
+    .sb-btn-play { font-size: 12px; }
+    @keyframes sbPlayBlink {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.25; transform: scale(0.92); }
+    }
+    #slide-bookmark.sb-playing .sb-tri-icon {
       display: inline-block;
-      animation: notePulse 1.5s ease-in-out infinite;
+      animation: sbPlayBlink 1.5s ease-in-out infinite;
     }
 
     /* 5. [신규] MP3 / 320kbps 음원추출 전용 모달 */
@@ -1605,11 +1738,22 @@
 </head>
 <body>
 
-  <!-- 0. 로그인 중앙 소형 코드창 -->
+  <!-- 0. 로그인 중앙 소형 창 (이름 7자 + 기억 체크박스 + 4자리 자동 진입) -->
   <div id="auth-gate-overlay">
     <div class="auth-gate-box">
+      <div class="auth-name-block" id="authNameBlock">
+        <input type="text" id="authNameInput" class="auth-name-input" maxlength="7" placeholder="이름 (7자 이내)" autocomplete="off" onkeydown="if(event.key==='Enter'){document.getElementById('authCodeInput').focus()}">
+        <label class="auth-remember-row">
+          <input type="checkbox" id="authRememberName">
+          <span>이름 기억 (다음부터 코드창 바로 이동)</span>
+        </label>
+      </div>
+      <div class="auth-saved-name-bar" id="authSavedNameBar">
+        <span id="authSavedNameLabel">-</span>
+        <button type="button" class="auth-change-name-btn" onclick="unlockSavedLoginName()">변경</button>
+      </div>
       <div class="auth-gate-input-row">
-        <input type="password" id="authCodeInput" class="auth-gate-input" placeholder="CODE" autocomplete="off" onkeydown="if(event.key==='Enter'){submitAuthCode()}">
+        <input type="password" id="authCodeInput" class="auth-gate-input" maxlength="4" inputmode="numeric" placeholder="CODE" autocomplete="off" oninput="onAuthCodeTyping()" onkeydown="if(event.key==='Enter'){submitAuthCode()}">
         <button type="button" class="auth-gate-btn" onclick="submitAuthCode()">확인</button>
       </div>
       <div class="auth-gate-err" id="authGateErr"></div>
@@ -1631,6 +1775,7 @@
   <!-- 1. 최상단 고정 헤더 (외곽 두꺼운 점선 + 검색창 바로 밑 가로 실선 구분 + 검색어 각주/2단계 터치) -->
   <div class="top-header">
     <div class="header-unified-box">
+      <svg class="header-dash-svg" preserveAspectRatio="none"><rect x="1.2" y="1.2" width="calc(100% - 2.4px)" height="calc(100% - 2.4px)" rx="9" ry="9" fill="none" stroke="var(--header-border-color)" stroke-width="2.2" stroke-dasharray="4 3" vector-effect="non-scaling-stroke"/></svg>
       <div class="header-top-row">
         <div class="header-left-slot">
           <div class="search-box">
@@ -1743,12 +1888,6 @@
     <div class="modal-bottom-tabs">
       <div class="bottom-drag-spacer" id="bottomDragSpacer"></div>
       <div class="tab-group-right">
-        <div class="bookmark-tab tab-bg" id="bgModeTab" onclick="toggleBgAudioMode()" title="iOS 백그라운드 오디오 모드 전환">
-          <span>🎧</span>
-        </div>
-        <div class="bookmark-tab tab-mp3" onclick="openMp3Modal()">
-          <span>mp3</span>
-        </div>
         <div class="bookmark-tab tab-close" onclick="closePlayerModal()" title="닫기">
           <span>✕</span>
         </div>
@@ -1756,9 +1895,13 @@
     </div>
   </div>
 
-  <!-- 3-2. 화면 밖 날리기 시 나타나는 연분홍색 투명도 60% 소형(2/3) 음표 책갈피 (짧은 터치: 복귀 / 길게 눌러 이동) -->
-  <div id="mini-music-bookmark" class="dock-right" title="터치: 정중앙 복귀 / 길게 누름: 위치 이동">
-    <span class="note-icon">♪</span>
+  <!-- 3-2. 슬라이드 책갈피 (스크롤 시 상시 표시 · 투명도 70% · 좌/우 한 손 이동 · ⚙/🎧/MP3/▶깜박) -->
+  <div id="slide-bookmark" class="dock-right">
+    <div class="sb-grip" id="sbDragGrip" title="드래그: 좌·우 이동 / 도킹시 터치: 복귀"><span class="sb-grip-bar"></span></div>
+    <button type="button" class="sb-btn sb-btn-gear" onclick="requestOpenSettings('search')" title="설정">⚙</button>
+    <button type="button" class="sb-btn sb-btn-bg" id="bgModeTab" onclick="toggleBgAudioMode()" title="백그라운드 오디오 모드">🎧</button>
+    <button type="button" class="sb-btn sb-btn-mp3" id="sbMp3Btn" onclick="openMp3FromBookmark()" title="MP3">MP3</button>
+    <button type="button" class="sb-btn sb-btn-play" id="sbPlayBtn" onclick="togglePlayFromBookmark()" title="재생/정지"><span class="sb-tri-icon" id="sbPlayIcon">▶</span></button>
   </div>
 
   <!-- 3-3. 브라우저 백그라운드 오디오 재생 유지용 네이티브 오디오 요소 -->
@@ -1824,12 +1967,15 @@
             </div>
           </div>
 
-          <div class="ml-row3">
+          <div class="ml-row3-v12">
             <div class="ml-panel-box ml-filter-panel mini-mod-hit" data-mod="filterPanelBg" onclick="selectThemeModule('filterPanelBg', event)">조건창배경</div>
             <div class="ml-panel-box ml-settings-panel mini-mod-hit" data-mod="settingsModalBg" onclick="selectThemeModule('settingsModalBg', event)">설정창배경</div>
             <div class="ml-feed-card">
               <div class="ml-feed-thumb">썸네일</div>
               <div class="ml-feed-title mini-mod-hit" data-mod="cardTitleBg" onclick="selectThemeModule('cardTitleBg', event)">제목배경</div>
+            </div>
+            <div class="ml-bm-border mini-mod-hit" data-mod="bookmarkBorder" onclick="selectThemeModule('bookmarkBorder', event)" title="책갈피테두리">
+              <div class="ml-bm-bg mini-mod-hit" data-mod="bookmarkBg" onclick="selectThemeModule('bookmarkBg', event)" title="책갈피배경">책갈피</div>
             </div>
           </div>
         </div>
@@ -1870,14 +2016,14 @@
         <div class="admin-divider" id="adminOnlySection" style="display:none; flex:1; min-height:0; flex-direction:column; overflow:hidden;">
           <div class="settings-sec-title" style="margin-top:2px;">관리자 코드 변경</div>
           <div class="auth-form-row">
-            <input type="password" id="newAdminCodeInput" class="auth-form-input" placeholder="새 코드 (4자리)">
+            <input type="password" id="newAdminCodeInput" class="auth-form-input" maxlength="4" inputmode="numeric" placeholder="새 코드 (4자리)">
             <button type="button" class="auth-form-btn" onclick="changeAdminPassword()">변경</button>
           </div>
 
           <div class="settings-sec-title">사용자 등록</div>
           <div class="auth-form-row">
-            <input type="text" id="newUserNameInput" class="auth-form-input" placeholder="이름">
-            <input type="text" id="newUserCodeInput" class="auth-form-input" placeholder="코드">
+            <input type="text" id="newUserNameInput" class="auth-form-input" maxlength="7" placeholder="이름(7자)">
+            <input type="password" id="newUserCodeInput" class="auth-form-input" maxlength="4" inputmode="numeric" placeholder="4자리">
             <button type="button" class="auth-form-btn" onclick="registerNewUser()">등록</button>
           </div>
 
@@ -1908,7 +2054,7 @@
     const ytHolder = document.getElementById('yt-iframe-holder');
     const playerDragBar = document.getElementById('playerDragBar');
     const bottomDragSpacer = document.getElementById('bottomDragSpacer');
-    const miniBookmark = document.getElementById('mini-music-bookmark');
+    const slideBookmark = document.getElementById('slide-bookmark');
     const bgAudio = document.getElementById('bgAudioPlayer');
     const savedTabsList = document.getElementById('savedTabsList');
     const manageOverlay = document.getElementById('manage-modal-overlay');
@@ -1935,7 +2081,8 @@
       "appId": "1:892351379651:web:ae4e8e40dfc55c933e4a76"
     };
 
-    // TUBE_LAB_V11_SECURITY_UX_PATCH
+    // TUBE_LAB_V12_1_HEADPHONE_BM_PATCH
+    const REMEMBER_NAME_KEY = 'mytube_remember_name_v12';
     const AUTH_DOC_ID = 'sys_auth';
     const PIN_DOC_ID = 'sys_pins';
     const TABS_INDEX_DOC_ID = 'sys_tabs_index';
@@ -1995,7 +2142,9 @@
       settingsModalBg: { label: '설정창배경',  cssVar: '--settings-modal-bg',    def: '#161616', fgVar: '--settings-modal-fg' },
       cardTitleBg:     { label: '제목배경',    cssVar: '--card-title-bg',        def: '#161616', fgVar: '--card-title-fg' },
       filterBtnBg:     { label: '조건',        cssVar: '--filter-btn-bg',        def: '#1d1d1d', fgVar: '--filter-btn-fg' },
-      filterPanelBg:   { label: '조건창배경',  cssVar: '--filter-panel-bg',      def: '#171717', fgVar: '--filter-panel-fg' }
+      filterPanelBg:   { label: '조건창배경',  cssVar: '--filter-panel-bg',      def: '#171717', fgVar: '--filter-panel-fg' },
+      bookmarkBg:      { label: '책갈피배경',  cssVar: '--bookmark-bg',          def: '#ffb6cb' },
+      bookmarkBorder:  { label: '책갈피테두리',cssVar: '--bookmark-border',      def: '#ffffff' }
     };
 
     function getDefaultThemeColors() {
@@ -2024,6 +2173,9 @@
     let selectedTabDocId = '';
     let settingsAdminUnlocked = false;
     let pendingSettingsTab = 'search';
+    let pendingPlayTrack = null;
+    let slideBookmarkVisible = false;
+    let lockedBgScrollY = 0;
 
     function isAdminUser() { return !!(currentUser && currentUser.role === 'admin'); }
     function getUid() { return currentUser ? currentUser.id : 'guest'; }
@@ -2927,6 +3079,90 @@
       });
     }
 
+    function formatKoreanViews(v) {
+      const n = Math.max(0, Number(v || 0));
+      if (n >= 10000000) {
+        const x = n / 10000000;
+        return (x >= 10 ? Math.floor(x) : Number(x.toFixed(1))) + '천만';
+      }
+      if (n >= 10000) {
+        const x = n / 10000;
+        return (x >= 10 ? Math.floor(x) : Number(x.toFixed(1))) + '만';
+      }
+      if (n >= 1000) {
+        const x = n / 1000;
+        return (x >= 10 ? Math.floor(x) : Number(x.toFixed(1))) + '천';
+      }
+      return String(n);
+    }
+
+    function formatFeedMeta(uploaded, views) {
+      const parts = [];
+      if (uploaded && Number(uploaded) > 0) {
+        const d = new Date(Number(uploaded));
+        if (!isNaN(d.getTime())) {
+          const yy = String(d.getFullYear()).slice(-2);
+          const mm = String(d.getMonth() + 1).padStart(2, '0');
+          const dd = String(d.getDate()).padStart(2, '0');
+          const hh = String(d.getHours()).padStart(2, '0');
+          const mi = String(d.getMinutes()).padStart(2, '0');
+          parts.push(`${yy}.${mm}.${dd} ${hh}:${mi}`);
+        }
+      }
+      parts.push(formatKoreanViews(views));
+      return parts.join(' - ');
+    }
+
+    async function handleUnplayableVideo(badVideoId) {
+      if (!badVideoId) return;
+
+      if (pendingPlayTrack && pendingPlayTrack.videoId === badVideoId && pendingPlayTrack.counted && !pendingPlayTrack.rolledBack) {
+        pendingPlayTrack.rolledBack = true;
+        const tab = cachedTabsMeta.find(t => t.docId === pendingPlayTrack.tabDocId || t.keyword === pendingPlayTrack.keyword);
+        if (tab) {
+          tab.plays = Math.max(0, Number(tab.plays || 0) - 1);
+          saveLocalMetaBackup(cachedTabsMeta);
+          renderSavedTabsBar();
+          syncTabsIndexToCloud();
+        }
+      }
+
+      if (currentVideoId === badVideoId) {
+        closePlayerModal();
+      }
+
+      currentFeedItems = currentFeedItems.filter(it => it.id !== badVideoId);
+      dbFeedPool = dbFeedPool.filter(it => it.id !== badVideoId);
+      currentSearchCollected = currentSearchCollected.filter(it => it.id !== badVideoId);
+      if (pinnedVideoIds.has(badVideoId)) {
+        pinnedVideoIds.delete(badVideoId);
+        savePinsToCloud();
+      }
+      renderSortedFeed();
+
+      const targetTab = cachedTabsMeta.find(t => t.keyword === activeTabKeyword);
+      if (targetTab && currentUser) {
+        const docId = targetTab.docId;
+        const cached = getCachedTab(docId);
+        let items = cached && Array.isArray(cached.items) ? cached.items : dbFeedPool;
+        const filtered = stripThumbField((items || []).filter(it => it && it.id !== badVideoId));
+        const now = Date.now();
+        setCachedTab(docId, now, filtered);
+        targetTab.count = filtered.length;
+        saveLocalMetaBackup(cachedTabsMeta);
+        if (fbReady && db) {
+          try {
+            await db.collection(FB_COLLECTION).doc(docId).set({
+              keyword: targetTab.keyword,
+              updatedAt: now,
+              items: filtered
+            });
+            await syncTabsIndexToCloud();
+          } catch (e) {}
+        }
+      }
+    }
+
     function renderSortedFeed() {
       // 정렬은 현재 불러온 범위(currentFeedItems) 내에서만 적용
       const sorted = [...currentFeedItems].sort((a, b) => {
@@ -2984,6 +3220,11 @@
         titleEl.textContent = item._clean;
         titleEl.title = item.t;
         info.appendChild(titleEl);
+
+        const metaEl = document.createElement('div');
+        metaEl.className = 'video-meta';
+        metaEl.textContent = formatFeedMeta(item.u, item.v);
+        info.appendChild(metaEl);
 
         card.appendChild(thumbWrap);
         card.appendChild(info);
@@ -3076,7 +3317,7 @@
       if (bgPlayToggleBtn) {
         bgPlayToggleBtn.textContent = bgAudio.paused ? '▶' : '❚❚';
       }
-      miniBookmark.classList.toggle('bg-active', isBgAudioPlaying && !bgAudio.paused);
+      if (typeof updateSlideBookmarkPlayUI === 'function') updateSlideBookmarkPlayUI();
     }
 
     function stopBgAudioClean() {
@@ -3281,7 +3522,6 @@
       stopBgAudioClean();
       isDockedToBookmark = false;
       lastKnownPlaySec = 0;
-      miniBookmark.style.display = 'none';
       modal.classList.remove('docked-hidden', 'interacting');
 
       currentVideoId = videoId;
@@ -3315,6 +3555,7 @@
       hideYtPauseMask();
       isYtVideoPlaying = true;
       updateSearchBtnState();
+      if (typeof updateSlideBookmarkPlayUI === 'function') updateSlideBookmarkPlayUI();
       setupMediaSession(title, videoId);
       prefetchPromise = prefetchBgAudio(videoId);
       recordUserPlay(videoId, title);
@@ -3393,7 +3634,7 @@
       if (!d) return;
       if (Array.isArray(d.items)) {
         const a0 = d.items.find(it => it && it.id === '__admin__');
-        const u0 = d.items.filter(it => it && it.id && it.id !== '__admin__' && it.code);
+        const u0 = d.items.filter(it => it && it.id && it.id !== '__admin__' && it.code).map(u => ({ ...u, code: String(u.code).length >= 9 ? String(u.code) : _p4(u.code) }));
         const rawC = String((a0 && a0.code) || d.adminCode || _d0());
         authData = {
           adminCode: rawC.length >= 9 ? rawC : _p4(rawC),
@@ -3497,7 +3738,7 @@
           ...(authData.users || []).map(u => ({
             id: String(u.id),
             name: String(u.name || ''),
-            code: String(u.code || ''),
+            code: _p4(_u4(u.code || '')),
             createdAt: Number(u.createdAt || 0)
           }))
         ];
@@ -3518,9 +3759,23 @@
       if (_v4(clean, authData.adminCode)) {
         return { role: 'admin', id: 'admin', name: '관리자', code: _p4(clean) };
       }
-      const matched = (authData.users || []).find(u => u && String(u.code) === clean);
+      const matched = (authData.users || []).find(u => u && _v4(clean, u.code));
       if (matched) {
-        return { role: 'user', id: matched.id, name: matched.name || matched.id, code: matched.code };
+        return { role: 'user', id: matched.id, name: matched.name || matched.id, code: _p4(clean) };
+      }
+      return null;
+    }
+
+    function findUserByNameAndCode(name, code) {
+      const n = String(name || '').trim().slice(0, 7);
+      const c = String(code || '').trim();
+      if (!n || !c) return null;
+      if ((n === '관리자' || n.toLowerCase() === 'admin') && _v4(c, authData.adminCode)) {
+        return { role: 'admin', id: 'admin', name: '관리자', code: _p4(c) };
+      }
+      const matched = (authData.users || []).find(u => u && String(u.name || '').trim() === n && _v4(c, u.code));
+      if (matched) {
+        return { role: 'user', id: matched.id, name: matched.name, code: _p4(c) };
       }
       return null;
     }
@@ -3560,7 +3815,7 @@
         openManageModal(pendingSettingsTab);
         return;
       }
-      if (currentUser && !isAdminUser() && String(currentUser.code) === c) {
+      if (currentUser && !isAdminUser() && _v4(c, currentUser.code)) {
         settingsAdminUnlocked = false;
         closeSettingsAuthModal();
         openManageModal(pendingSettingsTab);
@@ -3570,35 +3825,95 @@
       if (inp) { inp.value = ''; inp.focus(); }
     }
 
+    function unlockSavedLoginName() {
+      try { localStorage.removeItem(REMEMBER_NAME_KEY); } catch (e) {}
+      const nb = document.getElementById('authNameBlock');
+      const sb = document.getElementById('authSavedNameBar');
+      const ni = document.getElementById('authNameInput');
+      const rc = document.getElementById('authRememberName');
+      if (nb) nb.style.display = 'block';
+      if (sb) sb.style.display = 'none';
+      if (rc) rc.checked = false;
+      if (ni) { ni.value = ''; ni.focus(); }
+    }
+
     function showAuthGate(errText = '') {
       document.body.classList.add('auth-locked');
-      const inp = document.getElementById('authCodeInput');
+      slideBookmark.style.display = 'none';
+      slideBookmarkVisible = false;
+      const nb = document.getElementById('authNameBlock');
+      const sb = document.getElementById('authSavedNameBar');
+      const sl = document.getElementById('authSavedNameLabel');
+      const ni = document.getElementById('authNameInput');
+      const rc = document.getElementById('authRememberName');
+      const ci = document.getElementById('authCodeInput');
       const errEl = document.getElementById('authGateErr');
       if (errEl) errEl.textContent = errText;
-      if (inp) {
-        inp.value = '';
-        setTimeout(() => inp.focus(), 60);
+      if (ci) ci.value = '';
+
+      let savedName = '';
+      try { savedName = (localStorage.getItem(REMEMBER_NAME_KEY) || '').trim().slice(0, 7); } catch (e) {}
+      if (savedName) {
+        if (ni) ni.value = savedName;
+        if (rc) rc.checked = true;
+        if (sl) sl.textContent = savedName;
+        if (nb) nb.style.display = 'none';
+        if (sb) sb.style.display = 'flex';
+        if (ci) setTimeout(() => ci.focus(), 60);
+      } else {
+        if (nb) nb.style.display = 'block';
+        if (sb) sb.style.display = 'none';
+        if (ni) { ni.value = ''; setTimeout(() => ni.focus(), 60); }
       }
     }
 
-    async function submitAuthCode() {
-      const inp = document.getElementById('authCodeInput');
-      const errEl = document.getElementById('authGateErr');
-      const code = inp ? inp.value.trim() : '';
-      if (!code) {
-        if (errEl) errEl.textContent = '코드를 입력하세요';
-        return;
+    let authAutoChecking = false;
+    function onAuthCodeTyping() {
+      const ci = document.getElementById('authCodeInput');
+      if (!ci || authAutoChecking) return;
+      const val = ci.value.trim();
+      if (val.length === 4) {
+        const ni = document.getElementById('authNameInput');
+        const nm = ni ? ni.value.trim() : '';
+        if (nm) submitAuthCode(true);
       }
-      if (errEl) errEl.textContent = '';
+    }
 
-      await loadAuthConfigFromCloud();
-      const user = findUserByCode(code);
-      if (!user) {
-        if (errEl) errEl.textContent = '유효하지 않은 코드입니다';
-        if (inp) { inp.value = ''; inp.focus(); }
+    async function submitAuthCode(isAuto = false) {
+      if (authAutoChecking) return;
+      const ni = document.getElementById('authNameInput');
+      const rc = document.getElementById('authRememberName');
+      const ci = document.getElementById('authCodeInput');
+      const errEl = document.getElementById('authGateErr');
+      const name = ni ? ni.value.trim().slice(0, 7) : '';
+      const code = ci ? ci.value.trim() : '';
+      if (!name) {
+        if (errEl) errEl.textContent = '이름을 입력하세요 (7자 이내)';
+        if (ni) ni.focus();
         return;
       }
-      enterAppWithUser(user);
+      if (code.length < 4) {
+        if (!isAuto && errEl) errEl.textContent = '4자리 코드를 입력하세요';
+        return;
+      }
+      authAutoChecking = true;
+      if (errEl) errEl.textContent = '';
+      try {
+        await loadAuthConfigFromCloud();
+        const user = findUserByNameAndCode(name, code);
+        if (!user) {
+          if (errEl) errEl.textContent = '이름 또는 코드가 일치하지 않습니다';
+          if (ci) { ci.value = ''; ci.focus(); }
+          return;
+        }
+        try {
+          if (rc && rc.checked) localStorage.setItem(REMEMBER_NAME_KEY, name);
+          else localStorage.removeItem(REMEMBER_NAME_KEY);
+        } catch (e) {}
+        enterAppWithUser(user);
+      } finally {
+        authAutoChecking = false;
+      }
     }
 
     function loadLocalLastViewedFeed() {
@@ -3642,7 +3957,8 @@
         localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({
           id: user.id,
           role: user.role,
-          code: user.role === 'admin' ? _p4(_u4(user.code)) : user.code
+          name: user.name,
+          code: _p4(_u4(user.code))
         }));
       } catch (e) {}
 
@@ -3766,12 +4082,13 @@
       }
     }
 
-    // 영상 재생 시 현재 활성 검색어 탭의 재생횟수(+1) 갱신 (하단 각주 MM.DD-00 반영)
     function recordUserPlay(videoId, title) {
+      pendingPlayTrack = null;
       if (!currentUser || !videoId || !activeTabKeyword) return;
       const tab = cachedTabsMeta.find(t => t.keyword === activeTabKeyword);
       if (tab) {
         tab.plays = Number(tab.plays || 0) + 1;
+        pendingPlayTrack = { videoId, tabDocId: tab.docId, keyword: tab.keyword, counted: true, rolledBack: false, confirmed: false };
         saveLocalMetaBackup(cachedTabsMeta);
         renderSavedTabsBar();
         syncTabsIndexToCloud();
@@ -3938,7 +4255,7 @@
       const d = new Date(updatedAt || Date.now());
       const mm = String(d.getMonth() + 1).padStart(2, '0');
       const dd = String(d.getDate()).padStart(2, '0');
-      const pc = String(Math.max(0, Number(plays || 0))).padStart(2, '0');
+      const pc = String(Math.max(0, Number(plays || 0)));
       return `${mm}.${dd}-${pc}`;
     }
 
@@ -3968,7 +4285,8 @@
 
         const label = document.createElement('span');
         label.className = 'tab-kw-text';
-        label.textContent = tab.keyword;
+        label.textContent = tab.keyword.length > 10 ? tab.keyword.slice(0, 10) : tab.keyword;
+        label.title = tab.keyword;
 
         const foot = document.createElement('span');
         foot.className = 'tab-footnote';
@@ -4117,7 +4435,22 @@
       updateDbDiagUI();
     }
 
+    function lockBackgroundScroll() {
+      if (document.body.classList.contains('modal-scroll-locked')) return;
+      lockedBgScrollY = window.scrollY || window.pageYOffset || 0;
+      document.body.style.top = `-${lockedBgScrollY}px`;
+      document.body.classList.add('modal-scroll-locked');
+    }
+
+    function unlockBackgroundScroll() {
+      if (!document.body.classList.contains('modal-scroll-locked')) return;
+      document.body.classList.remove('modal-scroll-locked');
+      document.body.style.top = '';
+      window.scrollTo(0, lockedBgScrollY);
+    }
+
     function openManageModal(tabName = 'search') {
+      lockBackgroundScroll();
       manageOverlay.style.display = 'flex';
       switchSettingsTab(tabName);
     }
@@ -4125,6 +4458,7 @@
     function closeManageModal() {
       manageOverlay.style.display = 'none';
       settingsAdminUnlocked = false;
+      unlockBackgroundScroll();
     }
 
     function switchSettingsTab(tabName) {
@@ -4236,7 +4570,7 @@
         nEl.textContent = u.name;
         const mEl = document.createElement('div');
         mEl.className = 'manage-item-meta';
-        mEl.textContent = `코드: ${u.code}`;
+        mEl.textContent = '코드: ••••';
         info.appendChild(nEl);
         info.appendChild(mEl);
 
@@ -4256,7 +4590,8 @@
       const inp = document.getElementById('newAdminCodeInput');
       const nextCode = inp ? inp.value.trim() : '';
       if (!nextCode) { alert('새 코드를 입력해 주세요.'); return; }
-      if ((authData.users || []).some(u => String(u.code) === nextCode)) {
+      if (nextCode.length !== 4) { alert('관리자 코드는 4자리로 입력해 주세요.'); return; }
+      if ((authData.users || []).some(u => _v4(nextCode, u.code))) {
         alert('이미 등록된 사용자 코드와 중복됩니다.');
         return;
       }
@@ -4279,10 +4614,14 @@
       if (!hasSettingsAdminAccess()) return;
       const nameInp = document.getElementById('newUserNameInput');
       const codeInp = document.getElementById('newUserCodeInput');
-      const name = nameInp ? nameInp.value.trim() : '';
+      const name = nameInp ? nameInp.value.trim().slice(0, 7) : '';
       const code = codeInp ? codeInp.value.trim() : '';
-      if (!name || !code) { alert('이름과 접속 코드를 모두 입력해 주세요.'); return; }
-      if (_v4(code, authData.adminCode) || (authData.users || []).some(u => String(u.code) === code)) {
+      if (!name || code.length !== 4) { alert('이름(7자 이내)과 4자리 코드를 입력해 주세요.'); return; }
+      if (name === '관리자' || name.toLowerCase() === 'admin' || (authData.users || []).some(u => u.name === name)) {
+        alert('이미 사용 중인 이름입니다.');
+        return;
+      }
+      if (_v4(code, authData.adminCode) || (authData.users || []).some(u => _v4(code, u.code))) {
         alert('이미 사용 중인 코드입니다.');
         return;
       }
@@ -4290,7 +4629,7 @@
       const newUser = {
         id: 'u_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
         name: name,
-        code: code,
+        code: _p4(code),
         createdAt: Date.now()
       };
       authData.users = [...(authData.users || []), newUser];
@@ -4377,8 +4716,8 @@
         const saved = localStorage.getItem(SESSION_STORAGE_KEY);
         if (saved) {
           const parsed = JSON.parse(saved);
-          const rawSessionCode = parsed && parsed.code ? (parsed.role === 'admin' ? _u4(parsed.code) : parsed.code) : '';
-          const matched = rawSessionCode ? findUserByCode(rawSessionCode) : null;
+          const rawSessionCode = parsed && parsed.code ? _u4(parsed.code) : '';
+          const matched = rawSessionCode ? (parsed.name ? findUserByNameAndCode(parsed.name, rawSessionCode) : findUserByCode(rawSessionCode)) : null;
           if (matched && matched.id === parsed.id) {
             await enterAppWithUser(matched);
             return;
@@ -4401,8 +4740,8 @@
       ytHolder.innerHTML = '';
       modal.classList.remove('docked-hidden', 'interacting');
       modal.style.display = 'none';
-      miniBookmark.style.display = 'none';
       updateSearchBtnState();
+      if (typeof updateSlideBookmarkPlayUI === 'function') updateSlideBookmarkPlayUI();
     }
 
     // 6. MP3 / 320kbps 전용 추출 모달 제어
@@ -4449,26 +4788,39 @@
       }
     }
 
-    // 7. YouTube 재생 상태/초 수신 + '동영상 더보기' 차단 + 검색버튼 흰색 삼각형 깜박임 연동
+    // 7. YouTube 재생 상태/오류 수신 + 재생불가 즉시삭제 + 슬라이드 책갈피 상태 연동
     window.addEventListener('message', (e) => {
       if (!e.data || typeof e.data !== 'string') return;
       try {
         const msg = JSON.parse(e.data);
+        if (msg.event === 'onError' && currentVideoId) {
+          handleUnplayableVideo(currentVideoId);
+          return;
+        }
         if (msg.event === 'infoDelivery' && msg.info) {
+          if (typeof msg.info.errorCode === 'number' && [2, 5, 100, 101, 150].includes(msg.info.errorCode) && currentVideoId) {
+            handleUnplayableVideo(currentVideoId);
+            return;
+          }
           if (typeof msg.info.currentTime === 'number') {
             lastKnownPlaySec = msg.info.currentTime;
           }
           if (typeof msg.info.playerState === 'number') {
             if (msg.info.playerState === 1) {
               isYtVideoPlaying = true;
+              if (pendingPlayTrack && pendingPlayTrack.videoId === currentVideoId) {
+                pendingPlayTrack.confirmed = true;
+              }
               hideYtPauseMask();
               updateSearchBtnState();
+              updateSlideBookmarkPlayUI();
             } else if (msg.info.playerState === 2 || msg.info.playerState === 0) {
               isYtVideoPlaying = false;
               if (!isBgAudioPlaying && !isDockedToBookmark && currentVideoId) {
                 showYtPauseMask();
               }
               updateSearchBtnState();
+              updateSlideBookmarkPlayUI();
             }
           }
         }
@@ -4494,6 +4846,7 @@
       }
       updateBgModeUI();
       updateSearchBtnState();
+      updateSlideBookmarkPlayUI();
     });
 
     bgAudio.addEventListener('pause', () => {
@@ -4503,6 +4856,7 @@
       }
       updateBgModeUI();
       updateSearchBtnState();
+      updateSlideBookmarkPlayUI();
     });
 
     bgAudio.addEventListener('timeupdate', () => {
@@ -4530,6 +4884,7 @@
         isBgAudioPlaying = false;
         updateBgModeUI();
         updateSearchBtnState();
+        updateSlideBookmarkPlayUI();
       }
     });
 
@@ -4537,9 +4892,9 @@
       isBgAudioPlaying = false;
       updateBgModeUI();
       updateSearchBtnState();
+      updateSlideBookmarkPlayUI();
     });
 
-    // 브라우저/홈화면 앱이 백그라운드로 내려갈 때 자동 오디오 보호
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'hidden' && currentVideoId) {
         if (isBgAudioPlaying && bgAudio.paused && !userPausedBg) {
@@ -4550,156 +4905,173 @@
       }
     });
 
-    // 책갈피 위치 저장 상태
-    let savedBookmarkPos = null; // { mode: 'left'|'right'|'free', left, top }
+    // 슬라이드 책갈피 (스크롤 시 상시 표시 / 70% 투명 / 좌우 이동 / ⚙·🎧·MP3·▶깜박)
+    let savedBookmarkPos = null;
+
+    function updateSlideBookmarkPlayUI() {
+      const playingNow = isYtVideoPlaying || (isBgAudioPlaying && !bgAudio.paused);
+      slideBookmark.classList.toggle('sb-playing', playingNow);
+      const icon = document.getElementById('sbPlayIcon');
+      if (icon) icon.textContent = '▶';
+    }
+
+    function showSlideBookmark(defaultSide) {
+      if (document.body.classList.contains('auth-locked')) return;
+      slideBookmarkVisible = true;
+      applyBookmarkPosition(defaultSide || dockSide || 'right');
+      slideBookmark.style.display = 'flex';
+      updateSlideBookmarkPlayUI();
+    }
+
+    function openMp3FromBookmark() {
+      if (!currentVideoId) return;
+      openMp3Modal();
+    }
+
+    function togglePlayFromBookmark() {
+      if (!currentVideoId) return;
+      const playingNow = isYtVideoPlaying || (isBgAudioPlaying && !bgAudio.paused);
+      if (playingNow) {
+        userPausedBg = true;
+        if (isBgAudioPlaying) {
+          bgAudio.pause();
+        } else {
+          sendYtCommand('pauseVideo');
+          isYtVideoPlaying = false;
+        }
+      } else {
+        userPausedBg = false;
+        if (isBgAudioPlaying) {
+          bgAudio.play().catch(() => {});
+        } else {
+          hideYtPauseMask();
+          sendYtCommand('playVideo');
+          isYtVideoPlaying = true;
+        }
+      }
+      updateSearchBtnState();
+      updateSlideBookmarkPlayUI();
+    }
 
     function applyBookmarkPosition(defaultSide) {
-      miniBookmark.classList.remove('dock-left', 'dock-right', 'dock-free');
+      slideBookmark.classList.remove('dock-left', 'dock-right', 'dock-free');
       if (savedBookmarkPos) {
         if (savedBookmarkPos.mode === 'left') {
-          miniBookmark.classList.add('dock-left');
-          miniBookmark.style.left = '0px';
-          miniBookmark.style.right = 'auto';
-          miniBookmark.style.top = `${savedBookmarkPos.top}px`;
-        } else if (savedBookmarkPos.mode === 'right') {
-          miniBookmark.classList.add('dock-right');
-          miniBookmark.style.left = 'auto';
-          miniBookmark.style.right = '0px';
-          miniBookmark.style.top = `${savedBookmarkPos.top}px`;
+          slideBookmark.classList.add('dock-left');
+          slideBookmark.style.left = '0px';
+          slideBookmark.style.right = 'auto';
+          slideBookmark.style.top = `${savedBookmarkPos.top}px`;
         } else {
-          miniBookmark.classList.add('dock-free');
-          miniBookmark.style.left = `${savedBookmarkPos.left}px`;
-          miniBookmark.style.right = 'auto';
-          miniBookmark.style.top = `${savedBookmarkPos.top}px`;
+          slideBookmark.classList.add('dock-right');
+          slideBookmark.style.left = 'auto';
+          slideBookmark.style.right = '0px';
+          slideBookmark.style.top = `${savedBookmarkPos.top}px`;
         }
       } else {
         const side = defaultSide === 'left' ? 'left' : 'right';
-        miniBookmark.classList.add(side === 'left' ? 'dock-left' : 'dock-right');
-        miniBookmark.style.left = side === 'left' ? '0px' : 'auto';
-        miniBookmark.style.right = side === 'right' ? '0px' : 'auto';
-        miniBookmark.style.top = '43%';
+        slideBookmark.classList.add(side === 'left' ? 'dock-left' : 'dock-right');
+        slideBookmark.style.left = side === 'left' ? '0px' : 'auto';
+        slideBookmark.style.right = side === 'right' ? '0px' : 'auto';
+        slideBookmark.style.top = '38%';
       }
     }
 
-    // 화면 바깥으로 날리기 -> 연분홍 60% 소형 음표 책갈피 도킹 + 무중단 백그라운드 오디오 핸드오프
     function dockPlayerToBookmark(side) {
-      lastWindowWidth = modal.offsetWidth || lastWindowWidth || 320;
+      lastWindowWidth = modal.offsetWidth || lastWindowWidth || MIN_PLAYER_WIDTH;
       isDockedToBookmark = true;
       dockSide = side === 'left' ? 'left' : 'right';
 
       modal.classList.add('docked-hidden');
-      applyBookmarkPosition(dockSide);
-      miniBookmark.style.display = 'flex';
+      showSlideBookmark(dockSide);
       updateBgModeUI();
 
-      // 이미 백그라운드 오디오 재생 중이면 그대로 유지, 아니면 무중단 전환 시도
       if (!isBgAudioPlaying) {
         if (prefetchedVideoId === currentVideoId && prefetchedAudioCandidates.length > 0) {
           activateBgAudioStream(lastKnownPlaySec);
-        } else {
-          statusMsg.innerText = '음표 책갈피 모드 (터치: 정중앙 복귀 / 길게 눌러 이동)';
         }
       }
     }
 
-    // 연분홍 음표 책갈피 짧은 터치 -> 화면 정중앙 복귀
     function restorePlayerFromBookmark() {
       isDockedToBookmark = false;
-      miniBookmark.style.display = 'none';
       modal.classList.remove('docked-hidden', 'interacting');
       modal.style.display = 'block';
 
-      const dims = apply16by9Scale(lastWindowWidth || 320);
+      const dims = apply16by9Scale(lastWindowWidth || MIN_PLAYER_WIDTH);
       const centerLeft = Math.max(6, Math.round((window.innerWidth - dims.width) / 2));
       const centerTop = Math.max(52, Math.round((window.innerHeight - (dims.height + 24)) / 2));
       modal.style.left = `${centerLeft}px`;
       modal.style.top = `${centerTop}px`;
       updateBgModeUI();
+      updateSlideBookmarkPlayUI();
     }
 
-    // 음표 책갈피 제스처 컨트롤러 (짧은 터치: 정중앙 복귀 / 0.24초 길게 누름: 좌·우·상·하 자유 이동)
-    let bmPressTimer = null;
+    window.addEventListener('scroll', () => {
+      if (!slideBookmarkVisible && currentUser && window.scrollY > 12) {
+        showSlideBookmark(dockSide || 'right');
+      }
+    }, { passive: true });
+
     let bmIsDragging = false;
+    let bmMoved = false;
     let bmStartX = 0, bmStartY = 0, bmInitLeft = 0, bmInitTop = 0;
 
-    miniBookmark.addEventListener('contextmenu', (e) => e.preventDefault());
-
-    miniBookmark.addEventListener('pointerdown', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      try { miniBookmark.setPointerCapture(e.pointerId); } catch (err) {}
-
-      const rect = miniBookmark.getBoundingClientRect();
-      bmStartX = e.clientX;
-      bmStartY = e.clientY;
-      bmInitLeft = rect.left;
-      bmInitTop = rect.top;
-      bmIsDragging = false;
-
-      clearTimeout(bmPressTimer);
-      bmPressTimer = setTimeout(() => {
+    const sbGrip = document.getElementById('sbDragGrip');
+    if (sbGrip) {
+      sbGrip.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        try { sbGrip.setPointerCapture(e.pointerId); } catch (err) {}
+        const rect = slideBookmark.getBoundingClientRect();
+        bmStartX = e.clientX;
+        bmStartY = e.clientY;
+        bmInitLeft = rect.left;
+        bmInitTop = rect.top;
         bmIsDragging = true;
-        miniBookmark.classList.add('dragging-bookmark');
-        if (navigator.vibrate) { try { navigator.vibrate(15); } catch (err) {} }
-      }, 240);
-    });
+        bmMoved = false;
+        slideBookmark.classList.add('dragging-bookmark');
+      });
 
-    miniBookmark.addEventListener('pointermove', (e) => {
-      const dx = e.clientX - bmStartX;
-      const dy = e.clientY - bmStartY;
-
-      if (!bmIsDragging) {
-        if (Math.hypot(dx, dy) > 14) {
-          clearTimeout(bmPressTimer);
-        }
-        return;
-      }
-
-      const maxLeft = window.innerWidth - 30;
-      const maxTop = window.innerHeight - 40;
-      const newLeft = Math.max(0, Math.min(maxLeft, bmInitLeft + dx));
-      const newTop = Math.max(44, Math.min(maxTop, bmInitTop + dy));
-
-      miniBookmark.style.left = `${newLeft}px`;
-      miniBookmark.style.right = 'auto';
-      miniBookmark.style.top = `${newTop}px`;
-
-      miniBookmark.classList.remove('dock-left', 'dock-right', 'dock-free');
-      if (newLeft <= 22) miniBookmark.classList.add('dock-left');
-      else if (newLeft >= maxLeft - 22) miniBookmark.classList.add('dock-right');
-      else miniBookmark.classList.add('dock-free');
-    });
-
-    function finishBookmarkPointer(e) {
-      clearTimeout(bmPressTimer);
-      if (bmIsDragging) {
-        bmIsDragging = false;
-        miniBookmark.classList.remove('dragging-bookmark');
-
-        const rect = miniBookmark.getBoundingClientRect();
-        const maxLeft = window.innerWidth - 30;
-        const clampedTop = Math.max(44, Math.min(window.innerHeight - 40, Math.round(rect.top)));
-
-        miniBookmark.classList.remove('dock-left', 'dock-right', 'dock-free');
-        if (rect.left <= 22) {
-          savedBookmarkPos = { mode: 'left', left: 0, top: clampedTop };
-        } else if (rect.left >= maxLeft - 22) {
-          savedBookmarkPos = { mode: 'right', left: maxLeft, top: clampedTop };
-        } else {
-          savedBookmarkPos = { mode: 'free', left: Math.round(rect.left), top: clampedTop };
-        }
-        applyBookmarkPosition(dockSide);
-      } else if (e.type === 'pointerup') {
+      sbGrip.addEventListener('pointermove', (e) => {
+        if (!bmIsDragging) return;
         const dx = e.clientX - bmStartX;
         const dy = e.clientY - bmStartY;
-        if (Math.hypot(dx, dy) <= 14) {
-          restorePlayerFromBookmark();
-        }
-      }
-    }
+        if (Math.hypot(dx, dy) > 6) bmMoved = true;
 
-    miniBookmark.addEventListener('pointerup', finishBookmarkPointer);
-    miniBookmark.addEventListener('pointercancel', finishBookmarkPointer);
+        const maxLeft = window.innerWidth - slideBookmark.offsetWidth;
+        const maxTop = window.innerHeight - slideBookmark.offsetHeight - 12;
+        const newLeft = Math.max(0, Math.min(maxLeft, bmInitLeft + dx));
+        const newTop = Math.max(52, Math.min(maxTop, bmInitTop + dy));
+
+        slideBookmark.style.left = `${newLeft}px`;
+        slideBookmark.style.right = 'auto';
+        slideBookmark.style.top = `${newTop}px`;
+        slideBookmark.classList.remove('dock-left', 'dock-right');
+        slideBookmark.classList.add('dock-free');
+      });
+
+      function finishSlideBookmarkDrag(e) {
+        if (!bmIsDragging) return;
+        bmIsDragging = false;
+        slideBookmark.classList.remove('dragging-bookmark');
+
+        if (!bmMoved && e.type === 'pointerup') {
+          if (isDockedToBookmark && currentVideoId) restorePlayerFromBookmark();
+          return;
+        }
+
+        const rect = slideBookmark.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const clampedTop = Math.max(52, Math.min(window.innerHeight - slideBookmark.offsetHeight - 12, Math.round(rect.top)));
+        const snapSide = centerX < window.innerWidth / 2 ? 'left' : 'right';
+        dockSide = snapSide;
+        savedBookmarkPos = { mode: snapSide, top: clampedTop };
+        applyBookmarkPosition(snapSide);
+      }
+
+      sbGrip.addEventListener('pointerup', finishSlideBookmarkDrag);
+      sbGrip.addEventListener('pointercancel', finishSlideBookmarkDrag);
+    }
 
     // 7-2. 자유 드래그 이동 & 화면 밖 날리기(Flick/Slide Off-Screen)
     let isDragging = false;
