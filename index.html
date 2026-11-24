@@ -51,7 +51,16 @@
       max-width: 100vw;
     }
 
-    /* 0. 로그인 게이트 (인증 전 메인 숨김 · 중앙 소형 코드창만 표시) */
+    /* 0. 로그인 게이트 (인증 전 메인 숨김 · 배경 스크롤 완전 고정 · 중앙 소형 코드창만 표시) */
+    body.auth-locked {
+      position: fixed !important;
+      inset: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      overflow: hidden !important;
+      overscroll-behavior: none !important;
+      touch-action: none !important;
+    }
     body.auth-locked .top-header,
     body.auth-locked .video-grid {
       display: none !important;
@@ -173,8 +182,6 @@
     }
     /* 2차 설정 Code 창 공용 입력 기본 스타일 보존 */
     .auth-gate-input {
-      flex: 1;
-      min-width: 0;
       padding: 8px 10px;
       border-radius: 7px;
       border: 1px solid #333;
@@ -202,8 +209,8 @@
     }
     .auth-gate-btn:active { opacity: 0.85; transform: scale(0.97); }
     .auth-gate-err {
-      min-height: 14px;
-      margin-top: 7px;
+      min-height: 13px;
+      margin-top: 5px;
       font-size: 10.5px;
       color: #ff6b6b;
     }
@@ -698,7 +705,7 @@
     }
     .manage-modal-box {
       width: min(95vw, 392px);
-      height: min(86dvh, 520px);
+      height: min(88dvh, 620px);
       overscroll-behavior: contain;
       display: flex;
       flex-direction: column;
@@ -766,6 +773,23 @@
     }
     .settings-pane.active {
       display: flex;
+    }
+    #settings-pane-auth {
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+      padding-right: 2px;
+    }
+    #settings-pane-auth #adminOnlySection {
+      flex: none !important;
+      overflow: visible !important;
+    }
+    #settings-pane-auth #adminUsersList {
+      flex: none;
+      overflow-y: auto;
+      min-height: 115px;
+      max-height: 230px;
+      margin-bottom: 6px;
     }
 
     .manage-list {
@@ -1639,13 +1663,24 @@
       background: rgba(255, 70, 140, 0.92);
       box-shadow: 0 0 0 1.2px #ffffff;
     }
+    .sb-btn-note { font-size: 14px; }
+    .sb-btn-note.has-track {
+      background: rgba(217, 56, 106, 0.88);
+      box-shadow: 0 0 0 1.2px rgba(255, 255, 255, 0.92);
+    }
+    .sb-btn-note.window-open {
+      background: rgba(255, 255, 255, 0.94);
+      color: #d9386a;
+      text-shadow: none;
+    }
     .sb-btn-mp3 { font-size: 8px; letter-spacing: -0.3px; }
     .sb-btn-play { font-size: 12px; }
     @keyframes sbPlayBlink {
       0%, 100% { opacity: 1; transform: scale(1); }
       50% { opacity: 0.25; transform: scale(0.92); }
     }
-    #slide-bookmark.sb-playing .sb-tri-icon {
+    #slide-bookmark.sb-playing .sb-tri-icon,
+    #slide-bookmark.sb-playing .sb-note-icon {
       display: inline-block;
       animation: sbPlayBlink 1.5s ease-in-out infinite;
     }
@@ -1757,7 +1792,7 @@
   <div id="settings-auth-overlay" onclick="if(event.target===this){closeSettingsAuthModal()}">
     <div class="settings-auth-box">
       <input type="password" id="settingsAuthCodeInput" class="auth-gate-input" maxlength="4" inputmode="numeric" style="width:100%;" placeholder="CODE" autocomplete="off" onkeydown="if(event.key==='Enter'){submitSettingsAuthCode()}">
-      <div class="auth-gate-err" id="settingsAuthErr" style="min-height:13px; margin-top:5px;"></div>
+      <div class="auth-gate-err" id="settingsAuthErr"></div>
       <div class="settings-auth-actions">
         <button type="button" class="settings-auth-cancel" onclick="closeSettingsAuthModal()">취소</button>
         <button type="button" class="settings-auth-ok" onclick="submitSettingsAuthCode()">확인</button>
@@ -1888,13 +1923,14 @@
     </div>
   </div>
 
-  <!-- 3-2. 슬라이드 책갈피 (스크롤 시 상시 표시 · 투명도 70% · 좌/우 한 손 이동 · ⚙/🎧/MP3/▶깜박) -->
+  <!-- 3-2. 슬라이드 책갈피 (스크롤/재생 시 상시 표시 · 투명도 70% · 좌/우 한 손 이동 · ♪/▶/🎧/MP3/⚙) -->
   <div id="slide-bookmark" class="dock-right">
-    <div class="sb-grip" id="sbDragGrip" title="드래그: 좌·우 이동 / 도킹시 터치: 복귀"><span class="sb-grip-bar"></span></div>
-    <button type="button" class="sb-btn sb-btn-gear" onclick="requestOpenSettings('search')" title="설정">⚙</button>
+    <div class="sb-grip" id="sbDragGrip" title="드래그: 좌·우 이동"><span class="sb-grip-bar"></span></div>
+    <button type="button" class="sb-btn sb-btn-note" id="sbNoteBtn" onclick="togglePlayerFromNote()" title="재생창 열기/접기"><span class="sb-note-icon" id="sbNoteIcon">♪</span></button>
+    <button type="button" class="sb-btn sb-btn-play" id="sbPlayBtn" onclick="togglePlayFromBookmark()" title="재생/정지"><span class="sb-tri-icon" id="sbPlayIcon">▶</span></button>
     <button type="button" class="sb-btn sb-btn-bg" id="bgModeTab" onclick="toggleBgAudioMode()" title="백그라운드 오디오 모드">🎧</button>
     <button type="button" class="sb-btn sb-btn-mp3" id="sbMp3Btn" onclick="openMp3FromBookmark()" title="MP3">MP3</button>
-    <button type="button" class="sb-btn sb-btn-play" id="sbPlayBtn" onclick="togglePlayFromBookmark()" title="재생/정지"><span class="sb-tri-icon" id="sbPlayIcon">▶</span></button>
+    <button type="button" class="sb-btn sb-btn-gear" onclick="requestOpenSettings('search')" title="설정">⚙</button>
   </div>
 
   <!-- 3-3. 브라우저 백그라운드 오디오 재생 유지용 네이티브 오디오 요소 -->
@@ -2006,7 +2042,7 @@
         </div>
 
         <!-- 관리자 전용 구역 (관리자 비번 입력 시 접근 가능) -->
-        <div class="admin-divider" id="adminOnlySection" style="display:none; flex:1; min-height:0; flex-direction:column; overflow:hidden;">
+        <div class="admin-divider" id="adminOnlySection" style="display:none; flex-direction:column;">
           <div class="settings-sec-title" style="margin-top:2px;">관리자 코드 변경</div>
           <div class="auth-form-row">
             <input type="password" id="newAdminCodeInput" class="auth-form-input" maxlength="4" inputmode="numeric" placeholder="새 코드 (4자리)">
@@ -2074,8 +2110,9 @@
       "appId": "1:892351379651:web:ae4e8e40dfc55c933e4a76"
     };
 
-    // TUBE_LAB_V13_MINIMAL_LOGIN_PATCH
+    // TUBE_LAB_V14_AUTH_NOTE_PATCH
     const REMEMBER_NAME_KEY = 'mytube_remember_name_v12';
+    const PENDING_AUTH_SYNC_KEY = 'mytube_pending_auth_sync_v14';
     const AUTH_DOC_ID = 'sys_auth';
     const PIN_DOC_ID = 'sys_pins';
     const TABS_INDEX_DOC_ID = 'sys_tabs_index';
@@ -2095,9 +2132,10 @@
     const _k0=[48,48,48,48],_c9='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
     function _r3(){let o='';for(let i=0;i<3;i++)o+=_c9[(Math.random()*_c9.length)|0];return o;}
     function _d0(){return String.fromCharCode.apply(null,_k0);}
-    function _p4(v){const s=String(v||'').trim();return _r3()+s+_r3();}
     function _u4(v){const s=String(v||'').trim();return s.length>=9?s.slice(3,-3):s;}
-    function _v4(a,b){return String(a||'').trim()===_u4(b);}
+    function _p4(v){const s=_u4(v);return _r3()+s+_r3();}
+    function _v4(a,b){return _u4(a)===_u4(b);}
+    function _normName(v){return String(v||'').normalize('NFC').trim().slice(0,7);}
 
     (function _s9(){
       const _isEditable=(t)=>t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.isContentEditable);
@@ -2145,7 +2183,7 @@
       return obj;
     }
 
-    let authData = { adminCode: _p4(_d0()), users: [] };
+    let authData = { adminCode: _p4(_d0()), users: [], updatedAt: 0 };
     let currentUser = null;
     let currentFeedMode = 'grid';
     let currentGridCols = 2;
@@ -2258,7 +2296,6 @@
     let currentFeedIsCache = false;
     let pinnedVideoIds = new Set();
     let activeFilterOrder = [];
-    let totalLoadedItems = 0;
     let isSearching = false;
     let currentVideoId = '';
     let currentVideoTitle = '';
@@ -2826,7 +2863,6 @@
       isSearching = true;
       isLoadingMore = false;
       setWorkingState(true);
-      totalLoadedItems = 0;
       currentSearchCollected = [];
       currentFeedItems = [];
       dbFeedPool = [];
@@ -2973,7 +3009,6 @@
         const views = Number(item.v !== undefined ? item.v : (item.views > 0 ? item.views : 0)) || 0;
         const quality = computeQualityScore(title, item);
 
-        totalLoadedItems++;
         const compactObj = { id: videoId, t: title, u: uploaded, d: duration, v: views, q: quality };
 
         if (!isFromCache) {
@@ -3408,8 +3443,8 @@
       prefetchedVideoId = candidates.length > 0 ? videoId : '';
       updateBgModeUI();
 
-      // 이미 책갈피로 날린 상태에서 스트림이 도착했다면 자동 백그라운드 핸드오프 시도
-      if (isDockedToBookmark && !isBgAudioPlaying && candidates.length > 0) {
+      // 화면이 백그라운드로 내려간 상태에서만 자동 핸드오프(포그라운드 재생 소리 튐 방지)
+      if (document.visibilityState === 'hidden' && isDockedToBookmark && !isBgAudioPlaying && candidates.length > 0) {
         activateBgAudioStream(lastKnownPlaySec);
       }
       return candidates;
@@ -3493,19 +3528,18 @@
     function openPlayerModal(videoId, title) {
       unlockIosAudioOnce(); // iOS Safari/PWA 오디오 세션 선행 잠금해제!
       stopBgAudioClean();
-      isDockedToBookmark = false;
+      isDockedToBookmark = true;
       lastKnownPlaySec = 0;
-      modal.classList.remove('docked-hidden', 'interacting');
 
       currentVideoId = videoId;
       currentVideoTitle = title;
-      modal.style.display = 'block';
       lastWindowWidth = MIN_PLAYER_WIDTH;
-      const dims = apply16by9Scale(MIN_PLAYER_WIDTH);
+      apply16by9Scale(MIN_PLAYER_WIDTH);
 
-      // 재생창이 열릴 때 항상 화면 정중앙에 최소 사이즈(180x101)로 배치
-      modal.style.left = `${Math.max(6, Math.round((window.innerWidth - dims.width) / 2))}px`;
-      modal.style.top = `${Math.max(48, Math.round((window.innerHeight - (dims.height + 24)) / 2))}px`;
+      // 음악 우선: 재생창은 띄우지 않고 도킹 숨김 상태로 즉시 재생 시작 → 책갈피 음표(♪)로 진입
+      modal.classList.remove('interacting');
+      modal.classList.add('docked-hidden');
+      modal.style.display = 'block';
 
       ytHolder.innerHTML = `
         <iframe
@@ -3531,9 +3565,11 @@
       isYtVideoPlaying = true;
       updateSearchBtnState();
       if (typeof showSlideBookmark === 'function') showSlideBookmark(dockSide || 'right');
+      updateBgModeUI();
+      if (typeof updateSlideBookmarkPlayUI === 'function') updateSlideBookmarkPlayUI();
       setupMediaSession(title, videoId);
       prefetchPromise = prefetchBgAudio(videoId);
-      recordUserPlay(videoId, title);
+      recordUserPlay(videoId);
     }
 
     // 5-2. Firebase 3필드 100% 호환 스키마({keyword, updatedAt, items}) + 진단 + 최종 피드 신속 복원
@@ -3605,24 +3641,50 @@
       }
     }
 
+    function hasPendingAuthSync() {
+      try { return localStorage.getItem(PENDING_AUTH_SYNC_KEY) === '1'; } catch (e) { return false; }
+    }
+
+    function setPendingAuthSync(flag) {
+      try {
+        if (flag) localStorage.setItem(PENDING_AUTH_SYNC_KEY, '1');
+        else localStorage.removeItem(PENDING_AUTH_SYNC_KEY);
+      } catch (e) {}
+    }
+
     function parseAuthDocData(d) {
-      if (!d) return;
+      if (!d) return false;
+      const cloudUpdatedAt = Number(d.updatedAt || 0);
+      const localUpdatedAt = Number(authData.updatedAt || 0);
+      if (hasPendingAuthSync() || (localUpdatedAt > 0 && localUpdatedAt > cloudUpdatedAt)) {
+        return false;
+      }
       if (Array.isArray(d.items)) {
         const a0 = d.items.find(it => it && it.id === '__admin__');
-        const u0 = d.items.filter(it => it && it.id && it.id !== '__admin__' && it.code).map(u => ({ ...u, code: String(u.code).length >= 9 ? String(u.code) : _p4(u.code) }));
+        const u0 = d.items
+          .filter(it => it && it.id && it.id !== '__admin__' && it.code)
+          .map(u => ({
+            id: String(u.id),
+            name: _normName(u.name || ''),
+            code: _p4(u.code),
+            createdAt: Number(u.createdAt || 0)
+          }));
         const rawC = String((a0 && a0.code) || d.adminCode || _d0());
         authData = {
-          adminCode: rawC.length >= 9 ? rawC : _p4(rawC),
-          users: u0
+          adminCode: _p4(rawC),
+          users: u0,
+          updatedAt: cloudUpdatedAt
         };
       } else {
         const rawC = String(d.adminCode || _d0());
         authData = {
-          adminCode: rawC.length >= 9 ? rawC : _p4(rawC),
-          users: Array.isArray(d.users) ? d.users : []
+          adminCode: _p4(rawC),
+          users: Array.isArray(d.users) ? d.users.map(u => ({ ...u, name: _normName(u.name || ''), code: _p4(u.code) })) : [],
+          updatedAt: cloudUpdatedAt
         };
       }
       saveLocalAuthCache();
+      return true;
     }
 
     function loadLocalMetaBackup() {
@@ -3671,8 +3733,14 @@
           const parsed = JSON.parse(raw);
           if (parsed && parsed.adminCode) {
             authData = {
-              adminCode: String(parsed.adminCode),
-              users: Array.isArray(parsed.users) ? parsed.users : []
+              adminCode: _p4(parsed.adminCode),
+              users: Array.isArray(parsed.users) ? parsed.users.map(u => ({
+                id: String(u.id),
+                name: _normName(u.name || ''),
+                code: _p4(u.code),
+                createdAt: Number(u.createdAt || 0)
+              })) : [],
+              updatedAt: Number(parsed.updatedAt || 0)
             };
           }
         }
@@ -3693,7 +3761,11 @@
         const snap = await db.collection(FB_COLLECTION).doc(AUTH_DOC_ID).get();
         markDbHealthy();
         if (snap.exists) {
-          parseAuthDocData(snap.data());
+          const cloudData = snap.data();
+          const appliedCloud = parseAuthDocData(cloudData);
+          if (!appliedCloud && (hasPendingAuthSync() || Number(authData.updatedAt || 0) > Number((cloudData && cloudData.updatedAt) || 0))) {
+            await saveAuthConfigToCloud();
+          }
         } else {
           await saveAuthConfigToCloud();
         }
@@ -3703,28 +3775,43 @@
     }
 
     async function saveAuthConfigToCloud() {
-      const enc = _p4(_u4(authData.adminCode || _d0()));
+      const now = Number(authData.updatedAt || Date.now());
+      const enc = _p4(authData.adminCode || _d0());
       authData.adminCode = enc;
+      authData.updatedAt = now;
+      authData.users = (authData.users || []).map(u => ({
+        id: String(u.id),
+        name: _normName(u.name || ''),
+        code: _p4(u.code || ''),
+        createdAt: Number(u.createdAt || 0)
+      }));
       saveLocalAuthCache();
-      if (!fbReady || !db) return;
+      if (!fbReady || !db) {
+        setPendingAuthSync(true);
+        return { ok: false, error: 'DB 미연결' };
+      }
       try {
         const itemsPayload = [
           { id: '__admin__', code: enc },
-          ...(authData.users || []).map(u => ({
-            id: String(u.id),
-            name: String(u.name || ''),
-            code: _p4(_u4(u.code || '')),
-            createdAt: Number(u.createdAt || 0)
+          ...authData.users.map(u => ({
+            id: u.id,
+            name: u.name,
+            code: u.code,
+            createdAt: u.createdAt
           }))
         ];
         await db.collection(FB_COLLECTION).doc(AUTH_DOC_ID).set({
           keyword: AUTH_DOC_ID,
-          updatedAt: Date.now(),
+          updatedAt: now,
           items: itemsPayload
         });
+        setPendingAuthSync(false);
         markDbHealthy();
+        return { ok: true, error: '' };
       } catch (err) {
+        setPendingAuthSync(true);
         recordDbError(err);
+        return { ok: false, error: lastDbErrorMsg || '저장 실패' };
       }
     }
 
@@ -3742,15 +3829,15 @@
     }
 
     function findUserByNameAndCode(name, code) {
-      const n = String(name || '').trim().slice(0, 7);
+      const n = _normName(name);
       const c = String(code || '').trim();
       if (!n || !c) return null;
       if ((n === '관리자' || n.toLowerCase() === 'admin') && _v4(c, authData.adminCode)) {
         return { role: 'admin', id: 'admin', name: '관리자', code: _p4(c) };
       }
-      const matched = (authData.users || []).find(u => u && String(u.name || '').trim() === n && _v4(c, u.code));
+      const matched = (authData.users || []).find(u => u && _normName(u.name) === n && _v4(c, u.code));
       if (matched) {
-        return { role: 'user', id: matched.id, name: matched.name, code: _p4(c) };
+        return { role: 'user', id: matched.id, name: _normName(matched.name), code: _p4(c) };
       }
       return null;
     }
@@ -3833,10 +3920,10 @@
     })();
 
     function isRegisteredLoginName(name) {
-      const n = String(name || '').trim().slice(0, 7);
+      const n = _normName(name);
       if (!n) return false;
       if (n === '관리자' || n.toLowerCase() === 'admin') return true;
-      return (authData.users || []).some(u => u && String(u.name || '').trim() === n);
+      return (authData.users || []).some(u => u && _normName(u.name) === n);
     }
 
     function tryMoveToCodeField() {
@@ -3881,7 +3968,7 @@
       syncAuthViewportForKeyboard();
     }
 
-    function showAuthGate() {
+    function showAuthGate(forceNameInput = false) {
       document.body.classList.add('auth-locked');
       slideBookmark.style.display = 'none';
       slideBookmarkVisible = false;
@@ -3894,7 +3981,9 @@
       if (ci) ci.value = '';
 
       let savedName = '';
-      try { savedName = (localStorage.getItem(REMEMBER_NAME_KEY) || '').trim().slice(0, 7); } catch (e) {}
+      if (!forceNameInput) {
+        try { savedName = _normName(localStorage.getItem(REMEMBER_NAME_KEY) || ''); } catch (e) {}
+      }
       if (savedName) {
         if (ni) ni.value = savedName;
         if (rc) rc.checked = true;
@@ -3905,6 +3994,7 @@
       } else {
         if (nb) nb.style.display = 'flex';
         if (sb) sb.style.display = 'none';
+        if (rc) rc.checked = false;
         if (ni) { ni.value = ''; setTimeout(() => { ni.focus({ preventScroll: true }); syncAuthViewportForKeyboard(); }, 80); }
       }
       syncAuthViewportForKeyboard();
@@ -4003,7 +4093,6 @@
       currentFeedItems = [];
       dbFeedPool = [];
       activeSearchSession = null;
-      totalLoadedItems = 0;
       resultsContainer.innerHTML = '';
       document.getElementById('query').value = '';
       statusMsg.innerText = '';
@@ -4050,7 +4139,7 @@
       statusMsg.innerText = '';
       updateScrollSentinelUI();
       try { localStorage.removeItem(SESSION_STORAGE_KEY); } catch (e) {}
-      showAuthGate('');
+      showAuthGate(true);
     }
 
     async function saveUserProfileDocToCloud() {
@@ -4115,7 +4204,7 @@
       }
     }
 
-    function recordUserPlay(videoId, title) {
+    function recordUserPlay(videoId) {
       pendingPlayTrack = null;
       if (!currentUser || !videoId || !activeTabKeyword) return;
       const tab = cachedTabsMeta.find(t => t.keyword === activeTabKeyword);
@@ -4293,7 +4382,7 @@
     }
 
     // 검색어 2단계 터치: 1회 터치 -> 둥근 선택창 + 지정배경 + 확대 / 2회 터치 -> 신속 로드
-    function handleHistoryTabTap(tab, btnEl) {
+    function handleHistoryTabTap(tab) {
       if (selectedTabDocId !== tab.docId) {
         selectedTabDocId = tab.docId;
         renderSavedTabsBar();
@@ -4314,7 +4403,7 @@
         const isSel = selectedTabDocId === tab.docId;
         const isLoaded = activeTabKeyword === tab.keyword;
         btn.className = 'history-tab' + (isSel ? ' tab-selected' : '') + (isLoaded ? ' tab-loaded' : '');
-        btn.onclick = () => handleHistoryTabTap(tab, btn);
+        btn.onclick = () => handleHistoryTabTap(tab);
 
         const label = document.createElement('span');
         label.className = 'tab-kw-text';
@@ -4393,7 +4482,6 @@
     function renderDbTabItems(items, keyword) {
       activeTabKeyword = keyword;
       document.getElementById('query').value = keyword;
-      totalLoadedItems = 0;
       currentFeedItems = [];
       activeSearchSession = null;
       dbFeedPool = stripThumbField(items).slice(0, MAX_TAB_ITEMS);
@@ -4457,6 +4545,9 @@
     async function retryDbReconnect() {
       setWorkingState(true);
       const ok = await verifyFirebaseConnection();
+      if (ok) {
+        await loadAuthConfigFromCloud();
+      }
       if (ok && currentUser) {
         await Promise.all([
           loadUserProfileFromCloud(),
@@ -4621,6 +4712,7 @@
     async function changeAdminPassword() {
       if (!hasSettingsAdminAccess()) return;
       const inp = document.getElementById('newAdminCodeInput');
+      if (inp) inp.blur();
       const nextCode = inp ? inp.value.trim() : '';
       if (!nextCode) { alert('새 코드를 입력해 주세요.'); return; }
       if (nextCode.length !== 4) { alert('관리자 코드는 4자리로 입력해 주세요.'); return; }
@@ -4630,6 +4722,8 @@
       }
       const wrapped = _p4(nextCode);
       authData.adminCode = wrapped;
+      authData.updatedAt = Date.now();
+      setPendingAuthSync(true);
       if (isAdminUser()) {
         currentUser.code = wrapped;
         try {
@@ -4638,19 +4732,21 @@
           }));
         } catch (e) {}
       }
-      await saveAuthConfigToCloud();
+      const res = await saveAuthConfigToCloud();
       if (inp) inp.value = '';
-      alert('관리자 코드가 변경되었습니다.');
+      alert(res.ok ? '관리자 코드가 변경되었습니다.' : `관리자 코드가 적용되었습니다. (DB 동기화 대기: ${res.error})`);
     }
 
     async function registerNewUser() {
       if (!hasSettingsAdminAccess()) return;
       const nameInp = document.getElementById('newUserNameInput');
       const codeInp = document.getElementById('newUserCodeInput');
-      const name = nameInp ? nameInp.value.trim().slice(0, 7) : '';
+      if (nameInp) nameInp.blur();
+      if (codeInp) codeInp.blur();
+      const name = nameInp ? _normName(nameInp.value) : '';
       const code = codeInp ? codeInp.value.trim() : '';
       if (!name || code.length !== 4) { alert('이름(7자 이내)과 4자리 코드를 입력해 주세요.'); return; }
-      if (name === '관리자' || name.toLowerCase() === 'admin' || (authData.users || []).some(u => u.name === name)) {
+      if (name === '관리자' || name.toLowerCase() === 'admin' || (authData.users || []).some(u => _normName(u.name) === name)) {
         alert('이미 사용 중인 이름입니다.');
         return;
       }
@@ -4659,23 +4755,29 @@
         return;
       }
 
+      const now = Date.now();
       const newUser = {
-        id: 'u_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
+        id: 'u_' + now.toString(36) + Math.random().toString(36).slice(2, 5),
         name: name,
         code: _p4(code),
-        createdAt: Date.now()
+        createdAt: now
       };
       authData.users = [...(authData.users || []), newUser];
-      await saveAuthConfigToCloud();
+      authData.updatedAt = now;
+      setPendingAuthSync(true);
+      const res = await saveAuthConfigToCloud();
       if (nameInp) nameInp.value = '';
       if (codeInp) codeInp.value = '';
       renderAdminUsersList();
+      alert(res.ok ? `'${name}' 사용자가 등록되었습니다.` : `'${name}' 사용자가 등록되었습니다. (DB 동기화 대기: ${res.error})`);
     }
 
     async function deleteRegisteredUser(uid, name) {
       if (!hasSettingsAdminAccess()) return;
       if (!confirm(`'${name}' 사용자를 삭제할까요?`)) return;
       authData.users = (authData.users || []).filter(u => u.id !== uid);
+      authData.updatedAt = Date.now();
+      setPendingAuthSync(true);
       await saveAuthConfigToCloud();
       renderAdminUsersList();
     }
@@ -4759,7 +4861,7 @@
         }
       } catch (e) {}
 
-      showAuthGate('');
+      showAuthGate(false);
     }
 
     bootstrapApp();
@@ -4770,9 +4872,12 @@
       hideYtPauseMask();
       isDockedToBookmark = false;
       lastKnownPlaySec = 0;
+      currentVideoId = '';
+      currentVideoTitle = '';
       ytHolder.innerHTML = '';
       modal.classList.remove('docked-hidden', 'interacting');
       modal.style.display = 'none';
+      updateBgModeUI();
       updateSearchBtnState();
       if (typeof updateSlideBookmarkPlayUI === 'function') updateSlideBookmarkPlayUI();
     }
@@ -4946,6 +5051,23 @@
       slideBookmark.classList.toggle('sb-playing', playingNow);
       const icon = document.getElementById('sbPlayIcon');
       if (icon) icon.textContent = '▶';
+      const noteBtn = document.getElementById('sbNoteBtn');
+      if (noteBtn) {
+        const hasTrack = !!currentVideoId;
+        const isWinOpen = hasTrack && !isDockedToBookmark && modal.style.display !== 'none' && !modal.classList.contains('docked-hidden');
+        noteBtn.classList.toggle('has-track', hasTrack);
+        noteBtn.classList.toggle('window-open', isWinOpen);
+      }
+    }
+
+    function togglePlayerFromNote() {
+      if (!currentVideoId) return;
+      const isHidden = isDockedToBookmark || modal.style.display === 'none' || modal.classList.contains('docked-hidden');
+      if (isHidden) {
+        restorePlayerFromBookmark(true);
+      } else {
+        dockPlayerToBookmark(dockSide || 'right');
+      }
     }
 
     function showSlideBookmark(defaultSide) {
@@ -5025,12 +5147,13 @@
       }
     }
 
-    function restorePlayerFromBookmark() {
+    function restorePlayerFromBookmark(forceCompactCenter = true) {
       isDockedToBookmark = false;
       modal.classList.remove('docked-hidden', 'interacting');
       modal.style.display = 'block';
 
-      const dims = apply16by9Scale(lastWindowWidth || MIN_PLAYER_WIDTH);
+      const targetW = forceCompactCenter ? MIN_PLAYER_WIDTH : (lastWindowWidth || MIN_PLAYER_WIDTH);
+      const dims = apply16by9Scale(targetW);
       const centerLeft = Math.max(6, Math.round((window.innerWidth - dims.width) / 2));
       const centerTop = Math.max(52, Math.round((window.innerHeight - (dims.height + 24)) / 2));
       modal.style.left = `${centerLeft}px`;
