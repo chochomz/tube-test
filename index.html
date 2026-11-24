@@ -1776,10 +1776,11 @@
       "appId": "1:892351379651:web:ae4e8e40dfc55c933e4a76"
     };
 
-    // TUBE_LAB_V9_MODULAR_THEME_PATCH
-    const AUTH_DOC_ID = '__system_auth__';
-    const PIN_DOC_ID = '__system_pins__';
-    const TABS_INDEX_DOC_ID = '__tabs_index__';
+    // TUBE_LAB_V10_DB_TAP_MINPLAYER_PATCH
+    const AUTH_DOC_ID = 'sys_auth';
+    const PIN_DOC_ID = 'sys_pins';
+    const TABS_INDEX_DOC_ID = 'sys_tabs_index';
+    const MIN_PLAYER_WIDTH = 180;
     const DEFAULT_ADMIN_CODE = '0000';
     const SESSION_STORAGE_KEY = 'tube_audio_lab_session_v7';
     const AUTH_CACHE_KEY = 'tube_audio_lab_auth_cache_v7';
@@ -1834,12 +1835,14 @@
 
     function isAdminUser() { return !!(currentUser && currentUser.role === 'admin'); }
     function getUid() { return currentUser ? currentUser.id : 'guest'; }
-    function getTabsIndexDocId() { return isAdminUser() ? TABS_INDEX_DOC_ID : `__u_${getUid()}__tabs_index__`; }
-    function getPinsDocId() { return isAdminUser() ? PIN_DOC_ID : `__u_${getUid()}__pins__`; }
-    function getPlayInfoDocId() { return `__u_${getUid()}__play_info__`; }
+    function getTabsIndexDocId() { return isAdminUser() ? TABS_INDEX_DOC_ID : `sys_u_${getUid()}_tabs_index`; }
+    function getPinsDocId() { return isAdminUser() ? PIN_DOC_ID : `sys_u_${getUid()}_pins`; }
+    function getPlayInfoDocId() { return `sys_u_${getUid()}_play_info`; }
     function getSearchTabDocId(keyword) {
-      const base = sanitizeDocId(keyword);
-      return isAdminUser() ? base : `u_${getUid()}__${base}`;
+      let base = sanitizeDocId(keyword);
+      if (/^__.*__$/.test(base)) base = 'k_' + base.replace(/^_+|_+$/g, '');
+      if (!base) base = 'k_' + Date.now().toString(36);
+      return isAdminUser() ? base : `u_${getUid()}_${base}`;
     }
     function getTabCacheStorageKey(docId) { return `${TAB_CACHE_PREFIX}${getUid()}_${docId}`; }
     function getLocalPinsStorageKey() { return `${TEMP_LOCAL_PINS_KEY}_${getUid()}`; }
@@ -2679,6 +2682,59 @@
       return aStr.localeCompare(bStr, 'ko', { numeric: true });
     }
 
+    // 피드 영상 터치 감도 둔화 엔진 (스크롤 직후 220ms 차단 + 8px 이동 차단 + 안정적 탭 시 실행)
+    let lastFeedScrollTime = 0;
+    window.addEventListener('scroll', () => {
+      lastFeedScrollTime = Date.now();
+    }, { passive: true });
+
+    function attachDampedCardTap(cardEl, onActivate) {
+      let downTime = 0;
+      let startX = 0;
+      let startY = 0;
+      let moved = false;
+      let activePtrId = null;
+
+      cardEl.addEventListener('pointerdown', (e) => {
+        if (e.target && e.target.closest && e.target.closest('.star-pin-btn')) return;
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        if (Date.now() - lastFeedScrollTime < 220) {
+          activePtrId = null;
+          return;
+        }
+        activePtrId = e.pointerId;
+        downTime = Date.now();
+        startX = e.clientX;
+        startY = e.clientY;
+        moved = false;
+      }, { passive: true });
+
+      cardEl.addEventListener('pointermove', (e) => {
+        if (activePtrId !== e.pointerId || moved) return;
+        if (Math.hypot(e.clientX - startX, e.clientY - startY) > 8) {
+          moved = true;
+          activePtrId = null;
+        }
+      }, { passive: true });
+
+      cardEl.addEventListener('pointercancel', () => {
+        activePtrId = null;
+        moved = true;
+      }, { passive: true });
+
+      cardEl.addEventListener('pointerup', (e) => {
+        if (activePtrId !== e.pointerId) return;
+        activePtrId = null;
+        if (moved) return;
+        if (Date.now() - lastFeedScrollTime < 220) return;
+        const holdMs = Date.now() - downTime;
+        const minHold = e.pointerType === 'mouse' ? 40 : 90;
+        if (holdMs >= minHold && holdMs <= 650) {
+          onActivate();
+        }
+      });
+    }
+
     function renderSortedFeed() {
       // 정렬은 현재 불러온 범위(currentFeedItems) 내에서만 적용
       const sorted = [...currentFeedItems].sort((a, b) => {
@@ -2706,7 +2762,7 @@
         const isPinned = pinnedVideoIds.has(item.id);
         const card = document.createElement('div');
         card.className = 'video-card' + (isPinned ? ' pinned-card' : '');
-        card.onclick = () => openPlayerModal(item.id, item.t);
+        attachDampedCardTap(card, () => openPlayerModal(item.id, item.t));
 
         const thumbWrap = document.createElement('div');
         thumbWrap.className = 'thumb-wrapper';
@@ -3039,14 +3095,12 @@
       currentVideoId = videoId;
       currentVideoTitle = title;
       modal.style.display = 'block';
-      const dims = apply16by9Scale(lastWindowWidth || modal.offsetWidth || 320);
+      lastWindowWidth = MIN_PLAYER_WIDTH;
+      const dims = apply16by9Scale(MIN_PLAYER_WIDTH);
 
-      const curLeft = modal.offsetLeft;
-      const curTop = modal.offsetTop;
-      if (curLeft < -20 || curLeft > window.innerWidth - 40 || curTop < -20 || curTop > window.innerHeight - 40) {
-        modal.style.left = `${Math.max(6, Math.round((window.innerWidth - dims.width) / 2))}px`;
-        modal.style.top = `${Math.max(48, Math.round((window.innerHeight - (dims.height + 24)) / 2))}px`;
-      }
+      // 재생창이 열릴 때 항상 화면 정중앙에 최소 사이즈(180x101)로 배치
+      modal.style.left = `${Math.max(6, Math.round((window.innerWidth - dims.width) / 2))}px`;
+      modal.style.top = `${Math.max(48, Math.round((window.innerHeight - (dims.height + 24)) / 2))}px`;
 
       ytHolder.innerHTML = `
         <iframe
@@ -3167,7 +3221,7 @@
         const raw = localStorage.getItem(META_BACKUP_PREFIX + getUid());
         if (raw) {
           const arr = JSON.parse(raw);
-          if (Array.isArray(arr)) return arr.filter(t => t && t.docId);
+          if (Array.isArray(arr)) return arr.filter(t => t && t.docId && !/^__.*__$/.test(String(t.docId)) && !String(t.docId).startsWith('sys_'));
         }
       } catch (e) {}
       return [];
@@ -3593,7 +3647,7 @@
         let cloudMeta = [];
         if (idxSnap.exists && Array.isArray(idxSnap.data().items)) {
           cloudMeta = idxSnap.data().items
-            .filter(it => it && it.docId && !String(it.docId).startsWith('__'))
+            .filter(it => it && it.docId && !String(it.docId).startsWith('__') && !String(it.docId).startsWith('sys_'))
             .map(it => ({
               docId: it.docId,
               keyword: it.kw || it.docId,
@@ -3603,9 +3657,9 @@
         } else {
           try {
             const snap = await db.collection(FB_COLLECTION).get();
-            const userPrefix = `u_${getUid()}__`;
+            const userPrefix = `u_${getUid()}_`;
             snap.forEach(doc => {
-              if (doc.id.startsWith('__')) return;
+              if (doc.id.startsWith('__') || doc.id.startsWith('sys_')) return;
               if (isAdminUser()) {
                 if (doc.id.startsWith('u_')) return;
               } else {
