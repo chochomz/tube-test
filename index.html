@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Tube Audio Lab</title>
+  <title>myTube</title>
 
   <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1384/1384060.png">
   <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/1384/1384060.png">
@@ -15,10 +15,11 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
   <style>
+    :root { --app-bg: #0d0d0d; }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: #0d0d0d;
+      background-color: var(--app-bg);
       color: #ffffff;
       padding: 0 calc(env(safe-area-inset-right, 0px) + 10px) calc(env(safe-area-inset-bottom, 0px) + 14px) calc(env(safe-area-inset-left, 0px) + 10px);
       -webkit-tap-highlight-color: transparent;
@@ -34,7 +35,7 @@
       position: fixed;
       inset: 0;
       z-index: 20000;
-      background: #0d0d0d;
+      background: var(--app-bg);
       display: none;
       align-items: center;
       justify-content: center;
@@ -93,7 +94,7 @@
       position: sticky;
       top: 0;
       z-index: 100;
-      background: #0d0d0d;
+      background: var(--app-bg);
       padding: calc(env(safe-area-inset-top, 0px) + 8px) 0 5px 0;
     }
     .header-top-row {
@@ -311,21 +312,43 @@
       outline: none;
     }
     .search-box input:focus { border-color: #ff0000; }
+    /* 유튜브 로고 스타일 붉은 검색 버튼 + 실시간 4단계 상태 애니메이션 */
     button.search-btn {
-      width: 34px;
+      width: 38px;
       height: 31px;
       padding: 0;
-      border-radius: 7px;
+      border-radius: 8px;
       border: none;
       background: #ff0000;
-      color: white;
-      font-weight: bold;
-      font-size: 13px;
+      color: #ffffff;
       cursor: pointer;
       flex-shrink: 0;
       display: inline-flex;
       align-items: center;
       justify-content: center;
+      transition: transform 0.1s, opacity 0.15s;
+    }
+    button.search-btn:active { transform: scale(0.94); }
+    .yt-btn-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+    }
+    @keyframes ytWorkBlink {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.28; transform: scale(0.9); }
+    }
+    @keyframes ytPlaySlowBlink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.25; }
+    }
+    button.search-btn.state-working .yt-btn-icon {
+      animation: ytWorkBlink 0.65s ease-in-out infinite;
+    }
+    button.search-btn.state-playing .yt-btn-icon {
+      animation: ytPlaySlowBlink 1.8s ease-in-out infinite;
     }
 
     /* 1-2. 2행: 연한 핑크 저장 검색어 가로 스크롤 열(검색창 끝선 일치) + 우측 회색 이모지 2개 */
@@ -384,41 +407,47 @@
       background: rgba(255, 255, 255, 0.24);
     }
 
-    /* 우측 피드 나열 전환 회색 이모지 2개 (목록 1열 / 창 2~4열) */
+    /* 우측 피드 나열 전환 회색 이모지 2개 (테두리 없음 / 목록 + 둥근창 2->3->4 / 진동) */
     .layout-mode-controls {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-evenly;
+      gap: 6px;
       width: 108px;
       flex-shrink: 0;
     }
     .layout-emoji-btn {
+      width: 34px;
       height: 30px;
-      border-radius: 7px;
-      border: 1px solid #303030;
-      background: #1a1a1a;
-      color: #9a9a9a;
-      font-size: 13px;
-      font-weight: 700;
+      border: none;
+      background: transparent;
+      color: #7e8086;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 3px;
       cursor: pointer;
-      transition: background 0.15s, border-color 0.15s, color 0.15s;
       padding: 0;
+      transition: color 0.15s, transform 0.12s;
+      -webkit-tap-highlight-color: transparent;
     }
-    .layout-emoji-btn:active { background: #2c2c2c; }
     .layout-emoji-btn.active {
-      background: #2b2b2b;
-      border-color: #6b6b6b;
-      color: #d4d4d4;
+      color: #c2c5cc;
     }
-    .layout-col-num {
-      font-size: 10px;
-      font-weight: 700;
-      color: inherit;
+    @keyframes hapticPop {
+      0% { transform: scale(1); }
+      30% { transform: scale(0.84) rotate(-5deg); }
+      65% { transform: scale(1.12) rotate(4deg); }
+      100% { transform: scale(1) rotate(0deg); }
     }
+    .layout-emoji-btn.haptic-pop {
+      animation: hapticPop 0.24s ease;
+    }
+    /* 밝은 배경색 선택 시 텍스트/아이콘 대비 자동 보정 */
+    body.light-bg { color: #161616; }
+    body.light-bg .status-bar { color: #3d3d3d; }
+    body.light-bg .layout-emoji-btn { color: #666a72; }
+    body.light-bg .layout-emoji-btn.active { color: #2b2d33; }
+    body.light-bg .video-card { background: rgba(20, 20, 24, 0.86); }
 
     .status-bar {
       display: flex;
@@ -649,6 +678,61 @@
       margin-top: 10px;
       padding-top: 8px;
     }
+    /* 설정 > 색상변경 (256 색상표) */
+    .color-preview-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #202024;
+      border: 1px solid #303038;
+      border-radius: 8px;
+      padding: 8px 10px;
+      margin-bottom: 10px;
+    }
+    .color-preview-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .color-swatch-cur {
+      width: 22px;
+      height: 22px;
+      border-radius: 5px;
+      border: 1px solid rgba(255, 255, 255, 0.55);
+      background: var(--app-bg);
+    }
+    .color-hex-label {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 12px;
+      font-weight: 700;
+      color: #e5e5e5;
+      text-transform: uppercase;
+    }
+    .palette-256-grid {
+      display: grid;
+      grid-template-columns: repeat(16, 1fr);
+      gap: 2px;
+      background: #111;
+      padding: 4px;
+      border-radius: 8px;
+      border: 1px solid #2e2e34;
+      margin-bottom: 8px;
+    }
+    .palette-cell {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      border: none;
+      border-radius: 2px;
+      padding: 0;
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+    .palette-cell:active { transform: scale(1.25); z-index: 2; }
+    .palette-cell.selected {
+      outline: 2px solid #ffffff;
+      outline-offset: -1px;
+      z-index: 3;
+    }
     .manage-close-btn {
       width: 100%;
       padding: 8px;
@@ -871,50 +955,79 @@
       pointer-events: none;
     }
 
-    /* 4각 모서리 두꺼운 L자 꺾기 리사이즈 핸들 */
+    /* 4각 모서리 얇고 투명도 60% L자 꺾기 리사이즈 핸들 */
     .resizer {
       position: absolute;
-      width: 24px;
-      height: 24px;
+      width: 22px;
+      height: 22px;
       z-index: 22;
       touch-action: none;
     }
     .resizer::after {
       content: "";
       position: absolute;
-      width: 13px;
-      height: 13px;
+      width: 11px;
+      height: 11px;
       box-sizing: border-box;
-      filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.9));
+      filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.65));
       pointer-events: none;
     }
     .resizer.tl { top: 0; left: 0; cursor: nwse-resize; }
     .resizer.tl::after {
       top: 0; left: 0;
-      border-top: 3.5px solid rgba(255, 255, 255, 0.95);
-      border-left: 3.5px solid rgba(255, 255, 255, 0.95);
-      border-top-left-radius: 3px;
+      border-top: 2px solid rgba(255, 255, 255, 0.60);
+      border-left: 2px solid rgba(255, 255, 255, 0.60);
+      border-top-left-radius: 2px;
     }
     .resizer.tr { top: 0; right: 0; cursor: nesw-resize; }
     .resizer.tr::after {
       top: 0; right: 0;
-      border-top: 3.5px solid rgba(255, 255, 255, 0.95);
-      border-right: 3.5px solid rgba(255, 255, 255, 0.95);
-      border-top-right-radius: 3px;
+      border-top: 2px solid rgba(255, 255, 255, 0.60);
+      border-right: 2px solid rgba(255, 255, 255, 0.60);
+      border-top-right-radius: 2px;
     }
     .resizer.bl { bottom: 0; left: 0; cursor: nesw-resize; }
     .resizer.bl::after {
       bottom: 0; left: 0;
-      border-bottom: 3.5px solid rgba(255, 255, 255, 0.95);
-      border-left: 3.5px solid rgba(255, 255, 255, 0.95);
-      border-bottom-left-radius: 3px;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.60);
+      border-left: 2px solid rgba(255, 255, 255, 0.60);
+      border-bottom-left-radius: 2px;
     }
     .resizer.br { bottom: 0; right: 0; cursor: nwse-resize; }
     .resizer.br::after {
       bottom: 0; right: 0;
-      border-bottom: 3.5px solid rgba(255, 255, 255, 0.95);
-      border-right: 3.5px solid rgba(255, 255, 255, 0.95);
-      border-bottom-right-radius: 3px;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.60);
+      border-right: 2px solid rgba(255, 255, 255, 0.60);
+      border-bottom-right-radius: 2px;
+    }
+
+    /* 일시정지/종료 시 YouTube '동영상 더보기' 등 불필요 추천 차단 & 원터치 재재생 마스크 */
+    .yt-pause-mask {
+      position: absolute;
+      inset: 0;
+      z-index: 12;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(10, 10, 14, 0.86);
+      backdrop-filter: blur(3px);
+      -webkit-backdrop-filter: blur(3px);
+      cursor: pointer;
+    }
+    .yt-pause-mask.active { display: flex; }
+    .yt-pause-play-circle {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background: rgba(255, 0, 0, 0.88);
+      border: 1.5px solid rgba(255, 255, 255, 0.85);
+      color: #fff;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding-left: 3px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7);
     }
 
     /* 4. [핵심] 소형 우측 책갈피 탭 구조 (Drag 삭제, mp3 + ✕ 우측 밀착) */
@@ -1147,7 +1260,7 @@
       <div class="header-left-slot">
         <div class="search-box">
           <input type="text" id="query" placeholder="곡명 · 가수" onkeydown="if(event.key==='Enter'){startSearch()}">
-          <button class="search-btn" onclick="startSearch()" title="찾기">🔍</button>
+          <button class="search-btn state-disconnected" id="searchStateBtn" onclick="startSearch()" title="myTube 검색"><span id="searchStateIcon" class="yt-btn-icon"></span></button>
         </div>
       </div>
       <div class="header-right-slot" id="headerRightSlot">
@@ -1198,10 +1311,8 @@
     <div class="saved-tabs-row">
       <div class="tabs-scroll-area" id="savedTabsList"></div>
       <div class="layout-mode-controls">
-        <button type="button" class="layout-emoji-btn" id="listModeBtn" onclick="setFeedListMode()" title="1열 목록">☰</button>
-        <button type="button" class="layout-emoji-btn" id="gridModeBtn" onclick="cycleFeedGridCols()" title="창 개수 전환 (2~4열)">
-          <span>⊞</span><span class="layout-col-num" id="gridColNum">4</span>
-        </button>
+        <button type="button" class="layout-emoji-btn" id="listModeBtn" onclick="setFeedListMode()" title="목록 보기"></button>
+        <button type="button" class="layout-emoji-btn" id="gridModeBtn" onclick="cycleFeedGridCols()" title="창 보기 (2→3→4)"></button>
       </div>
     </div>
 
@@ -1231,6 +1342,11 @@
       <!-- 800x450 비례 스케일링 스테이지 (화면 확대/축소 시 유튜브 버튼이 함께 확대/축소됨) -->
       <div class="scale-stage" id="scaleStage">
         <div id="yt-iframe-holder"></div>
+      </div>
+
+      <!-- 일시정지/종료 시 동영상 더보기 차단 & 원터치 재재생 마스크 -->
+      <div class="yt-pause-mask" id="ytPauseMask" onclick="resumeYtFromMask()">
+        <div class="yt-pause-play-circle">▶</div>
       </div>
 
       <!-- 🎧 백그라운드 오디오 모드 활성 시 창 내부 표시 -->
@@ -1292,6 +1408,7 @@
       <div class="settings-tabs-header">
         <div class="settings-tabs-nav" id="settingsTabsNav">
           <button type="button" class="settings-tab-btn active" data-stab="search" onclick="switchSettingsTab('search')">검색</button>
+          <button type="button" class="settings-tab-btn" data-stab="color" onclick="switchSettingsTab('color')">색상변경</button>
           <button type="button" class="settings-tab-btn" data-stab="auth" onclick="switchSettingsTab('auth')">로그인</button>
         </div>
         <button type="button" class="settings-x-btn" onclick="closeManageModal()" title="닫기">✕</button>
@@ -1300,6 +1417,18 @@
       <!-- 탭 1: 검색 목록 관리 -->
       <div class="settings-pane active" id="settings-pane-search">
         <div class="manage-list" id="manageTabList"></div>
+      </div>
+
+      <!-- 탭 1-2: 전체 배경색 변경 (256 색상표) -->
+      <div class="settings-pane" id="settings-pane-color">
+        <div class="color-preview-bar">
+          <div class="color-preview-left">
+            <span class="color-swatch-cur" id="currentBgSwatch"></span>
+            <span class="color-hex-label" id="currentBgHex">#0d0d0d</span>
+          </div>
+          <button type="button" class="mini-btn" onclick="resetAppBgColor()">기본색</button>
+        </div>
+        <div class="palette-256-grid" id="palette256Grid"></div>
       </div>
 
       <!-- 탭 2: 로그인 / 사용자 플레이정보 / 관리자 기능 -->
@@ -1388,26 +1517,34 @@
       "appId": "1:892351379651:web:ae4e8e40dfc55c933e4a76"
     };
 
-    // TUBE_LAB_V7_AUTH_LAYOUT_PATCH
+    // TUBE_LAB_V8_MYTUBE_PATCH
     const AUTH_DOC_ID = '__system_auth__';
     const PIN_DOC_ID = '__system_pins__';
     const TABS_INDEX_DOC_ID = '__tabs_index__';
     const DEFAULT_ADMIN_CODE = '0000';
     const SESSION_STORAGE_KEY = 'tube_audio_lab_session_v7';
     const AUTH_CACHE_KEY = 'tube_audio_lab_auth_cache_v7';
-    const LAYOUT_STORAGE_KEY = 'tube_audio_lab_layout_v7';
+    const LAYOUT_STORAGE_KEY = 'tube_audio_lab_layout_v8';
+    const BG_COLOR_STORAGE_KEY = 'mytube_bg_color_v8';
+    const META_BACKUP_PREFIX = 'mytube_meta_backup_v8_';
+    const PENDING_SYNC_PREFIX = 'mytube_pending_sync_v8_';
     const TEMP_LOCAL_PINS_KEY = 'tube_audio_lab_pins_v3';
     const TAB_CACHE_PREFIX = 'tube_tab_cache_v7_';
     const PLAY_HISTORY_LOCAL_PREFIX = 'tube_play_hist_v7_';
     const FILTER_LABELS = { recent: '최근순', korean: '한글정렬', size: '크기순', views: '조회순', hq: '고화질순' };
     const memoryTabCache = new Map();
 
-    // 인증/사용자/레이아웃 상태
+    // 인증/사용자/레이아웃/연동/테마 상태
     let authData = { adminCode: DEFAULT_ADMIN_CODE, users: [] };
     let currentUser = null;
     let currentPlayHistory = [];
     let currentFeedMode = 'grid'; // 'list' | 'grid'
-    let currentGridCols = 4;      // 2 | 3 | 4
+    let currentGridCols = 2;      // 처음 창 2개부터 시작 (2 -> 3 -> 4 -> 2)
+    let fbVerified = false;       // 실제 Firestore 서버 통신 연동 여부
+    let isAppWorking = false;     // 검색 / DB / 로딩 동작 중 여부
+    let isYtVideoPlaying = false; // YouTube iframe 실제 재생 중 여부
+    let currentAppBgColor = '#0d0d0d';
+    let paletteBuilt = false;
 
     function isAdminUser() { return !!(currentUser && currentUser.role === 'admin'); }
     function getUid() { return currentUser ? currentUser.id : 'guest'; }
@@ -1675,12 +1812,107 @@
       }
     }
 
+    // 유튜브 로고 스타일 검색 버튼 4단계 상태 머신 (연동:녹색▶ / 미연동:두꺼운흰색X / 동작중:연파랑▶깜박 / 재생중:흰색▶천천히깜박)
+    function updateSearchBtnState() {
+      const btn = document.getElementById('searchStateBtn');
+      const iconBox = document.getElementById('searchStateIcon');
+      if (!btn || !iconBox) return;
+
+      btn.classList.remove('state-connected', 'state-disconnected', 'state-working', 'state-playing');
+      const playingNow = isYtVideoPlaying || (typeof isBgAudioPlaying !== 'undefined' && isBgAudioPlaying && !bgAudio.paused);
+
+      if (isAppWorking) {
+        btn.classList.add('state-working');
+        iconBox.innerHTML = '<svg viewBox="0 0 20 20" width="15" height="15"><polygon points="5,3 17,10 5,17" fill="#7dd3fc"/></svg>';
+      } else if (playingNow) {
+        btn.classList.add('state-playing');
+        iconBox.innerHTML = '<svg viewBox="0 0 20 20" width="15" height="15"><polygon points="5,3 17,10 5,17" fill="#ffffff"/></svg>';
+      } else if (fbVerified) {
+        btn.classList.add('state-connected');
+        iconBox.innerHTML = '<svg viewBox="0 0 20 20" width="15" height="15"><polygon points="5,3 17,10 5,17" fill="#4ade80"/></svg>';
+      } else {
+        btn.classList.add('state-disconnected');
+        iconBox.innerHTML = '<svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="#ffffff" stroke-width="3.2" stroke-linecap="round"><line x1="4" y1="4" x2="16" y2="16"/><line x1="16" y1="4" x2="4" y2="16"/></svg>';
+      }
+    }
+
+    function setWorkingState(flag) {
+      isAppWorking = !!flag;
+      updateSearchBtnState();
+    }
+
+    // 재생창 일시정지/종료 시 '동영상 더보기' 차단 마스크 제어
+    function showYtPauseMask() {
+      const mask = document.getElementById('ytPauseMask');
+      if (mask) mask.classList.add('active');
+    }
+    function hideYtPauseMask() {
+      const mask = document.getElementById('ytPauseMask');
+      if (mask) mask.classList.remove('active');
+    }
+    function resumeYtFromMask() {
+      hideYtPauseMask();
+      sendYtCommand('playVideo');
+      isYtVideoPlaying = true;
+      updateSearchBtnState();
+    }
+
+    // 테두리 없는 회색 목록 / 둥근 사각창(2:ㅁㅁ / 3:ㅁㅁ+밑에1 / 4:ㅁㅁ+ㅁㅁ) SVG & 진동
+    function getListModeSvg() {
+      return '<svg viewBox="0 0 20 20" width="20" height="20" fill="currentColor">' +
+        '<rect x="1.5" y="3.5" width="3" height="3" rx="1"/>' +
+        '<rect x="6.5" y="4" width="12" height="2" rx="1"/>' +
+        '<rect x="1.5" y="8.5" width="3" height="3" rx="1"/>' +
+        '<rect x="6.5" y="9" width="12" height="2" rx="1"/>' +
+        '<rect x="1.5" y="13.5" width="3" height="3" rx="1"/>' +
+        '<rect x="6.5" y="14" width="12" height="2" rx="1"/>' +
+        '</svg>';
+    }
+
+    function getGridColsSvg(cols) {
+      if (cols === 2) {
+        // 2개: 둥근 회색 사각창 나란히 ㅁㅁ
+        return '<svg viewBox="0 0 20 20" width="20" height="20" fill="currentColor">' +
+          '<rect x="2" y="6" width="7" height="7.5" rx="2"/>' +
+          '<rect x="11" y="6" width="7" height="7.5" rx="2"/>' +
+          '</svg>';
+      }
+      if (cols === 3) {
+        // 3개: 윗줄 ㅁㅁ + 밑에 1개
+        return '<svg viewBox="0 0 20 20" width="20" height="20" fill="currentColor">' +
+          '<rect x="2" y="2" width="7" height="7" rx="2"/>' +
+          '<rect x="11" y="2" width="7" height="7" rx="2"/>' +
+          '<rect x="2" y="11" width="7" height="7" rx="2"/>' +
+          '</svg>';
+      }
+      // 4개: ㅁㅁ / ㅁㅁ 사각 네 개
+      return '<svg viewBox="0 0 20 20" width="20" height="20" fill="currentColor">' +
+        '<rect x="2" y="2" width="7" height="7" rx="2"/>' +
+        '<rect x="11" y="2" width="7" height="7" rx="2"/>' +
+        '<rect x="2" y="11" width="7" height="7" rx="2"/>' +
+        '<rect x="11" y="11" width="7" height="7" rx="2"/>' +
+        '</svg>';
+    }
+
+    function triggerLayoutHaptic(el) {
+      if (navigator.vibrate) {
+        try { navigator.vibrate(22); } catch (e) {}
+      }
+      if (el) {
+        el.classList.remove('haptic-pop');
+        void el.offsetWidth;
+        el.classList.add('haptic-pop');
+      }
+    }
+
     // 피드 레이아웃 전환 (목록 1열 / 창 2->3->4 순환)
     function applyFeedLayoutUI() {
       resultsContainer.classList.remove('cols-1', 'cols-2', 'cols-3', 'cols-4');
       const listBtn = document.getElementById('listModeBtn');
       const gridBtn = document.getElementById('gridModeBtn');
-      const colNum = document.getElementById('gridColNum');
+
+      if (listBtn) listBtn.innerHTML = getListModeSvg();
+      if (gridBtn) gridBtn.innerHTML = getGridColsSvg(currentGridCols);
 
       if (currentFeedMode === 'list') {
         resultsContainer.classList.add('cols-1');
@@ -1691,7 +1923,6 @@
         if (listBtn) listBtn.classList.remove('active');
         if (gridBtn) gridBtn.classList.add('active');
       }
-      if (colNum) colNum.textContent = String(currentGridCols);
 
       try {
         localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify({
@@ -1720,16 +1951,122 @@
     function setFeedListMode() {
       currentFeedMode = 'list';
       applyFeedLayoutUI();
+      triggerLayoutHaptic(document.getElementById('listModeBtn'));
     }
 
     function cycleFeedGridCols() {
       if (currentFeedMode === 'list') {
         currentFeedMode = 'grid';
-        currentGridCols = 2; // 목록에서 창 터치 시 2개부터 시작
+        currentGridCols = 2; // 처음 2개부터 시작
       } else {
         currentGridCols = currentGridCols >= 4 ? 2 : (currentGridCols + 1); // 2 -> 3 -> 4 -> 2
       }
       applyFeedLayoutUI();
+      triggerLayoutHaptic(document.getElementById('gridModeBtn'));
+    }
+
+    // 256 색상표 생성 및 전체 배경색 적용 엔진
+    function generate256HexColors() {
+      const colors = [
+        '#0d0d0d', '#18181b', '#1e293b', '#172554',
+        '#14532d', '#3f1d2b', '#450a0a', '#3b0764',
+        '#7f1d1d', '#9a3412', '#713f12', '#166534',
+        '#115e59', '#1e40af', '#581c87', '#831843'
+      ];
+      // 216 웹 안전 6x6x6 RGB 큐브
+      const steps = [0, 51, 102, 153, 204, 255];
+      for (let r = 0; r < 6; r++) {
+        for (let g = 0; g < 6; g++) {
+          for (let b = 0; b < 6; b++) {
+            const hex = '#' +
+              steps[r].toString(16).padStart(2, '0') +
+              steps[g].toString(16).padStart(2, '0') +
+              steps[b].toString(16).padStart(2, '0');
+            colors.push(hex);
+          }
+        }
+      }
+      // 24단계 그레이스케일 (총 16 + 216 + 24 = 256색)
+      for (let i = 0; i < 24; i++) {
+        const v = Math.round((i / 23) * 255);
+        const h = v.toString(16).padStart(2, '0');
+        colors.push(`#${h}${h}${h}`);
+      }
+      return colors;
+    }
+
+    function isLightHexColor(hex) {
+      const clean = String(hex || '#0d0d0d').replace('#', '');
+      if (clean.length !== 6) return false;
+      const r = parseInt(clean.slice(0, 2), 16);
+      const g = parseInt(clean.slice(2, 4), 16);
+      const b = parseInt(clean.slice(4, 6), 16);
+      return (0.299 * r + 0.587 * g + 0.114 * b) > 165;
+    }
+
+    function applyAppBgColor(hex, saveToCloud = false) {
+      const color = /^#[0-9a-fA-F]{6}$/.test(String(hex || '')) ? String(hex).toLowerCase() : '#0d0d0d';
+      currentAppBgColor = color;
+      document.documentElement.style.setProperty('--app-bg', color);
+      document.body.classList.toggle('light-bg', isLightHexColor(color));
+
+      const sw = document.getElementById('currentBgSwatch');
+      const lbl = document.getElementById('currentBgHex');
+      if (sw) sw.style.background = color;
+      if (lbl) lbl.textContent = color;
+
+      document.querySelectorAll('#palette256Grid .palette-cell').forEach(cell => {
+        cell.classList.toggle('selected', cell.dataset.color === color);
+      });
+
+      try {
+        localStorage.setItem(BG_COLOR_STORAGE_KEY, color);
+        if (currentUser) localStorage.setItem(`${BG_COLOR_STORAGE_KEY}_${getUid()}`, color);
+      } catch (e) {}
+
+      if (saveToCloud && fbReady && db && currentUser) {
+        db.collection(FB_COLLECTION).doc(getPlayInfoDocId()).set({
+          keyword: getPlayInfoDocId(),
+          bgColor: color,
+          items: currentPlayHistory,
+          updatedAt: Date.now()
+        }, { merge: true }).catch(() => {});
+      }
+    }
+
+    function build256Palette() {
+      const grid = document.getElementById('palette256Grid');
+      if (!grid) return;
+      if (!paletteBuilt) {
+        const frag = document.createDocumentFragment();
+        generate256HexColors().forEach(hex => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'palette-cell';
+          btn.style.background = hex;
+          btn.dataset.color = hex;
+          btn.title = hex;
+          btn.onclick = () => applyAppBgColor(hex, true);
+          frag.appendChild(btn);
+        });
+        grid.innerHTML = '';
+        grid.appendChild(frag);
+        paletteBuilt = true;
+      }
+      applyAppBgColor(currentAppBgColor, false);
+    }
+
+    function resetAppBgColor() {
+      applyAppBgColor('#0d0d0d', true);
+    }
+
+    function initSavedBgColor() {
+      let saved = '#0d0d0d';
+      try {
+        const uColor = currentUser ? localStorage.getItem(`${BG_COLOR_STORAGE_KEY}_${getUid()}`) : null;
+        saved = uColor || localStorage.getItem(BG_COLOR_STORAGE_KEY) || '#0d0d0d';
+      } catch (e) {}
+      applyAppBgColor(saved, false);
     }
 
     // 별표(★) 최상단 고정 저장/로드 (사용자별 분리)
@@ -1791,13 +2128,18 @@
       renderSortedFeed();
     }
 
-    // 3. 100개 검색 수집
+    // 3. 100개 검색 수집 (동작 중 연파랑 삼각형 깜박임 + 완료 즉시 Firebase 영구 동기화 대기)
     async function startSearch() {
       const q = document.getElementById('query').value.trim();
-      if (!q || isSearching || !currentUser) return;
+      if (!q) {
+        if (!fbVerified) verifyFirebaseConnection();
+        return;
+      }
+      if (isSearching || !currentUser) return;
 
       closeFilterPanel();
       isSearching = true;
+      setWorkingState(true);
       totalLoadedItems = 0;
       currentSearchCollected = [];
       currentFeedItems = [];
@@ -1829,12 +2171,13 @@
         countMsg.innerText = `${totalLoadedItems}`;
 
         if (currentSearchCollected.length > 0) {
-          saveSearchTab(q, currentSearchCollected);
+          await saveSearchTab(q, currentSearchCollected);
         }
       } catch (err) {
         statusMsg.innerText = err.message;
       } finally {
         isSearching = false;
+        setWorkingState(false);
       }
     }
 
@@ -2056,7 +2399,7 @@
       try {
         navigator.mediaSession.metadata = new MediaMetadata({
           title: simplifyTitle(title),
-          artist: 'Tube Audio Lab',
+          artist: 'myTube',
           album: 'Background Audio',
           artwork: [
             { src: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`, sizes: '480x360', type: 'image/jpeg' }
@@ -2256,7 +2599,7 @@
       ytHolder.innerHTML = `
         <iframe
           id="ytPlayerFrame"
-          src="https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&controls=1&fs=1&enablejsapi=1&modestbranding=1&rel=0&playsinline=1"
+          src="https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&controls=1&fs=1&enablejsapi=1&modestbranding=1&rel=0&playsinline=1&iv_load_policy=3&cc_load_policy=0&disablekb=1"
           allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
           allowfullscreen>
         </iframe>
@@ -2271,16 +2614,21 @@
         });
       }
 
+      hideYtPauseMask();
+      isYtVideoPlaying = true;
+      updateSearchBtnState();
       setupMediaSession(title, videoId);
       prefetchPromise = prefetchBgAudio(videoId);
       recordUserPlay(videoId, title);
     }
 
-    // 5-2. Firebase 상시 자동 연결 + 로그인 인증 + 사용자별 검색/플레이 정보 엔진
+    // 5-2. Firebase 상시 자동 연결 + 실통신 헬스체크 + 양방향 검색이력 영구 동기화
     function initFirebaseAlways() {
       if (typeof firebase === 'undefined') {
         fbReady = false;
+        fbVerified = false;
         db = null;
+        updateSearchBtnState();
         return;
       }
       try {
@@ -2290,10 +2638,82 @@
         db = firebase.firestore();
         fbReady = true;
       } catch (err) {
-        console.error('[Firebase 연결 오류]', err);
+        console.error('[Firebase 초기화 오류]', err);
         fbReady = false;
+        fbVerified = false;
         db = null;
+        updateSearchBtnState();
       }
+    }
+
+    async function verifyFirebaseConnection() {
+      if (!fbReady || !db) {
+        fbVerified = false;
+        updateSearchBtnState();
+        return false;
+      }
+      try {
+        const snap = await Promise.race([
+          db.collection(FB_COLLECTION).doc(AUTH_DOC_ID).get(),
+          new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 7000))
+        ]);
+        fbVerified = true;
+        if (snap && snap.exists) {
+          const d = snap.data();
+          authData = {
+            adminCode: String(d.adminCode || DEFAULT_ADMIN_CODE),
+            users: Array.isArray(d.users) ? d.users : []
+          };
+          saveLocalAuthCache();
+        }
+        updateSearchBtnState();
+        return true;
+      } catch (err) {
+        console.warn('[Firebase 실통신 검증 실패]', err);
+        fbVerified = false;
+        updateSearchBtnState();
+        return false;
+      }
+    }
+
+    // 사용자별 로컬 목차 백업 & 미동기화 대기열 관리 (앱 즉시 종료 후 재진입 시 유실 0%)
+    function loadLocalMetaBackup() {
+      if (!currentUser) return [];
+      try {
+        const raw = localStorage.getItem(META_BACKUP_PREFIX + getUid());
+        if (raw) {
+          const arr = JSON.parse(raw);
+          if (Array.isArray(arr)) return arr.filter(t => t && t.docId);
+        }
+      } catch (e) {}
+      return [];
+    }
+
+    function saveLocalMetaBackup(metaList) {
+      if (!currentUser) return;
+      try {
+        localStorage.setItem(META_BACKUP_PREFIX + getUid(), JSON.stringify(metaList || []));
+      } catch (e) {}
+    }
+
+    function getPendingSyncIds() {
+      if (!currentUser) return [];
+      try {
+        const raw = localStorage.getItem(PENDING_SYNC_PREFIX + getUid());
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) { return []; }
+    }
+
+    function markPendingSync(docId) {
+      if (!currentUser || !docId) return;
+      const list = Array.from(new Set([...getPendingSyncIds(), docId]));
+      try { localStorage.setItem(PENDING_SYNC_PREFIX + getUid(), JSON.stringify(list)); } catch (e) {}
+    }
+
+    function clearPendingSync(docId) {
+      if (!currentUser || !docId) return;
+      const list = getPendingSyncIds().filter(id => id !== docId);
+      try { localStorage.setItem(PENDING_SYNC_PREFIX + getUid(), JSON.stringify(list)); } catch (e) {}
     }
 
     function loadLocalAuthCache() {
@@ -2317,9 +2737,14 @@
 
     async function loadAuthConfigFromCloud() {
       loadLocalAuthCache();
-      if (!fbReady || !db) return;
+      if (!fbReady || !db) {
+        fbVerified = false;
+        updateSearchBtnState();
+        return;
+      }
       try {
         const snap = await db.collection(FB_COLLECTION).doc(AUTH_DOC_ID).get();
+        fbVerified = true;
         if (snap.exists) {
           const d = snap.data();
           authData = {
@@ -2331,8 +2756,10 @@
           await saveAuthConfigToCloud();
         }
       } catch (err) {
-        console.warn('[인증 정보 로드 지연]', err);
+        console.warn('[인증 정보 로드 실패]', err);
+        fbVerified = false;
       }
+      updateSearchBtnState();
     }
 
     async function saveAuthConfigToCloud() {
@@ -2345,9 +2772,12 @@
           users: authData.users,
           updatedAt: Date.now()
         });
+        fbVerified = true;
       } catch (err) {
         console.warn('[인증 정보 저장 실패]', err);
+        fbVerified = false;
       }
+      updateSearchBtnState();
     }
 
     function findUserByCode(code) {
@@ -2384,7 +2814,6 @@
       }
       if (errEl) errEl.textContent = '';
 
-      // 최신 클라우드 인증 정보 재확인 후 검증
       await loadAuthConfigFromCloud();
       const user = findUserByCode(code);
       if (!user) {
@@ -2414,10 +2843,12 @@
       statusMsg.innerText = '';
       countMsg.innerText = '';
 
+      initSavedBgColor();
       loadLocalPinsImmediate();
       loadUserPlayHistory();
       syncPinsFromFirebase();
       loadSavedTabsMeta();
+      updateSearchBtnState();
     }
 
     function logoutUser() {
@@ -2439,7 +2870,7 @@
       showAuthGate('');
     }
 
-    // 사용자별 플레이 정보(최근 재생 이력) 저장/로드
+    // 사용자별 플레이 정보(최근 재생 이력 + 배경색) 저장/로드
     async function loadUserPlayHistory() {
       currentPlayHistory = [];
       if (!currentUser) return;
@@ -2454,9 +2885,15 @@
       if (fbReady && db) {
         try {
           const snap = await db.collection(FB_COLLECTION).doc(getPlayInfoDocId()).get();
-          if (snap.exists && Array.isArray(snap.data().items)) {
-            currentPlayHistory = snap.data().items;
-            localStorage.setItem(PLAY_HISTORY_LOCAL_PREFIX + getUid(), JSON.stringify(currentPlayHistory));
+          if (snap.exists) {
+            const d = snap.data();
+            if (Array.isArray(d.items)) {
+              currentPlayHistory = d.items;
+              localStorage.setItem(PLAY_HISTORY_LOCAL_PREFIX + getUid(), JSON.stringify(currentPlayHistory));
+            }
+            if (d.bgColor && /^#[0-9a-fA-F]{6}$/.test(d.bgColor)) {
+              applyAppBgColor(d.bgColor, false);
+            }
           }
         } catch (err) {}
       }
@@ -2478,16 +2915,18 @@
         try {
           await db.collection(FB_COLLECTION).doc(getPlayInfoDocId()).set({
             keyword: getPlayInfoDocId(),
+            bgColor: currentAppBgColor,
             updatedAt: Date.now(),
             items: currentPlayHistory
-          });
+          }, { merge: true });
         } catch (err) {}
       }
     }
 
-    // 초경량 목차 문서 동기화 (사용자별 독립)
+    // 초경량 목차 문서 동기화 (사용자별 독립 + 로컬 백업 병행)
     async function syncTabsIndexToCloud() {
-      if (!fbReady || !db || !currentUser) return;
+      saveLocalMetaBackup(cachedTabsMeta);
+      if (!fbReady || !db || !currentUser) return false;
       try {
         const indexItems = cachedTabsMeta.slice(0, MAX_TAB_ITEMS).map(t => ({
           docId: t.docId,
@@ -2500,56 +2939,146 @@
           updatedAt: Date.now(),
           items: indexItems
         });
+        fbVerified = true;
+        updateSearchBtnState();
+        return true;
       } catch (err) {
         console.warn('[목차 인덱스 저장 실패]', err);
+        fbVerified = false;
+        updateSearchBtnState();
+        return false;
       }
     }
 
     function upsertLocalMeta(docId, keyword, count, updatedAt) {
       cachedTabsMeta = cachedTabsMeta.filter(t => t.docId !== docId);
       cachedTabsMeta.unshift({ docId, keyword, count, updatedAt });
+      saveLocalMetaBackup(cachedTabsMeta);
       renderSavedTabsBar();
       if (manageOverlay.style.display === 'flex') renderManageList();
     }
 
-    async function loadSavedTabsMeta() {
-      cachedTabsMeta = [];
-      if (fbReady && db && currentUser) {
+    // 로컬에만 남아있던 미전송 검색 이력을 Firebase로 자동 재업로드
+    async function flushPendingTabsToCloud(missingMetaItems = []) {
+      if (!fbReady || !db || !currentUser) return;
+      const pendingSet = new Set(getPendingSyncIds());
+      missingMetaItems.forEach(m => { if (m && m.docId) pendingSet.add(m.docId); });
+      if (pendingSet.size === 0) return;
+
+      let uploadedAny = false;
+      for (const docId of pendingSet) {
+        const cached = getCachedTab(docId);
+        const meta = cachedTabsMeta.find(t => t.docId === docId);
+        if (!cached || !Array.isArray(cached.items) || !meta) {
+          clearPendingSync(docId);
+          continue;
+        }
         try {
-          const idxDocId = getTabsIndexDocId();
-          const idxSnap = await db.collection(FB_COLLECTION).doc(idxDocId).get();
-          if (idxSnap.exists && Array.isArray(idxSnap.data().items)) {
-            cachedTabsMeta = idxSnap.data().items
-              .filter(it => it && it.docId && !String(it.docId).startsWith('__'))
-              .map(it => ({
-                docId: it.docId,
-                keyword: it.kw || it.docId,
-                count: Number(it.cnt || 0),
-                updatedAt: Number(it.at || 0)
-              }))
-              .sort((a, b) => b.updatedAt - a.updatedAt);
-          } else if (isAdminUser()) {
-            // 관리자 최초 1회 기존 공용 탭 자동 목차화 (타 사용자 문서 u_ 제외)
-            const snap = await db.collection(FB_COLLECTION).orderBy('updatedAt', 'desc').get();
-            snap.forEach(doc => {
-              if (doc.id.startsWith('__') || doc.id.startsWith('u_')) return;
-              const d = doc.data();
-              const count = Array.isArray(d.items) ? d.items.length : 0;
-              cachedTabsMeta.push({
-                docId: doc.id,
-                keyword: d.keyword || doc.id,
-                count: count,
-                updatedAt: d.updatedAt || 0
-              });
-            });
-            if (cachedTabsMeta.length > 0) syncTabsIndexToCloud();
-          }
+          await db.collection(FB_COLLECTION).doc(docId).set({
+            keyword: meta.keyword,
+            updatedAt: meta.updatedAt || Date.now(),
+            items: stripThumbField(cached.items)
+          });
+          clearPendingSync(docId);
+          uploadedAny = true;
+          fbVerified = true;
         } catch (err) {
-          console.warn('[목차 로드 실패]', err);
+          console.warn('[보류 검색이력 재동기화 지연]', docId, err);
         }
       }
-      renderSavedTabsBar();
-      if (manageOverlay.style.display === 'flex') renderManageList();
+      if (uploadedAny) {
+        await syncTabsIndexToCloud();
+      }
+      updateSearchBtnState();
+    }
+
+    // 양방향 검색이력 로드 (로컬 0.01초 즉시 복원 -> Firebase 조회/복구 -> 자동 병합 + 누락분 재동기화)
+    async function loadSavedTabsMeta() {
+      if (!currentUser) return;
+
+      // 1단계: 로컬 백업 즉시 복원 (앱 재진입 직후 검색 이력이 바로 보임)
+      const localMeta = loadLocalMetaBackup();
+      if (localMeta.length > 0) {
+        cachedTabsMeta = [...localMeta].sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+        renderSavedTabsBar();
+      }
+
+      if (!fbReady || !db) {
+        fbVerified = false;
+        updateSearchBtnState();
+        return;
+      }
+
+      setWorkingState(true);
+      try {
+        const idxDocId = getTabsIndexDocId();
+        const idxSnap = await db.collection(FB_COLLECTION).doc(idxDocId).get();
+        fbVerified = true;
+
+        let cloudMeta = [];
+        if (idxSnap.exists && Array.isArray(idxSnap.data().items)) {
+          cloudMeta = idxSnap.data().items
+            .filter(it => it && it.docId && !String(it.docId).startsWith('__'))
+            .map(it => ({
+              docId: it.docId,
+              keyword: it.kw || it.docId,
+              count: Number(it.cnt || 0),
+              updatedAt: Number(it.at || 0)
+            }));
+        } else {
+          // 목차 문서가 아직 없는 경우 컬렉션에서 해당 사용자 문서 직접 복구
+          const snap = await db.collection(FB_COLLECTION).get();
+          const userPrefix = `u_${getUid()}__`;
+          snap.forEach(doc => {
+            if (doc.id.startsWith('__')) return;
+            if (isAdminUser()) {
+              if (doc.id.startsWith('u_')) return;
+            } else {
+              if (!doc.id.startsWith(userPrefix)) return;
+            }
+            const d = doc.data();
+            const count = Array.isArray(d.items) ? d.items.length : 0;
+            cloudMeta.push({
+              docId: doc.id,
+              keyword: d.keyword || doc.id.replace(userPrefix, ''),
+              count: count,
+              updatedAt: d.updatedAt || 0
+            });
+          });
+        }
+
+        // 2단계: 클라우드 목차 + 로컬 백업 병합 (최신 항목 우선)
+        const mergedMap = new Map();
+        cloudMeta.forEach(t => mergedMap.set(t.docId, t));
+        const missingInCloud = [];
+        localMeta.forEach(lt => {
+          const ct = mergedMap.get(lt.docId);
+          if (!ct) {
+            mergedMap.set(lt.docId, lt);
+            missingInCloud.push(lt);
+          } else if ((lt.updatedAt || 0) > (ct.updatedAt || 0)) {
+            mergedMap.set(lt.docId, lt);
+            missingInCloud.push(lt);
+          }
+        });
+
+        cachedTabsMeta = Array.from(mergedMap.values()).sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+        saveLocalMetaBackup(cachedTabsMeta);
+        renderSavedTabsBar();
+        if (manageOverlay.style.display === 'flex') renderManageList();
+
+        // 3단계: 로컬에만 있던 미전송 이력이 있거나 목차가 새로 복구되었다면 Firebase에 동기화
+        if (missingInCloud.length > 0 || getPendingSyncIds().length > 0) {
+          await flushPendingTabsToCloud(missingInCloud);
+        } else if (!idxSnap.exists && cachedTabsMeta.length > 0) {
+          await syncTabsIndexToCloud();
+        }
+      } catch (err) {
+        console.warn('[Firebase 목차 동기화 실패]', err);
+        fbVerified = false;
+      } finally {
+        setWorkingState(false);
+      }
     }
 
     function renderSavedTabsBar() {
@@ -2583,54 +3112,75 @@
     }
 
     async function saveSearchTab(keyword, newItems) {
-      if (!fbReady || !db || !currentUser) return;
+      if (!currentUser) return;
       const docId = getSearchTabDocId(keyword);
       const now = Date.now();
       const cleanNew = stripThumbField(newItems);
-      const docRef = db.collection(FB_COLLECTION).doc(docId);
 
-      try {
-        let existingItems = [];
-        const meta = cachedTabsMeta.find(t => t.docId === docId);
-        const cached = getCachedTab(docId);
+      // 1) 기존 항목 확보 (캐시 우선 -> 필요 시 클라우드)
+      let existingItems = [];
+      const meta = cachedTabsMeta.find(t => t.docId === docId);
+      const cached = getCachedTab(docId);
 
-        if (cached && meta && cached.updatedAt >= meta.updatedAt) {
-          existingItems = cached.items;
-        } else if (meta) {
-          const snap = await docRef.get();
+      if (cached && (!meta || cached.updatedAt >= meta.updatedAt)) {
+        existingItems = cached.items;
+      } else if (fbReady && db && meta) {
+        try {
+          const snap = await db.collection(FB_COLLECTION).doc(docId).get();
           if (snap.exists && Array.isArray(snap.data().items)) {
             existingItems = stripThumbField(snap.data().items);
           }
-        }
+        } catch (e) {}
+      }
 
-        const trimmedItems = stripThumbField(mergeAndCapItems(cleanNew, existingItems));
-        activeTabKeyword = keyword;
-        setCachedTab(docId, now, trimmedItems);
-        upsertLocalMeta(docId, keyword, trimmedItems.length, now);
+      const trimmedItems = stripThumbField(mergeAndCapItems(cleanNew, existingItems));
+      activeTabKeyword = keyword;
 
-        await Promise.all([
-          docRef.set({ keyword: keyword, updatedAt: now, items: trimmedItems }),
-          syncTabsIndexToCloud()
-        ]);
+      // 2) 로컬 캐시 + 로컬 목차 백업 동기적 즉시 확정 (앱 종료 시 유실 0%)
+      setCachedTab(docId, now, trimmedItems);
+      upsertLocalMeta(docId, keyword, trimmedItems.length, now);
+      markPendingSync(docId);
+
+      // 3) Firebase 데이터 문서 + 목차 문서 독립 저장
+      if (!fbReady || !db) {
+        fbVerified = false;
+        updateSearchBtnState();
+        return;
+      }
+
+      try {
+        await db.collection(FB_COLLECTION).doc(docId).set({
+          keyword: keyword,
+          updatedAt: now,
+          items: trimmedItems
+        });
+        clearPendingSync(docId);
+        fbVerified = true;
+        await syncTabsIndexToCloud();
       } catch (err) {
-        console.warn('[저장 실패]', err);
+        console.warn('[Firebase 검색이력 저장 실패 -> 재접속 시 자동 재동기화]', err);
+        fbVerified = false;
+        updateSearchBtnState();
       }
     }
 
     async function loadTabData(docId, keyword) {
-      if (isSearching || !fbReady || !db || !currentUser) return;
+      if (isSearching || !currentUser) return;
       let items = [];
       const meta = cachedTabsMeta.find(t => t.docId === docId);
       const cached = getCachedTab(docId);
 
       if (cached && cached.items.length > 0 && (!meta || cached.updatedAt >= meta.updatedAt)) {
         items = cached.items;
-      } else {
+      } else if (fbReady && db) {
+        setWorkingState(true);
         try {
           const snap = await db.collection(FB_COLLECTION).doc(docId).get();
+          fbVerified = true;
           if (!snap.exists) {
             removeCachedTab(docId);
             cachedTabsMeta = cachedTabsMeta.filter(t => t.docId !== docId);
+            saveLocalMetaBackup(cachedTabsMeta);
             renderSavedTabsBar();
             syncTabsIndexToCloud();
             return;
@@ -2639,9 +3189,18 @@
           items = stripThumbField(Array.isArray(data.items) ? data.items : []);
           setCachedTab(docId, data.updatedAt || Date.now(), items);
         } catch (err) {
-          statusMsg.innerText = '불러오기 실패';
-          return;
+          fbVerified = false;
+          if (cached && cached.items.length > 0) {
+            items = cached.items;
+          } else {
+            statusMsg.innerText = '불러오기 실패';
+            return;
+          }
+        } finally {
+          setWorkingState(false);
         }
+      } else if (cached && cached.items.length > 0) {
+        items = cached.items;
       }
 
       activeTabKeyword = keyword;
@@ -2654,7 +3213,7 @@
       statusMsg.innerText = '';
     }
 
-    // 설정 모달 상단 확장 탭 전환 컨트롤러
+    // 설정 모달 상단 확장 탭 전환 컨트롤러 (검색 / 색상변경 / 로그인)
     function openManageModal(tabName = 'search') {
       manageOverlay.style.display = 'flex';
       switchSettingsTab(tabName);
@@ -2674,6 +3233,8 @@
 
       if (tabName === 'search') {
         renderManageList();
+      } else if (tabName === 'color') {
+        build256Palette();
       } else if (tabName === 'auth') {
         renderAuthSettingsPane();
       }
@@ -2865,55 +3426,65 @@
     }
 
     async function trimTabHalf(docId, keyword) {
-      if (!fbReady || !db || !currentUser) return;
+      if (!currentUser) return;
       const now = Date.now();
-      try {
-        const docRef = db.collection(FB_COLLECTION).doc(docId);
-        const cached = getCachedTab(docId);
-        let items = cached ? cached.items : null;
-        if (!items) {
-          const snap = await docRef.get();
-          if (!snap.exists) return;
-          items = Array.isArray(snap.data().items) ? snap.data().items : [];
-        }
-        const keepCount = Math.max(10, Math.floor(items.length / 2));
-        const trimmed = stripThumbField(items.slice(0, keepCount));
+      const cached = getCachedTab(docId);
+      let items = cached ? cached.items : null;
+      if (!items && fbReady && db) {
+        try {
+          const snap = await db.collection(FB_COLLECTION).doc(docId).get();
+          if (snap.exists) items = Array.isArray(snap.data().items) ? snap.data().items : [];
+        } catch (e) {}
+      }
+      if (!items) return;
 
-        setCachedTab(docId, now, trimmed);
-        upsertLocalMeta(docId, keyword, trimmed.length, now);
-        await Promise.all([
-          docRef.update({ items: trimmed, updatedAt: now }),
-          syncTabsIndexToCloud()
-        ]);
-      } catch (err) {
-        alert('정리 중 오류가 발생했습니다.');
+      const keepCount = Math.max(10, Math.floor(items.length / 2));
+      const trimmed = stripThumbField(items.slice(0, keepCount));
+
+      setCachedTab(docId, now, trimmed);
+      upsertLocalMeta(docId, keyword, trimmed.length, now);
+      if (fbReady && db) {
+        try {
+          await db.collection(FB_COLLECTION).doc(docId).set({
+            keyword: keyword,
+            items: trimmed,
+            updatedAt: now
+          });
+          await syncTabsIndexToCloud();
+        } catch (err) {
+          markPendingSync(docId);
+        }
       }
     }
 
     async function deleteTabDoc(docId, keyword) {
-      if (!fbReady || !db || !currentUser) return;
+      if (!currentUser) return;
       if (!confirm(`'${keyword}' 목록을 삭제할까요?`)) return;
       removeCachedTab(docId);
+      clearPendingSync(docId);
       cachedTabsMeta = cachedTabsMeta.filter(t => t.docId !== docId);
+      saveLocalMetaBackup(cachedTabsMeta);
       if (activeTabKeyword === keyword) activeTabKeyword = '';
       renderSavedTabsBar();
       if (manageOverlay.style.display === 'flex') renderManageList();
 
-      try {
-        await Promise.all([
-          db.collection(FB_COLLECTION).doc(docId).delete(),
-          syncTabsIndexToCloud()
-        ]);
-      } catch (err) {
-        alert('삭제 중 오류가 발생했습니다.');
+      if (fbReady && db) {
+        try {
+          await db.collection(FB_COLLECTION).doc(docId).delete();
+          await syncTabsIndexToCloud();
+        } catch (err) {
+          console.warn('[삭제 동기화 지연]', err);
+        }
       }
     }
 
-    // 앱 부팅: 항상 Firebase 연결 -> 세션 유지 확인(로그아웃 전까지 유지) -> 미인증 시 중앙 소형 코드창
+    // 앱 부팅: 색상/레이아웃 복원 -> Firebase 연결 -> 세션 유지 확인 -> 자동 진입 또는 중앙 코드창
     async function bootstrapApp() {
       document.body.classList.add('auth-locked');
+      initSavedBgColor();
       updateFilterUI();
       initFeedLayoutMode();
+      updateSearchBtnState();
       initFirebaseAlways();
       await loadAuthConfigFromCloud();
 
@@ -2937,12 +3508,15 @@
 
     function closePlayerModal() {
       stopBgAudioClean();
+      isYtVideoPlaying = false;
+      hideYtPauseMask();
       isDockedToBookmark = false;
       lastKnownPlaySec = 0;
       ytHolder.innerHTML = '';
       modal.classList.remove('docked-hidden', 'interacting');
       modal.style.display = 'none';
       miniBookmark.style.display = 'none';
+      updateSearchBtnState();
     }
 
     // 6. MP3 / 320kbps 전용 추출 모달 제어
@@ -2989,13 +3563,28 @@
       }
     }
 
-    // 7. YouTube 재생 초 수신 + 무중단 백그라운드 오디오 이벤트 + iOS 백그라운드 유지
+    // 7. YouTube 재생 상태/초 수신 + '동영상 더보기' 차단 + 검색버튼 흰색 삼각형 깜박임 연동
     window.addEventListener('message', (e) => {
       if (!e.data || typeof e.data !== 'string') return;
       try {
         const msg = JSON.parse(e.data);
-        if (msg.event === 'infoDelivery' && msg.info && typeof msg.info.currentTime === 'number') {
-          lastKnownPlaySec = msg.info.currentTime;
+        if (msg.event === 'infoDelivery' && msg.info) {
+          if (typeof msg.info.currentTime === 'number') {
+            lastKnownPlaySec = msg.info.currentTime;
+          }
+          if (typeof msg.info.playerState === 'number') {
+            if (msg.info.playerState === 1) {
+              isYtVideoPlaying = true;
+              hideYtPauseMask();
+              updateSearchBtnState();
+            } else if (msg.info.playerState === 2 || msg.info.playerState === 0) {
+              isYtVideoPlaying = false;
+              if (!isBgAudioPlaying && !isDockedToBookmark && currentVideoId) {
+                showYtPauseMask();
+              }
+              updateSearchBtnState();
+            }
+          }
         }
       } catch (err) {}
     });
@@ -3008,17 +3597,17 @@
       pendingBgSeekSec = 0;
     });
 
-    // ★ 실제 소리가 나오기 시작한 순간('playing')에만 YouTube iframe 일시정지 -> 끊김 0%!
     bgAudio.addEventListener('playing', () => {
       if (bgAudio.src === SILENT_WAV_URI) return;
       isBgAudioPlaying = true;
+      hideYtPauseMask();
       sendYtCommand('pauseVideo');
       setupMediaSession(currentVideoTitle, currentVideoId);
       if ('mediaSession' in navigator) {
         try { navigator.mediaSession.playbackState = 'playing'; } catch (e) {}
       }
       updateBgModeUI();
-      statusMsg.innerText = '🎧 백그라운드 오디오 활성 (화면 잠금/백그라운드 재생 가능)';
+      updateSearchBtnState();
     });
 
     bgAudio.addEventListener('pause', () => {
@@ -3027,6 +3616,7 @@
         try { navigator.mediaSession.playbackState = 'paused'; } catch (e) {}
       }
       updateBgModeUI();
+      updateSearchBtnState();
     });
 
     bgAudio.addEventListener('timeupdate', () => {
@@ -3053,12 +3643,14 @@
       } else {
         isBgAudioPlaying = false;
         updateBgModeUI();
+        updateSearchBtnState();
       }
     });
 
     bgAudio.addEventListener('ended', () => {
       isBgAudioPlaying = false;
       updateBgModeUI();
+      updateSearchBtnState();
     });
 
     // 브라우저/홈화면 앱이 백그라운드로 내려갈 때 자동 오디오 보호
