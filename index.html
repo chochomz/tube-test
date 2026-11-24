@@ -9,6 +9,7 @@
   <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/1384/1384060.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" id="appThemeColorMeta" content="#0d0d0d">
 
   <!-- TUBE_LAB_V7_PATCH: Firebase Compat SDK (Firestore 상시 연결) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -1217,9 +1218,18 @@
       cursor: pointer;
     }
     /* 배터리 절약 순수 검정(#000000) 절전 오버레이 */
+    html.blackout-active,
+    body.blackout-active {
+      background: #000000 !important;
+      background-color: #000000 !important;
+      overscroll-behavior: none !important;
+    }
     #battery-blackout-overlay {
       position: fixed;
-      inset: 0;
+      top: -60px;
+      left: -20px;
+      right: -20px;
+      bottom: -60px;
       z-index: 30000;
       background: #000000;
       display: none;
@@ -1394,6 +1404,8 @@
     .video-grid.cols-3 .video-meta { font-size: 8.5px; }
     .video-grid.cols-2 .video-meta { font-size: 9.5px; }
     .video-grid.cols-1 .video-meta { font-size: 10.5px; margin-top: 4px; }
+    .video-meta-size { display: none; }
+    .video-grid.cols-1 .video-meta-size { display: inline; }
 
     /* 3. [핵심] 16:9 원본 밀착형 부유창 */
     #floating-player-modal {
@@ -1595,6 +1607,27 @@
       cursor: pointer;
     }
     .yt-pause-mask.active { display: flex; }
+    .yt-unmute-badge {
+      position: absolute;
+      left: 50%;
+      bottom: 12px;
+      transform: translateX(-50%);
+      z-index: 20;
+      display: none;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      border: 1.5px solid rgba(255, 255, 255, 0.9);
+      background: rgba(217, 56, 106, 0.92);
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 800;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.72);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .yt-unmute-badge.active { display: inline-flex; }
     .yt-pause-play-circle {
       width: 46px;
       height: 46px;
@@ -1664,20 +1697,20 @@
     /* 4-2. 슬라이드 책갈피 (스크롤 시 상시 표시 · 투명도 70% · 좌/우 한 손 이동 · ⚙/🎧/MP3/▶깜박) */
     #slide-bookmark {
       position: fixed;
-      top: 38%;
+      top: auto;
       z-index: 9500;
       width: 34px;
       display: none;
       flex-direction: column;
       align-items: center;
       gap: 4px;
-      padding: 5px 2px 6px 2px;
-      opacity: 0.70;
+      padding: 8px 3px 9px 3px;
+      opacity: 0.72;
       background: var(--bookmark-bg);
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
       border: 1.5px solid var(--bookmark-border);
-      box-shadow: 0 5px 16px rgba(0, 0, 0, 0.45);
+      box-shadow: -2px 6px 18px rgba(0, 0, 0, 0.48), inset 1px 0 0 rgba(255, 255, 255, 0.35);
       user-select: none;
       -webkit-user-select: none;
       -webkit-touch-callout: none;
@@ -1691,16 +1724,16 @@
       left: 0;
       right: auto;
       border-left: none;
-      border-radius: 0 11px 11px 0;
+      border-radius: 0 22px 22px 0;
     }
     #slide-bookmark.dock-right {
       right: 0;
       left: auto;
       border-right: none;
-      border-radius: 11px 0 0 11px;
+      border-radius: 22px 0 0 22px;
     }
     #slide-bookmark.dock-free {
-      border-radius: 11px;
+      border-radius: 22px;
     }
     #slide-bookmark.sb-tucked {
       transition: transform 0.85s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.85s ease, box-shadow 0.14s;
@@ -1743,7 +1776,7 @@
       width: 26px;
       height: 24px;
       border: none;
-      border-radius: 7px;
+      border-radius: 999px;
       background: rgba(0, 0, 0, 0.24);
       color: #ffffff;
       font-weight: 800;
@@ -2076,6 +2109,7 @@
       <div class="yt-pause-mask" id="ytPauseMask" onclick="resumeYtFromMask()">
         <div class="yt-pause-play-circle">▶</div>
       </div>
+      <button type="button" class="yt-unmute-badge" id="ytUnmuteBadge" onclick="unmuteYtFromBadge(event)">🔊 소리 켜기</button>
 
       <!-- 🎧 백그라운드 오디오 모드 활성 시 창 내부 표시 -->
       <div class="bg-audio-overlay" id="bgAudioOverlay">
@@ -2877,6 +2911,10 @@
       });
 
       document.body.classList.toggle('light-bg', isLightHexColor(currentThemeColors.appBg));
+      const tcMeta = document.getElementById('appThemeColorMeta');
+      if (tcMeta && !document.body.classList.contains('blackout-active')) {
+        tcMeta.setAttribute('content', currentThemeColors.appBg || '#0d0d0d');
+      }
       updateSelectedModulePreviewUI();
     }
 
@@ -3413,6 +3451,16 @@
       return String(n);
     }
 
+    function estimateVideoFileSize(durationSec, qualityScore) {
+      const sec = Number(durationSec || 0);
+      if (!sec || sec <= 0) return '';
+      const q = Number(qualityScore || 1);
+      const mbPerSec = q >= 5 ? 2.4 : (q >= 3 ? 0.85 : (q >= 2 ? 0.45 : 0.32));
+      const totalMb = sec * mbPerSec;
+      if (totalMb >= 1024) return '~' + (totalMb / 1024).toFixed(1) + 'GB';
+      return '~' + Math.max(1, Math.round(totalMb)) + 'MB';
+    }
+
     function formatFeedMeta(uploaded, views) {
       const parts = [];
       if (uploaded && Number(uploaded) > 0) {
@@ -3541,6 +3589,13 @@
         const metaEl = document.createElement('div');
         metaEl.className = 'video-meta';
         metaEl.textContent = formatFeedMeta(item.u, item.v);
+        const estSize = estimateVideoFileSize(item.d, item.q);
+        if (estSize) {
+          const sizeSpan = document.createElement('span');
+          sizeSpan.className = 'video-meta-size';
+          sizeSpan.textContent = ' · ' + estSize;
+          metaEl.appendChild(sizeSpan);
+        }
         info.appendChild(metaEl);
 
         card.appendChild(thumbWrap);
@@ -3829,14 +3884,12 @@
     async function activateBgAudioStream(startSec = 0) {
       if (!currentVideoId) return false;
       if (prefetchedVideoId !== currentVideoId || prefetchedAudioCandidates.length === 0) {
-        statusMsg.innerText = '백그라운드 오디오 스트림 연결 중...';
         if (prefetchPromise) await prefetchPromise;
         if (prefetchedVideoId !== currentVideoId || prefetchedAudioCandidates.length === 0) {
           await prefetchBgAudio(currentVideoId);
         }
       }
       if (prefetchedAudioCandidates.length === 0) {
-        statusMsg.innerText = '공용 스트림 지연 · 인앱 책갈피 재생 유지 중';
         return false;
       }
 
@@ -3850,7 +3903,6 @@
       if (idx >= prefetchedAudioCandidates.length) {
         isBgAudioPlaying = false;
         updateBgModeUI();
-        statusMsg.innerText = '오디오 스트림 전환 지연 · 기존 재생 유지';
         return false;
       }
       activeCandidateIdx = idx;
@@ -3900,12 +3952,35 @@
       updateBgModeUI();
     }
 
+    let ytFrameReady = false;
+    let ytAutoMuted = false;
+
+    function showYtUnmuteBadge() {
+      const b = document.getElementById('ytUnmuteBadge');
+      if (b) b.classList.add('active');
+    }
+    function hideYtUnmuteBadge() {
+      const b = document.getElementById('ytUnmuteBadge');
+      if (b) b.classList.remove('active');
+    }
+    function unmuteYtFromBadge(ev) {
+      if (ev && ev.stopPropagation) ev.stopPropagation();
+      ytAutoMuted = false;
+      hideYtUnmuteBadge();
+      sendYtCommand('unMute');
+      sendYtCommand('setVolume', [100]);
+      sendYtCommand('playVideo');
+    }
+
     function openPlayerModal(videoId, title) {
       unlockIosAudioOnce();
       stopBgAudioClean();
       clearTimeout(ytAutoplayWatchdog);
       ytConfirmedPlaying = false;
+      ytAutoMuted = false;
+      hideYtUnmuteBadge();
       isDockedToBookmark = false;
+      isYtVideoPlaying = false;
       lastKnownPlaySec = 0;
 
       currentVideoId = videoId;
@@ -3924,27 +3999,37 @@
       modal.style.top = topPos + 'px';
       modal.style.display = 'block';
 
-      ytHolder.innerHTML = '<iframe id="ytPlayerFrame" src="https://www.youtube-nocookie.com/embed/' + videoId + '?autoplay=1&controls=1&fs=1&enablejsapi=1&modestbranding=1&rel=0&playsinline=1&iv_load_policy=3&cc_load_policy=0&disablekb=1" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>';
+      const existingFrame = document.getElementById('ytPlayerFrame');
+      if (existingFrame && ytFrameReady) {
+        sendYtCommand('loadVideoById', [videoId]);
+        sendYtCommand('unMute');
+        sendYtCommand('playVideo');
+      } else {
+        ytFrameReady = false;
+        const originParam = (location.protocol === 'http:' || location.protocol === 'https:') ? ('&origin=' + encodeURIComponent(location.origin)) : '';
+        ytHolder.innerHTML = '<iframe id="ytPlayerFrame" src="https://www.youtube-nocookie.com/embed/' + videoId + '?autoplay=1&controls=1&fs=1&enablejsapi=1&modestbranding=1&rel=0&playsinline=1&iv_load_policy=3&cc_load_policy=0&disablekb=1' + originParam + '" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>';
 
-      const frame = document.getElementById('ytPlayerFrame');
-      if (frame) {
-        frame.addEventListener('load', () => {
-          try {
-            frame.contentWindow.postMessage(JSON.stringify({ event: 'listening', id: 1 }), '*');
-            frame.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'addEventListener', args: ['onError'] }), '*');
-            frame.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'addEventListener', args: ['onStateChange'] }), '*');
-            frame.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'playVideo', args: [] }), '*');
-            setTimeout(() => {
-              if (currentVideoId === videoId && !ytConfirmedPlaying && !isBgAudioPlaying && !userPausedBg) {
-                sendYtCommand('playVideo');
-              }
-            }, 380);
-          } catch (e) {}
-        });
+        const frame = document.getElementById('ytPlayerFrame');
+        if (frame) {
+          frame.addEventListener('load', () => {
+            ytFrameReady = true;
+            try {
+              frame.contentWindow.postMessage(JSON.stringify({ event: 'listening', id: 1 }), '*');
+              frame.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'addEventListener', args: ['onError'] }), '*');
+              frame.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'addEventListener', args: ['onStateChange'] }), '*');
+              frame.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'unMute', args: [] }), '*');
+              frame.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'playVideo', args: [] }), '*');
+              setTimeout(() => {
+                if (currentVideoId === videoId && !ytConfirmedPlaying && !isBgAudioPlaying && !userPausedBg) {
+                  sendYtCommand('playVideo');
+                }
+              }, 350);
+            } catch (e) {}
+          });
+        }
       }
 
       hideYtPauseMask();
-      isYtVideoPlaying = true;
       updateSearchBtnState();
       if (typeof revealSlideBookmark === 'function') revealSlideBookmark(3200);
       else if (typeof showSlideBookmark === 'function') showSlideBookmark(dockSide || 'right');
@@ -3954,21 +4039,15 @@
       prefetchPromise = prefetchBgAudio(videoId);
       recordUserPlay(videoId);
 
-      // 1.8초 자동재생 워치독: 모바일 브라우저가 iframe 자동재생을 차단하면 bgAudio로 즉시 폴백 재생
+      // 1.2초 자동재생 2중 보장: 소리 자동재생이 차단되면 음소거 자동재생으로 즉시 시작 + [🔊 소리 켜기] 배지 표시
       const targetId = videoId;
       ytAutoplayWatchdog = setTimeout(() => {
         if (currentVideoId !== targetId || ytConfirmedPlaying || isBgAudioPlaying || userPausedBg) return;
+        ytAutoMuted = true;
+        sendYtCommand('mute');
         sendYtCommand('playVideo');
-        if (prefetchedVideoId === targetId && prefetchedAudioCandidates.length > 0) {
-          activateBgAudioStream(lastKnownPlaySec);
-        } else {
-          prefetchBgAudio(targetId).then((cands) => {
-            if (currentVideoId === targetId && !ytConfirmedPlaying && !isBgAudioPlaying && !userPausedBg && cands.length > 0) {
-              activateBgAudioStream(lastKnownPlaySec);
-            }
-          });
-        }
-      }, 1800);
+        showYtUnmuteBadge();
+      }, 1200);
     }
 
     // 5-2. Firebase 3필드 100% 호환 스키마({keyword, updatedAt, items}) + 진단 + 최종 피드 신속 복원
@@ -5279,6 +5358,9 @@
     function closePlayerModal() {
       clearTimeout(ytAutoplayWatchdog);
       ytConfirmedPlaying = false;
+      ytFrameReady = false;
+      ytAutoMuted = false;
+      hideYtUnmuteBadge();
       stopBgAudioClean();
       isYtVideoPlaying = false;
       hideYtPauseMask();
@@ -5417,7 +5499,7 @@
         }
       } catch (e) {
         if (e && e.name === 'AbortError') return;
-        setMp3Progress(null, '공용 스트림 지연 → 아래 3번 외부 320k 변환을 이용해 주세요');
+        setMp3Progress(null, '직접 저장 불가 → 아래 3번 외부 320k 변환을 이용해 주세요');
         directStreamBtn.innerText = '⬇ 1. 기기로 바로 파일 저장 재시도';
       } finally {
         isExtractingAudio = false;
@@ -5469,14 +5551,20 @@
               ytConfirmedPlaying = true;
               clearTimeout(ytAutoplayWatchdog);
               isYtVideoPlaying = true;
+              if (!ytAutoMuted) hideYtUnmuteBadge();
               hideYtPauseMask();
               updateSearchBtnState();
               updateSlideBookmarkPlayUI();
             } else if (msg.info.playerState === 2 || msg.info.playerState === 0) {
               isYtVideoPlaying = false;
+              if (msg.info.playerState === 0) { ytAutoMuted = false; hideYtUnmuteBadge(); }
               if (!isBgAudioPlaying && !isDockedToBookmark && currentVideoId) {
                 showYtPauseMask();
               }
+              updateSearchBtnState();
+              updateSlideBookmarkPlayUI();
+            } else {
+              isYtVideoPlaying = false;
               updateSearchBtnState();
               updateSlideBookmarkPlayUI();
             }
@@ -5603,8 +5691,8 @@
     function initTuckedSlideBookmark() {
       if (document.body.classList.contains('auth-locked')) return;
       slideBookmarkVisible = true;
-      applyBookmarkPosition(dockSide || 'right');
       slideBookmark.style.display = 'flex';
+      applyBookmarkPosition(dockSide || 'right');
       slideBookmark.classList.add('sb-tucked');
       updateSlideBookmarkPlayUI();
     }
@@ -5651,8 +5739,20 @@
       const ov = document.getElementById('battery-blackout-overlay');
       if (!ov) return;
       lastBlackoutTapTime = 0;
+      document.documentElement.classList.add('blackout-active');
+      document.body.classList.add('blackout-active');
+      const tcMeta = document.getElementById('appThemeColorMeta');
+      if (tcMeta) tcMeta.setAttribute('content', '#000000');
       lockBackgroundScroll();
       ov.classList.add('active');
+      try {
+        const fsEl = document.documentElement;
+        const reqFs = fsEl.requestFullscreen || fsEl.webkitRequestFullscreen || fsEl.msRequestFullscreen;
+        if (reqFs && !document.fullscreenElement && !document.webkitFullscreenElement) {
+          const p = reqFs.call(fsEl);
+          if (p && typeof p.catch === 'function') p.catch(() => {});
+        }
+      } catch (e) {}
       showBlackoutHintBriefly(2500);
     }
 
@@ -5663,8 +5763,27 @@
       const hint = document.getElementById('blackoutHint');
       if (hint) hint.classList.remove('visible');
       ov.classList.remove('active');
+      document.documentElement.classList.remove('blackout-active');
+      document.body.classList.remove('blackout-active');
+      const tcMeta = document.getElementById('appThemeColorMeta');
+      if (tcMeta) tcMeta.setAttribute('content', currentThemeColors.appBg || '#0d0d0d');
+      try {
+        const exitFs = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
+        if (exitFs && (document.fullscreenElement || document.webkitFullscreenElement)) {
+          const p = exitFs.call(document);
+          if (p && typeof p.catch === 'function') p.catch(() => {});
+        }
+      } catch (e) {}
       unlockBackgroundScroll();
     }
+
+    (function bindBlackoutGuards() {
+      const ov = document.getElementById('battery-blackout-overlay');
+      if (!ov) return;
+      ov.addEventListener('touchmove', (e) => { e.preventDefault(); }, { passive: false });
+      ov.addEventListener('wheel', (e) => { e.preventDefault(); }, { passive: false });
+      ov.addEventListener('contextmenu', (e) => { e.preventDefault(); });
+    })();
 
     function onBlackoutOverlayTap() {
       const now = Date.now();
@@ -5734,7 +5853,9 @@
         slideBookmark.classList.add(side === 'left' ? 'dock-left' : 'dock-right');
         slideBookmark.style.left = side === 'left' ? '0px' : 'auto';
         slideBookmark.style.right = side === 'right' ? '0px' : 'auto';
-        slideBookmark.style.top = '38%';
+        const bmH = slideBookmark.offsetHeight || 180;
+        const bottomTop = Math.max(260, window.innerHeight - bmH - 24);
+        slideBookmark.style.top = bottomTop + 'px';
       }
     }
 
