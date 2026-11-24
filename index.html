@@ -1345,15 +1345,16 @@
     }
     /* iOS WebKit은 opacity:0 또는 화면밖(-9999px) iframe을 강제 정지하므로 화면내 2px/0.01로 재생 유지 */
     #floating-player-modal.docked-hidden {
-      opacity: 0.01 !important;
+      opacity: 0.004 !important;
       pointer-events: none !important;
       left: auto !important;
       top: auto !important;
       right: 0 !important;
       bottom: 0 !important;
-      width: 2px !important;
-      height: 2px !important;
+      width: 220px !important;
+      height: 124px !important;
       overflow: hidden !important;
+      z-index: -1 !important;
     }
 
     /* 🎧 백그라운드 오디오 전용 플레이어 오버레이 (창 내부 표시) */
@@ -1587,7 +1588,7 @@
       -webkit-user-select: none;
       -webkit-touch-callout: none;
       touch-action: none;
-      transition: transform 0.14s, opacity 0.14s, box-shadow 0.14s;
+      transition: transform 0.36s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.32s ease, box-shadow 0.14s;
     }
     body.auth-locked #slide-bookmark {
       display: none !important;
@@ -1607,9 +1608,21 @@
     #slide-bookmark.dock-free {
       border-radius: 11px;
     }
+    #slide-bookmark.dock-right.sb-tucked {
+      transform: translateX(calc(100% - 6px));
+      opacity: 0.28;
+    }
+    #slide-bookmark.dock-left.sb-tucked {
+      transform: translateX(calc(-100% + 6px));
+      opacity: 0.28;
+    }
+    #slide-bookmark.sb-tucked .sb-btn {
+      pointer-events: none;
+    }
     #slide-bookmark.dragging-bookmark {
-      opacity: 0.92;
-      transform: scale(1.08);
+      transition: none !important;
+      opacity: 0.92 !important;
+      transform: scale(1.08) !important;
       box-shadow: 0 0 18px rgba(255, 182, 203, 0.95);
     }
     .sb-grip {
@@ -1725,13 +1738,26 @@
       border-radius: 20px;
       margin-bottom: 15px;
     }
-    .mp3-widget-frame {
+    .mp3-status-text {
+      font-size: 11px;
+      color: #a1a1aa;
+      min-height: 16px;
+      margin-bottom: 8px;
+    }
+    .mp3-progress-wrap {
       width: 100%;
-      height: 62px;
-      border: none;
-      border-radius: 8px;
-      background: #111;
+      height: 6px;
+      border-radius: 99px;
+      background: #27272a;
+      overflow: hidden;
       margin-bottom: 12px;
+      display: none;
+    }
+    .mp3-progress-bar {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #ff3355, #f9a8d4);
+      transition: width 0.15s linear;
     }
     .mp3-action-btn {
       width: 100%;
@@ -1741,7 +1767,37 @@
       background: #ffffff;
       color: #000;
       font-weight: 700;
-      font-size: 13px;
+      font-size: 12.5px;
+      cursor: pointer;
+      margin-bottom: 8px;
+    }
+    .mp3-action-btn:disabled {
+      opacity: 0.6;
+      cursor: wait;
+    }
+    .mp3-direct-link {
+      display: none;
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #f472b6;
+      background: rgba(244, 114, 182, 0.16);
+      color: #fbcfe8;
+      font-weight: 700;
+      font-size: 12px;
+      text-decoration: none;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    .mp3-sub-btn {
+      width: 100%;
+      padding: 9.5px;
+      border-radius: 8px;
+      border: 1px solid #3f3f46;
+      background: #222228;
+      color: #e4e4e7;
+      font-weight: 700;
+      font-size: 11.5px;
       cursor: pointer;
       margin-bottom: 8px;
     }
@@ -1927,19 +1983,25 @@
   <audio id="bgAudioPlayer" playsinline preload="auto" style="display:none;"></audio>
 
   <!-- 4. MP3 / 320kbps 전용 음원추출 모달 -->
-  <div id="mp3-modal-overlay">
+  <div id="mp3-modal-overlay" onclick="if(event.target===this){closeMp3Modal()}">
     <div class="mp3-modal-box">
-      <div class="mp3-modal-header">고음질 음원 추출</div>
+      <div class="mp3-modal-header">고음질 음원 추출 · 저장</div>
       <div class="mp3-track-name" id="mp3TrackTitle">곡 제목</div>
-      <div class="mp3-quality-badge">고정 포맷 : MP3 / 320kbps</div>
-
-      <!-- 320kbps MP3 즉시 변환 모듈 -->
-      <iframe id="mp3WidgetFrame" class="mp3-widget-frame" scrolling="no"></iframe>
-
-      <button class="mp3-action-btn" id="directStreamBtn" onclick="extractDirectAudio()">
-        ⬇ 다이렉트 음원 스트림 추출 (320k)
+      <div class="mp3-quality-badge">최고음질 오디오 / MP3 320k 지원</div>
+      <div class="mp3-status-text" id="mp3StatusText">버튼을 눌러 기기로 바로 저장하세요</div>
+      <div class="mp3-progress-wrap" id="mp3ProgressWrap">
+        <div class="mp3-progress-bar" id="mp3ProgressBar"></div>
+      </div>
+      <button type="button" class="mp3-action-btn" id="directStreamBtn" onclick="extractDirectAudio()">
+        ⬇ 1. 기기로 바로 파일 저장 (최고음질)
       </button>
-      <button class="mp3-close-btn" onclick="closeMp3Modal()">닫기</button>
+      <a class="mp3-direct-link" id="mp3FallbackLink" target="_blank" rel="noopener noreferrer">
+        ↗ 2. 브라우저에서 직접 열기 / 길게 눌러 저장
+      </a>
+      <button type="button" class="mp3-sub-btn" id="mp3ExternalBtn" onclick="openExternalMp3Converter()">
+        🔗 3. 320k MP3 외부 변환 (링크 자동복사 + 열기)
+      </button>
+      <button type="button" class="mp3-close-btn" onclick="closeMp3Modal()">닫기</button>
     </div>
   </div>
 
@@ -2081,7 +2143,10 @@
 
     const mp3Overlay = document.getElementById('mp3-modal-overlay');
     const mp3TrackTitle = document.getElementById('mp3TrackTitle');
-    const mp3WidgetFrame = document.getElementById('mp3WidgetFrame');
+    const mp3StatusText = document.getElementById('mp3StatusText');
+    const mp3ProgressWrap = document.getElementById('mp3ProgressWrap');
+    const mp3ProgressBar = document.getElementById('mp3ProgressBar');
+    const mp3FallbackLink = document.getElementById('mp3FallbackLink');
     const directStreamBtn = document.getElementById('directStreamBtn');
 
     const CHUNK_SIZE = 50;
@@ -3036,7 +3101,7 @@
       cardEl.addEventListener('pointerdown', (e) => {
         if (e.target && e.target.closest && e.target.closest('.star-pin-btn')) return;
         if (e.pointerType === 'mouse' && e.button !== 0) return;
-        if (Date.now() - lastFeedScrollTime < 220) {
+        if (Date.now() - lastFeedScrollTime < 120) {
           activePtrId = null;
           return;
         }
@@ -3049,7 +3114,7 @@
 
       cardEl.addEventListener('pointermove', (e) => {
         if (activePtrId !== e.pointerId || moved) return;
-        if (Math.hypot(e.clientX - startX, e.clientY - startY) > 8) {
+        if (Math.hypot(e.clientX - startX, e.clientY - startY) > 12) {
           moved = true;
           activePtrId = null;
         }
@@ -3064,9 +3129,9 @@
         if (activePtrId !== e.pointerId) return;
         activePtrId = null;
         if (moved) return;
-        if (Date.now() - lastFeedScrollTime < 220) return;
+        if (Date.now() - lastFeedScrollTime < 120) return;
         const holdMs = Date.now() - downTime;
-        const minHold = e.pointerType === 'mouse' ? 40 : 90;
+        const minHold = e.pointerType === 'mouse' ? 0 : 20;
         if (holdMs >= minHold && holdMs <= 650) {
           onActivate();
         }
@@ -3262,6 +3327,73 @@
     let prefetchPromise = null;
     let activeCandidateIdx = 0;
     let pendingBgSeekSec = 0;
+
+    let ytAutoplayWatchdog = null;
+    let ytConfirmedPlaying = false;
+    let isExtractingAudio = false;
+    let mp3AbortCtrl = null;
+
+    function sanitizeFileName(raw) {
+      const cleaned = simplifyTitle(raw || 'myTube_audio')
+        .replace(/[\\/:*?"<>|\x00-\x1f]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, 75);
+      return cleaned || 'myTube_audio';
+    }
+
+    async function resolveBestAudioStream(videoId) {
+      const list = [];
+      const seen = new Set();
+      const pushCand = (url, ext, mime) => {
+        if (!url || typeof url !== 'string' || seen.has(url)) return;
+        seen.add(url);
+        list.push({ url, ext: ext || 'm4a', mime: mime || 'audio/mp4' });
+      };
+
+      if (prefetchedVideoId === videoId && prefetchedAudioCandidates.length > 0) {
+        prefetchedAudioCandidates.forEach(u => {
+          if (!/\.m3u8(\?|$)/i.test(u)) pushCand(u, 'm4a', 'audio/mp4');
+        });
+      }
+
+      if (list.length === 0) {
+        for (const server of STREAM_PIPED_SERVERS) {
+          try {
+            const data = await fetchJsonWithTimeout(server + '/streams/' + videoId, 5500);
+            const streams = (data.audioStreams || []).filter(s => s && s.url);
+            const mp4 = streams
+              .filter(s => /mp4|m4a/i.test(s.mimeType || '') || /mp4a/i.test(s.codec || ''))
+              .sort((a, b) => (b.bitrate || 0) - (a.bitrate || 0));
+            mp4.forEach(s => pushCand(s.url, 'm4a', 'audio/mp4'));
+            const others = streams
+              .filter(s => !(/mp4|m4a/i.test(s.mimeType || '') || /mp4a/i.test(s.codec || '')))
+              .sort((a, b) => (b.bitrate || 0) - (a.bitrate || 0));
+            others.forEach(s => pushCand(s.url, 'webm', s.mimeType || 'audio/webm'));
+            if (list.length > 0) break;
+          } catch (e) {}
+        }
+      }
+
+      if (list.length === 0) {
+        for (const inv of STREAM_INVIDIOUS_SERVERS) {
+          try {
+            const data = await fetchJsonWithTimeout(inv + '/api/v1/videos/' + videoId + '?fields=adaptiveFormats', 5500);
+            const adapt = (data.adaptiveFormats || [])
+              .filter(f => /audio\//i.test(f.type || ''))
+              .sort((a, b) => Number(b.bitrate || 0) - Number(a.bitrate || 0));
+            adapt.forEach(f => {
+              if (f.itag) {
+                const isMp4 = /mp4/i.test(f.type || '');
+                pushCand(inv + '/latest_version?id=' + videoId + '&itag=' + f.itag + '&local=true', isMp4 ? 'm4a' : 'webm', isMp4 ? 'audio/mp4' : 'audio/webm');
+              }
+            });
+            if (list.length > 0) break;
+          } catch (e) {}
+        }
+      }
+      return list;
+    }
 
     function formatSec(sec) {
       const s = Math.max(0, Math.floor(sec || 0));
@@ -3511,28 +3643,23 @@
     }
 
     function openPlayerModal(videoId, title) {
-      unlockIosAudioOnce(); // iOS Safari/PWA 오디오 세션 선행 잠금해제!
+      unlockIosAudioOnce();
       stopBgAudioClean();
+      clearTimeout(ytAutoplayWatchdog);
+      ytConfirmedPlaying = false;
       isDockedToBookmark = true;
       lastKnownPlaySec = 0;
 
       currentVideoId = videoId;
       currentVideoTitle = title;
-      apply16by9Scale(MIN_PLAYER_WIDTH);
+      apply16by9Scale(220);
 
-      // 음악 우선: 재생창은 띄우지 않고 도킹 숨김 상태로 즉시 재생 시작 → 책갈피 음표(♪)로 진입
+      // 음악 우선: 220x124 투명 도킹 상태로 즉시 재생 → 책갈피 슬라이드 등장
       modal.classList.remove('interacting');
       modal.classList.add('docked-hidden');
       modal.style.display = 'block';
 
-      ytHolder.innerHTML = `
-        <iframe
-          id="ytPlayerFrame"
-          src="https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&controls=1&fs=1&enablejsapi=1&modestbranding=1&rel=0&playsinline=1&iv_load_policy=3&cc_load_policy=0&disablekb=1"
-          allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
-          allowfullscreen>
-        </iframe>
-      `;
+      ytHolder.innerHTML = '<iframe id="ytPlayerFrame" src="https://www.youtube-nocookie.com/embed/' + videoId + '?autoplay=1&controls=1&fs=1&enablejsapi=1&modestbranding=1&rel=0&playsinline=1&iv_load_policy=3&cc_load_policy=0&disablekb=1" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>';
 
       const frame = document.getElementById('ytPlayerFrame');
       if (frame) {
@@ -3541,6 +3668,12 @@
             frame.contentWindow.postMessage(JSON.stringify({ event: 'listening', id: 1 }), '*');
             frame.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'addEventListener', args: ['onError'] }), '*');
             frame.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'addEventListener', args: ['onStateChange'] }), '*');
+            frame.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'playVideo', args: [] }), '*');
+            setTimeout(() => {
+              if (currentVideoId === videoId && !ytConfirmedPlaying && !isBgAudioPlaying && !userPausedBg) {
+                sendYtCommand('playVideo');
+              }
+            }, 380);
           } catch (e) {}
         });
       }
@@ -3548,12 +3681,29 @@
       hideYtPauseMask();
       isYtVideoPlaying = true;
       updateSearchBtnState();
-      if (typeof showSlideBookmark === 'function') showSlideBookmark(dockSide || 'right');
+      if (typeof revealSlideBookmark === 'function') revealSlideBookmark(3200);
+      else if (typeof showSlideBookmark === 'function') showSlideBookmark(dockSide || 'right');
       updateBgModeUI();
       if (typeof updateSlideBookmarkPlayUI === 'function') updateSlideBookmarkPlayUI();
       setupMediaSession(title, videoId);
       prefetchPromise = prefetchBgAudio(videoId);
       recordUserPlay(videoId);
+
+      // 1.8초 자동재생 워치독: 모바일 브라우저가 iframe 자동재생을 차단하면 bgAudio로 즉시 폴백 재생
+      const targetId = videoId;
+      ytAutoplayWatchdog = setTimeout(() => {
+        if (currentVideoId !== targetId || ytConfirmedPlaying || isBgAudioPlaying || userPausedBg) return;
+        sendYtCommand('playVideo');
+        if (prefetchedVideoId === targetId && prefetchedAudioCandidates.length > 0) {
+          activateBgAudioStream(lastKnownPlaySec);
+        } else {
+          prefetchBgAudio(targetId).then((cands) => {
+            if (currentVideoId === targetId && !ytConfirmedPlaying && !isBgAudioPlaying && !userPausedBg && cands.length > 0) {
+              activateBgAudioStream(lastKnownPlaySec);
+            }
+          });
+        }
+      }, 1800);
     }
 
     // 5-2. Firebase 3필드 100% 호환 스키마({keyword, updatedAt, items}) + 진단 + 최종 피드 신속 복원
@@ -4085,6 +4235,7 @@
       loadLocalPinsImmediate();
       lastViewedFeed = loadLocalLastViewedFeed();
       updateSearchBtnState();
+      if (typeof initTuckedSlideBookmark === 'function') initTuckedSlideBookmark();
 
       if (lastViewedFeed) {
         const fastCached = getCachedTab(lastViewedFeed.docId);
@@ -4851,6 +5002,8 @@
     bootstrapApp();
 
     function closePlayerModal() {
+      clearTimeout(ytAutoplayWatchdog);
+      ytConfirmedPlaying = false;
       stopBgAudioClean();
       isYtVideoPlaying = false;
       hideYtPauseMask();
@@ -4866,48 +5019,157 @@
       if (typeof updateSlideBookmarkPlayUI === 'function') updateSlideBookmarkPlayUI();
     }
 
-    // 6. MP3 / 320kbps 전용 추출 모달 제어
+    // 6. 고음질 음원 / MP3 320k 추출·저장 모달 제어
+    function setMp3Progress(pct, label) {
+      if (mp3StatusText && label) mp3StatusText.textContent = label;
+      if (!mp3ProgressWrap || !mp3ProgressBar) return;
+      if (pct === null) {
+        mp3ProgressWrap.style.display = 'none';
+        mp3ProgressBar.style.width = '0%';
+      } else {
+        mp3ProgressWrap.style.display = 'block';
+        mp3ProgressBar.style.width = Math.max(4, Math.min(100, Math.round(pct))) + '%';
+      }
+    }
+
     function openMp3Modal() {
       if (!currentVideoId) return;
-      mp3TrackTitle.innerText = currentVideoTitle;
-      directStreamBtn.innerText = "⬇ 다이렉트 음원 스트림 추출 (320k)";
-      
-      // 320kbps MP3 전용 변환 버튼 위젯 로드
-      const ytUrl = `https://www.youtube.com/watch?v=${currentVideoId}`;
-      mp3WidgetFrame.src = `https://loader.to/api/button/?url=${encodeURIComponent(ytUrl)}&f=mp3&color=ff0000`;
-      
+      lockBackgroundScroll();
+      mp3TrackTitle.innerText = simplifyTitle(currentVideoTitle);
+      directStreamBtn.disabled = false;
+      directStreamBtn.innerText = '⬇ 1. 기기로 바로 파일 저장 (최고음질)';
+      setMp3Progress(null, '버튼을 눌러 기기로 바로 저장하세요');
+      if (mp3FallbackLink) {
+        if (prefetchedVideoId === currentVideoId && prefetchedAudioCandidates.length > 0 && !/\.m3u8(\?|$)/i.test(prefetchedAudioCandidates[0])) {
+          mp3FallbackLink.href = prefetchedAudioCandidates[0];
+          mp3FallbackLink.download = sanitizeFileName(currentVideoTitle) + '.m4a';
+          mp3FallbackLink.style.display = 'block';
+        } else {
+          mp3FallbackLink.removeAttribute('href');
+          mp3FallbackLink.style.display = 'none';
+        }
+      }
       mp3Overlay.style.display = 'flex';
     }
 
     function closeMp3Modal() {
+      if (mp3AbortCtrl) {
+        try { mp3AbortCtrl.abort(); } catch (e) {}
+        mp3AbortCtrl = null;
+      }
+      isExtractingAudio = false;
+      directStreamBtn.disabled = false;
       mp3Overlay.style.display = 'none';
-      mp3WidgetFrame.src = '';
+      unlockBackgroundScroll();
     }
 
     async function extractDirectAudio() {
-      if (!currentVideoId) return;
-      directStreamBtn.innerText = "음원 스트림 추출 중...";
-      try {
-        const { data } = await smartFetch(`/streams/${currentVideoId}`);
-        // 최고 음질 오디오 스트림 선별
-        const sortedAudio = (data.audioStreams || []).sort((a, b) => (b.bitrate || 0) - (a.bitrate || 0));
-        const bestStream = sortedAudio[0];
+      if (!currentVideoId || isExtractingAudio) return;
+      isExtractingAudio = true;
+      directStreamBtn.disabled = true;
+      directStreamBtn.innerText = '음원 스트림 탐색 중...';
+      setMp3Progress(8, '다중 서버에서 최고음질 스트림 검색 중...');
 
-        if (bestStream && bestStream.url) {
-          const a = document.createElement('a');
-          a.href = bestStream.url;
-          a.target = '_blank';
-          a.download = `${currentVideoTitle}.mp3`;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          directStreamBtn.innerText = "✓ 추출 완료 (새 창에서 저장)";
-        } else {
-          throw new Error();
+      const targetId = currentVideoId;
+      const safeName = sanitizeFileName(currentVideoTitle);
+      mp3AbortCtrl = new AbortController();
+
+      try {
+        const candidates = await resolveBestAudioStream(targetId);
+        if (!candidates || candidates.length === 0) {
+          throw new Error('NO_STREAM');
+        }
+        if (mp3FallbackLink) {
+          mp3FallbackLink.href = candidates[0].url;
+          mp3FallbackLink.download = safeName + '.' + candidates[0].ext;
+          mp3FallbackLink.style.display = 'block';
+        }
+
+        let saved = false;
+        for (let i = 0; i < candidates.length; i++) {
+          const cand = candidates[i];
+          try {
+            setMp3Progress(15, '오디오 파일 내려받는 중... (' + (i + 1) + '/' + candidates.length + ')');
+            const res = await fetch(cand.url, { signal: mp3AbortCtrl.signal });
+            if (!res.ok) continue;
+
+            const totalBytes = Number(res.headers.get('content-length') || 0);
+            let blob = null;
+            if (res.body && typeof res.body.getReader === 'function') {
+              const reader = res.body.getReader();
+              const chunks = [];
+              let received = 0;
+              while (true) {
+                const part = await reader.read();
+                if (part.done) break;
+                chunks.push(part.value);
+                received += part.value.byteLength;
+                const mb = (received / (1024 * 1024)).toFixed(1);
+                if (totalBytes > 0) {
+                  const pct = Math.min(99, Math.round((received / totalBytes) * 100));
+                  setMp3Progress(pct, '다운로드 중: ' + pct + '% (' + mb + 'MB)');
+                } else {
+                  setMp3Progress(60, '다운로드 중: ' + mb + 'MB 수신됨');
+                }
+              }
+              blob = new Blob(chunks, { type: cand.mime || 'audio/mp4' });
+            } else {
+              blob = await res.blob();
+            }
+
+            if (blob && blob.size > 16384) {
+              const objUrl = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = objUrl;
+              a.download = safeName + '.' + cand.ext;
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              setTimeout(() => URL.revokeObjectURL(objUrl), 5000);
+              setMp3Progress(100, '저장 완료: ' + safeName + '.' + cand.ext);
+              directStreamBtn.innerText = '✓ 기기 저장 완료 (다시 저장)';
+              saved = true;
+              break;
+            }
+          } catch (innerErr) {
+            if (innerErr && innerErr.name === 'AbortError') throw innerErr;
+          }
+        }
+
+        if (!saved) {
+          setMp3Progress(null, '직접 저장 제한됨 → 아래 2번 또는 3번 버튼을 눌러주세요');
+          directStreamBtn.innerText = '⬇ 1. 기기로 바로 파일 저장 재시도';
         }
       } catch (e) {
-        directStreamBtn.innerText = "위 빨간색 MP3 변환 버튼을 눌러 저장하세요";
+        if (e && e.name === 'AbortError') return;
+        setMp3Progress(null, '공용 스트림 지연 → 아래 3번 외부 320k 변환을 이용해 주세요');
+        directStreamBtn.innerText = '⬇ 1. 기기로 바로 파일 저장 재시도';
+      } finally {
+        isExtractingAudio = false;
+        directStreamBtn.disabled = false;
+        mp3AbortCtrl = null;
       }
+    }
+
+    function openExternalMp3Converter() {
+      if (!currentVideoId) return;
+      const ytUrl = 'https://www.youtube.com/watch?v=' + currentVideoId;
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(ytUrl).catch(() => {});
+        } else {
+          const ta = document.createElement('textarea');
+          ta.value = ytUrl;
+          ta.style.position = 'fixed';
+          ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+        }
+      } catch (e) {}
+      setMp3Progress(null, '영상 링크가 자동 복사되었습니다! 열린 창에 붙여넣기 하세요');
+      window.open('https://cobalt.tools/', '_blank', 'noopener,noreferrer');
     }
 
     // 7. YouTube 재생 상태/오류 수신 + 재생불가 즉시삭제 + 슬라이드 책갈피 상태 연동
@@ -4929,6 +5191,8 @@
           }
           if (typeof msg.info.playerState === 'number') {
             if (msg.info.playerState === 1) {
+              ytConfirmedPlaying = true;
+              clearTimeout(ytAutoplayWatchdog);
               isYtVideoPlaying = true;
               hideYtPauseMask();
               updateSearchBtnState();
@@ -5051,16 +5315,50 @@
       }
     }
 
+    let sbAutoHideTimer = null;
+
+    function scheduleSlideBookmarkHide(delayMs = 2400) {
+      clearTimeout(sbAutoHideTimer);
+      sbAutoHideTimer = setTimeout(() => {
+        if (bmIsDragging || document.body.classList.contains('auth-locked')) return;
+        slideBookmark.classList.add('sb-tucked');
+      }, delayMs);
+    }
+
+    function initTuckedSlideBookmark() {
+      if (document.body.classList.contains('auth-locked')) return;
+      slideBookmarkVisible = true;
+      applyBookmarkPosition(dockSide || 'right');
+      slideBookmark.style.display = 'flex';
+      slideBookmark.classList.add('sb-tucked');
+      updateSlideBookmarkPlayUI();
+    }
+
+    function revealSlideBookmark(holdMs = 2400) {
+      if (document.body.classList.contains('auth-locked')) return;
+      if (!slideBookmarkVisible) {
+        showSlideBookmark(dockSide || 'right');
+      }
+      slideBookmark.classList.remove('sb-tucked');
+      scheduleSlideBookmarkHide(holdMs);
+    }
+
     function showSlideBookmark(defaultSide) {
       if (document.body.classList.contains('auth-locked')) return;
       slideBookmarkVisible = true;
       applyBookmarkPosition(defaultSide || dockSide || 'right');
       slideBookmark.style.display = 'flex';
+      slideBookmark.classList.remove('sb-tucked');
       updateSlideBookmarkPlayUI();
+      scheduleSlideBookmarkHide(2600);
     }
 
     function openMp3FromBookmark() {
-      if (!currentVideoId) return;
+      if (!currentVideoId) {
+        statusMsg.innerText = '먼저 영상을 터치해 재생하세요';
+        setTimeout(() => { if (statusMsg.innerText === '먼저 영상을 터치해 재생하세요') statusMsg.innerText = ''; }, 2500);
+        return;
+      }
       openMp3Modal();
     }
 
@@ -5141,12 +5439,23 @@
       updateSlideBookmarkPlayUI();
     }
 
+    // 통합 스크롤 리스너: 스크롤 중 슬라이드 등장 · 스크롤 멈춤 시 슬며시 숨김
     window.addEventListener('scroll', () => {
       lastFeedScrollTime = Date.now();
-      if (!slideBookmarkVisible && currentUser && window.scrollY > 12) {
-        showSlideBookmark(dockSide || 'right');
+      if (currentUser) {
+        revealSlideBookmark(2400);
       }
     }, { passive: true });
+
+    slideBookmark.addEventListener('pointerdown', (e) => {
+      if (slideBookmark.classList.contains('sb-tucked')) {
+        e.preventDefault();
+        e.stopPropagation();
+        revealSlideBookmark(3200);
+        return;
+      }
+      scheduleSlideBookmarkHide(3200);
+    }, true);
 
     let bmIsDragging = false;
     let bmMoved = false;
@@ -5157,6 +5466,8 @@
       sbGrip.addEventListener('pointerdown', (e) => {
         e.preventDefault();
         e.stopPropagation();
+        clearTimeout(sbAutoHideTimer);
+        slideBookmark.classList.remove('sb-tucked');
         try { sbGrip.setPointerCapture(e.pointerId); } catch (err) {}
         const rect = slideBookmark.getBoundingClientRect();
         bmStartX = e.clientX;
@@ -5203,6 +5514,7 @@
         dockSide = snapSide;
         savedBookmarkPos = { mode: snapSide, top: clampedTop };
         applyBookmarkPosition(snapSide);
+        scheduleSlideBookmarkHide(2400);
       }
 
       sbGrip.addEventListener('pointerup', finishSlideBookmarkDrag);
