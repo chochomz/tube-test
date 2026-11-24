@@ -15,7 +15,23 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
   <style>
-    :root { --app-bg: #0d0d0d; }
+    :root {
+      --app-bg: #0d0d0d;
+      --search-bg: #1c1c1c;
+      --search-fg: #ffffff;
+      --tabs-area-bg: #f9d5e5;
+      --layout-icon-color: #7e8086;
+      --settings-btn-bg: #1d1d1d;
+      --settings-btn-fg: #e0e0e0;
+      --settings-modal-bg: #161616;
+      --settings-modal-fg: #ffffff;
+      --card-title-bg: #161616;
+      --card-title-fg: #ffffff;
+      --filter-btn-bg: #1d1d1d;
+      --filter-btn-fg: #e5e5e5;
+      --filter-panel-bg: #171717;
+      --filter-panel-fg: #dddddd;
+    }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -122,8 +138,8 @@
       height: 31px;
       border-radius: 7px;
       border: 1px solid #353535;
-      background: #1d1d1d;
-      color: #e0e0e0;
+      background: var(--settings-btn-bg);
+      color: var(--settings-btn-fg);
       font-size: 15px;
       line-height: 1;
       display: inline-flex;
@@ -143,8 +159,8 @@
       padding: 0 6px;
       border-radius: 7px;
       border: 1px solid #353535;
-      background: #1d1d1d;
-      color: #e5e5e5;
+      background: var(--filter-btn-bg);
+      color: var(--filter-btn-fg);
       font-size: 11px;
       font-weight: 700;
       cursor: pointer;
@@ -174,7 +190,8 @@
       margin-top: 7px;
     }
     .filter-slide-inner {
-      background: #171717;
+      background: var(--filter-panel-bg);
+      color: var(--filter-panel-fg);
       border: 1px solid #333;
       border-radius: 9px;
       padding: 10px 11px;
@@ -185,7 +202,7 @@
       justify-content: space-between;
       align-items: center;
       font-size: 11px;
-      color: #bbb;
+      color: var(--filter-panel-fg);
       margin-bottom: 8px;
       gap: 8px;
     }
@@ -306,8 +323,8 @@
       padding: 0 9px;
       border-radius: 7px;
       border: 1px solid #2a2a2a;
-      background: #1c1c1c;
-      color: #fff;
+      background: var(--search-bg);
+      color: var(--search-fg);
       font-size: 12px;
       outline: none;
     }
@@ -351,38 +368,42 @@
       animation: ytPlaySlowBlink 1.8s ease-in-out infinite;
     }
 
-    /* 1-2. 2행: 연한 핑크 저장 검색어 가로 스크롤 열(검색창 끝선 일치) + 우측 회색 이모지 2개 */
+    /* 1-2. 2행: 검색어 ~ 목록·창 이모지까지 흰색 가는 점선 테두리 확대 + 지정 배경색 적용 */
     .saved-tabs-row {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 108px;
+      grid-template-columns: minmax(0, 1fr) 92px;
       gap: 6px;
       align-items: center;
       margin-top: 6px;
+      height: 32px;
+      padding: 2px 6px;
+      border-radius: 8px;
+      border: 1px dashed rgba(255, 255, 255, 0.85);
+      background: var(--tabs-area-bg);
     }
     .tabs-scroll-area {
       min-width: 0;
-      height: 30px;
+      height: 26px;
       display: flex;
       align-items: center;
       gap: 5px;
       overflow-x: auto;
       scrollbar-width: none;
       -ms-overflow-style: none;
-      background: #f9d5e5;
-      border: 1px solid rgba(255, 195, 220, 0.85);
-      border-radius: 8px;
-      padding: 3px 6px;
+      background: transparent;
+      border: none;
+      padding: 0 2px;
     }
     .tabs-scroll-area::-webkit-scrollbar { display: none; }
     .history-tab {
       display: inline-flex;
       align-items: center;
       gap: 4px;
-      padding: 3px 8px;
+      padding: 2.5px 8px;
       border-radius: 12px;
       background: rgba(255, 255, 255, 0.78);
-      border: 1px solid rgba(190, 95, 135, 0.32);
-      color: #3a1f2b;
+      border: 1px solid rgba(120, 80, 100, 0.32);
+      color: #261620;
       font-size: 10.5px;
       font-weight: 700;
       white-space: nowrap;
@@ -400,38 +421,40 @@
       font-size: 9.5px;
       padding: 1px 5px;
       border-radius: 8px;
-      background: rgba(58, 31, 43, 0.12);
+      background: rgba(38, 22, 32, 0.12);
       color: inherit;
     }
     .history-tab.active .tab-count-badge {
       background: rgba(255, 255, 255, 0.24);
     }
 
-    /* 우측 피드 나열 전환 회색 이모지 2개 (테두리 없음 / 목록 + 둥근창 2->3->4 / 진동) */
+    /* 우측 피드 나열 전환 이모지 2개 (테두리 없음 / 별도 색상 --layout-icon-color / 진동) */
     .layout-mode-controls {
       display: flex;
       align-items: center;
       justify-content: space-evenly;
       gap: 6px;
-      width: 108px;
+      width: 92px;
       flex-shrink: 0;
     }
     .layout-emoji-btn {
-      width: 34px;
-      height: 30px;
+      width: 32px;
+      height: 26px;
       border: none;
       background: transparent;
-      color: #7e8086;
+      color: var(--layout-icon-color);
+      opacity: 0.72;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       padding: 0;
-      transition: color 0.15s, transform 0.12s;
+      transition: opacity 0.15s, transform 0.12s;
       -webkit-tap-highlight-color: transparent;
     }
     .layout-emoji-btn.active {
-      color: #c2c5cc;
+      opacity: 1;
+      filter: drop-shadow(0 0 1px rgba(0,0,0,0.35));
     }
     @keyframes hapticPop {
       0% { transform: scale(1); }
@@ -442,21 +465,17 @@
     .layout-emoji-btn.haptic-pop {
       animation: hapticPop 0.24s ease;
     }
-    /* 밝은 배경색 선택 시 텍스트/아이콘 대비 자동 보정 */
+    /* 밝은 전체 배경 선택 시 상태바 가독성 보정 */
     body.light-bg { color: #161616; }
     body.light-bg .status-bar { color: #3d3d3d; }
-    body.light-bg .layout-emoji-btn { color: #666a72; }
-    body.light-bg .layout-emoji-btn.active { color: #2b2d33; }
-    body.light-bg .video-card { background: rgba(20, 20, 24, 0.86); }
 
     .status-bar {
       display: flex;
-      justify-content: space-between;
       align-items: center;
       font-size: 10.5px;
-      color: #888;
-      padding: 3px 2px 2px 2px;
-      min-height: 16px;
+      color: #ff7777;
+      padding: 2px 2px 0 2px;
+      min-height: 0;
     }
 
     /* 6. 설정 모달 (상단 확장형 탭: 검색 / 로그인 + 추후 확장 대응) */
@@ -476,7 +495,8 @@
       max-width: 390px;
       max-height: 85vh;
       overflow-y: auto;
-      background: #161616;
+      background: var(--settings-modal-bg);
+      color: var(--settings-modal-fg);
       border: 1px solid rgba(255, 255, 255, 0.75);
       border-radius: 12px;
       padding: 14px;
@@ -678,35 +698,211 @@
       margin-top: 10px;
       padding-top: 8px;
     }
-    /* 설정 > 색상변경 (256 색상표) */
+    /* 설정 > 색상변경: 미니 인터랙티브 레이아웃 + 9모듈 256 색상표 */
+    .mini-layout-guide {
+      font-size: 10.5px;
+      color: #9ca3af;
+      margin-bottom: 6px;
+      text-align: center;
+    }
+    .mini-theme-layout {
+      background: var(--app-bg);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      border-radius: 9px;
+      padding: 8px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: box-shadow 0.15s;
+    }
+    .mini-theme-layout.mod-selected {
+      box-shadow: 0 0 0 2px #f472b6;
+    }
+    .mini-mod-hit {
+      cursor: pointer;
+      transition: box-shadow 0.12s, transform 0.1s;
+    }
+    .mini-mod-hit.mod-selected {
+      box-shadow: 0 0 0 2px #f472b6 !important;
+      position: relative;
+      z-index: 2;
+    }
+    .ml-row1 {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 52px 26px;
+      gap: 4px;
+      margin-bottom: 5px;
+    }
+    .ml-search {
+      height: 24px;
+      border-radius: 5px;
+      border: 1px solid rgba(255,255,255,0.22);
+      background: var(--search-bg);
+      color: var(--search-fg);
+      font-size: 9.5px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 6px;
+    }
+    .ml-yt-dot {
+      width: 16px;
+      height: 13px;
+      border-radius: 3px;
+      background: #ff0000;
+      color: #4ade80;
+      font-size: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .ml-cond {
+      height: 24px;
+      border-radius: 5px;
+      border: 1px solid rgba(255,255,255,0.22);
+      background: var(--filter-btn-bg);
+      color: var(--filter-btn-fg);
+      font-size: 9.5px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .ml-gear {
+      height: 24px;
+      border-radius: 5px;
+      border: 1px solid rgba(255,255,255,0.22);
+      background: var(--settings-btn-bg);
+      color: var(--settings-btn-fg);
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .ml-row2 {
+      height: 26px;
+      border-radius: 6px;
+      border: 1px dashed rgba(255, 255, 255, 0.85);
+      background: var(--tabs-area-bg);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 6px;
+      margin-bottom: 6px;
+    }
+    .ml-tabs-label {
+      font-size: 9.5px;
+      font-weight: 700;
+      color: #2b1a23;
+      background: rgba(255,255,255,0.72);
+      padding: 2px 6px;
+      border-radius: 8px;
+    }
+    .ml-icons-box {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 6px;
+      border-radius: 5px;
+      color: var(--layout-icon-color);
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .ml-row3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1.15fr;
+      gap: 5px;
+    }
+    .ml-panel-box {
+      height: 46px;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.25);
+      font-size: 9.5px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      line-height: 1.25;
+      padding: 3px;
+    }
+    .ml-filter-panel {
+      background: var(--filter-panel-bg);
+      color: var(--filter-panel-fg);
+    }
+    .ml-settings-panel {
+      background: var(--settings-modal-bg);
+      color: var(--settings-modal-fg);
+    }
+    .ml-feed-card {
+      height: 46px;
+      border-radius: 5px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.22);
+      display: flex;
+      flex-direction: column;
+    }
+    .ml-feed-thumb {
+      height: 22px;
+      background: linear-gradient(135deg, #2a2a32, #444452);
+      font-size: 8px;
+      color: #ccc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .ml-feed-title {
+      flex: 1;
+      background: var(--card-title-bg);
+      color: var(--card-title-fg);
+      font-size: 9px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 4px;
+    }
     .color-preview-bar {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background: #202024;
-      border: 1px solid #303038;
+      gap: 6px;
+      background: rgba(0, 0, 0, 0.28);
+      border: 1px solid rgba(255, 255, 255, 0.16);
       border-radius: 8px;
-      padding: 8px 10px;
-      margin-bottom: 10px;
+      padding: 6px 8px;
+      margin-bottom: 8px;
     }
     .color-preview-left {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
+      min-width: 0;
+    }
+    .color-mod-badge {
+      font-size: 10.5px;
+      font-weight: 700;
+      color: #f9a8d4;
+      white-space: nowrap;
     }
     .color-swatch-cur {
-      width: 22px;
-      height: 22px;
-      border-radius: 5px;
-      border: 1px solid rgba(255, 255, 255, 0.55);
-      background: var(--app-bg);
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      flex-shrink: 0;
     }
     .color-hex-label {
       font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-      font-size: 12px;
+      font-size: 10.5px;
       font-weight: 700;
-      color: #e5e5e5;
+      color: inherit;
       text-transform: uppercase;
+    }
+    .color-preview-actions {
+      display: flex;
+      gap: 4px;
+      flex-shrink: 0;
     }
     .palette-256-grid {
       display: grid;
@@ -716,7 +912,7 @@
       padding: 4px;
       border-radius: 8px;
       border: 1px solid #2e2e34;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
     .palette-cell {
       width: 100%;
@@ -732,6 +928,34 @@
       outline: 2px solid #ffffff;
       outline-offset: -1px;
       z-index: 3;
+    }
+    .db-diag-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      padding: 7px 9px;
+      border-radius: 7px;
+      background: rgba(0, 0, 0, 0.28);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      margin-top: 8px;
+      font-size: 10.5px;
+    }
+    .db-diag-text {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .feed-scroll-sentinel {
+      width: 100%;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10.5px;
+      color: #888;
     }
     .manage-close-btn {
       width: 100%;
@@ -777,11 +1001,11 @@
       width: 100%; height: 100%;
       object-fit: cover;
     }
-    .card-info { padding: 4px; }
+    .card-info { padding: 4px; background: var(--card-title-bg); }
     .video-title {
       font-size: 9px;
       line-height: 1.25;
-      color: #ddd;
+      color: var(--card-title-fg);
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
@@ -1318,12 +1542,12 @@
 
     <div class="status-bar">
       <span id="status"></span>
-      <span id="count"></span>
     </div>
   </div>
 
   <!-- 2. 가변 피드 (목록 1열 / 창 2~4열) -->
-  <div class="video-grid cols-4" id="results"></div>
+  <div class="video-grid cols-2" id="results"></div>
+  <div id="feedScrollSentinel" class="feed-scroll-sentinel"></div>
 
   <!-- 3. 16:9 밀착형 독립 부유창 (Floating Window) -->
   <div id="floating-player-modal">
@@ -1419,14 +1643,45 @@
         <div class="manage-list" id="manageTabList"></div>
       </div>
 
-      <!-- 탭 1-2: 전체 배경색 변경 (256 색상표) -->
+      <!-- 탭 1-2: 미니 레이아웃 터치형 9모듈 색상변경 (256 색상표) -->
       <div class="settings-pane" id="settings-pane-color">
+        <div class="mini-layout-guide">레이아웃의 변경할 영역을 터치한 뒤 아래 256색을 선택하세요</div>
+
+        <div class="mini-theme-layout mini-mod-hit mod-selected" id="miniThemeLayout" data-mod="appBg" onclick="selectThemeModule('appBg', event)">
+          <div class="ml-row1">
+            <div class="ml-search mini-mod-hit" data-mod="searchBg" onclick="selectThemeModule('searchBg', event)">
+              <span>검색창</span>
+              <span class="ml-yt-dot">▶</span>
+            </div>
+            <div class="ml-cond mini-mod-hit" data-mod="filterBtnBg" onclick="selectThemeModule('filterBtnBg', event)">▾조건</div>
+            <div class="ml-gear mini-mod-hit" data-mod="settingsBtnBg" onclick="selectThemeModule('settingsBtnBg', event)">⚙</div>
+          </div>
+
+          <div class="ml-row2 mini-mod-hit" data-mod="tabsAreaBg" onclick="selectThemeModule('tabsAreaBg', event)">
+            <span class="ml-tabs-label">검색어 창배경</span>
+            <span class="ml-icons-box mini-mod-hit" data-mod="layoutIconCol" onclick="selectThemeModule('layoutIconCol', event)" title="목록·창 이모지 색">≡ ⊞</span>
+          </div>
+
+          <div class="ml-row3">
+            <div class="ml-panel-box ml-filter-panel mini-mod-hit" data-mod="filterPanelBg" onclick="selectThemeModule('filterPanelBg', event)">조건창내<br>배경</div>
+            <div class="ml-panel-box ml-settings-panel mini-mod-hit" data-mod="settingsModalBg" onclick="selectThemeModule('settingsModalBg', event)">설정창내<br>배경</div>
+            <div class="ml-feed-card">
+              <div class="ml-feed-thumb">썸네일</div>
+              <div class="ml-feed-title mini-mod-hit" data-mod="cardTitleBg" onclick="selectThemeModule('cardTitleBg', event)">제목 배경</div>
+            </div>
+          </div>
+        </div>
+
         <div class="color-preview-bar">
           <div class="color-preview-left">
+            <span class="color-mod-badge" id="selectedModLabel">전체 배경</span>
             <span class="color-swatch-cur" id="currentBgSwatch"></span>
             <span class="color-hex-label" id="currentBgHex">#0d0d0d</span>
           </div>
-          <button type="button" class="mini-btn" onclick="resetAppBgColor()">기본색</button>
+          <div class="color-preview-actions">
+            <button type="button" class="mini-btn" onclick="resetSelectedModuleColor()">초기화</button>
+            <button type="button" class="mini-btn" onclick="resetAllThemeColors()">전체복원</button>
+          </div>
         </div>
         <div class="palette-256-grid" id="palette256Grid"></div>
       </div>
@@ -1446,6 +1701,11 @@
 
         <div class="settings-sec-title">최근 플레이 정보</div>
         <div class="play-history-list" id="userPlayHistoryList"></div>
+
+        <div class="db-diag-bar">
+          <span class="db-diag-text" id="dbDiagText">DB 상태 확인 중...</span>
+          <button type="button" class="mini-btn" onclick="retryDbReconnect()">재연결</button>
+        </div>
 
         <!-- 관리자 전용 구역 -->
         <div class="admin-divider" id="adminOnlySection" style="display:none;">
@@ -1480,7 +1740,6 @@
     let activeServerIndex = 0;
 
     const statusMsg = document.getElementById('status');
-    const countMsg = document.getElementById('count');
     const resultsContainer = document.getElementById('results');
     
     const modal = document.getElementById('floating-player-modal');
@@ -1501,7 +1760,7 @@
     const mp3WidgetFrame = document.getElementById('mp3WidgetFrame');
     const directStreamBtn = document.getElementById('directStreamBtn');
 
-    const TARGET_COUNT = 100;
+    const CHUNK_SIZE = 50;
     const MAX_TAB_ITEMS = 300;
     const BASE_STAGE_WIDTH = 800;
     const FB_COLLECTION = 'tube_search_tabs';
@@ -1517,7 +1776,7 @@
       "appId": "1:892351379651:web:ae4e8e40dfc55c933e4a76"
     };
 
-    // TUBE_LAB_V8_MYTUBE_PATCH
+    // TUBE_LAB_V9_MODULAR_THEME_PATCH
     const AUTH_DOC_ID = '__system_auth__';
     const PIN_DOC_ID = '__system_pins__';
     const TABS_INDEX_DOC_ID = '__tabs_index__';
@@ -1525,7 +1784,8 @@
     const SESSION_STORAGE_KEY = 'tube_audio_lab_session_v7';
     const AUTH_CACHE_KEY = 'tube_audio_lab_auth_cache_v7';
     const LAYOUT_STORAGE_KEY = 'tube_audio_lab_layout_v8';
-    const BG_COLOR_STORAGE_KEY = 'mytube_bg_color_v8';
+    const THEME_STORAGE_KEY = 'mytube_theme_modules_v9';
+    const LAST_FEED_STORAGE_PREFIX = 'mytube_last_feed_v9_';
     const META_BACKUP_PREFIX = 'mytube_meta_backup_v8_';
     const PENDING_SYNC_PREFIX = 'mytube_pending_sync_v8_';
     const TEMP_LOCAL_PINS_KEY = 'tube_audio_lab_pins_v3';
@@ -1534,17 +1794,43 @@
     const FILTER_LABELS = { recent: '최근순', korean: '한글정렬', size: '크기순', views: '조회순', hq: '고화질순' };
     const memoryTabCache = new Map();
 
-    // 인증/사용자/레이아웃/연동/테마 상태
+    // 9개 모듈 색상 메타 정의
+    const THEME_MODULES = {
+      appBg:           { label: '전체 배경',     cssVar: '--app-bg',            def: '#0d0d0d' },
+      searchBg:        { label: '검색창',        cssVar: '--search-bg',         def: '#1c1c1c', fgVar: '--search-fg' },
+      tabsAreaBg:      { label: '검색어 창배경',  cssVar: '--tabs-area-bg',      def: '#f9d5e5' },
+      layoutIconCol:   { label: '목록·창 색',    cssVar: '--layout-icon-color', def: '#7e8086' },
+      settingsBtnBg:   { label: '설정창',        cssVar: '--settings-btn-bg',   def: '#1d1d1d', fgVar: '--settings-btn-fg' },
+      settingsModalBg: { label: '설정창내 배경',  cssVar: '--settings-modal-bg', def: '#161616', fgVar: '--settings-modal-fg' },
+      cardTitleBg:     { label: '제목 배경',     cssVar: '--card-title-bg',     def: '#161616', fgVar: '--card-title-fg' },
+      filterBtnBg:     { label: '조건',          cssVar: '--filter-btn-bg',     def: '#1d1d1d', fgVar: '--filter-btn-fg' },
+      filterPanelBg:   { label: '조건창내 배경',  cssVar: '--filter-panel-bg',   def: '#171717', fgVar: '--filter-panel-fg' }
+    };
+
+    function getDefaultThemeColors() {
+      const obj = {};
+      Object.keys(THEME_MODULES).forEach(k => { obj[k] = THEME_MODULES[k].def; });
+      return obj;
+    }
+
+    // 인증/사용자/레이아웃/연동/테마/페이징 상태
     let authData = { adminCode: DEFAULT_ADMIN_CODE, users: [] };
     let currentUser = null;
     let currentPlayHistory = [];
-    let currentFeedMode = 'grid'; // 'list' | 'grid'
-    let currentGridCols = 2;      // 처음 창 2개부터 시작 (2 -> 3 -> 4 -> 2)
-    let fbVerified = false;       // 실제 Firestore 서버 통신 연동 여부
-    let isAppWorking = false;     // 검색 / DB / 로딩 동작 중 여부
-    let isYtVideoPlaying = false; // YouTube iframe 실제 재생 중 여부
-    let currentAppBgColor = '#0d0d0d';
+    let currentFeedMode = 'grid';
+    let currentGridCols = 2;
+    let fbVerified = false;
+    let lastDbErrorMsg = '';
+    let isAppWorking = false;
+    let isYtVideoPlaying = false;
+    let currentThemeColors = getDefaultThemeColors();
+    let selectedThemeMod = 'appBg';
     let paletteBuilt = false;
+    let lastViewedFeed = null; // { docId, keyword, at }
+    let activeSearchSession = null; // { query, server, nextpage, exhausted }
+    let dbFeedPool = [];
+    let isLoadingMore = false;
+    let feedScrollObserver = null;
 
     function isAdminUser() { return !!(currentUser && currentUser.role === 'admin'); }
     function getUid() { return currentUser ? currentUser.id : 'guest'; }
@@ -1965,28 +2251,25 @@
       triggerLayoutHaptic(document.getElementById('gridModeBtn'));
     }
 
-    // 256 색상표 생성 및 전체 배경색 적용 엔진
+    // 9개 모듈 단위 256 색상표 + 미니 레이아웃 인터랙티브 적용 엔진
     function generate256HexColors() {
       const colors = [
         '#0d0d0d', '#18181b', '#1e293b', '#172554',
         '#14532d', '#3f1d2b', '#450a0a', '#3b0764',
         '#7f1d1d', '#9a3412', '#713f12', '#166534',
-        '#115e59', '#1e40af', '#581c87', '#831843'
+        '#115e59', '#1e40af', '#581c87', '#f9d5e5'
       ];
-      // 216 웹 안전 6x6x6 RGB 큐브
       const steps = [0, 51, 102, 153, 204, 255];
       for (let r = 0; r < 6; r++) {
         for (let g = 0; g < 6; g++) {
           for (let b = 0; b < 6; b++) {
-            const hex = '#' +
+            colors.push('#' +
               steps[r].toString(16).padStart(2, '0') +
               steps[g].toString(16).padStart(2, '0') +
-              steps[b].toString(16).padStart(2, '0');
-            colors.push(hex);
+              steps[b].toString(16).padStart(2, '0'));
           }
         }
       }
-      // 24단계 그레이스케일 (총 16 + 216 + 24 = 256색)
       for (let i = 0; i < 24; i++) {
         const v = Math.round((i / 23) * 255);
         const h = v.toString(16).padStart(2, '0');
@@ -2001,36 +2284,85 @@
       const r = parseInt(clean.slice(0, 2), 16);
       const g = parseInt(clean.slice(2, 4), 16);
       const b = parseInt(clean.slice(4, 6), 16);
-      return (0.299 * r + 0.587 * g + 0.114 * b) > 165;
+      return (0.299 * r + 0.587 * g + 0.114 * b) > 155;
     }
 
-    function applyAppBgColor(hex, saveToCloud = false) {
-      const color = /^#[0-9a-fA-F]{6}$/.test(String(hex || '')) ? String(hex).toLowerCase() : '#0d0d0d';
-      currentAppBgColor = color;
-      document.documentElement.style.setProperty('--app-bg', color);
-      document.body.classList.toggle('light-bg', isLightHexColor(color));
+    function applyThemeColorsToDOM() {
+      const root = document.documentElement;
+      Object.keys(THEME_MODULES).forEach(key => {
+        const meta = THEME_MODULES[key];
+        const val = /^#[0-9a-fA-F]{6}$/.test(String(currentThemeColors[key] || ''))
+          ? String(currentThemeColors[key]).toLowerCase()
+          : meta.def;
+        currentThemeColors[key] = val;
+        root.style.setProperty(meta.cssVar, val);
 
-      const sw = document.getElementById('currentBgSwatch');
-      const lbl = document.getElementById('currentBgHex');
-      if (sw) sw.style.background = color;
-      if (lbl) lbl.textContent = color;
-
-      document.querySelectorAll('#palette256Grid .palette-cell').forEach(cell => {
-        cell.classList.toggle('selected', cell.dataset.color === color);
+        // 명도 기반 자동 글자색 보정 (검정 계열 배경 -> 흰색 글자 / 흰색 계열 배경 -> 검정 글자)
+        if (meta.fgVar) {
+          root.style.setProperty(meta.fgVar, isLightHexColor(val) ? '#111111' : '#ffffff');
+        }
       });
 
-      try {
-        localStorage.setItem(BG_COLOR_STORAGE_KEY, color);
-        if (currentUser) localStorage.setItem(`${BG_COLOR_STORAGE_KEY}_${getUid()}`, color);
-      } catch (e) {}
+      document.body.classList.toggle('light-bg', isLightHexColor(currentThemeColors.appBg));
+      updateSelectedModulePreviewUI();
+    }
 
-      if (saveToCloud && fbReady && db && currentUser) {
-        db.collection(FB_COLLECTION).doc(getPlayInfoDocId()).set({
-          keyword: getPlayInfoDocId(),
-          bgColor: color,
-          items: currentPlayHistory,
-          updatedAt: Date.now()
-        }, { merge: true }).catch(() => {});
+    function updateSelectedModulePreviewUI() {
+      const meta = THEME_MODULES[selectedThemeMod] || THEME_MODULES.appBg;
+      const curHex = currentThemeColors[selectedThemeMod] || meta.def;
+
+      const lbl = document.getElementById('selectedModLabel');
+      const sw = document.getElementById('currentBgSwatch');
+      const hexEl = document.getElementById('currentBgHex');
+      if (lbl) lbl.textContent = meta.label;
+      if (sw) sw.style.background = curHex;
+      if (hexEl) hexEl.textContent = curHex;
+
+      document.querySelectorAll('#miniThemeLayout .mini-mod-hit, #miniThemeLayout').forEach(el => {
+        el.classList.toggle('mod-selected', el.getAttribute('data-mod') === selectedThemeMod);
+      });
+      document.querySelectorAll('#palette256Grid .palette-cell').forEach(cell => {
+        cell.classList.toggle('selected', cell.dataset.color === curHex);
+      });
+    }
+
+    function selectThemeModule(modKey, ev) {
+      if (ev && ev.stopPropagation) ev.stopPropagation();
+      if (!THEME_MODULES[modKey]) return;
+      selectedThemeMod = modKey;
+      updateSelectedModulePreviewUI();
+    }
+
+    function setSelectedModuleColor(hex, saveToCloud = true) {
+      if (!/^#[0-9a-fA-F]{6}$/.test(String(hex || ''))) return;
+      currentThemeColors[selectedThemeMod] = String(hex).toLowerCase();
+      applyThemeColorsToDOM();
+      persistThemeColors(saveToCloud);
+    }
+
+    function resetSelectedModuleColor() {
+      const meta = THEME_MODULES[selectedThemeMod];
+      if (!meta) return;
+      currentThemeColors[selectedThemeMod] = meta.def;
+      applyThemeColorsToDOM();
+      persistThemeColors(true);
+    }
+
+    function resetAllThemeColors() {
+      currentThemeColors = getDefaultThemeColors();
+      applyThemeColorsToDOM();
+      persistThemeColors(true);
+    }
+
+    function persistThemeColors(saveToCloud = true) {
+      try {
+        localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify(currentThemeColors));
+        if (currentUser) {
+          localStorage.setItem(`${THEME_STORAGE_KEY}_${getUid()}`, JSON.stringify(currentThemeColors));
+        }
+      } catch (e) {}
+      if (saveToCloud && currentUser) {
+        saveUserProfileDocToCloud();
       }
     }
 
@@ -2046,27 +2378,33 @@
           btn.style.background = hex;
           btn.dataset.color = hex;
           btn.title = hex;
-          btn.onclick = () => applyAppBgColor(hex, true);
+          btn.onclick = () => setSelectedModuleColor(hex, true);
           frag.appendChild(btn);
         });
         grid.innerHTML = '';
         grid.appendChild(frag);
         paletteBuilt = true;
       }
-      applyAppBgColor(currentAppBgColor, false);
-    }
-
-    function resetAppBgColor() {
-      applyAppBgColor('#0d0d0d', true);
+      applyThemeColorsToDOM();
     }
 
     function initSavedBgColor() {
-      let saved = '#0d0d0d';
+      currentThemeColors = getDefaultThemeColors();
       try {
-        const uColor = currentUser ? localStorage.getItem(`${BG_COLOR_STORAGE_KEY}_${getUid()}`) : null;
-        saved = uColor || localStorage.getItem(BG_COLOR_STORAGE_KEY) || '#0d0d0d';
+        const raw = (currentUser && localStorage.getItem(`${THEME_STORAGE_KEY}_${getUid()}`)) ||
+                    localStorage.getItem(THEME_STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && typeof parsed === 'object') {
+            Object.keys(THEME_MODULES).forEach(k => {
+              if (parsed[k] && /^#[0-9a-fA-F]{6}$/.test(parsed[k])) {
+                currentThemeColors[k] = parsed[k].toLowerCase();
+              }
+            });
+          }
+        }
       } catch (e) {}
-      applyAppBgColor(saved, false);
+      applyThemeColorsToDOM();
     }
 
     // 별표(★) 최상단 고정 저장/로드 (사용자별 분리)
@@ -2128,69 +2466,186 @@
       renderSortedFeed();
     }
 
-    // 3. 100개 검색 수집 (동작 중 연파랑 삼각형 깜박임 + 완료 즉시 Firebase 영구 동기화 대기)
+    // 3. 50개 단위 고속 검색 수집 (총 300개까지 스크롤 시 50개씩 추가 로드 & DB 효율화)
+    function updateScrollSentinelUI() {
+      const el = document.getElementById('feedScrollSentinel');
+      if (!el) return;
+      if (isLoadingMore) {
+        el.textContent = '추가 불러오는 중...';
+        return;
+      }
+      const hasMoreDb = currentFeedIsCache && currentFeedItems.length < Math.min(dbFeedPool.length, MAX_TAB_ITEMS);
+      const hasMoreLive = !currentFeedIsCache && activeSearchSession && !activeSearchSession.exhausted && currentFeedItems.length < MAX_TAB_ITEMS;
+      el.textContent = (hasMoreDb || hasMoreLive) ? '▼ 스크롤하여 50개 더 보기' : '';
+    }
+
+    function initFeedScrollObserver() {
+      const sentinel = document.getElementById('feedScrollSentinel');
+      if (!sentinel || typeof IntersectionObserver === 'undefined') return;
+      if (feedScrollObserver) feedScrollObserver.disconnect();
+      feedScrollObserver = new IntersectionObserver((entries) => {
+        if (entries.some(e => e.isIntersecting)) {
+          loadMoreChunk50();
+        }
+      }, { rootMargin: '260px' });
+      feedScrollObserver.observe(sentinel);
+    }
+
     async function startSearch() {
       const q = document.getElementById('query').value.trim();
       if (!q) {
-        if (!fbVerified) verifyFirebaseConnection();
+        if (!fbVerified) {
+          const ok = await verifyFirebaseConnection();
+          if (!ok && lastDbErrorMsg) statusMsg.innerText = `DB: ${lastDbErrorMsg}`;
+        }
         return;
       }
       if (isSearching || !currentUser) return;
 
       closeFilterPanel();
       isSearching = true;
+      isLoadingMore = false;
       setWorkingState(true);
       totalLoadedItems = 0;
       currentSearchCollected = [];
       currentFeedItems = [];
+      dbFeedPool = [];
+      activeSearchSession = null;
       currentFeedIsCache = false;
       activeTabKeyword = '';
       renderSavedTabsBar();
       resultsContainer.innerHTML = '';
       statusMsg.innerText = '';
-      countMsg.innerText = `0/${TARGET_COUNT}`;
+      updateScrollSentinelUI();
 
       try {
+        const seenIds = new Set();
         let { data, server } = await smartFetch(`/search?q=${encodeURIComponent(q)}&filter=videos`);
-        appendGrid(data.items, false, false);
+        appendChunkItems(data.items, CHUNK_SIZE, seenIds, false, false);
 
         let nextPage = data.nextpage;
-        while (nextPage && totalLoadedItems < TARGET_COUNT) {
+        while (nextPage && currentFeedItems.length < CHUNK_SIZE) {
           try {
             const nextPath = `/nextpage/search?nextpage=${encodeURIComponent(nextPage)}&q=${encodeURIComponent(q)}&filter=videos`;
             const nextRes = await fetch(`${server}${nextPath}`);
             const nextData = await nextRes.json();
-            if (!nextData.items || nextData.items.length === 0) break;
-            appendGrid(nextData.items, false, true);
+            if (!nextData.items || nextData.items.length === 0) {
+              nextPage = null;
+              break;
+            }
+            appendChunkItems(nextData.items, CHUNK_SIZE, seenIds, false, true);
             nextPage = nextData.nextpage;
-          } catch (e) { break; }
+          } catch (e) {
+            nextPage = null;
+            break;
+          }
         }
+
+        activeSearchSession = {
+          query: q,
+          server: server,
+          nextpage: nextPage || null,
+          exhausted: !nextPage || currentFeedItems.length >= MAX_TAB_ITEMS
+        };
 
         renderSortedFeed();
         statusMsg.innerText = '';
-        countMsg.innerText = `${totalLoadedItems}`;
 
         if (currentSearchCollected.length > 0) {
+          const docId = getSearchTabDocId(q);
           await saveSearchTab(q, currentSearchCollected);
+          saveLastViewedFeed(docId, q);
         }
       } catch (err) {
         statusMsg.innerText = err.message;
       } finally {
         isSearching = false;
         setWorkingState(false);
+        updateScrollSentinelUI();
       }
     }
 
-    // 4. 데이터 수집 + 통합 정렬 렌더링 (고화질순 q 점수 포함)
-    function appendGrid(items, isFromCache = false, deferRender = false) {
+    // 스크롤 하단 도달 시 50개씩 추가 로드 (총 최대 300개, 정렬은 불러온 범위 내에서만 적용)
+    async function loadMoreChunk50() {
+      if (isSearching || isLoadingMore || !currentUser) return;
+      if (currentFeedItems.length === 0 || currentFeedItems.length >= MAX_TAB_ITEMS) {
+        updateScrollSentinelUI();
+        return;
+      }
+
+      // 1) 저장 탭(DB) 풀에서 다음 50개 단계적 노출
+      if (currentFeedIsCache) {
+        if (currentFeedItems.length >= dbFeedPool.length) {
+          updateScrollSentinelUI();
+          return;
+        }
+        isLoadingMore = true;
+        updateScrollSentinelUI();
+        const nextSlice = dbFeedPool.slice(currentFeedItems.length, Math.min(currentFeedItems.length + CHUNK_SIZE, MAX_TAB_ITEMS));
+        const seenIds = new Set(currentFeedItems.map(it => it.id));
+        appendChunkItems(nextSlice, Math.min(currentFeedItems.length + CHUNK_SIZE, MAX_TAB_ITEMS), seenIds, true, false);
+        isLoadingMore = false;
+        updateScrollSentinelUI();
+        return;
+      }
+
+      // 2) 실시간 검색 결과에서 다음 50개 추가 수집 + DB 증분 저장
+      if (!activeSearchSession || activeSearchSession.exhausted || !activeSearchSession.nextpage) {
+        updateScrollSentinelUI();
+        return;
+      }
+
+      isLoadingMore = true;
+      setWorkingState(true);
+      updateScrollSentinelUI();
+
+      try {
+        const targetTotal = Math.min(currentFeedItems.length + CHUNK_SIZE, MAX_TAB_ITEMS);
+        const seenIds = new Set(currentFeedItems.map(it => it.id));
+        let nextPage = activeSearchSession.nextpage;
+        const { server, query } = activeSearchSession;
+
+        while (nextPage && currentFeedItems.length < targetTotal) {
+          try {
+            const nextPath = `/nextpage/search?nextpage=${encodeURIComponent(nextPage)}&q=${encodeURIComponent(query)}&filter=videos`;
+            const nextRes = await fetch(`${server}${nextPath}`);
+            const nextData = await nextRes.json();
+            if (!nextData.items || nextData.items.length === 0) {
+              nextPage = null;
+              break;
+            }
+            appendChunkItems(nextData.items, targetTotal, seenIds, false, true);
+            nextPage = nextData.nextpage;
+          } catch (e) {
+            nextPage = null;
+            break;
+          }
+        }
+
+        activeSearchSession.nextpage = nextPage || null;
+        activeSearchSession.exhausted = !nextPage || currentFeedItems.length >= MAX_TAB_ITEMS;
+        renderSortedFeed();
+
+        if (currentSearchCollected.length > 0) {
+          await saveSearchTab(query, currentSearchCollected);
+        }
+      } finally {
+        isLoadingMore = false;
+        setWorkingState(false);
+        updateScrollSentinelUI();
+      }
+    }
+
+    // 4. 청크 단위 데이터 수집 + 불러온 범위 한정 정렬 렌더링
+    function appendChunkItems(items, maxLimit, seenIds, isFromCache = false, deferRender = false) {
       if (!items || !items.length) return;
-      const limit = isFromCache ? MAX_TAB_ITEMS : TARGET_COUNT;
       currentFeedIsCache = isFromCache;
 
       items.forEach(item => {
-        if (totalLoadedItems >= limit) return;
+        if (currentFeedItems.length >= maxLimit || currentFeedItems.length >= MAX_TAB_ITEMS) return;
         const videoId = extractVideoId(item);
-        if (!videoId) return;
+        if (!videoId || (seenIds && seenIds.has(videoId))) return;
+        if (seenIds) seenIds.add(videoId);
 
         const title = item.t !== undefined ? item.t : (item.title || '제목 없음');
         const uploaded = Number(item.u !== undefined ? item.u : (item.uploaded > 0 ? item.uploaded : 0)) || 0;
@@ -2212,9 +2667,7 @@
         });
       });
 
-      if (deferRender) {
-        countMsg.innerText = `${currentFeedItems.length}/${TARGET_COUNT}`;
-      } else {
+      if (!deferRender) {
         renderSortedFeed();
       }
     }
@@ -2227,6 +2680,7 @@
     }
 
     function renderSortedFeed() {
+      // 정렬은 현재 불러온 범위(currentFeedItems) 내에서만 적용
       const sorted = [...currentFeedItems].sort((a, b) => {
         const aPin = pinnedVideoIds.has(a.id) ? 1 : 0;
         const bPin = pinnedVideoIds.has(b.id) ? 1 : 0;
@@ -2289,9 +2743,7 @@
       });
 
       resultsContainer.appendChild(frag);
-      countMsg.innerText = isSearching
-        ? `${currentFeedItems.length}/${TARGET_COUNT}`
-        : (currentFeedItems.length > 0 ? `${currentFeedItems.length}` : '');
+      updateScrollSentinelUI();
     }
 
     // TUBE_LAB_V5_IOS_BG_PATCH
@@ -2622,13 +3074,39 @@
       recordUserPlay(videoId, title);
     }
 
-    // 5-2. Firebase 상시 자동 연결 + 실통신 헬스체크 + 양방향 검색이력 영구 동기화
+    // 5-2. Firebase 3필드 100% 호환 스키마({keyword, updatedAt, items}) + 진단 + 최종 피드 신속 복원
+    function updateDbDiagUI() {
+      const el = document.getElementById('dbDiagText');
+      if (!el) return;
+      if (fbVerified) {
+        el.textContent = 'DB 상태: Firebase 정상 연동됨';
+        el.style.color = '#4ade80';
+      } else {
+        el.textContent = lastDbErrorMsg ? `DB 오류: ${lastDbErrorMsg}` : 'DB 상태: 미연동 (재연결 클릭)';
+        el.style.color = '#ff7777';
+      }
+    }
+
+    function recordDbError(err) {
+      fbVerified = false;
+      const code = err && err.code ? String(err.code) : '';
+      const msg = err && err.message ? String(err.message) : String(err || 'unknown');
+      lastDbErrorMsg = code ? `${code}` : msg.slice(0, 48);
+      updateSearchBtnState();
+      updateDbDiagUI();
+    }
+
+    function markDbHealthy() {
+      fbVerified = true;
+      lastDbErrorMsg = '';
+      updateSearchBtnState();
+      updateDbDiagUI();
+    }
+
     function initFirebaseAlways() {
       if (typeof firebase === 'undefined') {
         fbReady = false;
-        fbVerified = false;
-        db = null;
-        updateSearchBtnState();
+        recordDbError({ code: 'sdk-not-loaded' });
         return;
       }
       try {
@@ -2638,45 +3116,51 @@
         db = firebase.firestore();
         fbReady = true;
       } catch (err) {
-        console.error('[Firebase 초기화 오류]', err);
         fbReady = false;
-        fbVerified = false;
         db = null;
-        updateSearchBtnState();
+        recordDbError(err);
       }
     }
 
     async function verifyFirebaseConnection() {
       if (!fbReady || !db) {
-        fbVerified = false;
-        updateSearchBtnState();
-        return false;
+        initFirebaseAlways();
+        if (!fbReady || !db) return false;
       }
       try {
         const snap = await Promise.race([
           db.collection(FB_COLLECTION).doc(AUTH_DOC_ID).get(),
-          new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 7000))
+          new Promise((_, rej) => setTimeout(() => rej({ code: 'timeout' }), 7000))
         ]);
-        fbVerified = true;
+        markDbHealthy();
         if (snap && snap.exists) {
-          const d = snap.data();
-          authData = {
-            adminCode: String(d.adminCode || DEFAULT_ADMIN_CODE),
-            users: Array.isArray(d.users) ? d.users : []
-          };
-          saveLocalAuthCache();
+          parseAuthDocData(snap.data());
         }
-        updateSearchBtnState();
         return true;
       } catch (err) {
-        console.warn('[Firebase 실통신 검증 실패]', err);
-        fbVerified = false;
-        updateSearchBtnState();
+        recordDbError(err);
         return false;
       }
     }
 
-    // 사용자별 로컬 목차 백업 & 미동기화 대기열 관리 (앱 즉시 종료 후 재진입 시 유실 0%)
+    function parseAuthDocData(d) {
+      if (!d) return;
+      if (Array.isArray(d.items)) {
+        const adminEntry = d.items.find(it => it && it.id === '__admin__');
+        const userEntries = d.items.filter(it => it && it.id && it.id !== '__admin__' && it.code);
+        authData = {
+          adminCode: String((adminEntry && adminEntry.code) || d.adminCode || DEFAULT_ADMIN_CODE),
+          users: userEntries
+        };
+      } else {
+        authData = {
+          adminCode: String(d.adminCode || DEFAULT_ADMIN_CODE),
+          users: Array.isArray(d.users) ? d.users : []
+        };
+      }
+      saveLocalAuthCache();
+    }
+
     function loadLocalMetaBackup() {
       if (!currentUser) return [];
       try {
@@ -2738,46 +3222,45 @@
     async function loadAuthConfigFromCloud() {
       loadLocalAuthCache();
       if (!fbReady || !db) {
-        fbVerified = false;
-        updateSearchBtnState();
+        recordDbError({ code: 'not-initialized' });
         return;
       }
       try {
         const snap = await db.collection(FB_COLLECTION).doc(AUTH_DOC_ID).get();
-        fbVerified = true;
+        markDbHealthy();
         if (snap.exists) {
-          const d = snap.data();
-          authData = {
-            adminCode: String(d.adminCode || DEFAULT_ADMIN_CODE),
-            users: Array.isArray(d.users) ? d.users : []
-          };
-          saveLocalAuthCache();
+          parseAuthDocData(snap.data());
         } else {
           await saveAuthConfigToCloud();
         }
       } catch (err) {
-        console.warn('[인증 정보 로드 실패]', err);
-        fbVerified = false;
+        recordDbError(err);
       }
-      updateSearchBtnState();
     }
 
+    // 기존 V6 Firestore 규칙 100% 호환 3필드({keyword, updatedAt, items}) 저장
     async function saveAuthConfigToCloud() {
       saveLocalAuthCache();
       if (!fbReady || !db) return;
       try {
+        const itemsPayload = [
+          { id: '__admin__', code: String(authData.adminCode || DEFAULT_ADMIN_CODE) },
+          ...(authData.users || []).map(u => ({
+            id: String(u.id),
+            name: String(u.name || ''),
+            code: String(u.code || ''),
+            createdAt: Number(u.createdAt || 0)
+          }))
+        ];
         await db.collection(FB_COLLECTION).doc(AUTH_DOC_ID).set({
           keyword: AUTH_DOC_ID,
-          adminCode: authData.adminCode,
-          users: authData.users,
-          updatedAt: Date.now()
+          updatedAt: Date.now(),
+          items: itemsPayload
         });
-        fbVerified = true;
+        markDbHealthy();
       } catch (err) {
-        console.warn('[인증 정보 저장 실패]', err);
-        fbVerified = false;
+        recordDbError(err);
       }
-      updateSearchBtnState();
     }
 
     function findUserByCode(code) {
@@ -2824,7 +3307,43 @@
       enterAppWithUser(user);
     }
 
-    function enterAppWithUser(user) {
+    // 최종 시청 피드 저장 & 최초 접속 시 신속 자동 복원
+    function loadLocalLastViewedFeed() {
+      if (!currentUser) return null;
+      try {
+        const raw = localStorage.getItem(LAST_FEED_STORAGE_PREFIX + getUid());
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.docId && parsed.keyword) return parsed;
+        }
+      } catch (e) {}
+      return null;
+    }
+
+    function saveLastViewedFeed(docId, keyword) {
+      if (!currentUser || !docId || !keyword) return;
+      lastViewedFeed = { docId, keyword, at: Date.now() };
+      try {
+        localStorage.setItem(LAST_FEED_STORAGE_PREFIX + getUid(), JSON.stringify(lastViewedFeed));
+      } catch (e) {}
+      saveUserProfileDocToCloud();
+    }
+
+    async function restoreLastViewedFeed(forceFromCloud = false) {
+      if (!currentUser || isSearching) return;
+      const target = lastViewedFeed || loadLocalLastViewedFeed() || (cachedTabsMeta[0] ? {
+        docId: cachedTabsMeta[0].docId,
+        keyword: cachedTabsMeta[0].keyword,
+        at: cachedTabsMeta[0].updatedAt || 0
+      } : null);
+
+      if (!target || !target.docId) return;
+      if (!forceFromCloud && activeTabKeyword === target.keyword && currentFeedItems.length > 0) return;
+
+      await loadTabData(target.docId, target.keyword, false);
+    }
+
+    async function enterAppWithUser(user) {
       currentUser = user;
       try {
         localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({
@@ -2837,18 +3356,35 @@
       document.body.classList.remove('auth-locked');
       activeTabKeyword = '';
       currentFeedItems = [];
+      dbFeedPool = [];
+      activeSearchSession = null;
       totalLoadedItems = 0;
       resultsContainer.innerHTML = '';
       document.getElementById('query').value = '';
       statusMsg.innerText = '';
-      countMsg.innerText = '';
 
       initSavedBgColor();
       loadLocalPinsImmediate();
-      loadUserPlayHistory();
-      syncPinsFromFirebase();
-      loadSavedTabsMeta();
+      lastViewedFeed = loadLocalLastViewedFeed();
       updateSearchBtnState();
+
+      // 1단계: 로컬 스냅샷으로 최종 보던 피드 0.01초 즉시 복원
+      if (lastViewedFeed) {
+        const fastCached = getCachedTab(lastViewedFeed.docId);
+        if (fastCached && fastCached.items.length > 0) {
+          renderDbTabItems(fastCached.items, lastViewedFeed.keyword);
+        }
+      }
+
+      // 2단계: Firebase에서 프로필(테마·최종피드·재생이력) + 별표 + 검색목차 병렬 동기화
+      await Promise.all([
+        loadUserProfileFromCloud(),
+        syncPinsFromFirebase(),
+        loadSavedTabsMeta()
+      ]);
+
+      // 3단계: Firebase 기준 최종 시청 피드가 갱신되었거나 화면이 비어있다면 신속 로드
+      await restoreLastViewedFeed(currentFeedItems.length === 0);
     }
 
     function logoutUser() {
@@ -2857,7 +3393,10 @@
       currentUser = null;
       cachedTabsMeta = [];
       currentFeedItems = [];
+      dbFeedPool = [];
+      activeSearchSession = null;
       currentPlayHistory = [];
+      lastViewedFeed = null;
       pinnedVideoIds = new Set();
       memoryTabCache.clear();
       activeTabKeyword = '';
@@ -2865,13 +3404,43 @@
       savedTabsList.innerHTML = '';
       document.getElementById('query').value = '';
       statusMsg.innerText = '';
-      countMsg.innerText = '';
+      updateScrollSentinelUI();
       try { localStorage.removeItem(SESSION_STORAGE_KEY); } catch (e) {}
       showAuthGate('');
     }
 
-    // 사용자별 플레이 정보(최근 재생 이력 + 배경색) 저장/로드
-    async function loadUserPlayHistory() {
+    // 사용자 프로필 통합 저장 (기존 3필드 스키마 {keyword, updatedAt, items} 100% 준수!)
+    async function saveUserProfileDocToCloud() {
+      if (!fbReady || !db || !currentUser) return;
+      const packedItems = [];
+      packedItems.push({ id: '__theme__', data: currentThemeColors });
+      if (lastViewedFeed && lastViewedFeed.docId) {
+        packedItems.push({
+          id: '__last_feed__',
+          docId: lastViewedFeed.docId,
+          keyword: lastViewedFeed.keyword,
+          at: lastViewedFeed.at || Date.now()
+        });
+      }
+      (currentPlayHistory || []).slice(0, 30).forEach(it => {
+        if (it && it.id && !String(it.id).startsWith('__')) {
+          packedItems.push({ id: it.id, t: it.t || '', at: Number(it.at || 0) });
+        }
+      });
+
+      try {
+        await db.collection(FB_COLLECTION).doc(getPlayInfoDocId()).set({
+          keyword: getPlayInfoDocId(),
+          updatedAt: Date.now(),
+          items: packedItems
+        });
+        markDbHealthy();
+      } catch (err) {
+        recordDbError(err);
+      }
+    }
+
+    async function loadUserProfileFromCloud() {
       currentPlayHistory = [];
       if (!currentUser) return;
       try {
@@ -2882,20 +3451,47 @@
         }
       } catch (e) {}
 
-      if (fbReady && db) {
-        try {
-          const snap = await db.collection(FB_COLLECTION).doc(getPlayInfoDocId()).get();
-          if (snap.exists) {
-            const d = snap.data();
-            if (Array.isArray(d.items)) {
-              currentPlayHistory = d.items;
-              localStorage.setItem(PLAY_HISTORY_LOCAL_PREFIX + getUid(), JSON.stringify(currentPlayHistory));
-            }
-            if (d.bgColor && /^#[0-9a-fA-F]{6}$/.test(d.bgColor)) {
-              applyAppBgColor(d.bgColor, false);
+      if (!fbReady || !db) return;
+      try {
+        const snap = await db.collection(FB_COLLECTION).doc(getPlayInfoDocId()).get();
+        markDbHealthy();
+        if (snap.exists) {
+          const d = snap.data();
+          const list = Array.isArray(d.items) ? d.items : [];
+          const themeEntry = list.find(it => it && it.id === '__theme__' && it.data);
+          const lastFeedEntry = list.find(it => it && it.id === '__last_feed__' && it.docId);
+          const playItems = list.filter(it => it && it.id && !String(it.id).startsWith('__'));
+
+          if (playItems.length > 0) {
+            currentPlayHistory = playItems;
+            localStorage.setItem(PLAY_HISTORY_LOCAL_PREFIX + getUid(), JSON.stringify(currentPlayHistory));
+          }
+          if (themeEntry && themeEntry.data) {
+            Object.keys(THEME_MODULES).forEach(k => {
+              if (themeEntry.data[k] && /^#[0-9a-fA-F]{6}$/.test(themeEntry.data[k])) {
+                currentThemeColors[k] = themeEntry.data[k].toLowerCase();
+              }
+            });
+            applyThemeColorsToDOM();
+            persistThemeColors(false);
+          } else if (d.bgColor && /^#[0-9a-fA-F]{6}$/.test(d.bgColor)) {
+            currentThemeColors.appBg = d.bgColor.toLowerCase();
+            applyThemeColorsToDOM();
+          }
+          if (lastFeedEntry && lastFeedEntry.docId) {
+            const localAt = lastViewedFeed ? Number(lastViewedFeed.at || 0) : 0;
+            if (Number(lastFeedEntry.at || 0) >= localAt) {
+              lastViewedFeed = {
+                docId: lastFeedEntry.docId,
+                keyword: lastFeedEntry.keyword || lastFeedEntry.docId,
+                at: Number(lastFeedEntry.at || Date.now())
+              };
+              localStorage.setItem(LAST_FEED_STORAGE_PREFIX + getUid(), JSON.stringify(lastViewedFeed));
             }
           }
-        } catch (err) {}
+        }
+      } catch (err) {
+        recordDbError(err);
       }
     }
 
@@ -2910,20 +3506,9 @@
       try {
         localStorage.setItem(PLAY_HISTORY_LOCAL_PREFIX + getUid(), JSON.stringify(currentPlayHistory));
       } catch (e) {}
-
-      if (fbReady && db) {
-        try {
-          await db.collection(FB_COLLECTION).doc(getPlayInfoDocId()).set({
-            keyword: getPlayInfoDocId(),
-            bgColor: currentAppBgColor,
-            updatedAt: Date.now(),
-            items: currentPlayHistory
-          }, { merge: true });
-        } catch (err) {}
-      }
+      await saveUserProfileDocToCloud();
     }
 
-    // 초경량 목차 문서 동기화 (사용자별 독립 + 로컬 백업 병행)
     async function syncTabsIndexToCloud() {
       saveLocalMetaBackup(cachedTabsMeta);
       if (!fbReady || !db || !currentUser) return false;
@@ -2939,13 +3524,10 @@
           updatedAt: Date.now(),
           items: indexItems
         });
-        fbVerified = true;
-        updateSearchBtnState();
+        markDbHealthy();
         return true;
       } catch (err) {
-        console.warn('[목차 인덱스 저장 실패]', err);
-        fbVerified = false;
-        updateSearchBtnState();
+        recordDbError(err);
         return false;
       }
     }
@@ -2958,7 +3540,6 @@
       if (manageOverlay.style.display === 'flex') renderManageList();
     }
 
-    // 로컬에만 남아있던 미전송 검색 이력을 Firebase로 자동 재업로드
     async function flushPendingTabsToCloud(missingMetaItems = []) {
       if (!fbReady || !db || !currentUser) return;
       const pendingSet = new Set(getPendingSyncIds());
@@ -2981,22 +3562,17 @@
           });
           clearPendingSync(docId);
           uploadedAny = true;
-          fbVerified = true;
+          markDbHealthy();
         } catch (err) {
-          console.warn('[보류 검색이력 재동기화 지연]', docId, err);
+          recordDbError(err);
         }
       }
-      if (uploadedAny) {
-        await syncTabsIndexToCloud();
-      }
-      updateSearchBtnState();
+      if (uploadedAny) await syncTabsIndexToCloud();
     }
 
-    // 양방향 검색이력 로드 (로컬 0.01초 즉시 복원 -> Firebase 조회/복구 -> 자동 병합 + 누락분 재동기화)
     async function loadSavedTabsMeta() {
       if (!currentUser) return;
 
-      // 1단계: 로컬 백업 즉시 복원 (앱 재진입 직후 검색 이력이 바로 보임)
       const localMeta = loadLocalMetaBackup();
       if (localMeta.length > 0) {
         cachedTabsMeta = [...localMeta].sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
@@ -3004,8 +3580,7 @@
       }
 
       if (!fbReady || !db) {
-        fbVerified = false;
-        updateSearchBtnState();
+        recordDbError({ code: 'not-initialized' });
         return;
       }
 
@@ -3013,7 +3588,7 @@
       try {
         const idxDocId = getTabsIndexDocId();
         const idxSnap = await db.collection(FB_COLLECTION).doc(idxDocId).get();
-        fbVerified = true;
+        markDbHealthy();
 
         let cloudMeta = [];
         if (idxSnap.exists && Array.isArray(idxSnap.data().items)) {
@@ -3026,37 +3601,35 @@
               updatedAt: Number(it.at || 0)
             }));
         } else {
-          // 목차 문서가 아직 없는 경우 컬렉션에서 해당 사용자 문서 직접 복구
-          const snap = await db.collection(FB_COLLECTION).get();
-          const userPrefix = `u_${getUid()}__`;
-          snap.forEach(doc => {
-            if (doc.id.startsWith('__')) return;
-            if (isAdminUser()) {
-              if (doc.id.startsWith('u_')) return;
-            } else {
-              if (!doc.id.startsWith(userPrefix)) return;
-            }
-            const d = doc.data();
-            const count = Array.isArray(d.items) ? d.items.length : 0;
-            cloudMeta.push({
-              docId: doc.id,
-              keyword: d.keyword || doc.id.replace(userPrefix, ''),
-              count: count,
-              updatedAt: d.updatedAt || 0
+          try {
+            const snap = await db.collection(FB_COLLECTION).get();
+            const userPrefix = `u_${getUid()}__`;
+            snap.forEach(doc => {
+              if (doc.id.startsWith('__')) return;
+              if (isAdminUser()) {
+                if (doc.id.startsWith('u_')) return;
+              } else {
+                if (!doc.id.startsWith(userPrefix)) return;
+              }
+              const d = doc.data();
+              cloudMeta.push({
+                docId: doc.id,
+                keyword: d.keyword || doc.id.replace(userPrefix, ''),
+                count: Array.isArray(d.items) ? d.items.length : 0,
+                updatedAt: d.updatedAt || 0
+              });
             });
-          });
+          } catch (listErr) {
+            console.warn('[컬렉션 스캔 건너뜀]', listErr);
+          }
         }
 
-        // 2단계: 클라우드 목차 + 로컬 백업 병합 (최신 항목 우선)
         const mergedMap = new Map();
         cloudMeta.forEach(t => mergedMap.set(t.docId, t));
         const missingInCloud = [];
         localMeta.forEach(lt => {
           const ct = mergedMap.get(lt.docId);
-          if (!ct) {
-            mergedMap.set(lt.docId, lt);
-            missingInCloud.push(lt);
-          } else if ((lt.updatedAt || 0) > (ct.updatedAt || 0)) {
+          if (!ct || (lt.updatedAt || 0) > (ct.updatedAt || 0)) {
             mergedMap.set(lt.docId, lt);
             missingInCloud.push(lt);
           }
@@ -3067,15 +3640,13 @@
         renderSavedTabsBar();
         if (manageOverlay.style.display === 'flex') renderManageList();
 
-        // 3단계: 로컬에만 있던 미전송 이력이 있거나 목차가 새로 복구되었다면 Firebase에 동기화
         if (missingInCloud.length > 0 || getPendingSyncIds().length > 0) {
           await flushPendingTabsToCloud(missingInCloud);
         } else if (!idxSnap.exists && cachedTabsMeta.length > 0) {
           await syncTabsIndexToCloud();
         }
       } catch (err) {
-        console.warn('[Firebase 목차 동기화 실패]', err);
-        fbVerified = false;
+        recordDbError(err);
       } finally {
         setWorkingState(false);
       }
@@ -3086,7 +3657,7 @@
       cachedTabsMeta.forEach(tab => {
         const btn = document.createElement('button');
         btn.className = 'history-tab' + (activeTabKeyword === tab.keyword ? ' active' : '');
-        btn.onclick = () => loadTabData(tab.docId, tab.keyword);
+        btn.onclick = () => loadTabData(tab.docId, tab.keyword, true);
 
         const label = document.createElement('span');
         label.textContent = tab.keyword;
@@ -3117,7 +3688,6 @@
       const now = Date.now();
       const cleanNew = stripThumbField(newItems);
 
-      // 1) 기존 항목 확보 (캐시 우선 -> 필요 시 클라우드)
       let existingItems = [];
       const meta = cachedTabsMeta.find(t => t.docId === docId);
       const cached = getCachedTab(docId);
@@ -3136,15 +3706,12 @@
       const trimmedItems = stripThumbField(mergeAndCapItems(cleanNew, existingItems));
       activeTabKeyword = keyword;
 
-      // 2) 로컬 캐시 + 로컬 목차 백업 동기적 즉시 확정 (앱 종료 시 유실 0%)
       setCachedTab(docId, now, trimmedItems);
       upsertLocalMeta(docId, keyword, trimmedItems.length, now);
       markPendingSync(docId);
 
-      // 3) Firebase 데이터 문서 + 목차 문서 독립 저장
       if (!fbReady || !db) {
-        fbVerified = false;
-        updateSearchBtnState();
+        recordDbError({ code: 'not-initialized' });
         return;
       }
 
@@ -3155,16 +3722,31 @@
           items: trimmedItems
         });
         clearPendingSync(docId);
-        fbVerified = true;
+        markDbHealthy();
         await syncTabsIndexToCloud();
       } catch (err) {
-        console.warn('[Firebase 검색이력 저장 실패 -> 재접속 시 자동 재동기화]', err);
-        fbVerified = false;
-        updateSearchBtnState();
+        recordDbError(err);
       }
     }
 
-    async function loadTabData(docId, keyword) {
+    function renderDbTabItems(items, keyword) {
+      activeTabKeyword = keyword;
+      document.getElementById('query').value = keyword;
+      totalLoadedItems = 0;
+      currentFeedItems = [];
+      activeSearchSession = null;
+      dbFeedPool = stripThumbField(items).slice(0, MAX_TAB_ITEMS);
+      resultsContainer.innerHTML = '';
+
+      const firstChunk = dbFeedPool.slice(0, CHUNK_SIZE);
+      const seenIds = new Set();
+      appendChunkItems(firstChunk, CHUNK_SIZE, seenIds, true, false);
+      renderSavedTabsBar();
+      statusMsg.innerText = '';
+      updateScrollSentinelUI();
+    }
+
+    async function loadTabData(docId, keyword, shouldSaveLast = true) {
       if (isSearching || !currentUser) return;
       let items = [];
       const meta = cachedTabsMeta.find(t => t.docId === docId);
@@ -3176,7 +3758,7 @@
         setWorkingState(true);
         try {
           const snap = await db.collection(FB_COLLECTION).doc(docId).get();
-          fbVerified = true;
+          markDbHealthy();
           if (!snap.exists) {
             removeCachedTab(docId);
             cachedTabsMeta = cachedTabsMeta.filter(t => t.docId !== docId);
@@ -3189,11 +3771,11 @@
           items = stripThumbField(Array.isArray(data.items) ? data.items : []);
           setCachedTab(docId, data.updatedAt || Date.now(), items);
         } catch (err) {
-          fbVerified = false;
+          recordDbError(err);
           if (cached && cached.items.length > 0) {
             items = cached.items;
           } else {
-            statusMsg.innerText = '불러오기 실패';
+            statusMsg.innerText = `불러오기 실패 (${lastDbErrorMsg})`;
             return;
           }
         } finally {
@@ -3203,14 +3785,25 @@
         items = cached.items;
       }
 
-      activeTabKeyword = keyword;
-      document.getElementById('query').value = keyword;
-      totalLoadedItems = 0;
-      currentFeedItems = [];
-      resultsContainer.innerHTML = '';
-      appendGrid(items, true, false);
-      renderSavedTabsBar();
-      statusMsg.innerText = '';
+      if (items.length === 0) return;
+      renderDbTabItems(items, keyword);
+      if (shouldSaveLast) {
+        saveLastViewedFeed(docId, keyword);
+      }
+    }
+
+    async function retryDbReconnect() {
+      setWorkingState(true);
+      const ok = await verifyFirebaseConnection();
+      if (ok && currentUser) {
+        await Promise.all([
+          loadUserProfileFromCloud(),
+          syncPinsFromFirebase(),
+          loadSavedTabsMeta()
+        ]);
+      }
+      setWorkingState(false);
+      updateDbDiagUI();
     }
 
     // 설정 모달 상단 확장 탭 전환 컨트롤러 (검색 / 색상변경 / 로그인)
@@ -3237,6 +3830,7 @@
         build256Palette();
       } else if (tabName === 'auth') {
         renderAuthSettingsPane();
+        updateDbDiagUI();
       }
     }
 
@@ -3256,7 +3850,7 @@
         info.style.cursor = 'pointer';
         info.onclick = () => {
           closeManageModal();
-          loadTabData(tab.docId, tab.keyword);
+          loadTabData(tab.docId, tab.keyword, true);
         };
         const nameEl = document.createElement('div');
         nameEl.className = 'manage-item-name';
@@ -3332,6 +3926,7 @@
         adminSec.style.display = isAdminUser() ? 'block' : 'none';
         if (isAdminUser()) renderAdminUsersList();
       }
+      updateDbDiagUI();
     }
 
     function renderAdminUsersList() {
@@ -3453,6 +4048,7 @@
           await syncTabsIndexToCloud();
         } catch (err) {
           markPendingSync(docId);
+          recordDbError(err);
         }
       }
     }
@@ -3473,17 +4069,18 @@
           await db.collection(FB_COLLECTION).doc(docId).delete();
           await syncTabsIndexToCloud();
         } catch (err) {
-          console.warn('[삭제 동기화 지연]', err);
+          recordDbError(err);
         }
       }
     }
 
-    // 앱 부팅: 색상/레이아웃 복원 -> Firebase 연결 -> 세션 유지 확인 -> 자동 진입 또는 중앙 코드창
+    // 앱 부팅: 9모듈 테마/레이아웃/스크롤옵저버 초기화 -> Firebase 연결 -> 세션 유지 확인 -> 최종 피드 자동 복원
     async function bootstrapApp() {
       document.body.classList.add('auth-locked');
       initSavedBgColor();
       updateFilterUI();
       initFeedLayoutMode();
+      initFeedScrollObserver();
       updateSearchBtnState();
       initFirebaseAlways();
       await loadAuthConfigFromCloud();
@@ -3494,7 +4091,7 @@
           const parsed = JSON.parse(saved);
           const matched = parsed && parsed.code ? findUserByCode(parsed.code) : null;
           if (matched && matched.id === parsed.id) {
-            enterAppWithUser(matched);
+            await enterAppWithUser(matched);
             return;
           }
           localStorage.removeItem(SESSION_STORAGE_KEY);
