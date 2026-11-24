@@ -10,10 +10,9 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-  <!-- TUBE_LAB_FB_PATCH_V2: Firebase Compat SDK (Firestore + 추후 로그인용 Auth) -->
+  <!-- TUBE_LAB_V7_PATCH: Firebase Compat SDK (Firestore 상시 연결) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -26,32 +25,96 @@
       user-select: none;
     }
 
-    /* 1. 최상단 고정 검색창 (iOS 노치/다이나믹 아일랜드 안전 여백 + 검색·조건 밀착 + 최우측 ⚙) */
+    /* 0. 로그인 게이트 (인증 전 메인 숨김 · 중앙 소형 코드창만 표시) */
+    body.auth-locked .top-header,
+    body.auth-locked .video-grid {
+      display: none !important;
+    }
+    #auth-gate-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 20000;
+      background: #0d0d0d;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    body.auth-locked #auth-gate-overlay {
+      display: flex;
+    }
+    .auth-gate-box {
+      width: 236px;
+      background: #17171a;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 12px;
+      padding: 16px 14px;
+      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.85);
+      text-align: center;
+    }
+    .auth-gate-input-row {
+      display: flex;
+      gap: 5px;
+    }
+    .auth-gate-input {
+      flex: 1;
+      min-width: 0;
+      padding: 8px 10px;
+      border-radius: 7px;
+      border: 1px solid #333;
+      background: #101012;
+      color: #fff;
+      font-size: 13px;
+      letter-spacing: 2px;
+      text-align: center;
+      outline: none;
+    }
+    .auth-gate-input:focus { border-color: #f472b6; }
+    .auth-gate-btn {
+      padding: 8px 12px;
+      border-radius: 7px;
+      border: none;
+      background: #ff0000;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .auth-gate-err {
+      min-height: 14px;
+      margin-top: 7px;
+      font-size: 10.5px;
+      color: #ff6b6b;
+    }
+
+    /* 1. 최상단 고정 헤더 (1행·2행 동일 Grid로 검색창 끝선과 연핑크 열 끝선 100% 칼정렬) */
     .top-header {
       position: sticky;
       top: 0;
       z-index: 100;
       background: #0d0d0d;
-      padding: calc(env(safe-area-inset-top, 0px) + 8px) 0 6px 0;
+      padding: calc(env(safe-area-inset-top, 0px) + 8px) 0 5px 0;
     }
     .header-top-row {
-      display: flex;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 108px;
+      gap: 6px;
       align-items: center;
-      gap: 5px;
       width: 100%;
     }
     .header-left-slot {
-      flex: 1;
       min-width: 0;
       display: flex;
       align-items: center;
-      gap: 4px;
     }
     .header-right-slot {
-      flex-shrink: 0;
       display: flex;
       align-items: center;
-      justify-content: flex-end;
+      justify-content: space-between;
+      gap: 4px;
+      width: 108px;
+      flex-shrink: 0;
     }
     .header-gear-btn {
       width: 31px;
@@ -71,20 +134,24 @@
     }
     .header-gear-btn:active { background: #333; }
 
-    /* 조건검색 토글 버튼 & 풀다운 슬라이드 체크박스 패널 */
+    /* 검색조건 토글 버튼 & 2열 풀다운 슬라이드 체크박스 패널 */
     .filter-toggle-btn {
-      padding: 7px 10px;
+      flex: 1;
+      min-width: 0;
+      height: 31px;
+      padding: 0 6px;
       border-radius: 7px;
       border: 1px solid #353535;
       background: #1d1d1d;
       color: #e5e5e5;
-      font-size: 11.5px;
+      font-size: 11px;
       font-weight: 700;
       cursor: pointer;
       white-space: nowrap;
       display: inline-flex;
       align-items: center;
-      gap: 4px;
+      justify-content: center;
+      gap: 2px;
       transition: background 0.15s, border-color 0.15s;
     }
     .filter-toggle-btn:active { background: #2c2c2c; }
@@ -101,7 +168,7 @@
       transition: max-height 0.24s ease, opacity 0.2s ease, margin-top 0.2s ease;
     }
     .filter-slide-wrap.open {
-      max-height: 220px;
+      max-height: 280px;
       opacity: 1;
       margin-top: 7px;
     }
@@ -119,39 +186,49 @@
       font-size: 11px;
       color: #bbb;
       margin-bottom: 8px;
+      gap: 8px;
     }
     .filter-order-hint {
       font-size: 10px;
       color: #ff7777;
       font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
+    /* 검색조건 2열 고정 + 문자열 1줄(nowrap) 강제 */
     .filter-check-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 5px;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
       margin-bottom: 9px;
     }
     .filter-check-item {
       display: flex;
       align-items: center;
-      justify-content: center;
-      gap: 4px;
-      padding: 6px 4px;
+      justify-content: flex-start;
+      gap: 7px;
+      padding: 7px 10px;
       border-radius: 7px;
       background: #222;
       border: 1px solid #323232;
       color: #ddd;
-      font-size: 11px;
+      font-size: 11.5px;
       font-weight: 600;
       cursor: pointer;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+    .filter-check-item span {
       white-space: nowrap;
     }
     .filter-check-item input[type="checkbox"] {
       accent-color: #ff0000;
-      width: 13px;
-      height: 13px;
+      width: 14px;
+      height: 14px;
       cursor: pointer;
       margin: 0;
+      flex-shrink: 0;
     }
     .filter-check-item.checked {
       background: rgba(255, 0, 0, 0.16);
@@ -215,7 +292,8 @@
       color: #ffffff;
       text-shadow: 0 0 6px rgba(255, 255, 255, 0.95);
     }
-    .search-box { display: flex; gap: 4px; width: 100%; }
+
+    .search-box { display: flex; gap: 4px; width: 100%; min-width: 0; }
     input, textarea {
       user-select: text;
       -webkit-user-select: text;
@@ -223,7 +301,8 @@
     .search-box input {
       flex: 1;
       min-width: 0;
-      padding: 7px 8px;
+      height: 31px;
+      padding: 0 9px;
       border-radius: 7px;
       border: 1px solid #2a2a2a;
       background: #1c1c1c;
@@ -233,98 +312,125 @@
     }
     .search-box input:focus { border-color: #ff0000; }
     button.search-btn {
-      padding: 7px 10px;
+      width: 34px;
+      height: 31px;
+      padding: 0;
       border-radius: 7px;
       border: none;
       background: #ff0000;
       color: white;
       font-weight: bold;
-      font-size: 12px;
+      font-size: 13px;
       cursor: pointer;
-      white-space: nowrap;
       flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    /* 1-2. 검색 버튼 하단 저장 검색어 가로 탭 바 */
+    /* 1-2. 2행: 연한 핑크 저장 검색어 가로 스크롤 열(검색창 끝선 일치) + 우측 회색 이모지 2개 */
     .saved-tabs-row {
-      display: flex;
-      align-items: center;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 108px;
       gap: 6px;
-      margin-top: 7px;
-      padding-bottom: 2px;
+      align-items: center;
+      margin-top: 6px;
     }
     .tabs-scroll-area {
-      flex: 1;
+      min-width: 0;
+      height: 30px;
       display: flex;
       align-items: center;
       gap: 5px;
       overflow-x: auto;
       scrollbar-width: none;
       -ms-overflow-style: none;
-      padding: 1px 0;
+      background: #f9d5e5;
+      border: 1px solid rgba(255, 195, 220, 0.85);
+      border-radius: 8px;
+      padding: 3px 6px;
     }
     .tabs-scroll-area::-webkit-scrollbar { display: none; }
     .history-tab {
       display: inline-flex;
       align-items: center;
       gap: 4px;
-      padding: 5px 10px;
-      border-radius: 14px;
-      background: #1c1c1c;
-      border: 1px solid #303030;
-      color: #ddd;
-      font-size: 11px;
-      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid rgba(190, 95, 135, 0.32);
+      color: #3a1f2b;
+      font-size: 10.5px;
+      font-weight: 700;
       white-space: nowrap;
       flex-shrink: 0;
       cursor: pointer;
       transition: background 0.15s, border-color 0.15s;
     }
-    .history-tab:active { background: #2d2d2d; }
+    .history-tab:active { background: #ffffff; }
     .history-tab.active {
-      background: #ff0000;
-      border-color: #ff4d4d;
+      background: #d9386a;
+      border-color: #b82555;
       color: #fff;
     }
     .tab-count-badge {
       font-size: 9.5px;
       padding: 1px 5px;
       border-radius: 8px;
-      background: rgba(255,255,255,0.14);
+      background: rgba(58, 31, 43, 0.12);
       color: inherit;
     }
-    .tabs-placeholder {
-      font-size: 11px;
-      color: #888;
-      padding: 4px 8px;
-      border-radius: 12px;
-      border: 1px dashed #333;
-      white-space: nowrap;
-      cursor: pointer;
+    .history-tab.active .tab-count-badge {
+      background: rgba(255, 255, 255, 0.24);
     }
-    .tab-manage-btn {
+
+    /* 우측 피드 나열 전환 회색 이모지 2개 (목록 1열 / 창 2~4열) */
+    .layout-mode-controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+      width: 108px;
       flex-shrink: 0;
-      padding: 5px 9px;
-      border-radius: 14px;
-      background: #242424;
-      border: 1px solid #444;
-      color: #ccc;
-      font-size: 11px;
-      font-weight: 600;
-      cursor: pointer;
-      white-space: nowrap;
     }
-    .tab-manage-btn:active { background: #383838; }
+    .layout-emoji-btn {
+      height: 30px;
+      border-radius: 7px;
+      border: 1px solid #303030;
+      background: #1a1a1a;
+      color: #9a9a9a;
+      font-size: 13px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+      padding: 0;
+    }
+    .layout-emoji-btn:active { background: #2c2c2c; }
+    .layout-emoji-btn.active {
+      background: #2b2b2b;
+      border-color: #6b6b6b;
+      color: #d4d4d4;
+    }
+    .layout-col-num {
+      font-size: 10px;
+      font-weight: 700;
+      color: inherit;
+    }
 
     .status-bar {
       display: flex;
       justify-content: space-between;
-      font-size: 11px;
+      align-items: center;
+      font-size: 10.5px;
       color: #888;
-      padding: 4px 2px 4px 2px;
+      padding: 3px 2px 2px 2px;
+      min-height: 16px;
     }
 
-    /* 6. [신규] 저장 탭 용량 정리 & Firebase 연결 설정 모달 */
+    /* 6. 설정 모달 (상단 확장형 탭: 검색 / 로그인 + 추후 확장 대응) */
     #manage-modal-overlay {
       position: fixed;
       inset: 0;
@@ -338,30 +444,71 @@
     }
     .manage-modal-box {
       width: 100%;
-      max-width: 380px;
+      max-width: 390px;
       max-height: 85vh;
       overflow-y: auto;
       background: #161616;
       border: 1px solid rgba(255, 255, 255, 0.75);
       border-radius: 12px;
-      padding: 16px;
+      padding: 14px;
       box-shadow: 0 15px 40px rgba(0,0,0,0.9);
     }
-    .manage-header {
+    .settings-tabs-header {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      margin-bottom: 8px;
+      justify-content: space-between;
+      gap: 6px;
+      border-bottom: 1px solid #2b2b2b;
+      padding-bottom: 9px;
+      margin-bottom: 12px;
     }
-    .manage-title { font-size: 14px; font-weight: 700; color: #fff; }
-    .manage-sub { font-size: 11px; color: #999; margin-bottom: 10px; line-height: 1.4; }
+    .settings-tabs-nav {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .settings-tabs-nav::-webkit-scrollbar { display: none; }
+    .settings-tab-btn {
+      padding: 6px 12px;
+      border-radius: 7px;
+      border: 1px solid #333;
+      background: #202020;
+      color: #aaa;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .settings-tab-btn.active {
+      background: #ff0000;
+      border-color: #ff4444;
+      color: #fff;
+    }
+    .settings-x-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 7px;
+      border: 1px solid #3a3a3a;
+      background: #222;
+      color: #ccc;
+      font-size: 13px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .settings-pane { display: none; }
+    .settings-pane.active { display: block; }
+
     .manage-list {
       display: flex;
       flex-direction: column;
       gap: 6px;
-      max-height: 220px;
+      max-height: 290px;
       overflow-y: auto;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
     .manage-item {
       display: flex;
@@ -392,65 +539,139 @@
       color: #ddd;
       font-size: 10.5px;
       cursor: pointer;
+      white-space: nowrap;
     }
     .mini-btn.danger {
       border-color: #662222;
       background: #3a1515;
       color: #ff7777;
     }
-    .fb-config-section {
-      border-top: 1px solid #2c2c2c;
-      padding-top: 10px;
-      margin-top: 8px;
+
+    /* 로그인 설정 탭 전용 스타일 */
+    .auth-profile-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #202024;
+      border: 1px solid #32323a;
+      border-radius: 8px;
+      padding: 10px 11px;
+      margin-bottom: 10px;
     }
-    .fb-config-label {
-      font-size: 11px;
-      color: #bbb;
-      margin-bottom: 6px;
+    .auth-role-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 5px;
+      background: rgba(244, 114, 182, 0.2);
+      color: #f9a8d4;
+      margin-right: 5px;
     }
-    .fb-config-textarea {
-      width: 100%;
-      height: 82px;
-      background: #101010;
-      border: 1px solid #333;
-      border-radius: 6px;
-      color: #a5d6ff;
-      font-family: monospace;
+    .auth-user-name { font-size: 13px; font-weight: 700; color: #fff; }
+    .auth-stats-row {
       font-size: 10.5px;
-      padding: 7px;
-      outline: none;
-      resize: none;
+      color: #aaa;
+      margin-top: 3px;
+    }
+    .settings-sec-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #bbb;
+      margin: 10px 0 6px 0;
+    }
+    .auth-form-row {
+      display: flex;
+      gap: 5px;
       margin-bottom: 8px;
     }
-    .manage-btn-row { display: flex; gap: 6px; }
-    .manage-save-btn {
+    .auth-form-input {
       flex: 1;
-      padding: 9px;
-      border-radius: 8px;
+      min-width: 0;
+      padding: 7px 8px;
+      border-radius: 6px;
+      border: 1px solid #353535;
+      background: #101012;
+      color: #fff;
+      font-size: 11.5px;
+      outline: none;
+    }
+    .auth-form-input:focus { border-color: #f472b6; }
+    .auth-form-btn {
+      padding: 7px 10px;
+      border-radius: 6px;
       border: none;
       background: #ff0000;
       color: #fff;
+      font-size: 11.5px;
       font-weight: 700;
-      font-size: 12px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .play-history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      max-height: 135px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+    }
+    .play-history-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 7px;
+      border-radius: 6px;
+      background: #1c1c20;
+      border: 1px solid #2b2b30;
       cursor: pointer;
     }
-    .manage-close-btn {
+    .play-history-item:active { background: #2b2b32; }
+    .play-history-thumb {
+      width: 44px;
+      height: 25px;
+      border-radius: 3px;
+      object-fit: cover;
+      flex-shrink: 0;
+      background: #222;
+    }
+    .play-history-title {
       flex: 1;
-      padding: 9px;
+      min-width: 0;
+      font-size: 11px;
+      color: #e5e5e5;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .admin-divider {
+      border-top: 1px solid #2c2c2c;
+      margin-top: 10px;
+      padding-top: 8px;
+    }
+    .manage-close-btn {
+      width: 100%;
+      padding: 8px;
       border-radius: 8px;
       border: 1px solid #444;
       background: transparent;
       color: #bbb;
       font-size: 12px;
       cursor: pointer;
+      margin-top: 6px;
     }
 
-    /* 2. 가로 4칸 바둑판 피드 */
+    /* 2. 바둑판/목록 가변 피드 (1열 목록 / 2~4열 창 전환) */
     .video-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 6px;
     }
+    .video-grid.cols-4 { grid-template-columns: repeat(4, 1fr); gap: 6px; }
+    .video-grid.cols-3 { grid-template-columns: repeat(3, 1fr); gap: 7px; }
+    .video-grid.cols-2 { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .video-grid.cols-1 { grid-template-columns: 1fr; gap: 6px; }
+
     .video-card {
       display: flex;
       flex-direction: column;
@@ -482,6 +703,33 @@
       -webkit-box-orient: vertical;
       overflow: hidden;
       word-break: break-all;
+    }
+    .video-grid.cols-3 .video-title { font-size: 10px; }
+    .video-grid.cols-2 .video-title { font-size: 11px; line-height: 1.3; }
+    .video-grid.cols-2 .card-info { padding: 6px; }
+
+    /* 1열 목록형 레이아웃 */
+    .video-grid.cols-1 .video-card {
+      flex-direction: row;
+      align-items: center;
+      border-radius: 6px;
+    }
+    .video-grid.cols-1 .thumb-wrapper {
+      width: 112px;
+      min-width: 112px;
+      height: 63px;
+      padding-top: 0;
+      flex-shrink: 0;
+    }
+    .video-grid.cols-1 .card-info {
+      flex: 1;
+      min-width: 0;
+      padding: 6px 10px;
+    }
+    .video-grid.cols-1 .video-title {
+      font-size: 12px;
+      line-height: 1.35;
+      -webkit-line-clamp: 2;
     }
 
     /* 3. [핵심] 16:9 원본 밀착형 부유창 */
@@ -882,29 +1130,40 @@
 </head>
 <body>
 
-  <!-- 1. 최상단 검색 헤더 (좌측 50% 검색 + 우측 50% 확장 슬롯 + 저장 가로 탭) -->
+  <!-- 0. 로그인 중앙 소형 코드창 -->
+  <div id="auth-gate-overlay">
+    <div class="auth-gate-box">
+      <div class="auth-gate-input-row">
+        <input type="password" id="authCodeInput" class="auth-gate-input" placeholder="CODE" autocomplete="off" onkeydown="if(event.key==='Enter'){submitAuthCode()}">
+        <button type="button" class="auth-gate-btn" onclick="submitAuthCode()">확인</button>
+      </div>
+      <div class="auth-gate-err" id="authGateErr"></div>
+    </div>
+  </div>
+
+  <!-- 1. 최상단 고정 헤더 (1행 검색·조건·설정 / 2행 연핑크 탭·회색 이모지 2개) -->
   <div class="top-header">
     <div class="header-top-row">
       <div class="header-left-slot">
         <div class="search-box">
-          <input type="text" id="query" placeholder="곡명·가수 검색" onkeydown="if(event.key==='Enter'){startSearch()}">
-          <button class="search-btn" onclick="startSearch()">검색</button>
+          <input type="text" id="query" placeholder="곡명 · 가수" onkeydown="if(event.key==='Enter'){startSearch()}">
+          <button class="search-btn" onclick="startSearch()" title="찾기">🔍</button>
         </div>
+      </div>
+      <div class="header-right-slot" id="headerRightSlot">
         <button class="filter-toggle-btn" id="filterToggleBtn" onclick="toggleFilterPanel()">
           <span id="filterBtnLabel">▾ 조건</span>
         </button>
-      </div>
-      <div class="header-right-slot" id="headerRightSlot">
-        <button class="header-gear-btn" id="headerGearBtn" onclick="openManageModal()" title="저장 탭 정리 및 Firebase 설정">⚙</button>
+        <button class="header-gear-btn" id="headerGearBtn" onclick="openManageModal('search')" title="설정">⚙</button>
       </div>
     </div>
 
-    <!-- 조건검색 풀다운 슬라이드 체크박스 패널 -->
+    <!-- 검색조건 2열 풀다운 슬라이드 체크박스 패널 -->
     <div class="filter-slide-wrap" id="filterSlidePanel">
       <div class="filter-slide-inner">
         <div class="filter-panel-head">
-          <span>정렬 · 조건 검색 (체크 순 반영)</span>
-          <span id="filterOrderHint" class="filter-order-hint">기본 검색순</span>
+          <span>검색조건 (체크 순 반영)</span>
+          <span id="filterOrderHint" class="filter-order-hint">기본순</span>
         </div>
         <div class="filter-check-grid">
           <label class="filter-check-item" id="fLabel-recent">
@@ -923,6 +1182,10 @@
             <input type="checkbox" value="views" onchange="onFilterCheckChange(this)">
             <span>조회순</span>
           </label>
+          <label class="filter-check-item" id="fLabel-hq">
+            <input type="checkbox" value="hq" onchange="onFilterCheckChange(this)">
+            <span>고화질순</span>
+          </label>
         </div>
         <div class="filter-panel-foot">
           <button class="filter-reset-btn" onclick="resetFilterConditions()">초기화</button>
@@ -931,21 +1194,25 @@
       </div>
     </div>
 
-    <!-- 저장 검색어 가로 탭 바 (화면 100% 폭 사용) -->
+    <!-- 2행: 연핑크 저장 검색어 가로 스크롤 열(검색창 끝선까지) + 우측 회색 이모지 2개 -->
     <div class="saved-tabs-row">
-      <div class="tabs-scroll-area" id="savedTabsList">
-        <span class="tabs-placeholder" onclick="openManageModal()">검색 시 탭 자동 저장</span>
+      <div class="tabs-scroll-area" id="savedTabsList"></div>
+      <div class="layout-mode-controls">
+        <button type="button" class="layout-emoji-btn" id="listModeBtn" onclick="setFeedListMode()" title="1열 목록">☰</button>
+        <button type="button" class="layout-emoji-btn" id="gridModeBtn" onclick="cycleFeedGridCols()" title="창 개수 전환 (2~4열)">
+          <span>⊞</span><span class="layout-col-num" id="gridColNum">4</span>
+        </button>
       </div>
     </div>
 
     <div class="status-bar">
-      <span id="status">원하는 음악을 검색해보세요.</span>
+      <span id="status"></span>
       <span id="count"></span>
     </div>
   </div>
 
-  <!-- 2. 가로 5칸 바둑판 피드 -->
-  <div class="video-grid" id="results"></div>
+  <!-- 2. 가변 피드 (목록 1열 / 창 2~4열) -->
+  <div class="video-grid cols-4" id="results"></div>
 
   <!-- 3. 16:9 밀착형 독립 부유창 (Floating Window) -->
   <div id="floating-player-modal">
@@ -1019,27 +1286,59 @@
     </div>
   </div>
 
-  <!-- 5. 저장 탭 용량 관리 & Firebase 연결 설정 모달 -->
+  <!-- 5. 설정 모달 (상단 확장 탭: 검색 / 로그인 + 추후 확장 탭) -->
   <div id="manage-modal-overlay">
     <div class="manage-modal-box">
-      <div class="manage-header">
-        <span class="manage-title">저장 탭 용량 관리 (최대 300개/탭)</span>
-        <span id="fbConnBadge" style="font-size:10px; color:#facc15;">임시 로컬 모드</span>
-      </div>
-      <div class="manage-sub" id="manageSubDesc">Firebase 키 연결 전에는 임시 로컬 저장소로 자동 동작하며, 연결 시 PC/모바일 클라우드 동기화로 전환됩니다.</div>
-
-      <div class="manage-list" id="manageTabList">
-        <div style="font-size:11px; color:#777; text-align:center; padding:12px 0;">저장된 탭이 없습니다.</div>
+      <div class="settings-tabs-header">
+        <div class="settings-tabs-nav" id="settingsTabsNav">
+          <button type="button" class="settings-tab-btn active" data-stab="search" onclick="switchSettingsTab('search')">검색</button>
+          <button type="button" class="settings-tab-btn" data-stab="auth" onclick="switchSettingsTab('auth')">로그인</button>
+        </div>
+        <button type="button" class="settings-x-btn" onclick="closeManageModal()" title="닫기">✕</button>
       </div>
 
-      <div class="fb-config-section">
-        <div class="fb-config-label">Firebase Config (콘솔 코드 그대로 붙여넣어 즉시 연결 가능)</div>
-        <textarea id="fbConfigInput" class="fb-config-textarea" placeholder='{"apiKey":"...","authDomain":"...","projectId":"..."}'></textarea>
-        <div class="manage-btn-row">
-          <button class="manage-save-btn" onclick="saveFirebaseConfigFromUI()">Firebase 연결 저장</button>
-          <button class="manage-close-btn" onclick="closeManageModal()">닫기</button>
+      <!-- 탭 1: 검색 목록 관리 -->
+      <div class="settings-pane active" id="settings-pane-search">
+        <div class="manage-list" id="manageTabList"></div>
+      </div>
+
+      <!-- 탭 2: 로그인 / 사용자 플레이정보 / 관리자 기능 -->
+      <div class="settings-pane" id="settings-pane-auth">
+        <div class="auth-profile-card">
+          <div>
+            <div>
+              <span class="auth-role-badge" id="authRoleBadge">계정</span>
+              <span class="auth-user-name" id="authUserNameDisplay">-</span>
+            </div>
+            <div class="auth-stats-row" id="authUserStats">검색 탭 0 · 고정 0 · 최근재생 0</div>
+          </div>
+          <button type="button" class="mini-btn danger" onclick="logoutUser()">로그아웃</button>
+        </div>
+
+        <div class="settings-sec-title">최근 플레이 정보</div>
+        <div class="play-history-list" id="userPlayHistoryList"></div>
+
+        <!-- 관리자 전용 구역 -->
+        <div class="admin-divider" id="adminOnlySection" style="display:none;">
+          <div class="settings-sec-title">관리자 비밀번호 변경</div>
+          <div class="auth-form-row">
+            <input type="text" id="newAdminCodeInput" class="auth-form-input" placeholder="새 관리자 코드">
+            <button type="button" class="auth-form-btn" onclick="changeAdminPassword()">변경</button>
+          </div>
+
+          <div class="settings-sec-title">사용자 등록</div>
+          <div class="auth-form-row">
+            <input type="text" id="newUserNameInput" class="auth-form-input" placeholder="이름">
+            <input type="text" id="newUserCodeInput" class="auth-form-input" placeholder="접속 코드">
+            <button type="button" class="auth-form-btn" onclick="registerNewUser()">등록</button>
+          </div>
+
+          <div class="settings-sec-title">등록된 사용자</div>
+          <div class="manage-list" id="adminUsersList" style="max-height:150px;"></div>
         </div>
       </div>
+
+      <button type="button" class="manage-close-btn" onclick="closeManageModal()">닫기</button>
     </div>
   </div>
 
@@ -1067,8 +1366,6 @@
     const savedTabsList = document.getElementById('savedTabsList');
     const manageOverlay = document.getElementById('manage-modal-overlay');
     const manageTabList = document.getElementById('manageTabList');
-    const fbConfigInput = document.getElementById('fbConfigInput');
-    const fbConnBadge = document.getElementById('fbConnBadge');
 
     const mp3Overlay = document.getElementById('mp3-modal-overlay');
     const mp3TrackTitle = document.getElementById('mp3TrackTitle');
@@ -1076,14 +1373,12 @@
     const directStreamBtn = document.getElementById('directStreamBtn');
 
     const TARGET_COUNT = 100;
-    const MAX_TAB_ITEMS = 300; // 탭당 최대 저장 개수 (용량 제한)
-    const BASE_STAGE_WIDTH = 800; // 기준 해상도 800x450 (16:9)
+    const MAX_TAB_ITEMS = 300;
+    const BASE_STAGE_WIDTH = 800;
     const FB_COLLECTION = 'tube_search_tabs';
-    const FB_CONFIG_STORAGE_KEY = 'tube_audio_lab_fb_config_v2';
-    const TEMP_LOCAL_TABS_KEY = 'tube_audio_lab_temp_tabs_v2';
     const FALLBACK_THUMB = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='68' viewBox='0 0 120 68'%3E%3Crect width='120' height='68' fill='%23222'/%3E%3Ctext x='50%25' y='52%25' fill='%23666' font-size='10' text-anchor='middle' dominant-baseline='middle'%3ENo Image%3C/text%3E%3C/svg%3E";
 
-    // 패처에서 주입된 Firebase Config (비어 있으면 임시 로컬 모드로 자동 동작)
+    // 항상 Firebase 자동 연결 고정 Config
     const DEFAULT_FIREBASE_CONFIG = {
       "apiKey": "AIzaSyBJdTUdDEvC6cyC15C80n8iNQj_Pl74iII",
       "authDomain": "tube-cdn.firebaseapp.com",
@@ -1093,18 +1388,52 @@
       "appId": "1:892351379651:web:ae4e8e40dfc55c933e4a76"
     };
 
-    // TUBE_LAB_V3_FILTER_STAR_PATCH
-    // TUBE_LAB_V6_SPEED_OPT_PATCH
+    // TUBE_LAB_V7_AUTH_LAYOUT_PATCH
+    const AUTH_DOC_ID = '__system_auth__';
     const PIN_DOC_ID = '__system_pins__';
     const TABS_INDEX_DOC_ID = '__tabs_index__';
+    const DEFAULT_ADMIN_CODE = '0000';
+    const SESSION_STORAGE_KEY = 'tube_audio_lab_session_v7';
+    const AUTH_CACHE_KEY = 'tube_audio_lab_auth_cache_v7';
+    const LAYOUT_STORAGE_KEY = 'tube_audio_lab_layout_v7';
     const TEMP_LOCAL_PINS_KEY = 'tube_audio_lab_pins_v3';
-    const TAB_CACHE_PREFIX = 'tube_tab_cache_v6_';
-    const FILTER_LABELS = { recent: '최근순', korean: '한글정렬', size: '크기순', views: '조회순' };
-    const memoryTabCache = new Map(); // docId -> { updatedAt, items }
+    const TAB_CACHE_PREFIX = 'tube_tab_cache_v7_';
+    const PLAY_HISTORY_LOCAL_PREFIX = 'tube_play_hist_v7_';
+    const FILTER_LABELS = { recent: '최근순', korean: '한글정렬', size: '크기순', views: '조회순', hq: '고화질순' };
+    const memoryTabCache = new Map();
 
-    // 썸네일 URL을 DB에 저장하지 않고 videoId만으로 구글 공식 초고속 CDN 직결 (장당 ~12KB)
+    // 인증/사용자/레이아웃 상태
+    let authData = { adminCode: DEFAULT_ADMIN_CODE, users: [] };
+    let currentUser = null;
+    let currentPlayHistory = [];
+    let currentFeedMode = 'grid'; // 'list' | 'grid'
+    let currentGridCols = 4;      // 2 | 3 | 4
+
+    function isAdminUser() { return !!(currentUser && currentUser.role === 'admin'); }
+    function getUid() { return currentUser ? currentUser.id : 'guest'; }
+    function getTabsIndexDocId() { return isAdminUser() ? TABS_INDEX_DOC_ID : `__u_${getUid()}__tabs_index__`; }
+    function getPinsDocId() { return isAdminUser() ? PIN_DOC_ID : `__u_${getUid()}__pins__`; }
+    function getPlayInfoDocId() { return `__u_${getUid()}__play_info__`; }
+    function getSearchTabDocId(keyword) {
+      const base = sanitizeDocId(keyword);
+      return isAdminUser() ? base : `u_${getUid()}__${base}`;
+    }
+    function getTabCacheStorageKey(docId) { return `${TAB_CACHE_PREFIX}${getUid()}_${docId}`; }
+    function getLocalPinsStorageKey() { return `${TEMP_LOCAL_PINS_KEY}_${getUid()}`; }
+
     function getFastThumbUrl(videoId) {
       return videoId ? `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg` : FALLBACK_THUMB;
+    }
+
+    function computeQualityScore(title, item) {
+      if (item && typeof item.q === 'number' && item.q > 0) return item.q;
+      const text = String(title || '') + ' ' + String((item && item.shortDescription) || '');
+      if (/\b(8k|4320p)\b/i.test(text)) return 6;
+      if (/\b(4k|2160p|uhd|ultra\s*hd)\b/i.test(text)) return 5;
+      if (/\b(2k|1440p|qhd)\b/i.test(text)) return 4;
+      if (/\b(1080p|fhd|full\s*hd|hi-?res|flac|lossless|remaster|dolby|320k)\b/i.test(text)) return 3;
+      if (/\b(720p|hd|hq|high\s*quality|official|mv|m\/v|live)\b/i.test(text)) return 2;
+      return 1;
     }
 
     function stripThumbField(items) {
@@ -1113,18 +1442,20 @@
         t: it.t || '',
         u: Number(it.u || 0) || 0,
         d: Number(it.d || 0) || 0,
-        v: Number(it.v || 0) || 0
+        v: Number(it.v || 0) || 0,
+        q: computeQualityScore(it.t || '', it)
       })).filter(it => it.id);
     }
 
     function getCachedTab(docId) {
-      if (memoryTabCache.has(docId)) return memoryTabCache.get(docId);
+      const memKey = `${getUid()}_${docId}`;
+      if (memoryTabCache.has(memKey)) return memoryTabCache.get(memKey);
       try {
-        const raw = localStorage.getItem(TAB_CACHE_PREFIX + docId);
+        const raw = localStorage.getItem(getTabCacheStorageKey(docId));
         if (raw) {
           const parsed = JSON.parse(raw);
           if (parsed && Array.isArray(parsed.items)) {
-            memoryTabCache.set(docId, parsed);
+            memoryTabCache.set(memKey, parsed);
             return parsed;
           }
         }
@@ -1133,28 +1464,28 @@
     }
 
     function setCachedTab(docId, updatedAt, items) {
+      const memKey = `${getUid()}_${docId}`;
       const entry = { updatedAt: updatedAt || Date.now(), items: stripThumbField(items) };
-      memoryTabCache.set(docId, entry);
+      memoryTabCache.set(memKey, entry);
       try {
-        localStorage.setItem(TAB_CACHE_PREFIX + docId, JSON.stringify(entry));
+        localStorage.setItem(getTabCacheStorageKey(docId), JSON.stringify(entry));
       } catch (e) {
-        // 기기 로컬 캐시 공간 부족 시 오래된 캐시 1건 정리 후 재시도 (오류 무발생)
         try {
           for (let i = 0; i < localStorage.length; i++) {
             const k = localStorage.key(i);
-            if (k && k.startsWith(TAB_CACHE_PREFIX) && k !== (TAB_CACHE_PREFIX + docId)) {
+            if (k && k.startsWith(TAB_CACHE_PREFIX) && k !== getTabCacheStorageKey(docId)) {
               localStorage.removeItem(k);
               break;
             }
           }
-          localStorage.setItem(TAB_CACHE_PREFIX + docId, JSON.stringify(entry));
+          localStorage.setItem(getTabCacheStorageKey(docId), JSON.stringify(entry));
         } catch (err) {}
       }
     }
 
     function removeCachedTab(docId) {
-      memoryTabCache.delete(docId);
-      try { localStorage.removeItem(TAB_CACHE_PREFIX + docId); } catch (e) {}
+      memoryTabCache.delete(`${getUid()}_${docId}`);
+      try { localStorage.removeItem(getTabCacheStorageKey(docId)); } catch (e) {}
     }
 
     let db = null;
@@ -1310,10 +1641,10 @@
       } else {
         btn.classList.remove('has-active');
         label.textContent = '▾ 조건';
-        hint.textContent = '기본 검색순';
+        hint.textContent = '기본순';
       }
 
-      ['recent', 'korean', 'size', 'views'].forEach(key => {
+      ['recent', 'korean', 'size', 'views', 'hq'].forEach(key => {
         const lbl = document.getElementById(`fLabel-${key}`);
         if (!lbl) return;
         const checked = activeFilterOrder.includes(key);
@@ -1344,10 +1675,68 @@
       }
     }
 
-    // 별표(★) 최상단 고정 저장/로드 (기존 Firestore 규칙 무수정 호환: __system_pins__)
-    function loadLocalPinsImmediate() {
+    // 피드 레이아웃 전환 (목록 1열 / 창 2->3->4 순환)
+    function applyFeedLayoutUI() {
+      resultsContainer.classList.remove('cols-1', 'cols-2', 'cols-3', 'cols-4');
+      const listBtn = document.getElementById('listModeBtn');
+      const gridBtn = document.getElementById('gridModeBtn');
+      const colNum = document.getElementById('gridColNum');
+
+      if (currentFeedMode === 'list') {
+        resultsContainer.classList.add('cols-1');
+        if (listBtn) listBtn.classList.add('active');
+        if (gridBtn) gridBtn.classList.remove('active');
+      } else {
+        resultsContainer.classList.add(`cols-${currentGridCols}`);
+        if (listBtn) listBtn.classList.remove('active');
+        if (gridBtn) gridBtn.classList.add('active');
+      }
+      if (colNum) colNum.textContent = String(currentGridCols);
+
       try {
-        const raw = localStorage.getItem(TEMP_LOCAL_PINS_KEY);
+        localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify({
+          mode: currentFeedMode,
+          cols: currentGridCols
+        }));
+      } catch (e) {}
+    }
+
+    function initFeedLayoutMode() {
+      try {
+        const raw = localStorage.getItem(LAYOUT_STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && (parsed.mode === 'list' || parsed.mode === 'grid')) {
+            currentFeedMode = parsed.mode;
+          }
+          if (parsed && [2, 3, 4].includes(Number(parsed.cols))) {
+            currentGridCols = Number(parsed.cols);
+          }
+        }
+      } catch (e) {}
+      applyFeedLayoutUI();
+    }
+
+    function setFeedListMode() {
+      currentFeedMode = 'list';
+      applyFeedLayoutUI();
+    }
+
+    function cycleFeedGridCols() {
+      if (currentFeedMode === 'list') {
+        currentFeedMode = 'grid';
+        currentGridCols = 2; // 목록에서 창 터치 시 2개부터 시작
+      } else {
+        currentGridCols = currentGridCols >= 4 ? 2 : (currentGridCols + 1); // 2 -> 3 -> 4 -> 2
+      }
+      applyFeedLayoutUI();
+    }
+
+    // 별표(★) 최상단 고정 저장/로드 (사용자별 분리)
+    function loadLocalPinsImmediate() {
+      pinnedVideoIds = new Set();
+      try {
+        const raw = localStorage.getItem(getLocalPinsStorageKey());
         if (raw) {
           const arr = JSON.parse(raw);
           if (Array.isArray(arr)) pinnedVideoIds = new Set(arr);
@@ -1357,14 +1746,14 @@
 
     function saveLocalPinsOnly() {
       try {
-        localStorage.setItem(TEMP_LOCAL_PINS_KEY, JSON.stringify(Array.from(pinnedVideoIds).slice(0, MAX_TAB_ITEMS)));
+        localStorage.setItem(getLocalPinsStorageKey(), JSON.stringify(Array.from(pinnedVideoIds).slice(0, MAX_TAB_ITEMS)));
       } catch (e) {}
     }
 
     async function syncPinsFromFirebase() {
-      if (!fbReady || !db) return;
+      if (!fbReady || !db || !currentUser) return;
       try {
-        const snap = await db.collection(FB_COLLECTION).doc(PIN_DOC_ID).get();
+        const snap = await db.collection(FB_COLLECTION).doc(getPinsDocId()).get();
         if (snap.exists && Array.isArray(snap.data().items)) {
           const ids = snap.data().items.map(it => it && it.id).filter(Boolean);
           pinnedVideoIds = new Set(ids);
@@ -1378,11 +1767,11 @@
 
     async function savePinsToCloud() {
       saveLocalPinsOnly();
-      if (!fbReady || !db) return;
+      if (!fbReady || !db || !currentUser) return;
       try {
         const pinList = Array.from(pinnedVideoIds).slice(0, MAX_TAB_ITEMS).map(id => ({ id }));
-        await db.collection(FB_COLLECTION).doc(PIN_DOC_ID).set({
-          keyword: PIN_DOC_ID,
+        await db.collection(FB_COLLECTION).doc(getPinsDocId()).set({
+          keyword: getPinsDocId(),
           updatedAt: Date.now(),
           items: pinList
         });
@@ -1402,10 +1791,10 @@
       renderSortedFeed();
     }
 
-    // 3. 100개 검색 수집 (v6: 1페이지 즉시 표시 + 수집 중 DOM 중복 재렌더링 제거 + 비동기 초경량 저장)
+    // 3. 100개 검색 수집
     async function startSearch() {
       const q = document.getElementById('query').value.trim();
-      if (!q || isSearching) return;
+      if (!q || isSearching || !currentUser) return;
 
       closeFilterPanel();
       isSearching = true;
@@ -1416,12 +1805,12 @@
       activeTabKeyword = '';
       renderSavedTabsBar();
       resultsContainer.innerHTML = '';
-      statusMsg.innerText = "검색 수집 중...";
-      countMsg.innerText = "(0/100)";
+      statusMsg.innerText = '';
+      countMsg.innerText = `0/${TARGET_COUNT}`;
 
       try {
         let { data, server } = await smartFetch(`/search?q=${encodeURIComponent(q)}&filter=videos`);
-        appendGrid(data.items, false, false); // 첫 페이지는 즉시 화면에 노출
+        appendGrid(data.items, false, false);
 
         let nextPage = data.nextpage;
         while (nextPage && totalLoadedItems < TARGET_COUNT) {
@@ -1430,21 +1819,17 @@
             const nextRes = await fetch(`${server}${nextPath}`);
             const nextData = await nextRes.json();
             if (!nextData.items || nextData.items.length === 0) break;
-            appendGrid(nextData.items, false, true); // 후속 페이지는 메모리에만 빠르게 누적 (DOM 깜박임 제거)
+            appendGrid(nextData.items, false, true);
             nextPage = nextData.nextpage;
           } catch (e) { break; }
         }
 
-        // 조건검색 + 별표 기준 1회 일괄 최종 렌더링
         renderSortedFeed();
-        const condNote = activeFilterOrder.length > 0
-          ? ` (${activeFilterOrder.map(k => FILTER_LABELS[k]).join('·')})`
-          : '';
-        statusMsg.innerText = `검색 완료${condNote}`;
-        countMsg.innerText = `총 ${totalLoadedItems}개`;
+        statusMsg.innerText = '';
+        countMsg.innerText = `${totalLoadedItems}`;
 
         if (currentSearchCollected.length > 0) {
-          saveSearchTab(q, currentSearchCollected); // 백그라운드 논블로킹 저장
+          saveSearchTab(q, currentSearchCollected);
         }
       } catch (err) {
         statusMsg.innerText = err.message;
@@ -1453,7 +1838,7 @@
       }
     }
 
-    // 4. 데이터 수집 + 통합 정렬 렌더링 (v6: th URL 저장 완전 제거 -> 구글 CDN 직결)
+    // 4. 데이터 수집 + 통합 정렬 렌더링 (고화질순 q 점수 포함)
     function appendGrid(items, isFromCache = false, deferRender = false) {
       if (!items || !items.length) return;
       const limit = isFromCache ? MAX_TAB_ITEMS : TARGET_COUNT;
@@ -1468,10 +1853,10 @@
         const uploaded = Number(item.u !== undefined ? item.u : (item.uploaded > 0 ? item.uploaded : 0)) || 0;
         const duration = Number(item.d !== undefined ? item.d : (item.duration > 0 ? item.duration : 0)) || 0;
         const views = Number(item.v !== undefined ? item.v : (item.views > 0 ? item.views : 0)) || 0;
+        const quality = computeQualityScore(title, item);
 
         totalLoadedItems++;
-        // th(썸네일 URL) 미저장으로 Firebase 용량·전송량 60% 절감!
-        const compactObj = { id: videoId, t: title, u: uploaded, d: duration, v: views };
+        const compactObj = { id: videoId, t: title, u: uploaded, d: duration, v: views, q: quality };
 
         if (!isFromCache) {
           currentSearchCollected.push(compactObj);
@@ -1485,7 +1870,7 @@
       });
 
       if (deferRender) {
-        countMsg.innerText = `(${currentFeedItems.length}/${TARGET_COUNT})`;
+        countMsg.innerText = `${currentFeedItems.length}/${TARGET_COUNT}`;
       } else {
         renderSortedFeed();
       }
@@ -1500,22 +1885,20 @@
 
     function renderSortedFeed() {
       const sorted = [...currentFeedItems].sort((a, b) => {
-        // 1순위: 흰색 별표(★) 체크된 영상은 무조건 최상단 배치
         const aPin = pinnedVideoIds.has(a.id) ? 1 : 0;
         const bPin = pinnedVideoIds.has(b.id) ? 1 : 0;
         if (aPin !== bPin) return bPin - aPin;
 
-        // 2순위: 사용자가 체크한 조건 순서대로 정렬
         for (const cond of activeFilterOrder) {
           let diff = 0;
           if (cond === 'recent') diff = (b.u || 0) - (a.u || 0);
           else if (cond === 'korean') diff = compareKoreanTitle(a._clean, b._clean);
           else if (cond === 'size') diff = (b.d || 0) - (a.d || 0);
           else if (cond === 'views') diff = (b.v || 0) - (a.v || 0);
+          else if (cond === 'hq') diff = (b.q || computeQualityScore(b.t)) - (a.q || computeQualityScore(a.t));
           if (diff !== 0) return diff;
         }
 
-        // 3순위: 원래 검색 순위 유지
         return (a._idx || 0) - (b._idx || 0);
       });
 
@@ -1538,7 +1921,6 @@
         img.onerror = function() { this.onerror = null; this.src = FALLBACK_THUMB; };
         thumbWrap.appendChild(img);
 
-        // 우측 상단 작은 흰색 별표 체크박스 버튼
         const starBtn = document.createElement('button');
         starBtn.type = 'button';
         starBtn.className = 'star-pin-btn' + (isPinned ? ' pinned' : '');
@@ -1564,9 +1946,9 @@
       });
 
       resultsContainer.appendChild(frag);
-      countMsg.innerText = currentFeedIsCache
-        ? `총 ${currentFeedItems.length}개 (최대 ${MAX_TAB_ITEMS})`
-        : (isSearching ? `(${currentFeedItems.length}/${TARGET_COUNT})` : `총 ${currentFeedItems.length}개`);
+      countMsg.innerText = isSearching
+        ? `${currentFeedItems.length}/${TARGET_COUNT}`
+        : (currentFeedItems.length > 0 ? `${currentFeedItems.length}` : '');
     }
 
     // TUBE_LAB_V5_IOS_BG_PATCH
@@ -1891,96 +2273,221 @@
 
       setupMediaSession(title, videoId);
       prefetchPromise = prefetchBgAudio(videoId);
+      recordUserPlay(videoId, title);
     }
 
-    // 5-2. Firebase / 임시 로컬 듀얼 저장소 엔진 (300개 캡 + 즉시 로드 + 용량 정리)
-    function parseFirebaseConfigInput(rawText) {
-      if (!rawText || !rawText.trim()) return null;
+    // 5-2. Firebase 상시 자동 연결 + 로그인 인증 + 사용자별 검색/플레이 정보 엔진
+    function initFirebaseAlways() {
+      if (typeof firebase === 'undefined') {
+        fbReady = false;
+        db = null;
+        return;
+      }
       try {
-        const parsed = JSON.parse(rawText);
-        if (parsed && parsed.apiKey && parsed.projectId) return parsed;
-      } catch (e) { /* 콘솔 JS 객체 형식 파싱 시도 */ }
-
-      const keys = ['apiKey', 'authDomain', 'projectId', 'storageBucket', 'messagingSenderId', 'appId'];
-      const extracted = {};
-      keys.forEach(k => {
-        const re = new RegExp(`["']?${k}["']?\\s*:\\s*["']([^"']+)["']`);
-        const m = rawText.match(re);
-        if (m) extracted[k] = m[1];
-      });
-      return (extracted.apiKey && extracted.projectId) ? extracted : null;
+        if (!firebase.apps || firebase.apps.length === 0) {
+          firebase.initializeApp(DEFAULT_FIREBASE_CONFIG);
+        }
+        db = firebase.firestore();
+        fbReady = true;
+      } catch (err) {
+        console.error('[Firebase 연결 오류]', err);
+        fbReady = false;
+        db = null;
+      }
     }
 
-    function getActiveFirebaseConfig() {
+    function loadLocalAuthCache() {
       try {
-        const saved = localStorage.getItem(FB_CONFIG_STORAGE_KEY);
-        if (saved) {
-          const cfg = JSON.parse(saved);
-          if (cfg && cfg.apiKey && cfg.projectId) return cfg;
+        const raw = localStorage.getItem(AUTH_CACHE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.adminCode) {
+            authData = {
+              adminCode: String(parsed.adminCode),
+              users: Array.isArray(parsed.users) ? parsed.users : []
+            };
+          }
         }
       } catch (e) {}
-      if (DEFAULT_FIREBASE_CONFIG && DEFAULT_FIREBASE_CONFIG.apiKey && DEFAULT_FIREBASE_CONFIG.projectId) {
-        return DEFAULT_FIREBASE_CONFIG;
+    }
+
+    function saveLocalAuthCache() {
+      try { localStorage.setItem(AUTH_CACHE_KEY, JSON.stringify(authData)); } catch (e) {}
+    }
+
+    async function loadAuthConfigFromCloud() {
+      loadLocalAuthCache();
+      if (!fbReady || !db) return;
+      try {
+        const snap = await db.collection(FB_COLLECTION).doc(AUTH_DOC_ID).get();
+        if (snap.exists) {
+          const d = snap.data();
+          authData = {
+            adminCode: String(d.adminCode || DEFAULT_ADMIN_CODE),
+            users: Array.isArray(d.users) ? d.users : []
+          };
+          saveLocalAuthCache();
+        } else {
+          await saveAuthConfigToCloud();
+        }
+      } catch (err) {
+        console.warn('[인증 정보 로드 지연]', err);
+      }
+    }
+
+    async function saveAuthConfigToCloud() {
+      saveLocalAuthCache();
+      if (!fbReady || !db) return;
+      try {
+        await db.collection(FB_COLLECTION).doc(AUTH_DOC_ID).set({
+          keyword: AUTH_DOC_ID,
+          adminCode: authData.adminCode,
+          users: authData.users,
+          updatedAt: Date.now()
+        });
+      } catch (err) {
+        console.warn('[인증 정보 저장 실패]', err);
+      }
+    }
+
+    function findUserByCode(code) {
+      const clean = String(code || '').trim();
+      if (!clean) return null;
+      if (clean === String(authData.adminCode || DEFAULT_ADMIN_CODE)) {
+        return { role: 'admin', id: 'admin', name: '관리자', code: clean };
+      }
+      const matched = (authData.users || []).find(u => u && String(u.code) === clean);
+      if (matched) {
+        return { role: 'user', id: matched.id, name: matched.name || matched.id, code: matched.code };
       }
       return null;
     }
 
-    function initFirebase() {
-      const cfg = getActiveFirebaseConfig();
-      if (!cfg || typeof firebase === 'undefined') {
-        fbReady = false;
-        db = null;
-        if (fbConnBadge) {
-          fbConnBadge.textContent = '임시 로컬 모드';
-          fbConnBadge.style.color = '#facc15';
-        }
-        loadSavedTabsMeta();
-        return;
-      }
-
-      try {
-        if (firebase.apps && firebase.apps.length > 0) {
-          const existing = firebase.app();
-          if (existing.options.projectId !== cfg.projectId || existing.options.apiKey !== cfg.apiKey) {
-            existing.delete().then(() => {
-              firebase.initializeApp(cfg);
-              db = firebase.firestore();
-              fbReady = true;
-              onFirebaseConnected();
-            });
-            return;
-          }
-          db = firebase.firestore();
-        } else {
-          firebase.initializeApp(cfg);
-          db = firebase.firestore();
-        }
-        fbReady = true;
-        onFirebaseConnected();
-      } catch (err) {
-        console.error('[Firebase 초기화 실패 -> 임시 로컬 폴백]', err);
-        fbReady = false;
-        db = null;
-        if (fbConnBadge) {
-          fbConnBadge.textContent = '연결 오류(임시로컬)';
-          fbConnBadge.style.color = '#ff7777';
-        }
-        loadSavedTabsMeta();
+    function showAuthGate(errText = '') {
+      document.body.classList.add('auth-locked');
+      const inp = document.getElementById('authCodeInput');
+      const errEl = document.getElementById('authGateErr');
+      if (errEl) errEl.textContent = errText;
+      if (inp) {
+        inp.value = '';
+        setTimeout(() => inp.focus(), 60);
       }
     }
 
-    function onFirebaseConnected() {
-      if (fbConnBadge) {
-        fbConnBadge.textContent = 'Firebase 연결됨';
-        fbConnBadge.style.color = '#4ade80';
+    async function submitAuthCode() {
+      const inp = document.getElementById('authCodeInput');
+      const errEl = document.getElementById('authGateErr');
+      const code = inp ? inp.value.trim() : '';
+      if (!code) {
+        if (errEl) errEl.textContent = '코드를 입력하세요';
+        return;
       }
+      if (errEl) errEl.textContent = '';
+
+      // 최신 클라우드 인증 정보 재확인 후 검증
+      await loadAuthConfigFromCloud();
+      const user = findUserByCode(code);
+      if (!user) {
+        if (errEl) errEl.textContent = '유효하지 않은 코드입니다';
+        if (inp) { inp.value = ''; inp.focus(); }
+        return;
+      }
+      enterAppWithUser(user);
+    }
+
+    function enterAppWithUser(user) {
+      currentUser = user;
+      try {
+        localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({
+          id: user.id,
+          role: user.role,
+          code: user.code
+        }));
+      } catch (e) {}
+
+      document.body.classList.remove('auth-locked');
+      activeTabKeyword = '';
+      currentFeedItems = [];
+      totalLoadedItems = 0;
+      resultsContainer.innerHTML = '';
+      document.getElementById('query').value = '';
+      statusMsg.innerText = '';
+      countMsg.innerText = '';
+
+      loadLocalPinsImmediate();
+      loadUserPlayHistory();
       syncPinsFromFirebase();
       loadSavedTabsMeta();
     }
 
-    // 초경량 목차 문서(__tabs_index__) 동기화 (기존 Firestore 규칙 100% 호환)
+    function logoutUser() {
+      closePlayerModal();
+      closeManageModal();
+      currentUser = null;
+      cachedTabsMeta = [];
+      currentFeedItems = [];
+      currentPlayHistory = [];
+      pinnedVideoIds = new Set();
+      memoryTabCache.clear();
+      activeTabKeyword = '';
+      resultsContainer.innerHTML = '';
+      savedTabsList.innerHTML = '';
+      document.getElementById('query').value = '';
+      statusMsg.innerText = '';
+      countMsg.innerText = '';
+      try { localStorage.removeItem(SESSION_STORAGE_KEY); } catch (e) {}
+      showAuthGate('');
+    }
+
+    // 사용자별 플레이 정보(최근 재생 이력) 저장/로드
+    async function loadUserPlayHistory() {
+      currentPlayHistory = [];
+      if (!currentUser) return;
+      try {
+        const raw = localStorage.getItem(PLAY_HISTORY_LOCAL_PREFIX + getUid());
+        if (raw) {
+          const arr = JSON.parse(raw);
+          if (Array.isArray(arr)) currentPlayHistory = arr;
+        }
+      } catch (e) {}
+
+      if (fbReady && db) {
+        try {
+          const snap = await db.collection(FB_COLLECTION).doc(getPlayInfoDocId()).get();
+          if (snap.exists && Array.isArray(snap.data().items)) {
+            currentPlayHistory = snap.data().items;
+            localStorage.setItem(PLAY_HISTORY_LOCAL_PREFIX + getUid(), JSON.stringify(currentPlayHistory));
+          }
+        } catch (err) {}
+      }
+    }
+
+    async function recordUserPlay(videoId, title) {
+      if (!currentUser || !videoId) return;
+      const cleanTitle = simplifyTitle(title);
+      currentPlayHistory = [
+        { id: videoId, t: cleanTitle, at: Date.now() },
+        ...currentPlayHistory.filter(it => it && it.id !== videoId)
+      ].slice(0, 30);
+
+      try {
+        localStorage.setItem(PLAY_HISTORY_LOCAL_PREFIX + getUid(), JSON.stringify(currentPlayHistory));
+      } catch (e) {}
+
+      if (fbReady && db) {
+        try {
+          await db.collection(FB_COLLECTION).doc(getPlayInfoDocId()).set({
+            keyword: getPlayInfoDocId(),
+            updatedAt: Date.now(),
+            items: currentPlayHistory
+          });
+        } catch (err) {}
+      }
+    }
+
+    // 초경량 목차 문서 동기화 (사용자별 독립)
     async function syncTabsIndexToCloud() {
-      if (!fbReady || !db) return;
+      if (!fbReady || !db || !currentUser) return;
       try {
         const indexItems = cachedTabsMeta.slice(0, MAX_TAB_ITEMS).map(t => ({
           docId: t.docId,
@@ -1988,8 +2495,8 @@
           cnt: t.count,
           at: t.updatedAt || Date.now()
         }));
-        await db.collection(FB_COLLECTION).doc(TABS_INDEX_DOC_ID).set({
-          keyword: TABS_INDEX_DOC_ID,
+        await db.collection(FB_COLLECTION).doc(getTabsIndexDocId()).set({
+          keyword: getTabsIndexDocId(),
           updatedAt: Date.now(),
           items: indexItems
         });
@@ -2005,15 +2512,15 @@
       if (manageOverlay.style.display === 'flex') renderManageList();
     }
 
-    // 앱 시작 시 1KB짜리 목차 문서 1건만 읽기 (전체 300곡 x N탭 다운로드 완전 제거!)
     async function loadSavedTabsMeta() {
       cachedTabsMeta = [];
-      if (fbReady && db) {
+      if (fbReady && db && currentUser) {
         try {
-          const idxSnap = await db.collection(FB_COLLECTION).doc(TABS_INDEX_DOC_ID).get();
+          const idxDocId = getTabsIndexDocId();
+          const idxSnap = await db.collection(FB_COLLECTION).doc(idxDocId).get();
           if (idxSnap.exists && Array.isArray(idxSnap.data().items)) {
             cachedTabsMeta = idxSnap.data().items
-              .filter(it => it && it.docId && it.docId !== PIN_DOC_ID && it.docId !== TABS_INDEX_DOC_ID)
+              .filter(it => it && it.docId && !String(it.docId).startsWith('__'))
               .map(it => ({
                 docId: it.docId,
                 keyword: it.kw || it.docId,
@@ -2021,11 +2528,11 @@
                 updatedAt: Number(it.at || 0)
               }))
               .sort((a, b) => b.updatedAt - a.updatedAt);
-          } else {
-            // 최초 1회 기존 탭 자동 목차화(마이그레이션) -> 이후엔 영구적으로 1KB만 읽음
+          } else if (isAdminUser()) {
+            // 관리자 최초 1회 기존 공용 탭 자동 목차화 (타 사용자 문서 u_ 제외)
             const snap = await db.collection(FB_COLLECTION).orderBy('updatedAt', 'desc').get();
             snap.forEach(doc => {
-              if (doc.id === PIN_DOC_ID || doc.id === TABS_INDEX_DOC_ID) return;
+              if (doc.id.startsWith('__') || doc.id.startsWith('u_')) return;
               const d = doc.data();
               const count = Array.isArray(d.items) ? d.items.length : 0;
               cachedTabsMeta.push({
@@ -2035,26 +2542,11 @@
                 updatedAt: d.updatedAt || 0
               });
             });
-            if (cachedTabsMeta.length > 0) {
-              syncTabsIndexToCloud();
-            }
+            if (cachedTabsMeta.length > 0) syncTabsIndexToCloud();
           }
         } catch (err) {
-          console.warn('[Firebase 목차 로드 실패]', err);
+          console.warn('[목차 로드 실패]', err);
         }
-      } else {
-        const localStore = loadTempLocalStore();
-        Object.keys(localStore).forEach(docId => {
-          const d = localStore[docId];
-          const count = Array.isArray(d.items) ? d.items.length : 0;
-          cachedTabsMeta.push({
-            docId: docId,
-            keyword: d.keyword || docId,
-            count: count,
-            updatedAt: d.updatedAt || 0
-          });
-        });
-        cachedTabsMeta.sort((a, b) => b.updatedAt - a.updatedAt);
       }
       renderSavedTabsBar();
       if (manageOverlay.style.display === 'flex') renderManageList();
@@ -2062,17 +2554,6 @@
 
     function renderSavedTabsBar() {
       savedTabsList.innerHTML = '';
-      if (cachedTabsMeta.length === 0) {
-        const span = document.createElement('span');
-        span.className = 'tabs-placeholder';
-        span.textContent = fbReady
-          ? '검색 시 Firebase 탭 자동 저장 (최대 300개/탭)'
-          : '임시 로컬 모드 · 검색 시 탭 자동 저장 (⚙에서 Firebase 연결)';
-        span.onclick = openManageModal;
-        savedTabsList.appendChild(span);
-        return;
-      }
-
       cachedTabsMeta.forEach(tab => {
         const btn = document.createElement('button');
         btn.className = 'history-tab' + (activeTabKeyword === tab.keyword ? ' active' : '');
@@ -2102,96 +2583,65 @@
     }
 
     async function saveSearchTab(keyword, newItems) {
-      const docId = sanitizeDocId(keyword);
+      if (!fbReady || !db || !currentUser) return;
+      const docId = getSearchTabDocId(keyword);
       const now = Date.now();
       const cleanNew = stripThumbField(newItems);
+      const docRef = db.collection(FB_COLLECTION).doc(docId);
 
-      if (fbReady && db) {
-        const docRef = db.collection(FB_COLLECTION).doc(docId);
-        try {
-          let existingItems = [];
-          const meta = cachedTabsMeta.find(t => t.docId === docId);
-          const cached = getCachedTab(docId);
+      try {
+        let existingItems = [];
+        const meta = cachedTabsMeta.find(t => t.docId === docId);
+        const cached = getCachedTab(docId);
 
-          if (cached && meta && cached.updatedAt >= meta.updatedAt) {
-            existingItems = cached.items;
-          } else if (meta) {
-            const snap = await docRef.get();
-            if (snap.exists && Array.isArray(snap.data().items)) {
-              existingItems = stripThumbField(snap.data().items);
-            }
+        if (cached && meta && cached.updatedAt >= meta.updatedAt) {
+          existingItems = cached.items;
+        } else if (meta) {
+          const snap = await docRef.get();
+          if (snap.exists && Array.isArray(snap.data().items)) {
+            existingItems = stripThumbField(snap.data().items);
           }
-
-          const trimmedItems = stripThumbField(mergeAndCapItems(cleanNew, existingItems));
-          activeTabKeyword = keyword;
-          setCachedTab(docId, now, trimmedItems);
-          upsertLocalMeta(docId, keyword, trimmedItems.length, now);
-
-          // 데이터 문서 + 1KB 목차 문서 병렬 저장 (전체 컬렉션 재읽기 없음!)
-          await Promise.all([
-            docRef.set({ keyword: keyword, updatedAt: now, items: trimmedItems }),
-            syncTabsIndexToCloud()
-          ]);
-          statusMsg.innerText = `검색 완료 · '${keyword}' 고속 저장 (${trimmedItems.length}/${MAX_TAB_ITEMS})`;
-        } catch (err) {
-          console.warn('[Firebase 저장 실패]', err);
         }
-      } else {
-        const localStore = loadTempLocalStore();
-        const existingItems = (localStore[docId] && Array.isArray(localStore[docId].items))
-          ? stripThumbField(localStore[docId].items)
-          : [];
+
         const trimmedItems = stripThumbField(mergeAndCapItems(cleanNew, existingItems));
-        localStore[docId] = { keyword: keyword, updatedAt: now, items: trimmedItems };
-        if (saveTempLocalStore(localStore)) {
-          activeTabKeyword = keyword;
-          upsertLocalMeta(docId, keyword, trimmedItems.length, now);
-          statusMsg.innerText = `검색 완료 · '${keyword}' 임시 저장 (${trimmedItems.length}/${MAX_TAB_ITEMS})`;
-        }
+        activeTabKeyword = keyword;
+        setCachedTab(docId, now, trimmedItems);
+        upsertLocalMeta(docId, keyword, trimmedItems.length, now);
+
+        await Promise.all([
+          docRef.set({ keyword: keyword, updatedAt: now, items: trimmedItems }),
+          syncTabsIndexToCloud()
+        ]);
+      } catch (err) {
+        console.warn('[저장 실패]', err);
       }
     }
 
     async function loadTabData(docId, keyword) {
-      if (isSearching) return;
+      if (isSearching || !fbReady || !db || !currentUser) return;
       let items = [];
-      let loadedFromCache = false;
+      const meta = cachedTabsMeta.find(t => t.docId === docId);
+      const cached = getCachedTab(docId);
 
-      if (fbReady && db) {
-        const meta = cachedTabsMeta.find(t => t.docId === docId);
-        const cached = getCachedTab(docId);
-
-        // 1순위: 기기 캐시가 최신이면 0.01초 즉시 표시 (DB 읽기 0회!)
-        if (cached && cached.items.length > 0 && (!meta || cached.updatedAt >= meta.updatedAt)) {
-          items = cached.items;
-          loadedFromCache = true;
-        } else {
-          statusMsg.innerText = `'${keyword}' 불러오는 중...`;
-          try {
-            const snap = await db.collection(FB_COLLECTION).doc(docId).get();
-            if (!snap.exists) {
-              removeCachedTab(docId);
-              cachedTabsMeta = cachedTabsMeta.filter(t => t.docId !== docId);
-              renderSavedTabsBar();
-              syncTabsIndexToCloud();
-              statusMsg.innerText = "저장된 탭 데이터를 찾을 수 없습니다.";
-              return;
-            }
-            const data = snap.data();
-            items = stripThumbField(Array.isArray(data.items) ? data.items : []);
-            setCachedTab(docId, data.updatedAt || Date.now(), items);
-          } catch (err) {
-            statusMsg.innerText = "DB 불러오기 실패 (권한/네트워크 확인)";
+      if (cached && cached.items.length > 0 && (!meta || cached.updatedAt >= meta.updatedAt)) {
+        items = cached.items;
+      } else {
+        try {
+          const snap = await db.collection(FB_COLLECTION).doc(docId).get();
+          if (!snap.exists) {
+            removeCachedTab(docId);
+            cachedTabsMeta = cachedTabsMeta.filter(t => t.docId !== docId);
+            renderSavedTabsBar();
+            syncTabsIndexToCloud();
             return;
           }
-        }
-      } else {
-        const localStore = loadTempLocalStore();
-        const entry = localStore[docId];
-        if (!entry) {
-          await loadSavedTabsMeta();
+          const data = snap.data();
+          items = stripThumbField(Array.isArray(data.items) ? data.items : []);
+          setCachedTab(docId, data.updatedAt || Date.now(), items);
+        } catch (err) {
+          statusMsg.innerText = '불러오기 실패';
           return;
         }
-        items = Array.isArray(entry.items) ? entry.items : [];
       }
 
       activeTabKeyword = keyword;
@@ -2201,26 +2651,38 @@
       resultsContainer.innerHTML = '';
       appendGrid(items, true, false);
       renderSavedTabsBar();
-      statusMsg.innerText = fbReady
-        ? (loadedFromCache ? `'${keyword}' 즉시 로드 (초고속 캐시)` : `'${keyword}' DB 로드 완료`)
-        : `'${keyword}' 임시 로컬 즉시 로드 완료`;
+      statusMsg.innerText = '';
     }
 
-    function openManageModal() {
-      const cfg = getActiveFirebaseConfig();
-      fbConfigInput.value = cfg ? JSON.stringify(cfg, null, 2) : '';
-      renderManageList();
+    // 설정 모달 상단 확장 탭 전환 컨트롤러
+    function openManageModal(tabName = 'search') {
       manageOverlay.style.display = 'flex';
+      switchSettingsTab(tabName);
     }
 
     function closeManageModal() {
       manageOverlay.style.display = 'none';
     }
 
+    function switchSettingsTab(tabName) {
+      document.querySelectorAll('.settings-tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-stab') === tabName);
+      });
+      document.querySelectorAll('.settings-pane').forEach(pane => {
+        pane.classList.toggle('active', pane.id === `settings-pane-${tabName}`);
+      });
+
+      if (tabName === 'search') {
+        renderManageList();
+      } else if (tabName === 'auth') {
+        renderAuthSettingsPane();
+      }
+    }
+
     function renderManageList() {
       manageTabList.innerHTML = '';
       if (cachedTabsMeta.length === 0) {
-        manageTabList.innerHTML = '<div style="font-size:11px; color:#888; text-align:center; padding:12px 0;">저장된 검색 탭이 없습니다.</div>';
+        manageTabList.innerHTML = '<div style="font-size:11px; color:#888; text-align:center; padding:16px 0;">저장된 검색 목록이 없습니다.</div>';
         return;
       }
 
@@ -2230,12 +2692,17 @@
 
         const info = document.createElement('div');
         info.className = 'manage-item-info';
+        info.style.cursor = 'pointer';
+        info.onclick = () => {
+          closeManageModal();
+          loadTabData(tab.docId, tab.keyword);
+        };
         const nameEl = document.createElement('div');
         nameEl.className = 'manage-item-name';
         nameEl.textContent = tab.keyword;
         const metaEl = document.createElement('div');
         metaEl.className = 'manage-item-meta';
-        metaEl.textContent = `저장됨: ${tab.count} / ${MAX_TAB_ITEMS}개 (${fbReady ? 'Firebase' : '임시로컬'})`;
+        metaEl.textContent = `${tab.count} / ${MAX_TAB_ITEMS}`;
         info.appendChild(nameEl);
         info.appendChild(metaEl);
 
@@ -2261,86 +2728,212 @@
       });
     }
 
-    async function trimTabHalf(docId, keyword) {
-      const now = Date.now();
-      if (fbReady && db) {
-        try {
-          const docRef = db.collection(FB_COLLECTION).doc(docId);
-          const cached = getCachedTab(docId);
-          let items = cached ? cached.items : null;
-          if (!items) {
-            const snap = await docRef.get();
-            if (!snap.exists) return;
-            items = Array.isArray(snap.data().items) ? snap.data().items : [];
-          }
-          const keepCount = Math.max(10, Math.floor(items.length / 2));
-          const trimmed = stripThumbField(items.slice(0, keepCount));
+    function renderAuthSettingsPane() {
+      const roleBadge = document.getElementById('authRoleBadge');
+      const nameDisp = document.getElementById('authUserNameDisplay');
+      const statsEl = document.getElementById('authUserStats');
+      const histList = document.getElementById('userPlayHistoryList');
+      const adminSec = document.getElementById('adminOnlySection');
 
-          setCachedTab(docId, now, trimmed);
-          upsertLocalMeta(docId, keyword, trimmed.length, now);
-          await Promise.all([
-            docRef.update({ items: trimmed, updatedAt: now }),
-            syncTabsIndexToCloud()
-          ]);
-          statusMsg.innerText = `'${keyword}' 탭 정리 완료 (${trimmed.length}개 유지)`;
-        } catch (err) {
-          alert('정리 중 오류가 발생했습니다.');
+      if (roleBadge) roleBadge.textContent = isAdminUser() ? '관리자' : '사용자';
+      if (nameDisp) nameDisp.textContent = currentUser ? currentUser.name : '-';
+      if (statsEl) {
+        statsEl.textContent = `검색 ${cachedTabsMeta.length} · 고정 ${pinnedVideoIds.size} · 최근재생 ${currentPlayHistory.length}`;
+      }
+
+      if (histList) {
+        histList.innerHTML = '';
+        if (currentPlayHistory.length === 0) {
+          histList.innerHTML = '<div style="font-size:11px; color:#777; text-align:center; padding:10px 0;">최근 재생 기록이 없습니다.</div>';
+        } else {
+          currentPlayHistory.slice(0, 15).forEach(it => {
+            const row = document.createElement('div');
+            row.className = 'play-history-item';
+            row.onclick = () => {
+              closeManageModal();
+              openPlayerModal(it.id, it.t);
+            };
+            const img = document.createElement('img');
+            img.className = 'play-history-thumb';
+            img.src = getFastThumbUrl(it.id);
+            img.onerror = function() { this.onerror = null; this.src = FALLBACK_THUMB; };
+            const tEl = document.createElement('div');
+            tEl.className = 'play-history-title';
+            tEl.textContent = it.t || it.id;
+            row.appendChild(img);
+            row.appendChild(tEl);
+            histList.appendChild(row);
+          });
         }
-      } else {
-        const localStore = loadTempLocalStore();
-        if (!localStore[docId]) return;
-        const items = Array.isArray(localStore[docId].items) ? localStore[docId].items : [];
+      }
+
+      if (adminSec) {
+        adminSec.style.display = isAdminUser() ? 'block' : 'none';
+        if (isAdminUser()) renderAdminUsersList();
+      }
+    }
+
+    function renderAdminUsersList() {
+      const listEl = document.getElementById('adminUsersList');
+      if (!listEl) return;
+      listEl.innerHTML = '';
+
+      const users = authData.users || [];
+      if (users.length === 0) {
+        listEl.innerHTML = '<div style="font-size:11px; color:#777; text-align:center; padding:10px 0;">등록된 사용자가 없습니다.</div>';
+        return;
+      }
+
+      users.forEach(u => {
+        const row = document.createElement('div');
+        row.className = 'manage-item';
+
+        const info = document.createElement('div');
+        info.className = 'manage-item-info';
+        const nEl = document.createElement('div');
+        nEl.className = 'manage-item-name';
+        nEl.textContent = u.name;
+        const mEl = document.createElement('div');
+        mEl.className = 'manage-item-meta';
+        mEl.textContent = `코드: ${u.code}`;
+        info.appendChild(nEl);
+        info.appendChild(mEl);
+
+        const delBtn = document.createElement('button');
+        delBtn.className = 'mini-btn danger';
+        delBtn.textContent = '삭제';
+        delBtn.onclick = () => deleteRegisteredUser(u.id, u.name);
+
+        row.appendChild(info);
+        row.appendChild(delBtn);
+        listEl.appendChild(row);
+      });
+    }
+
+    async function changeAdminPassword() {
+      if (!isAdminUser()) return;
+      const inp = document.getElementById('newAdminCodeInput');
+      const nextCode = inp ? inp.value.trim() : '';
+      if (!nextCode) { alert('새 관리자 코드를 입력해 주세요.'); return; }
+      if ((authData.users || []).some(u => String(u.code) === nextCode)) {
+        alert('이미 등록된 사용자 코드와 중복됩니다.');
+        return;
+      }
+      authData.adminCode = nextCode;
+      currentUser.code = nextCode;
+      try {
+        localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({
+          id: currentUser.id, role: currentUser.role, code: nextCode
+        }));
+      } catch (e) {}
+      await saveAuthConfigToCloud();
+      if (inp) inp.value = '';
+      alert('관리자 비밀번호가 변경되었습니다.');
+    }
+
+    async function registerNewUser() {
+      if (!isAdminUser()) return;
+      const nameInp = document.getElementById('newUserNameInput');
+      const codeInp = document.getElementById('newUserCodeInput');
+      const name = nameInp ? nameInp.value.trim() : '';
+      const code = codeInp ? codeInp.value.trim() : '';
+      if (!name || !code) { alert('이름과 접속 코드를 모두 입력해 주세요.'); return; }
+      if (code === String(authData.adminCode) || (authData.users || []).some(u => String(u.code) === code)) {
+        alert('이미 사용 중인 코드입니다.');
+        return;
+      }
+
+      const newUser = {
+        id: 'u_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
+        name: name,
+        code: code,
+        createdAt: Date.now()
+      };
+      authData.users = [...(authData.users || []), newUser];
+      await saveAuthConfigToCloud();
+      if (nameInp) nameInp.value = '';
+      if (codeInp) codeInp.value = '';
+      renderAdminUsersList();
+    }
+
+    async function deleteRegisteredUser(uid, name) {
+      if (!isAdminUser()) return;
+      if (!confirm(`'${name}' 사용자를 삭제할까요?`)) return;
+      authData.users = (authData.users || []).filter(u => u.id !== uid);
+      await saveAuthConfigToCloud();
+      renderAdminUsersList();
+    }
+
+    async function trimTabHalf(docId, keyword) {
+      if (!fbReady || !db || !currentUser) return;
+      const now = Date.now();
+      try {
+        const docRef = db.collection(FB_COLLECTION).doc(docId);
+        const cached = getCachedTab(docId);
+        let items = cached ? cached.items : null;
+        if (!items) {
+          const snap = await docRef.get();
+          if (!snap.exists) return;
+          items = Array.isArray(snap.data().items) ? snap.data().items : [];
+        }
         const keepCount = Math.max(10, Math.floor(items.length / 2));
-        localStore[docId].items = stripThumbField(items.slice(0, keepCount));
-        localStore[docId].updatedAt = now;
-        saveTempLocalStore(localStore);
-        upsertLocalMeta(docId, keyword, localStore[docId].items.length, now);
-        statusMsg.innerText = `'${keyword}' 임시 탭 정리 완료 (${localStore[docId].items.length}개 유지)`;
+        const trimmed = stripThumbField(items.slice(0, keepCount));
+
+        setCachedTab(docId, now, trimmed);
+        upsertLocalMeta(docId, keyword, trimmed.length, now);
+        await Promise.all([
+          docRef.update({ items: trimmed, updatedAt: now }),
+          syncTabsIndexToCloud()
+        ]);
+      } catch (err) {
+        alert('정리 중 오류가 발생했습니다.');
       }
     }
 
     async function deleteTabDoc(docId, keyword) {
-      if (!confirm(`'${keyword}' 탭과 저장된 목록을 삭제할까요?`)) return;
+      if (!fbReady || !db || !currentUser) return;
+      if (!confirm(`'${keyword}' 목록을 삭제할까요?`)) return;
       removeCachedTab(docId);
       cachedTabsMeta = cachedTabsMeta.filter(t => t.docId !== docId);
       if (activeTabKeyword === keyword) activeTabKeyword = '';
       renderSavedTabsBar();
       if (manageOverlay.style.display === 'flex') renderManageList();
 
-      if (fbReady && db) {
-        try {
-          await Promise.all([
-            db.collection(FB_COLLECTION).doc(docId).delete(),
-            syncTabsIndexToCloud()
-          ]);
-          statusMsg.innerText = `'${keyword}' 탭 삭제 완료`;
-        } catch (err) {
-          alert('삭제 중 오류가 발생했습니다.');
+      try {
+        await Promise.all([
+          db.collection(FB_COLLECTION).doc(docId).delete(),
+          syncTabsIndexToCloud()
+        ]);
+      } catch (err) {
+        alert('삭제 중 오류가 발생했습니다.');
+      }
+    }
+
+    // 앱 부팅: 항상 Firebase 연결 -> 세션 유지 확인(로그아웃 전까지 유지) -> 미인증 시 중앙 소형 코드창
+    async function bootstrapApp() {
+      document.body.classList.add('auth-locked');
+      updateFilterUI();
+      initFeedLayoutMode();
+      initFirebaseAlways();
+      await loadAuthConfigFromCloud();
+
+      try {
+        const saved = localStorage.getItem(SESSION_STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          const matched = parsed && parsed.code ? findUserByCode(parsed.code) : null;
+          if (matched && matched.id === parsed.id) {
+            enterAppWithUser(matched);
+            return;
+          }
+          localStorage.removeItem(SESSION_STORAGE_KEY);
         }
-      } else {
-        const localStore = loadTempLocalStore();
-        delete localStore[docId];
-        saveTempLocalStore(localStore);
-        statusMsg.innerText = `'${keyword}' 임시 탭 삭제 완료`;
-      }
+      } catch (e) {}
+
+      showAuthGate('');
     }
 
-    function saveFirebaseConfigFromUI() {
-      const cfg = parseFirebaseConfigInput(fbConfigInput.value);
-      if (!cfg) {
-        alert('올바른 Firebase Config(apiKey, projectId 포함)를 입력해 주세요.');
-        return;
-      }
-      localStorage.setItem(FB_CONFIG_STORAGE_KEY, JSON.stringify(cfg));
-      initFirebase();
-      statusMsg.innerText = 'Firebase 설정 저장 및 연결 완료';
-      setTimeout(() => renderManageList(), 400);
-    }
-
-    // 앱 시작 시 로컬 별표 즉시 로드 + Firebase 자동 초기화
-    loadLocalPinsImmediate();
-    updateFilterUI();
-    initFirebase();
+    bootstrapApp();
 
     function closePlayerModal() {
       stopBgAudioClean();
