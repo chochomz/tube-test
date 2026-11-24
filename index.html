@@ -58,13 +58,17 @@
     }
     #auth-gate-overlay {
       position: fixed;
-      inset: 0;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 100dvh;
       z-index: 20000;
       background: var(--app-bg);
       display: none;
       align-items: center;
       justify-content: center;
-      padding: 20px;
+      padding: 16px;
+      transition: height 0.14s ease;
     }
     body.auth-locked #auth-gate-overlay {
       display: flex;
@@ -78,41 +82,67 @@
       touch-action: none !important;
     }
     .auth-gate-box {
-      width: 248px;
-      background: #17171a;
-      border: 1px solid rgba(255, 255, 255, 0.24);
-      border-radius: 12px;
-      padding: 15px 14px 12px 14px;
-      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.85);
+      width: 156px;
+      background: transparent;
+      border: none;
+      border-radius: 0;
+      padding: 0;
+      box-shadow: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 9px;
       text-align: center;
     }
     .auth-name-block {
-      margin-bottom: 7px;
-    }
-    .auth-name-input {
       width: 100%;
-      padding: 7px 10px;
-      border-radius: 7px;
-      border: 1px solid #333;
-      background: #101012;
-      color: #fff;
-      font-size: 12.5px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 7px;
+    }
+    .auth-name-input,
+    #auth-gate-overlay .auth-gate-input {
+      width: 100%;
+      height: 36px;
+      padding: 0 10px;
+      border-radius: 8px;
+      border: 2px dashed rgba(255, 255, 255, 0.92);
+      background: rgba(16, 16, 20, 0.72);
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 700;
       text-align: center;
       outline: none;
     }
-    .auth-name-input:focus { border-color: #f472b6; }
+    #auth-gate-overlay .auth-gate-input {
+      letter-spacing: 3px;
+    }
+    .auth-name-input::placeholder,
+    #auth-gate-overlay .auth-gate-input::placeholder {
+      color: rgba(249, 168, 212, 0.45);
+      letter-spacing: 2px;
+      font-weight: 700;
+    }
+    .auth-name-input:focus::placeholder,
+    #auth-gate-overlay .auth-gate-input:focus::placeholder {
+      color: transparent;
+    }
+    .auth-name-input:focus,
+    #auth-gate-overlay .auth-gate-input:focus {
+      border-color: #ffffff;
+    }
     .auth-remember-row {
-      display: flex;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 5px;
-      margin-top: 6px;
-      font-size: 11px;
-      color: #bdbdbd;
+      gap: 6px;
+      font-size: 11.5px;
+      color: #cfcfcf;
       cursor: pointer;
     }
     .auth-remember-row input {
-      accent-color: #ff0000;
+      accent-color: #ffffff;
       width: 13px;
       height: 13px;
       margin: 0;
@@ -120,30 +150,28 @@
     }
     .auth-saved-name-bar {
       display: none;
+      width: 100%;
+      height: 34px;
       align-items: center;
       justify-content: space-between;
-      background: #202026;
-      border: 1px solid #32323c;
-      border-radius: 7px;
-      padding: 5px 9px;
-      margin-bottom: 7px;
+      background: rgba(24, 24, 30, 0.75);
+      border: 2px dashed rgba(255, 255, 255, 0.92);
+      border-radius: 8px;
+      padding: 0 9px;
       font-size: 12px;
       font-weight: 700;
       color: #f9a8d4;
     }
     .auth-change-name-btn {
-      border: 1px solid #444;
-      background: #2a2a30;
-      color: #ccc;
+      border: none;
+      background: rgba(255, 255, 255, 0.16);
+      color: #eee;
       font-size: 10px;
       padding: 2px 6px;
       border-radius: 5px;
       cursor: pointer;
     }
-    .auth-gate-input-row {
-      display: flex;
-      gap: 5px;
-    }
+    /* 2차 설정 Code 창 공용 입력 기본 스타일 보존 */
     .auth-gate-input {
       flex: 1;
       min-width: 0;
@@ -159,16 +187,20 @@
     }
     .auth-gate-input:focus { border-color: #f472b6; }
     .auth-gate-btn {
-      padding: 8px 11px;
-      border-radius: 7px;
+      width: 100%;
+      height: 35px;
+      padding: 0 12px;
+      border-radius: 8px;
       border: none;
-      background: #ff0000;
-      color: #fff;
-      font-size: 12px;
-      font-weight: 700;
+      background: #ffffff;
+      color: #111111;
+      font-size: 12.5px;
+      font-weight: 800;
       cursor: pointer;
       white-space: nowrap;
+      transition: opacity 0.12s, transform 0.1s;
     }
+    .auth-gate-btn:active { opacity: 0.85; transform: scale(0.97); }
     .auth-gate-err {
       min-height: 14px;
       margin-top: 7px;
@@ -1702,25 +1734,22 @@
 </head>
 <body>
 
-  <!-- 0. 로그인 중앙 소형 창 (이름 7자 + 기억 체크박스 + 4자리 자동 진입) -->
+  <!-- 0. 미니멀 로그인 창 (무외곽 · 각창 흰색 두꺼운 점선 · NAME/CODE 흐릿핑크 · 기억 하기 · 키보드 회피) -->
   <div id="auth-gate-overlay">
     <div class="auth-gate-box">
       <div class="auth-name-block" id="authNameBlock">
-        <input type="text" id="authNameInput" class="auth-name-input" maxlength="7" placeholder="이름 (7자 이내)" autocomplete="off" onkeydown="if(event.key==='Enter'){document.getElementById('authCodeInput').focus()}">
+        <input type="text" id="authNameInput" class="auth-name-input" maxlength="7" placeholder="NAME" autocomplete="off" oninput="onAuthNameTyping()" onkeydown="if(event.key==='Enter'){tryMoveToCodeField()}">
         <label class="auth-remember-row">
           <input type="checkbox" id="authRememberName">
-          <span>이름 기억 (다음부터 코드창 바로 이동)</span>
+          <span>기억 하기</span>
         </label>
       </div>
       <div class="auth-saved-name-bar" id="authSavedNameBar">
         <span id="authSavedNameLabel">-</span>
         <button type="button" class="auth-change-name-btn" onclick="unlockSavedLoginName()">변경</button>
       </div>
-      <div class="auth-gate-input-row">
-        <input type="password" id="authCodeInput" class="auth-gate-input" maxlength="4" inputmode="numeric" placeholder="CODE" autocomplete="off" oninput="onAuthCodeTyping()" onkeydown="if(event.key==='Enter'){submitAuthCode()}">
-        <button type="button" class="auth-gate-btn" onclick="submitAuthCode()">확인</button>
-      </div>
-      <div class="auth-gate-err" id="authGateErr"></div>
+      <input type="password" id="authCodeInput" class="auth-gate-input" maxlength="4" inputmode="numeric" placeholder="CODE" autocomplete="off" oninput="onAuthCodeTyping()" onkeydown="if(event.key==='Enter'){submitAuthCode(false)}">
+      <button type="button" class="auth-gate-btn" onclick="submitAuthCode(false)">확인</button>
     </div>
   </div>
 
@@ -2045,7 +2074,7 @@
       "appId": "1:892351379651:web:ae4e8e40dfc55c933e4a76"
     };
 
-    // TUBE_LAB_V12_2_FINAL_CLEAN_PATCH
+    // TUBE_LAB_V13_MINIMAL_LOGIN_PATCH
     const REMEMBER_NAME_KEY = 'mytube_remember_name_v12';
     const AUTH_DOC_ID = 'sys_auth';
     const PIN_DOC_ID = 'sys_pins';
@@ -3771,19 +3800,88 @@
       if (inp) { inp.value = ''; inp.focus(); }
     }
 
+    let authNameComposing = false;
+    let authNameMoveTimer = null;
+    let authAutoChecking = false;
+
+    function syncAuthViewportForKeyboard() {
+      const ov = document.getElementById('auth-gate-overlay');
+      if (!ov) return;
+      if (window.visualViewport) {
+        ov.style.height = `${Math.round(window.visualViewport.height)}px`;
+        ov.style.top = `${Math.round(window.visualViewport.offsetTop)}px`;
+      } else {
+        ov.style.height = '100dvh';
+        ov.style.top = '0px';
+      }
+    }
+
+    (function bindAuthInputHelpers() {
+      const ni = document.getElementById('authNameInput');
+      if (ni) {
+        ni.addEventListener('compositionstart', () => { authNameComposing = true; });
+        ni.addEventListener('compositionend', () => {
+          authNameComposing = false;
+          onAuthNameTyping();
+        });
+      }
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', syncAuthViewportForKeyboard);
+        window.visualViewport.addEventListener('scroll', syncAuthViewportForKeyboard);
+      }
+      window.addEventListener('resize', syncAuthViewportForKeyboard);
+    })();
+
+    function isRegisteredLoginName(name) {
+      const n = String(name || '').trim().slice(0, 7);
+      if (!n) return false;
+      if (n === '관리자' || n.toLowerCase() === 'admin') return true;
+      return (authData.users || []).some(u => u && String(u.name || '').trim() === n);
+    }
+
+    function tryMoveToCodeField() {
+      const ni = document.getElementById('authNameInput');
+      const ci = document.getElementById('authCodeInput');
+      if (!ni || !ci) return;
+      if (isRegisteredLoginName(ni.value)) {
+        ci.focus({ preventScroll: true });
+        setTimeout(syncAuthViewportForKeyboard, 80);
+      }
+    }
+
+    function onAuthNameTyping() {
+      clearTimeout(authNameMoveTimer);
+      if (authNameComposing) return;
+      const ni = document.getElementById('authNameInput');
+      if (!ni) return;
+      const val = ni.value.trim();
+      if (!val) return;
+      authNameMoveTimer = setTimeout(() => {
+        if (authNameComposing) return;
+        if (isRegisteredLoginName(ni.value)) {
+          const ci = document.getElementById('authCodeInput');
+          if (ci) {
+            ci.focus({ preventScroll: true });
+            setTimeout(syncAuthViewportForKeyboard, 80);
+          }
+        }
+      }, 170);
+    }
+
     function unlockSavedLoginName() {
       try { localStorage.removeItem(REMEMBER_NAME_KEY); } catch (e) {}
       const nb = document.getElementById('authNameBlock');
       const sb = document.getElementById('authSavedNameBar');
       const ni = document.getElementById('authNameInput');
       const rc = document.getElementById('authRememberName');
-      if (nb) nb.style.display = 'block';
+      if (nb) nb.style.display = 'flex';
       if (sb) sb.style.display = 'none';
       if (rc) rc.checked = false;
-      if (ni) { ni.value = ''; ni.focus(); }
+      if (ni) { ni.value = ''; ni.focus({ preventScroll: true }); }
+      syncAuthViewportForKeyboard();
     }
 
-    function showAuthGate(errText = '') {
+    function showAuthGate() {
       document.body.classList.add('auth-locked');
       slideBookmark.style.display = 'none';
       slideBookmarkVisible = false;
@@ -3793,8 +3891,6 @@
       const ni = document.getElementById('authNameInput');
       const rc = document.getElementById('authRememberName');
       const ci = document.getElementById('authCodeInput');
-      const errEl = document.getElementById('authGateErr');
-      if (errEl) errEl.textContent = errText;
       if (ci) ci.value = '';
 
       let savedName = '';
@@ -3805,15 +3901,15 @@
         if (sl) sl.textContent = savedName;
         if (nb) nb.style.display = 'none';
         if (sb) sb.style.display = 'flex';
-        if (ci) setTimeout(() => ci.focus(), 60);
+        if (ci) setTimeout(() => { ci.focus({ preventScroll: true }); syncAuthViewportForKeyboard(); }, 80);
       } else {
-        if (nb) nb.style.display = 'block';
+        if (nb) nb.style.display = 'flex';
         if (sb) sb.style.display = 'none';
-        if (ni) { ni.value = ''; setTimeout(() => ni.focus(), 60); }
+        if (ni) { ni.value = ''; setTimeout(() => { ni.focus({ preventScroll: true }); syncAuthViewportForKeyboard(); }, 80); }
       }
+      syncAuthViewportForKeyboard();
     }
 
-    let authAutoChecking = false;
     function onAuthCodeTyping() {
       const ci = document.getElementById('authCodeInput');
       if (!ci || authAutoChecking) return;
@@ -3830,28 +3926,21 @@
       const ni = document.getElementById('authNameInput');
       const rc = document.getElementById('authRememberName');
       const ci = document.getElementById('authCodeInput');
-      const errEl = document.getElementById('authGateErr');
       const name = ni ? ni.value.trim().slice(0, 7) : '';
       const code = ci ? ci.value.trim() : '';
-      if (!name) {
-        if (errEl) errEl.textContent = '이름을 입력하세요 (7자 이내)';
-        if (ni) ni.focus();
-        return;
-      }
-      if (code.length < 4) {
-        if (!isAuto && errEl) errEl.textContent = '4자리 코드를 입력하세요';
-        return;
-      }
+      if (!name || code.length < 4) return; // 틀리거나 미완성이면 아무 동작 안 함
+
       authAutoChecking = true;
-      if (errEl) errEl.textContent = '';
       try {
-        await loadAuthConfigFromCloud();
-        const user = findUserByNameAndCode(name, code);
+        let user = findUserByNameAndCode(name, code);
         if (!user) {
-          if (errEl) errEl.textContent = '이름 또는 코드가 일치하지 않습니다';
-          if (ci) { ci.value = ''; ci.focus(); }
-          return;
+          await loadAuthConfigFromCloud();
+          user = findUserByNameAndCode(name, code);
         }
+        if (!user) return; // 틀리면 아무 동작 안 함
+
+        if (ci) ci.blur();
+        if (ni) ni.blur();
         try {
           if (rc && rc.checked) localStorage.setItem(REMEMBER_NAME_KEY, name);
           else localStorage.removeItem(REMEMBER_NAME_KEY);
