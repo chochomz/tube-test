@@ -10,7 +10,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-  <!-- Firebase Compat SDK (Firestore 상시 연결) -->
+  <!-- TUBE_LAB_V7_PATCH: Firebase Compat SDK (Firestore 상시 연결) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
@@ -175,7 +175,7 @@
       border-radius: 5px;
       cursor: pointer;
     }
-    /* 2차 설정 Code 창 공용 입력 기본 스타일 */
+    /* 2차 설정 Code 창 공용 입력 기본 스타일 보존 */
     .auth-gate-input {
       padding: 8px 10px;
       border-radius: 7px;
@@ -259,7 +259,7 @@
       cursor: pointer;
     }
 
-    /* 1. 최상단 고정 헤더 (통합 두꺼운 점선 박스 + 사이 가로 점선) */
+    /* 1. 최상단 고정 헤더 (검색~조건~설정~검색어~목록·창 통합 두꺼운 점선 박스 + 사이 가로 실선) */
     .top-header {
       position: sticky;
       top: 0;
@@ -502,7 +502,7 @@
       outline: none;
     }
     .search-box input:focus { border-color: #ff0000; }
-    /* 유튜브 로고 스타일 붉은 검색 버튼 + 실시간 상태 애니메이션 */
+    /* 유튜브 로고 스타일 붉은 검색 버튼 + 실시간 4단계 상태 애니메이션 */
     button.search-btn {
       width: 38px;
       height: 31px;
@@ -541,7 +541,7 @@
       animation: ytPlaySlowBlink 1.8s ease-in-out infinite;
     }
 
-    /* 1-2. 2행: 가로 점선 구분 + 검색어(세로점선·하단각주·2단계터치) + 우측 이모지 밀착 */
+    /* 1-2. 2행: 검색창 바로 밑 가로 실선 구분 + 검색어(세로점선·하단각주·2단계터치) + 우측 이모지 밀착 */
     .header-mid-divider {
       width: 100%;
       height: 0;
@@ -630,7 +630,7 @@
       text-underline-offset: 2px;
     }
 
-    /* 우측 피드 나열 전환 이모지 2개 */
+    /* 우측 피드 나열 전환 이모지 2개 (우측 바짝 밀착 + 간격 축소 + 별도 색상 + 진동) */
     .layout-mode-controls {
       display: flex;
       align-items: center;
@@ -680,7 +680,7 @@
       min-height: 0;
     }
 
-    /* 6. 설정 모달 (모바일/태블릿 자동맞춤 · 높이 고정 · 하단 적용후 닫기) */
+    /* 6. 설정 모달 (모바일/태블릿 자동맞춤 · 높이 고정 · 스크롤 최소 · 하단 적용후 닫기) */
     #manage-modal-overlay {
       position: fixed;
       inset: 0;
@@ -894,7 +894,7 @@
       margin-top: 10px;
       padding-top: 8px;
     }
-    /* 설정 > 색상변경: 디테일 14모듈 미니 레이아웃 */
+    /* 설정 > 색상변경: 디테일 14모듈 미니 레이아웃 (모바일 고정 · 1줄 nowrap · 스크롤 0) */
     .mini-theme-layout {
       background: var(--app-bg);
       border: 1px solid rgba(255, 255, 255, 0.3);
@@ -1301,12 +1301,12 @@
     .video-grid.cols-2 .video-meta { font-size: 9.5px; }
     .video-grid.cols-1 .video-meta { font-size: 10.5px; margin-top: 4px; }
 
-    /* 3. 16:9 원본 밀착형 부유창 */
+    /* 3. [핵심] 16:9 원본 밀착형 부유창 */
     #floating-player-modal {
       position: fixed;
       top: 14%;
       left: 6%;
-      width: 320px;
+      width: 320px; /* 초기 가로 (세로는 16:9인 180px로 JS가 자동 고정) */
       z-index: 9000;
       display: none;
       touch-action: none;
@@ -1315,7 +1315,7 @@
     /* 가는 흰색 실선 테두리 (영상 원본 비율에 100% 밀착) */
     .modal-main-window {
       width: 100%;
-      height: 180px;
+      height: 180px; /* JS에서 16:9 비율로 실시간 동기화 */
       background: #000;
       border: 1px solid rgba(255, 255, 255, 0.95);
       border-radius: 4px;
@@ -1356,7 +1356,7 @@
       overflow: hidden !important;
     }
 
-    /* 백그라운드 오디오 전용 플레이어 오버레이 (창 내부 표시) */
+    /* 🎧 백그라운드 오디오 전용 플레이어 오버레이 (창 내부 표시) */
     .bg-audio-overlay {
       position: absolute;
       inset: 0;
@@ -1486,7 +1486,7 @@
       border-bottom-right-radius: 2px;
     }
 
-    /* 일시정지/종료 시 YouTube 추천 차단 & 원터치 재재생 마스크 */
+    /* 일시정지/종료 시 YouTube '동영상 더보기' 등 불필요 추천 차단 & 원터치 재재생 마스크 */
     .yt-pause-mask {
       position: absolute;
       inset: 0;
@@ -1515,7 +1515,7 @@
       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7);
     }
 
-    /* 4. 하부 소형 우측 닫기 탭 (✕) */
+    /* 4. [핵심] 하부 소형 우측 닫기 탭 (✕) */
     .modal-bottom-tabs {
       display: flex;
       justify-content: flex-end;
@@ -1560,12 +1560,13 @@
     .bookmark-tab:active {
       background: rgba(255, 255, 255, 0.9);
     }
+
     .bookmark-tab.tab-close {
       z-index: 3;
       padding: 3px 10px;
     }
 
-    /* 4-2. 슬라이드 책갈피 (스크롤/재생 시 상시 표시 · 투명도 70% · 좌/우 이동 · ♪/▶/🎧/MP3/⚙) */
+    /* 4-2. 슬라이드 책갈피 (스크롤 시 상시 표시 · 투명도 70% · 좌/우 한 손 이동 · ⚙/🎧/MP3/▶깜박) */
     #slide-bookmark {
       position: fixed;
       top: 38%;
@@ -1674,7 +1675,7 @@
       animation: sbPlayBlink 1.5s ease-in-out infinite;
     }
 
-    /* 5. MP3 / 320kbps 음원추출 전용 모달 */
+    /* 5. [신규] MP3 / 320kbps 음원추출 전용 모달 */
     #mp3-modal-overlay {
       position: fixed;
       inset: 0;
@@ -1789,7 +1790,7 @@
     </div>
   </div>
 
-  <!-- 1. 최상단 고정 헤더 (외곽 두꺼운 점선 + 검색창 바로 밑 가로 점선 구분 + 검색어 각주/2단계 터치) -->
+  <!-- 1. 최상단 고정 헤더 (외곽 두꺼운 점선 + 검색창 바로 밑 가로 실선 구분 + 검색어 각주/2단계 터치) -->
   <div class="top-header">
     <div class="header-unified-box">
       <svg class="header-dash-svg" preserveAspectRatio="none"><rect x="1.2" y="1.2" width="calc(100% - 2.4px)" height="calc(100% - 2.4px)" rx="9" ry="9" fill="none" stroke="var(--header-border-color)" stroke-width="2.2" stroke-dasharray="4 3" vector-effect="non-scaling-stroke"/></svg>
@@ -1811,7 +1812,7 @@
       <!-- 검색창 바로 밑 가는 점선 구분 -->
       <div class="header-mid-divider"></div>
 
-      <!-- 2행: 검색어(하단 중앙 각주 MM.DD-00 · 세로점선 · 1회 확대선택/2회 즉시로드) + 우측 밀착 이모지 2개 -->
+      <!-- 2행: 검색어(하단 중앙 각주 MM.DD-00 · 세로점선 · 1회 확대선택/2회 즉시로드) + 우측 밀착 회색 이모지 2개 -->
       <div class="saved-tabs-row">
         <div class="tabs-scroll-area" id="savedTabsList"></div>
         <div class="layout-mode-controls">
@@ -1874,13 +1875,13 @@
         <div class="player-drag-pill"></div>
       </div>
 
-      <!-- 4각 모서리 L자 꺾기 리사이즈 핸들 -->
+      <!-- 4각 모서리 두꺼운 L자 꺾기 리사이즈 핸들 -->
       <div class="resizer tl" data-dir="tl"></div>
       <div class="resizer tr" data-dir="tr"></div>
       <div class="resizer bl" data-dir="bl"></div>
       <div class="resizer br" data-dir="br"></div>
 
-      <!-- 800x450 비례 스케일링 스테이지 -->
+      <!-- 800x450 비례 스케일링 스테이지 (화면 확대/축소 시 유튜브 버튼이 함께 확대/축소됨) -->
       <div class="scale-stage" id="scaleStage">
         <div id="yt-iframe-holder"></div>
       </div>
@@ -1890,7 +1891,7 @@
         <div class="yt-pause-play-circle">▶</div>
       </div>
 
-      <!-- 백그라운드 오디오 모드 활성 시 창 내부 표시 -->
+      <!-- 🎧 백그라운드 오디오 모드 활성 시 창 내부 표시 -->
       <div class="bg-audio-overlay" id="bgAudioOverlay">
         <div class="bg-overlay-badge">🎧 백그라운드 오디오 재생 중</div>
         <div class="bg-overlay-title" id="bgOverlayTitle">재생 중</div>
@@ -1942,7 +1943,7 @@
     </div>
   </div>
 
-  <!-- 5. 설정 모달 (고정 프레임 · 디테일 14모듈 레이아웃 · 적용후 닫기) -->
+  <!-- 5. 설정 모달 (고정 프레임 · 스크롤 최소 · 디테일 12모듈 레이아웃 · 적용후 닫기) -->
   <div id="manage-modal-overlay">
     <div class="manage-modal-box">
       <div class="settings-tabs-header">
@@ -2012,7 +2013,7 @@
         <div class="palette-256-grid" id="palette256Grid"></div>
       </div>
 
-      <!-- 탭 2: 로그인 / DB 진단 / 관리자 구역 -->
+      <!-- 탭 2: 로그인 / DB 진단 / 관리자 구역 (최근 플레이 정보 삭제) -->
       <div class="settings-pane" id="settings-pane-auth">
         <div class="auth-profile-card" style="flex-shrink:0;">
           <div>
@@ -2030,7 +2031,7 @@
           <button type="button" class="mini-btn" onclick="retryDbReconnect()">재연결</button>
         </div>
 
-        <!-- 관리자 전용 구역 (관리자 코드 입력 시 접근 가능) -->
+        <!-- 관리자 전용 구역 (관리자 비번 입력 시 접근 가능) -->
         <div class="admin-divider" id="adminOnlySection" style="display:none; flex-direction:column;">
           <div class="settings-sec-title" style="margin-top:2px;">관리자 코드 변경</div>
           <div class="auth-form-row">
@@ -2064,10 +2065,11 @@
 
     const statusMsg = document.getElementById('status');
     const resultsContainer = document.getElementById('results');
-
+    
     const modal = document.getElementById('floating-player-modal');
     const modalWindow = document.getElementById('modalWindow');
     const scaleStage = document.getElementById('scaleStage');
+    // TUBE_LAB_V4_PLAYER_BG_PATCH
     const ytHolder = document.getElementById('yt-iframe-holder');
     const playerDragBar = document.getElementById('playerDragBar');
     const bottomDragSpacer = document.getElementById('bottomDragSpacer');
@@ -2098,6 +2100,7 @@
       "appId": "1:892351379651:web:ae4e8e40dfc55c933e4a76"
     };
 
+    // TUBE_LAB_V14_AUTH_NOTE_PATCH
     const REMEMBER_NAME_KEY = 'mytube_remember_name_v12';
     const PENDING_AUTH_SYNC_KEY = 'mytube_pending_auth_sync_v14';
     const AUTH_DOC_ID = 'sys_auth';
@@ -2291,10 +2294,10 @@
     let currentVideoId = '';
     let currentVideoTitle = '';
 
-    // 1. 16:9 비율 완벽 유지 및 내부 요소 비례 스케일링 함수
+    // 1. 16:9 비율 완벽 유지 및 내부 요소 비례 스케일링 함수 (v4: 4각 모서리 보정용 치수 반환)
     function apply16by9Scale(newWidth) {
       const clampedW = Math.max(180, Math.min(newWidth, window.innerWidth - 12));
-      const exactH = Math.round(clampedW * (9 / 16));
+      const exactH = Math.round(clampedW * (9 / 16)); // 16:9 칼비율
 
       modal.style.width = `${clampedW}px`;
       modalWindow.style.height = `${exactH}px`;
@@ -2342,18 +2345,23 @@
       let s = String(rawTitle || '').trim();
       if (!s) return '제목 없음';
 
+      // 1) 이모지 및 장식 기호 제거
       s = s.replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\u{FE00}-\u{FE0F}\u{200D}]/gu, ' ');
       s = s.replace(/[★☆♥♡♪♫♬♩◆◇■□●○▶▷◀◁•※✦✧✔✓｜丨]/g, ' ');
 
+      // 2) 앞부분 말머리 괄호 태그([Playlist], [4K], 【HD】 등) 제거해 핵심 제목을 맨 앞으로
       const leadStripped = s.replace(/^\s*(?:[\[\(【《「<][^\]\)】》」>]{1,30}[\]\)】》」>]\s*)+/, '').trim();
       if (leadStripped.length >= 2) s = leadStripped;
 
+      // 3) 뒷부분 부가 괄호 태그 정리
       const tailStripped = s.replace(/(?:\s*[\[\(【《「<][^\]\)】》」>]{1,28}[\]\)】》」>]\s*)+$/, '').trim();
       if (tailStripped.length >= 2) s = tailStripped;
 
+      // 4) 연속 중복 특수문자 축약
       s = s.replace(/([!?~._=,])\1+/g, '$1');
       s = s.replace(/[~_=]{2,}/g, ' ');
 
+      // 5) 구분자(|, /, -, ·) 기준 중복 구절 배제
       const parts = s.split(/\s*[|\/·]\s*|\s+-\s+/).map(p => p.trim()).filter(Boolean);
       const uniqueParts = [];
       parts.forEach(part => {
@@ -2367,6 +2375,7 @@
       });
       if (uniqueParts.length > 0) s = uniqueParts.join(' ');
 
+      // 6) 인접 중복 단어 배제
       const words = s.split(/\s+/).filter(Boolean);
       const dedupWords = [];
       words.forEach(w => {
@@ -2480,7 +2489,7 @@
       updateSearchBtnState();
     }
 
-    // 테두리 없는 목록 / 둥근 사각창(2/3/4) SVG & 진동
+    // 테두리 없는 회색 목록 / 둥근 사각창(2:ㅁㅁ / 3:ㅁㅁ+밑에1 / 4:ㅁㅁ+ㅁㅁ) SVG & 진동
     function getListModeSvg() {
       return '<svg viewBox="0 0 20 20" width="20" height="20" fill="currentColor">' +
         '<rect x="1.5" y="3.5" width="3" height="3" rx="1"/>' +
@@ -2494,18 +2503,21 @@
 
     function getGridColsSvg(cols) {
       if (cols === 2) {
+        // 2개: 둥근 회색 사각창 나란히 ㅁㅁ
         return '<svg viewBox="0 0 20 20" width="20" height="20" fill="currentColor">' +
           '<rect x="2" y="6" width="7" height="7.5" rx="2"/>' +
           '<rect x="11" y="6" width="7" height="7.5" rx="2"/>' +
           '</svg>';
       }
       if (cols === 3) {
+        // 3개: 윗줄 ㅁㅁ + 밑에 1개
         return '<svg viewBox="0 0 20 20" width="20" height="20" fill="currentColor">' +
           '<rect x="2" y="2" width="7" height="7" rx="2"/>' +
           '<rect x="11" y="2" width="7" height="7" rx="2"/>' +
           '<rect x="2" y="11" width="7" height="7" rx="2"/>' +
           '</svg>';
       }
+      // 4개: ㅁㅁ / ㅁㅁ 사각 네 개
       return '<svg viewBox="0 0 20 20" width="20" height="20" fill="currentColor">' +
         '<rect x="2" y="2" width="7" height="7" rx="2"/>' +
         '<rect x="11" y="2" width="7" height="7" rx="2"/>' +
@@ -2577,9 +2589,9 @@
     function cycleFeedGridCols() {
       if (currentFeedMode === 'list') {
         currentFeedMode = 'grid';
-        currentGridCols = 2;
+        currentGridCols = 2; // 처음 2개부터 시작
       } else {
-        currentGridCols = currentGridCols >= 4 ? 2 : (currentGridCols + 1);
+        currentGridCols = currentGridCols >= 4 ? 2 : (currentGridCols + 1); // 2 -> 3 -> 4 -> 2
       }
       applyFeedLayoutUI();
       triggerLayoutHaptic(document.getElementById('gridModeBtn'));
@@ -2631,6 +2643,7 @@
         currentThemeColors[key] = val;
         root.style.setProperty(meta.cssVar, val);
 
+        // 명도 기반 자동 글자색 보정 (검정 계열 배경 -> 흰색 글자 / 흰색 계열 배경 -> 검정 글자)
         if (meta.fgVar) {
           root.style.setProperty(meta.fgVar, isLightHexColor(val) ? '#111111' : '#ffffff');
         }
@@ -2905,6 +2918,7 @@
         return;
       }
 
+      // 1) 저장 탭(DB) 풀에서 다음 50개 단계적 노출
       if (currentFeedIsCache) {
         if (currentFeedItems.length >= dbFeedPool.length) {
           updateScrollSentinelUI();
@@ -2920,6 +2934,7 @@
         return;
       }
 
+      // 2) 실시간 검색 결과에서 다음 50개 추가 수집 + DB 증분 저장
       if (!activeSearchSession || activeSearchSession.exhausted || !activeSearchSession.nextpage) {
         updateScrollSentinelUI();
         return;
@@ -3143,6 +3158,7 @@
     }
 
     function renderSortedFeed() {
+      // 정렬은 현재 불러온 범위(currentFeedItems) 내에서만 적용
       const sorted = [...currentFeedItems].sort((a, b) => {
         const aPin = pinnedVideoIds.has(a.id) ? 1 : 0;
         const bPin = pinnedVideoIds.has(b.id) ? 1 : 0;
@@ -3213,7 +3229,8 @@
       updateScrollSentinelUI();
     }
 
-    // 5. 부유창 재생 + iOS 무중단 백그라운드 오디오 엔진 (Piped+Invidious 다중 페일오버)
+    // TUBE_LAB_V5_IOS_BG_PATCH
+    // 5. 부유창 재생 + iOS 26.3.1 무중단 백그라운드 오디오 엔진 (Piped+Invidious 다중 페일오버)
     const STREAM_PIPED_SERVERS = [
       'https://api.piped.private.coffee',
       'https://pipedapi.kavin.rocks',
@@ -3261,7 +3278,7 @@
       } catch (e) {}
     }
 
-    // iOS Safari / 홈화면 PWA 오디오 제스처 선행 잠금해제
+    // iOS Safari / 홈화면 PWA 오디오 제스처 선행 잠금해제 (사용자 터치 내부에서 실행)
     function unlockIosAudioOnce() {
       if (iosAudioUnlocked || isBgAudioPlaying) return;
       try {
@@ -3358,7 +3375,7 @@
       }
     }
 
-    // 다중 Piped + Invidious 페일오버로 iOS 네이티브 재생 가능 오디오 후보 수집
+    // 다중 Piped + Invidious 페일오버로 iOS 네이티브 재생 가능(M4A/HLS/MP4) 오디오 후보 수집
     async function prefetchBgAudio(videoId) {
       prefetchedAudioCandidates = [];
       prefetchedVideoId = '';
@@ -3370,6 +3387,7 @@
         if (u && typeof u === 'string' && !candidates.includes(u)) candidates.push(u);
       };
 
+      // 1순위: Piped 다중 서버 (M4A AAC + iOS 네이티브 HLS .m3u8)
       for (const server of STREAM_PIPED_SERVERS) {
         if (currentVideoId !== videoId) return [];
         try {
@@ -3379,11 +3397,12 @@
             .filter(s => /mp4|m4a/i.test(s.mimeType || '') || /mp4a/i.test(s.codec || ''))
             .sort((a, b) => (b.bitrate || 0) - (a.bitrate || 0));
           mp4.forEach(s => addUnique(s.url));
-          if (data.hls) addUnique(data.hls);
+          if (data.hls) addUnique(data.hls); // iOS Safari/PWA 네이티브 HLS 초강력 지원
           if (candidates.length > 0) break;
         } catch (e) {}
       }
 
+      // 2순위: Invidious 다중 서버 프록시 폴백 (local=true로 모바일 IP 차단 우회)
       if (candidates.length === 0) {
         for (const inv of STREAM_INVIDIOUS_SERVERS) {
           if (currentVideoId !== videoId) return [];
@@ -3409,13 +3428,14 @@
       prefetchedVideoId = candidates.length > 0 ? videoId : '';
       updateBgModeUI();
 
+      // 화면이 백그라운드로 내려간 상태에서만 자동 핸드오프(포그라운드 재생 소리 튐 방지)
       if (document.visibilityState === 'hidden' && isDockedToBookmark && !isBgAudioPlaying && candidates.length > 0) {
         activateBgAudioStream(lastKnownPlaySec);
       }
       return candidates;
     }
 
-    // 무중단 백그라운드 오디오 전환 (실제 'playing' 확인 전까지 YouTube iframe 정지 안 함)
+    // 무중단 백그라운드 오디오 전환 (실제 'playing' 확인 전까지 YouTube iframe 절대 정지 안 함!)
     async function activateBgAudioStream(startSec = 0) {
       if (!currentVideoId) return false;
       if (prefetchedVideoId !== currentVideoId || prefetchedAudioCandidates.length === 0) {
@@ -3459,12 +3479,13 @@
       }
     }
 
-    // 백그라운드 오디오 모드 토글
+    // 재생창 하단 [🎧] 원터치 백그라운드 오디오 모드 토글
     function toggleBgAudioMode() {
       if (!currentVideoId) return;
       unlockIosAudioOnce();
 
       if (isBgAudioPlaying) {
+        // BG 오디오 -> YouTube 영상 모드로 복귀
         const resumeSec = Math.floor(bgAudio.currentTime || lastKnownPlaySec || 0);
         lastKnownPlaySec = resumeSec;
         stopBgAudioClean();
@@ -3472,6 +3493,7 @@
         sendYtCommand('playVideo');
         statusMsg.innerText = '영상 모드로 복귀';
       } else {
+        // YouTube 영상 -> iOS 백그라운드 오디오 모드로 즉시 전환
         activateBgAudioStream(lastKnownPlaySec);
       }
     }
@@ -3489,7 +3511,7 @@
     }
 
     function openPlayerModal(videoId, title) {
-      unlockIosAudioOnce();
+      unlockIosAudioOnce(); // iOS Safari/PWA 오디오 세션 선행 잠금해제!
       stopBgAudioClean();
       isDockedToBookmark = true;
       lastKnownPlaySec = 0;
@@ -3980,7 +4002,7 @@
       const ci = document.getElementById('authCodeInput');
       const name = ni ? ni.value.trim().slice(0, 7) : '';
       const code = ci ? ci.value.trim() : '';
-      if (!name || code.length < 4) return;
+      if (!name || code.length < 4) return; // 틀리거나 미완성이면 아무 동작 안 함
 
       authAutoChecking = true;
       try {
@@ -3989,7 +4011,7 @@
           await loadAuthConfigFromCloud();
           user = findUserByNameAndCode(name, code);
         }
-        if (!user) return;
+        if (!user) return; // 틀리면 아무 동작 안 함
 
         if (ci) ci.blur();
         if (ni) ni.blur();
@@ -4354,6 +4376,7 @@
         }
         return;
       }
+      // 2회째 터치 -> 신속 로드
       loadTabData(tab.docId, tab.keyword, true);
     }
 
@@ -4848,10 +4871,11 @@
       if (!currentVideoId) return;
       mp3TrackTitle.innerText = currentVideoTitle;
       directStreamBtn.innerText = "⬇ 다이렉트 음원 스트림 추출 (320k)";
-
+      
+      // 320kbps MP3 전용 변환 버튼 위젯 로드
       const ytUrl = `https://www.youtube.com/watch?v=${currentVideoId}`;
       mp3WidgetFrame.src = `https://loader.to/api/button/?url=${encodeURIComponent(ytUrl)}&f=mp3&color=ff0000`;
-
+      
       mp3Overlay.style.display = 'flex';
     }
 
@@ -4865,6 +4889,7 @@
       directStreamBtn.innerText = "음원 스트림 추출 중...";
       try {
         const { data } = await smartFetch(`/streams/${currentVideoId}`);
+        // 최고 음질 오디오 스트림 선별
         const sortedAudio = (data.audioStreams || []).sort((a, b) => (b.bitrate || 0) - (a.bitrate || 0));
         const bestStream = sortedAudio[0];
 
@@ -4999,7 +5024,7 @@
       }
     });
 
-    // 슬라이드 책갈피 (스크롤 시 상시 표시 / 70% 투명 / 좌우 이동 / ♪·▶·🎧·MP3·⚙)
+    // 슬라이드 책갈피 (스크롤 시 상시 표시 / 70% 투명 / 좌우 이동 / ⚙·🎧·MP3·▶깜박)
     let savedBookmarkPos = null;
 
     function updateSlideBookmarkPlayUI() {
@@ -5116,7 +5141,6 @@
       updateSlideBookmarkPlayUI();
     }
 
-    // 통합 스크롤 리스너 (피드 오터치 둔화 타임스탬프 갱신 + 슬라이드 책갈피 자동 노출)
     window.addEventListener('scroll', () => {
       lastFeedScrollTime = Date.now();
       if (!slideBookmarkVisible && currentUser && window.scrollY > 12) {
@@ -5242,6 +5266,7 @@
         lastMoveX = e.clientX;
         lastMoveTime = now;
 
+        // 좌/우는 제한 없이 화면 밖으로 날릴 수 있게 허용
         modal.style.left = `${initLeft + dx}px`;
         modal.style.top = `${Math.max(-30, Math.min(window.innerHeight - 55, initTop + dy))}px`;
         return;
@@ -5257,6 +5282,7 @@
 
         const dims = apply16by9Scale(targetW);
 
+        // 좌측/상단 모서리 조작 시 반대편 우측/하단 모서리를 제자리에 고정
         if (resizeDir.includes('l')) {
           modal.style.left = `${initLeft + startW - dims.width}px`;
         }
@@ -5272,11 +5298,13 @@
         modal.classList.remove('interacting');
         const rect = modal.getBoundingClientRect();
 
+        // 창의 절반 가까이 좌/우 화면 바깥으로 나가거나 빠르게 좌/우로 날렸을 때 책갈피로 도킹
         if (rect.left + rect.width * 0.45 < 0 || (velocityX < -0.65 && rect.left < 28)) {
           dockPlayerToBookmark('left');
         } else if (rect.right - rect.width * 0.45 > window.innerWidth || (velocityX > 0.65 && rect.right > window.innerWidth - 28)) {
           dockPlayerToBookmark('right');
         } else {
+          // 화면 안에 머물렀다면 상단 이탈만 부드럽게 보정
           if (rect.top < 0) modal.style.top = '4px';
         }
       }
