@@ -180,19 +180,6 @@
       border-radius: 5px;
       cursor: pointer;
     }
-    /* 2차 설정 Code 창 공용 입력 기본 스타일 보존 */
-    .auth-gate-input {
-      padding: 8px 10px;
-      border-radius: 7px;
-      border: 1px solid #333;
-      background: #101012;
-      color: #fff;
-      font-size: 13px;
-      letter-spacing: 3px;
-      text-align: center;
-      outline: none;
-    }
-    .auth-gate-input:focus { border-color: #f472b6; }
     .auth-gate-btn {
       width: 100%;
       height: 35px;
@@ -208,12 +195,6 @@
       transition: opacity 0.12s, transform 0.1s;
     }
     .auth-gate-btn:active { opacity: 0.85; transform: scale(0.97); }
-    .auth-gate-err {
-      min-height: 13px;
-      margin-top: 5px;
-      font-size: 10.5px;
-      color: #ff6b6b;
-    }
 
     /* 설정 진입 2차 단일 점선 코드창 (초기 로그인 동일 크기 156×36) */
     #settings-auth-overlay {
@@ -524,7 +505,7 @@
       transition: max-height 0.28s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.22s ease, margin-top 0.22s ease;
     }
     .tab-history-drawer.open {
-      max-height: 230px;
+      max-height: 390px;
       opacity: 1;
       margin-top: 6px;
     }
@@ -533,7 +514,7 @@
       color: var(--filter-panel-fg);
       border: 1px solid var(--header-border-color);
       border-radius: 9px;
-      padding: 7px 9px;
+      padding: 8px 10px;
       box-shadow: 0 10px 24px rgba(0, 0, 0, 0.68);
     }
     .tab-history-head {
@@ -541,24 +522,24 @@
       align-items: center;
       justify-content: space-between;
       gap: 6px;
-      padding-bottom: 5px;
+      padding-bottom: 6px;
       margin-bottom: 4px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-      font-size: 10.5px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+      font-size: 12.5px;
       font-weight: 700;
     }
     .tab-history-close {
-      padding: 2px 8px;
+      padding: 3px 9px;
       border-radius: 5px;
       border: none;
       background: #ffffff;
       color: #111111;
-      font-size: 10px;
+      font-size: 11px;
       font-weight: 700;
       cursor: pointer;
     }
     .tab-history-items {
-      max-height: 170px;
+      max-height: 325px;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
       touch-action: pan-y;
@@ -566,18 +547,19 @@
     .tab-history-row {
       display: flex;
       align-items: center;
-      gap: 6px;
-      padding: 6px 4px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      gap: 8px;
+      padding: 8px 4px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.09);
       cursor: pointer;
-      font-size: 11.5px;
-      line-height: 1.25;
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1.3;
       color: var(--filter-panel-fg);
     }
     .tab-history-row:last-child { border-bottom: none; }
     .tab-history-row:active { background: rgba(255, 255, 255, 0.12); border-radius: 4px; }
     .tab-history-play {
-      font-size: 9px;
+      font-size: 11px;
       color: var(--header-border-color);
       flex-shrink: 0;
     }
@@ -587,6 +569,28 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+    .tab-history-del {
+      width: 26px;
+      height: 26px;
+      border: none;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--filter-panel-fg);
+      opacity: 0.72;
+      font-size: 14px;
+      font-weight: 800;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      padding: 0;
+    }
+    .tab-history-del:active {
+      opacity: 1;
+      background: rgba(255, 255, 255, 0.16);
     }
     /* 유튜브 로고 스타일 붉은 검색 버튼 + 실시간 4단계 상태 애니메이션 */
     button.search-btn {
@@ -1650,6 +1654,55 @@
     .video-meta-size { display: none; }
     .video-grid.cols-1 .video-meta-size { display: inline; }
 
+    /* 대형 1열 창 (좌우 꽉 찬 16:9 풀사이즈 · 터치 시 부유창 없이 그 자리 바로 재생) */
+    .video-grid.grid-full {
+      grid-template-columns: 1fr;
+      gap: 10px;
+      width: calc(100% + 20px);
+      margin-left: -10px;
+      margin-right: -10px;
+    }
+    .video-grid.grid-full .video-card {
+      border-radius: 0;
+      width: 100%;
+    }
+    .video-grid.grid-full .card-info {
+      padding: 8px 12px 9px 12px;
+    }
+    .video-grid.grid-full .video-title {
+      font-size: 13.5px;
+      font-weight: 600;
+      line-height: 1.35;
+      -webkit-line-clamp: 2;
+    }
+    .video-grid.grid-full .video-meta {
+      font-size: 11px;
+      margin-top: 4px;
+    }
+    .video-grid.grid-full .video-meta-size {
+      display: inline;
+    }
+    .video-grid.grid-full .thumb-wrapper iframe.inline-yt-frame {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+      z-index: 3;
+      background: #000;
+    }
+    .video-grid.grid-full .video-card.playing-card,
+    .video-grid.grid-full .video-card.inline-playing {
+      border: 1px solid var(--header-border-color);
+      box-shadow: none;
+      outline: none;
+      border-radius: 0;
+    }
+    .video-grid.grid-full .video-card.inline-playing .star-pin-btn {
+      display: none;
+    }
+
     /* 3. [핵심] 16:9 원본 밀착형 부유창 */
     #floating-player-modal {
       position: fixed;
@@ -2294,7 +2347,7 @@
         <div class="tabs-scroll-area" id="savedTabsList"></div>
         <div class="layout-mode-controls">
           <button type="button" class="layout-emoji-btn" id="listModeBtn" onclick="setFeedListMode()" title="목록 보기"></button>
-          <button type="button" class="layout-emoji-btn" id="gridModeBtn" onclick="cycleFeedGridCols()" title="창 보기 (2→3→4)"></button>
+          <button type="button" class="layout-emoji-btn" id="gridModeBtn" onclick="cycleFeedGridCols()" title="창 보기 (1→2→3→4)"></button>
         </div>
       </div>
     </div>
@@ -2750,6 +2803,9 @@
     let pendingPlayTrack = null;
     let slideBookmarkVisible = false;
     let lockedBgScrollY = 0;
+    let isInlinePlaying = false;
+    let inlineVideoId = '';
+    let activeDrawerDocId = '';
 
     function isAdminUser() { return !!(currentUser && currentUser.role === 'admin'); }
     function getUid() { return currentUser ? currentUser.id : 'guest'; }
@@ -2942,6 +2998,7 @@
 
     // 재생창 동작 중 설정/조건/검색 등 조작 시 책갈피로 즉시 도킹
     function autoDockPlayerIfOpen() {
+      if (isInlinePlaying) return;
       if (currentVideoId && !isDockedToBookmark && modal.style.display !== 'none' && !modal.classList.contains('docked-hidden')) {
         dockPlayerToBookmark(dockSide || 'right');
       }
@@ -3094,6 +3151,12 @@
     }
 
     function getGridColsSvg(cols) {
+      if (cols === 1) {
+        // 1개: 둥근 큰 사각창 1개 (좌우 꽉 찬 대형 피드)
+        return '<svg viewBox="0 0 20 20" width="20" height="20" fill="currentColor">' +
+          '<rect x="2.5" y="3.5" width="15" height="13" rx="2.5"/>' +
+          '</svg>';
+      }
       if (cols === 2) {
         // 2개: 둥근 회색 사각창 나란히 ㅁㅁ
         return '<svg viewBox="0 0 20 20" width="20" height="20" fill="currentColor">' +
@@ -3129,9 +3192,9 @@
       }
     }
 
-    // 피드 레이아웃 전환 (목록 1열 / 창 2->3->4 순환 · 유저별 완전 분리)
+    // 피드 레이아웃 전환 (목록 1열 / 창 1->2->3->4 순환 · 유저별 완전 분리)
     function applyFeedLayoutUI(saveToCloud = false) {
-      resultsContainer.classList.remove('cols-1', 'cols-2', 'cols-3', 'cols-4');
+      resultsContainer.classList.remove('cols-1', 'cols-2', 'cols-3', 'cols-4', 'grid-full');
       const listBtn = document.getElementById('listModeBtn');
       const gridBtn = document.getElementById('gridModeBtn');
 
@@ -3143,7 +3206,11 @@
         if (listBtn) listBtn.classList.add('active');
         if (gridBtn) gridBtn.classList.remove('active');
       } else {
-        resultsContainer.classList.add(`cols-${currentGridCols}`);
+        if (currentGridCols === 1) {
+          resultsContainer.classList.add('grid-full');
+        } else {
+          resultsContainer.classList.add(`cols-${currentGridCols}`);
+        }
         if (listBtn) listBtn.classList.remove('active');
         if (gridBtn) gridBtn.classList.add('active');
       }
@@ -3170,7 +3237,7 @@
             if (parsed && (parsed.mode === 'list' || parsed.mode === 'grid')) {
               currentFeedMode = parsed.mode;
             }
-            if (parsed && [2, 3, 4].includes(Number(parsed.cols))) {
+            if (parsed && [1, 2, 3, 4].includes(Number(parsed.cols))) {
               currentGridCols = Number(parsed.cols);
             }
           }
@@ -3180,17 +3247,22 @@
     }
 
     function setFeedListMode() {
+      if (isInlinePlaying) stopInlinePlayer(true);
       currentFeedMode = 'list';
       applyFeedLayoutUI(true);
       triggerLayoutHaptic(document.getElementById('listModeBtn'));
     }
 
     function cycleFeedGridCols() {
+      const wasFullGrid = (currentFeedMode === 'grid' && currentGridCols === 1);
       if (currentFeedMode === 'list') {
         currentFeedMode = 'grid';
-        currentGridCols = 2; // 처음 2개부터 시작
+        currentGridCols = 1; // 1(대형창)부터 시작
       } else {
-        currentGridCols = currentGridCols >= 4 ? 2 : (currentGridCols + 1); // 2 -> 3 -> 4 -> 2
+        currentGridCols = currentGridCols >= 4 ? 1 : (currentGridCols + 1); // 1 -> 2 -> 3 -> 4 -> 1
+      }
+      if (wasFullGrid && currentGridCols !== 1 && isInlinePlaying) {
+        stopInlinePlayer(true);
       }
       applyFeedLayoutUI(true);
       triggerLayoutHaptic(document.getElementById('gridModeBtn'));
@@ -3581,6 +3653,7 @@
 
       closeFilterPanel();
       closeTabHistoryDrawer();
+      if (isInlinePlaying) stopInlinePlayer(true);
       isSearching = true;
       isLoadingMore = false;
       setWorkingState(true);
@@ -3701,7 +3774,7 @@
 
         activeSearchSession.nextpage = nextPage || null;
         activeSearchSession.exhausted = !nextPage || currentFeedItems.length >= MAX_TAB_ITEMS;
-        renderSortedFeed();
+        renderSortedFeed(isInlinePlaying);
 
         if (currentSearchCollected.length > 0) {
           await saveSearchTab(query, currentSearchCollected);
@@ -3759,7 +3832,7 @@
       });
 
       if (!deferRender) {
-        renderSortedFeed();
+        renderSortedFeed(isInlinePlaying);
       }
     }
 
@@ -3928,7 +4001,88 @@
       }
     }
 
-    function renderSortedFeed() {
+    function createFeedCardElement(item) {
+      const isPinned = pinnedVideoIds.has(item.id);
+      const isPlaying = !!(currentVideoId && currentVideoId === item.id);
+      const card = document.createElement('div');
+      card.className = 'video-card' + (isPinned ? ' pinned-card' : '') + (isPlaying ? ' playing-card' : '');
+      card.dataset.vid = item.id;
+      attachDampedCardTap(card, () => {
+        if (currentFeedMode === 'grid' && currentGridCols === 1) {
+          openInlinePlayer(card, item);
+        } else {
+          openPlayerModal(item.id, item.t);
+        }
+      });
+
+      const thumbWrap = document.createElement('div');
+      thumbWrap.className = 'thumb-wrapper';
+
+      const img = document.createElement('img');
+      img.src = getFastThumbUrl(item.id);
+      img.loading = 'lazy';
+      img.decoding = 'async';
+      img.onerror = function() { this.onerror = null; this.src = FALLBACK_THUMB; };
+      thumbWrap.appendChild(img);
+
+      const starBtn = document.createElement('button');
+      starBtn.type = 'button';
+      starBtn.className = 'star-pin-btn' + (isPinned ? ' pinned' : '');
+      starBtn.textContent = isPinned ? '★' : '☆';
+      starBtn.title = isPinned ? '상단 고정 해제' : '최상단 고정';
+      starBtn.onclick = (e) => {
+        e.stopPropagation();
+        togglePinVideo(item.id);
+      };
+      thumbWrap.appendChild(starBtn);
+
+      const info = document.createElement('div');
+      info.className = 'card-info';
+      const titleEl = document.createElement('div');
+      titleEl.className = 'video-title';
+      titleEl.textContent = item._clean;
+      titleEl.title = item.t;
+      info.appendChild(titleEl);
+
+      const metaEl = document.createElement('div');
+      metaEl.className = 'video-meta';
+      metaEl.textContent = formatFeedMeta(item.u, item.v);
+      const estSize = estimateVideoFileSize(item.d, item.q);
+      if (estSize) {
+        const sizeSpan = document.createElement('span');
+        sizeSpan.className = 'video-meta-size';
+        sizeSpan.textContent = ' · ' + estSize;
+        metaEl.appendChild(sizeSpan);
+      }
+      info.appendChild(metaEl);
+
+      card.appendChild(thumbWrap);
+      card.appendChild(info);
+      return card;
+    }
+
+    function renderSortedFeed(preserveInlineDom = false) {
+      // 인라인 재생 중 추가 50개 스크롤 로드 시 기존 재생 카드 DOM 유지 (영상 끊김 방지)
+      if (preserveInlineDom && isInlinePlaying && resultsContainer.children.length > 0) {
+        const existingVids = new Set();
+        resultsContainer.querySelectorAll('.video-card').forEach(c => {
+          if (c.dataset.vid) existingVids.add(c.dataset.vid);
+        });
+        const frag = document.createDocumentFragment();
+        currentFeedItems.forEach(item => {
+          if (!existingVids.has(item.id)) {
+            frag.appendChild(createFeedCardElement(item));
+          }
+        });
+        resultsContainer.appendChild(frag);
+        updateScrollSentinelUI();
+        return;
+      }
+
+      if (isInlinePlaying) {
+        stopInlinePlayer(true);
+      }
+
       // 정렬은 현재 불러온 범위(currentFeedItems) 내에서만 적용
       const sorted = [...currentFeedItems].sort((a, b) => {
         const aPin = pinnedVideoIds.has(a.id) ? 1 : 0;
@@ -3950,61 +4104,7 @@
 
       resultsContainer.innerHTML = '';
       const frag = document.createDocumentFragment();
-
-      sorted.forEach(item => {
-        const isPinned = pinnedVideoIds.has(item.id);
-        const isPlaying = !!(currentVideoId && currentVideoId === item.id);
-        const card = document.createElement('div');
-        card.className = 'video-card' + (isPinned ? ' pinned-card' : '') + (isPlaying ? ' playing-card' : '');
-        card.dataset.vid = item.id;
-        attachDampedCardTap(card, () => openPlayerModal(item.id, item.t));
-
-        const thumbWrap = document.createElement('div');
-        thumbWrap.className = 'thumb-wrapper';
-
-        const img = document.createElement('img');
-        img.src = getFastThumbUrl(item.id);
-        img.loading = 'lazy';
-        img.decoding = 'async';
-        img.onerror = function() { this.onerror = null; this.src = FALLBACK_THUMB; };
-        thumbWrap.appendChild(img);
-
-        const starBtn = document.createElement('button');
-        starBtn.type = 'button';
-        starBtn.className = 'star-pin-btn' + (isPinned ? ' pinned' : '');
-        starBtn.textContent = isPinned ? '★' : '☆';
-        starBtn.title = isPinned ? '상단 고정 해제' : '최상단 고정';
-        starBtn.onclick = (e) => {
-          e.stopPropagation();
-          togglePinVideo(item.id);
-        };
-        thumbWrap.appendChild(starBtn);
-
-        const info = document.createElement('div');
-        info.className = 'card-info';
-        const titleEl = document.createElement('div');
-        titleEl.className = 'video-title';
-        titleEl.textContent = item._clean;
-        titleEl.title = item.t;
-        info.appendChild(titleEl);
-
-        const metaEl = document.createElement('div');
-        metaEl.className = 'video-meta';
-        metaEl.textContent = formatFeedMeta(item.u, item.v);
-        const estSize = estimateVideoFileSize(item.d, item.q);
-        if (estSize) {
-          const sizeSpan = document.createElement('span');
-          sizeSpan.className = 'video-meta-size';
-          sizeSpan.textContent = ' · ' + estSize;
-          metaEl.appendChild(sizeSpan);
-        }
-        info.appendChild(metaEl);
-
-        card.appendChild(thumbWrap);
-        card.appendChild(info);
-        frag.appendChild(card);
-      });
-
+      sorted.forEach(item => frag.appendChild(createFeedCardElement(item)));
       resultsContainer.appendChild(frag);
       updateScrollSentinelUI();
     }
@@ -4136,11 +4236,90 @@
     }
 
     function sendYtCommand(func, args = []) {
-      const frame = document.getElementById('ytPlayerFrame');
+      const frame = isInlinePlaying
+        ? document.getElementById('inlineYtPlayerFrame')
+        : document.getElementById('ytPlayerFrame');
       if (!frame || !frame.contentWindow) return;
       try {
         frame.contentWindow.postMessage(JSON.stringify({ event: 'command', func, args }), '*');
       } catch (e) {}
+    }
+
+    function stopInlinePlayer(resetTrackState = true) {
+      const existing = document.getElementById('inlineYtPlayerFrame');
+      if (existing) existing.remove();
+      resultsContainer.querySelectorAll('.video-card.inline-playing').forEach(el => {
+        el.classList.remove('inline-playing', 'playing-card');
+      });
+      isInlinePlaying = false;
+      inlineVideoId = '';
+      if (resetTrackState) {
+        stopBgAudioClean();
+        isYtVideoPlaying = false;
+        lastKnownPlaySec = 0;
+        currentVideoId = '';
+        currentVideoTitle = '';
+        updateBgModeUI();
+        updateSearchBtnState();
+        updateSlideBookmarkPlayUI();
+      }
+    }
+
+    function openInlinePlayer(cardEl, item) {
+      if (!cardEl || !item || !item.id) return;
+      if (isInlinePlaying && inlineVideoId === item.id && cardEl.classList.contains('inline-playing')) return;
+
+      // 열려 있던 부유창 또는 이전 인라인 재생 정리 (소리 겹침 원천 차단)
+      if (!isInlinePlaying && (currentVideoId || modal.style.display !== 'none')) {
+        closePlayerModal();
+      } else if (isInlinePlaying) {
+        stopInlinePlayer(false);
+      }
+
+      unlockIosAudioOnce();
+      stopBgAudioClean();
+      isInlinePlaying = true;
+      inlineVideoId = item.id;
+      isDockedToBookmark = false;
+      isYtVideoPlaying = false;
+      lastKnownPlaySec = 0;
+      currentVideoId = item.id;
+      currentVideoTitle = item.t;
+
+      const thumbWrap = cardEl.querySelector('.thumb-wrapper');
+      if (thumbWrap) {
+        const originParam = (location.protocol === 'http:' || location.protocol === 'https:') ? ('&origin=' + encodeURIComponent(location.origin)) : '';
+        const frame = document.createElement('iframe');
+        frame.id = 'inlineYtPlayerFrame';
+        frame.className = 'inline-yt-frame';
+        frame.src = 'https://www.youtube-nocookie.com/embed/' + item.id + '?autoplay=1&controls=1&fs=1&enablejsapi=1&modestbranding=1&rel=0&playsinline=1&iv_load_policy=3&cc_load_policy=0&disablekb=1' + originParam;
+        frame.allow = 'autoplay; encrypted-media; fullscreen; picture-in-picture';
+        frame.allowFullscreen = true;
+        frame.addEventListener('load', () => {
+          try {
+            frame.contentWindow.postMessage(JSON.stringify({ event: 'listening', id: 2 }), '*');
+            frame.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'addEventListener', args: ['onError'] }), '*');
+            frame.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'addEventListener', args: ['onStateChange'] }), '*');
+            frame.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'playVideo', args: [] }), '*');
+          } catch (e) {}
+        });
+        thumbWrap.appendChild(frame);
+      }
+
+      resultsContainer.querySelectorAll('.video-card.playing-card').forEach(el => {
+        if (el !== cardEl) el.classList.remove('playing-card', 'inline-playing');
+      });
+      cardEl.classList.add('inline-playing', 'playing-card');
+
+      closeTabHistoryDrawer();
+      closeFilterPanel();
+      updateSearchBtnState();
+      revealSlideBookmark(SB_IDLE_HIDE_MS);
+      updateBgModeUI();
+      updateSlideBookmarkPlayUI();
+      setupMediaSession(item.t, item.id);
+      prefetchPromise = prefetchBgAudio(item.id);
+      recordUserPlay(item.id, item.t);
     }
 
     // iOS Safari / 홈화면 PWA 오디오 제스처 선행 잠금해제 (사용자 터치 내부에서 실행)
@@ -4364,6 +4543,7 @@
     }
 
     function openPlayerModal(videoId, title) {
+      if (isInlinePlaying) stopInlinePlayer(false);
       unlockIosAudioOnce();
       stopBgAudioClean();
       isDockedToBookmark = false;
@@ -4662,19 +4842,6 @@
         recordDbError(err);
         return { ok: false, error: lastDbErrorMsg || '저장 실패' };
       }
-    }
-
-    function findUserByCode(code) {
-      const clean = String(code || '').trim();
-      if (!clean) return null;
-      if (_v4(clean, authData.adminCode)) {
-        return { role: 'admin', id: 'admin', name: '관리자', code: _p4(clean) };
-      }
-      const matched = (authData.users || []).find(u => u && _v4(clean, u.code));
-      if (matched) {
-        return { role: 'user', id: matched.id, name: matched.name || matched.id, code: _p4(clean) };
-      }
-      return null;
     }
 
     function findUserByNameAndCode(name, code) {
@@ -5135,7 +5302,7 @@
 
           if (layoutEntry) {
             if (layoutEntry.mode === 'list' || layoutEntry.mode === 'grid') currentFeedMode = layoutEntry.mode;
-            if ([2, 3, 4].includes(Number(layoutEntry.cols))) currentGridCols = Number(layoutEntry.cols);
+            if ([1, 2, 3, 4].includes(Number(layoutEntry.cols))) currentGridCols = Number(layoutEntry.cols);
             applyFeedLayoutUI(false);
           }
 
@@ -5172,7 +5339,7 @@
       }
     }
 
-    const MAX_TAB_HISTORY = 25;
+    const MAX_TAB_HISTORY = 7;
 
     function normalizeTabHist(arr) {
       if (!Array.isArray(arr)) return [];
@@ -5378,6 +5545,7 @@
     }
 
     function closeTabHistoryDrawer() {
+      activeDrawerDocId = '';
       const drawer = document.getElementById('tabHistoryDrawer');
       if (drawer) drawer.classList.remove('open');
     }
@@ -5388,16 +5556,17 @@
       const itemsEl = document.getElementById('tabHistoryItems');
       if (!drawer || !itemsEl) return;
 
-      const hist = normalizeTabHist(tab && tab.hist);
+      const hist = normalizeTabHist(tab && tab.hist).slice(0, MAX_TAB_HISTORY);
       if (hist.length === 0) {
-        drawer.classList.remove('open');
+        closeTabHistoryDrawer();
         return;
       }
 
+      activeDrawerDocId = tab.docId;
       closeFilterPanel();
       autoDockPlayerIfOpen();
 
-      if (titleEl) titleEl.textContent = `${tab.keyword} · 재생목록 (${hist.length})`;
+      if (titleEl) titleEl.textContent = `${tab.keyword} · 재생목록 (${hist.length}/${MAX_TAB_HISTORY})`;
       itemsEl.innerHTML = '';
       hist.forEach(item => {
         const row = document.createElement('div');
@@ -5406,6 +5575,14 @@
           closeTabHistoryDrawer();
           activeTabKeyword = tab.keyword;
           renderSavedTabsBar();
+          if (currentFeedMode === 'grid' && currentGridCols === 1) {
+            const matchedCard = resultsContainer.querySelector('.video-card[data-vid="' + item.id + '"]');
+            if (matchedCard) {
+              matchedCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              openInlinePlayer(matchedCard, { id: item.id, t: item.t });
+              return;
+            }
+          }
           openPlayerModal(item.id, item.t);
         };
 
@@ -5417,8 +5594,19 @@
         name.className = 'tab-history-name';
         name.textContent = item.t;
 
+        const delBtn = document.createElement('button');
+        delBtn.type = 'button';
+        delBtn.className = 'tab-history-del';
+        delBtn.textContent = '✕';
+        delBtn.title = '재생목록에서 삭제';
+        delBtn.onclick = (e) => {
+          e.stopPropagation();
+          deleteTabHistoryItem(tab.docId, item.id);
+        };
+
         row.appendChild(icon);
         row.appendChild(name);
+        row.appendChild(delBtn);
         itemsEl.appendChild(row);
       });
 
@@ -5533,6 +5721,7 @@
     }
 
     function renderDbTabItems(items, keyword) {
+      if (isInlinePlaying) stopInlinePlayer(true);
       activeTabKeyword = keyword;
       document.getElementById('query').value = keyword;
       currentFeedItems = [];
@@ -5661,7 +5850,12 @@
       if (!tab || !Array.isArray(tab.hist)) return;
       tab.hist = tab.hist.filter(h => h && h.id !== videoId);
       saveLocalMetaBackup(cachedTabsMeta);
-      renderManageList();
+      if (manageOverlay.style.display === 'flex') renderManageList();
+      const drawer = document.getElementById('tabHistoryDrawer');
+      if (drawer && drawer.classList.contains('open') && activeDrawerDocId === docId) {
+        if (tab.hist.length > 0) openTabHistoryDrawer(tab);
+        else closeTabHistoryDrawer();
+      }
       syncTabsIndexToCloud();
     }
 
@@ -5955,6 +6149,10 @@
     bootstrapApp();
 
     function closePlayerModal() {
+      if (isInlinePlaying) {
+        stopInlinePlayer(true);
+        return;
+      }
       ytFrameReady = false;
       stopBgAudioClean();
       isYtVideoPlaying = false;
@@ -6151,7 +6349,7 @@
               updateSlideBookmarkPlayUI();
             } else if (msg.info.playerState === 2 || msg.info.playerState === 0) {
               isYtVideoPlaying = false;
-              if (!isBgAudioPlaying && !isDockedToBookmark && currentVideoId) {
+              if (!isBgAudioPlaying && !isDockedToBookmark && !isInlinePlaying && currentVideoId) {
                 showYtPauseMask();
               }
               updateSearchBtnState();
@@ -6291,6 +6489,13 @@
 
     function togglePlayerFromNote() {
       if (!currentVideoId) return;
+      if (isInlinePlaying) {
+        const activeCard = resultsContainer.querySelector('.video-card.inline-playing');
+        if (activeCard && activeCard.scrollIntoView) {
+          activeCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        return;
+      }
       const isHidden = isDockedToBookmark || modal.style.display === 'none' || modal.classList.contains('docked-hidden');
       if (isHidden) {
         restorePlayerFromBookmark();
