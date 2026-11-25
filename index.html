@@ -201,7 +201,7 @@
     }
     .auth-gate-btn:active { opacity: 0.85; transform: scale(0.97); }
 
-    /* 설정 진입 2차 단일 점선 코드창 (초기 로그인 동일 크기 156×36) */
+    /* 설정 진입 2차 단일 점선 코드창 */
     #settings-auth-overlay {
       position: fixed;
       inset: 0;
@@ -308,7 +308,7 @@
     }
     .header-gear-btn:active { background: #333; }
 
-    /* 검색조건 토글 버튼 (테두리 삭제 · 선택 시에도 사용자 지정색 유지) */
+    /* 검색조건 토글 버튼 */
     .filter-toggle-btn {
       flex: 1;
       min-width: 0;
@@ -371,7 +371,6 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    /* 검색조건 2열 고정 + 문자열 1줄(nowrap) 강제 */
     .filter-check-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -394,9 +393,7 @@
       white-space: nowrap;
       overflow: hidden;
     }
-    .filter-check-item span {
-      white-space: nowrap;
-    }
+    .filter-check-item span { white-space: nowrap; }
     .filter-check-item input[type="checkbox"] {
       accent-color: #111111;
       width: 14px;
@@ -415,16 +412,7 @@
       justify-content: flex-end;
       gap: 6px;
     }
-    .filter-reset-btn {
-      padding: 5px 10px;
-      border-radius: 6px;
-      border: none;
-      background: #ffffff;
-      color: #111111;
-      font-size: 11px;
-      font-weight: 700;
-      cursor: pointer;
-    }
+    .filter-reset-btn,
     .filter-apply-btn {
       padding: 5px 12px;
       border-radius: 6px;
@@ -504,6 +492,7 @@
       -webkit-appearance: none;
       appearance: none;
     }
+
     /* 검색어 1회 터치 시 부드럽게 슬라이드 다운되는 재생목록 드롭다운 */
     .tab-history-drawer {
       max-height: 0;
@@ -512,9 +501,7 @@
       margin-top: 0;
       transition: max-height 0.28s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.22s ease, margin-top 0.22s ease;
     }
-    .tab-history-drawer.instant-close {
-      transition: none !important;
-    }
+    .tab-history-drawer.instant-close { transition: none !important; }
     .tab-history-drawer.open {
       max-height: 310px;
       opacity: 1;
@@ -603,7 +590,8 @@
       opacity: 1;
       background: rgba(255, 255, 255, 0.16);
     }
-    /* 유튜브 로고 스타일 붉은 검색 버튼 + 실시간 4단계 상태 애니메이션 */
+
+    /* 유튜브 로고 스타일 붉은 검색 버튼 */
     button.search-btn {
       width: 38px;
       height: 31px;
@@ -635,7 +623,7 @@
       animation: ytWorkBlink 0.65s ease-in-out infinite;
     }
 
-    /* 1-2. 2행: 검색창 바로 밑 가로 실선 구분 + 검색어(세로점선·하단각주·2단계터치) + 우측 이모지 밀착 */
+    /* 1-2. 2행: 가로 점선 구분 + 검색어 + 우측 이모지 */
     .header-mid-divider {
       width: 100%;
       height: 0;
@@ -693,9 +681,7 @@
       pointer-events: none;
     }
     .history-tab.tab-selected::after,
-    .history-tab.tab-loaded::after {
-      opacity: 0.2;
-    }
+    .history-tab.tab-loaded::after { opacity: 0.2; }
     .tab-kw-text {
       font-size: 11px;
       font-weight: 700;
@@ -712,7 +698,6 @@
       font-variant-numeric: tabular-nums;
       white-space: nowrap;
     }
-    /* 1회 터치 시 둥근 선택창 + 색상지정 배경 + 살짝 확대 */
     .history-tab.tab-selected {
       background: var(--tab-selected-bg);
       color: var(--tab-selected-fg);
@@ -727,7 +712,7 @@
       text-underline-offset: 2px;
     }
 
-    /* 우측 피드 나열 전환 이모지 2개 (우측 밀착 + 좌측 슬롯 음영으로 검색어 끼워들어감 연출) */
+    /* 우측 피드 나열 전환 이모지 2개 */
     .layout-mode-controls {
       position: relative;
       z-index: 3;
@@ -768,9 +753,7 @@
       65% { transform: scale(1.12) rotate(4deg); }
       100% { transform: scale(1) rotate(0deg); }
     }
-    .layout-emoji-btn.haptic-pop {
-      animation: hapticPop 0.24s ease;
-    }
+    .layout-emoji-btn.haptic-pop { animation: hapticPop 0.24s ease; }
     body.light-bg { color: #161616; }
     body.light-bg .status-bar { color: #3d3d3d; }
 
@@ -783,7 +766,7 @@
       min-height: 0;
     }
 
-    /* 6. 설정 모달 (모바일/태블릿 자동맞춤 · 높이 고정 · 스크롤 최소 · 하단 적용후 닫기) */
+    /* 6. 설정 모달 */
     #manage-modal-overlay {
       position: fixed;
       inset: 0;
@@ -867,13 +850,9 @@
       flex-direction: column;
       overflow: hidden;
     }
-    .settings-pane.active {
-      display: flex;
-    }
+    .settings-pane.active { display: flex; }
     .settings-pane::-webkit-scrollbar,
-    .manage-list::-webkit-scrollbar {
-      width: 5px;
-    }
+    .manage-list::-webkit-scrollbar { width: 5px; }
     .settings-pane::-webkit-scrollbar-track,
     .manage-list::-webkit-scrollbar-track {
       background: rgba(255, 255, 255, 0.05);
@@ -1048,22 +1027,14 @@
       margin-right: 5px;
     }
     .auth-user-name { font-size: 13px; font-weight: 700; color: #fff; }
-    .auth-stats-row {
-      font-size: 10.5px;
-      color: #aaa;
-      margin-top: 3px;
-    }
+    .auth-stats-row { font-size: 10.5px; color: #aaa; margin-top: 3px; }
     .settings-sec-title {
       font-size: 11px;
       font-weight: 700;
       color: #bbb;
       margin: 10px 0 6px 0;
     }
-    .auth-form-row {
-      display: flex;
-      gap: 5px;
-      margin-bottom: 8px;
-    }
+    .auth-form-row { display: flex; gap: 5px; margin-bottom: 8px; }
     .auth-form-input {
       flex: 1;
       min-width: 0;
@@ -1092,7 +1063,8 @@
       margin-top: 10px;
       padding-top: 8px;
     }
-    /* 설정 > 색상변경: 디테일 14모듈 미니 레이아웃 (모바일 고정 · 1줄 nowrap · 스크롤 0) */
+
+    /* 설정 > 색상변경: 디테일 14모듈 미니 레이아웃 */
     .mini-theme-layout {
       background: var(--app-bg);
       border: 1px solid rgba(255, 255, 255, 0.3);
@@ -1197,12 +1169,7 @@
       padding: 0 5px;
       gap: 4px;
     }
-    .ml-tabs-group {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      min-width: 0;
-    }
+    .ml-tabs-group { display: inline-flex; align-items: center; gap: 4px; min-width: 0; }
     .ml-tab-plain {
       font-size: 8.5px;
       font-weight: 700;
@@ -1282,18 +1249,9 @@
       justify-content: center;
       padding: 0 2px;
     }
-    .ml-filter-panel {
-      background: var(--filter-panel-bg);
-      color: var(--filter-panel-fg);
-    }
-    .ml-history-panel {
-      background: var(--history-panel-bg);
-      color: var(--history-panel-fg);
-    }
-    .ml-settings-panel {
-      background: var(--settings-modal-bg);
-      color: var(--settings-modal-fg);
-    }
+    .ml-filter-panel { background: var(--filter-panel-bg); color: var(--filter-panel-fg); }
+    .ml-history-panel { background: var(--history-panel-bg); color: var(--history-panel-fg); }
+    .ml-settings-panel { background: var(--settings-modal-bg); color: var(--settings-modal-fg); }
     .ml-feed-card {
       height: 28px;
       border-radius: 5px;
@@ -1351,9 +1309,7 @@
       text-decoration-style: dotted;
       text-underline-offset: 2px;
     }
-    .ui-opt-lbl.clickable-mod.mod-active {
-      color: #f9a8d4;
-    }
+    .ui-opt-lbl.clickable-mod.mod-active { color: #f9a8d4; }
     .ui-opt-btns {
       display: inline-flex;
       align-items: center;
@@ -1377,11 +1333,7 @@
       border-color: #ffffff;
       color: #111111;
     }
-    .ui-opt-sep {
-      font-size: 10px;
-      color: #52525b;
-      margin: 0 1px;
-    }
+    .ui-opt-sep { font-size: 10px; color: #52525b; margin: 0 1px; }
     .color-preview-bar {
       display: flex;
       align-items: center;
@@ -1394,18 +1346,8 @@
       margin-bottom: 5px;
       flex-shrink: 0;
     }
-    .color-preview-left {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      min-width: 0;
-    }
-    .color-mod-badge {
-      font-size: 10px;
-      font-weight: 700;
-      color: #f9a8d4;
-      white-space: nowrap;
-    }
+    .color-preview-left { display: flex; align-items: center; gap: 5px; min-width: 0; }
+    .color-mod-badge { font-size: 10px; font-weight: 700; color: #f9a8d4; white-space: nowrap; }
     .color-swatch-cur {
       width: 15px;
       height: 15px;
@@ -1421,11 +1363,7 @@
       text-transform: uppercase;
       white-space: nowrap;
     }
-    .color-preview-actions {
-      display: flex;
-      gap: 4px;
-      flex-shrink: 0;
-    }
+    .color-preview-actions { display: flex; gap: 4px; flex-shrink: 0; }
     .ui-opacity-wrap {
       display: flex;
       align-items: center;
@@ -1483,10 +1421,9 @@
       outline-offset: -1px;
       z-index: 3;
     }
+
     /* 배터리 절약 순수 검정(#000000) 전체 OFF 절전 오버레이 */
-    html.blackout-active {
-      color-scheme: dark !important;
-    }
+    html.blackout-active { color-scheme: dark !important; }
     html.blackout-active,
     body.blackout-active {
       background: #000000 !important;
@@ -1500,9 +1437,7 @@
     body.blackout-active #slide-bookmark,
     body.blackout-active #manage-modal-overlay,
     body.blackout-active #mp3-modal-overlay,
-    body.blackout-active #settings-auth-overlay {
-      visibility: hidden !important;
-    }
+    body.blackout-active #settings-auth-overlay { visibility: hidden !important; }
     #battery-blackout-overlay {
       position: fixed;
       top: -120px;
@@ -1522,9 +1457,7 @@
       user-select: none;
       -webkit-user-select: none;
     }
-    #battery-blackout-overlay.active {
-      display: flex;
-    }
+    #battery-blackout-overlay.active { display: flex; }
     .blackout-hint {
       pointer-events: none;
       opacity: 0;
@@ -1534,9 +1467,7 @@
       align-items: center;
       gap: 6px;
     }
-    .blackout-hint.visible {
-      opacity: 1;
-    }
+    .blackout-hint.visible { opacity: 1; }
     .blackout-hint-title {
       font-size: 12px;
       font-weight: 700;
@@ -1582,11 +1513,7 @@
       margin-bottom: 6px;
       flex-shrink: 0;
     }
-    .stream-api-head {
-      font-size: 10px;
-      font-weight: 700;
-      color: #bbbbbb;
-    }
+    .stream-api-head { font-size: 10px; font-weight: 700; color: #bbbbbb; }
     .feed-scroll-sentinel {
       width: 100%;
       height: 28px;
@@ -1610,12 +1537,13 @@
       flex-shrink: 0;
     }
 
-    /* 2. 바둑판/목록 가변 피드 (1열 목록 / 2~4열 창 전환) */
+    /* 2. 바둑판/목록 가변 피드 (1열 목록 / 2~5열 창 전환) */
     .video-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 6px;
     }
+    .video-grid.cols-5 { grid-template-columns: repeat(5, 1fr); gap: 6px; }
     .video-grid.cols-4 { grid-template-columns: repeat(4, 1fr); gap: 6px; }
     .video-grid.cols-3 { grid-template-columns: repeat(3, 1fr); gap: 7px; }
     .video-grid.cols-2 { grid-template-columns: repeat(2, 1fr); gap: 8px; }
@@ -1670,16 +1598,8 @@
       padding-top: 0;
       flex-shrink: 0;
     }
-    .video-grid.cols-1 .card-info {
-      flex: 1;
-      min-width: 0;
-      padding: 6px 10px;
-    }
-    .video-grid.cols-1 .video-title {
-      font-size: 12px;
-      line-height: 1.35;
-      -webkit-line-clamp: 2;
-    }
+    .video-grid.cols-1 .card-info { flex: 1; min-width: 0; padding: 6px 10px; }
+    .video-grid.cols-1 .video-title { font-size: 12px; line-height: 1.35; -webkit-line-clamp: 2; }
     .video-meta {
       margin-top: 2px;
       text-align: left;
@@ -1698,7 +1618,7 @@
     .video-meta-size { display: none; }
     .video-grid.cols-1 .video-meta-size { display: inline; }
 
-    /* 대형 1열 창 (좌우 꽉 찬 16:9 풀사이즈 · 터치 시 부유창 없이 그 자리 바로 재생) */
+    /* 대형 1열 창 */
     .video-grid.grid-full {
       grid-template-columns: 1fr;
       gap: 10px;
@@ -1706,30 +1626,12 @@
       margin-left: calc(-1 * (env(safe-area-inset-left, 0px) + 10px));
       margin-right: calc(-1 * (env(safe-area-inset-right, 0px) + 10px));
     }
-    .video-grid.grid-full .video-card {
-      border-radius: 0;
-      width: 100%;
-      background: var(--card-title-bg);
-    }
-    .video-grid.grid-full .thumb-wrapper {
-      background: var(--app-bg);
-    }
-    .video-grid.grid-full .card-info {
-      padding: 8px 12px 9px 12px;
-    }
-    .video-grid.grid-full .video-title {
-      font-size: 13.5px;
-      font-weight: 600;
-      line-height: 1.35;
-      -webkit-line-clamp: 2;
-    }
-    .video-grid.grid-full .video-meta {
-      font-size: 11px;
-      margin-top: 4px;
-    }
-    .video-grid.grid-full .video-meta-size {
-      display: inline;
-    }
+    .video-grid.grid-full .video-card { border-radius: 0; width: 100%; background: var(--card-title-bg); }
+    .video-grid.grid-full .thumb-wrapper { background: var(--app-bg); }
+    .video-grid.grid-full .card-info { padding: 8px 12px 9px 12px; }
+    .video-grid.grid-full .video-title { font-size: 13.5px; font-weight: 600; line-height: 1.35; -webkit-line-clamp: 2; }
+    .video-grid.grid-full .video-meta { font-size: 11px; margin-top: 4px; }
+    .video-grid.grid-full .video-meta-size { display: inline; }
     .video-grid.grid-full .thumb-wrapper iframe.inline-yt-frame {
       position: absolute;
       inset: 0;
@@ -1747,25 +1649,21 @@
       outline: none;
       border-radius: 0;
     }
-    .video-grid.grid-full .video-card.inline-playing .star-pin-btn {
-      display: none;
-    }
+    .video-grid.grid-full .video-card.inline-playing .star-pin-btn { display: none; }
 
     /* 3. [핵심] 16:9 원본 밀착형 부유창 */
     #floating-player-modal {
       position: fixed;
       top: 14%;
       left: 6%;
-      width: 320px; /* 초기 가로 (세로는 16:9인 180px로 JS가 자동 고정) */
+      width: 320px;
       z-index: 9000;
       display: none;
       touch-action: none;
     }
-
-    /* 가는 흰색 실선 테두리 (영상 원본 비율에 100% 밀착) */
     .modal-main-window {
       width: 100%;
-      height: 180px; /* JS에서 16:9 비율로 실시간 동기화 */
+      height: 180px;
       background: #000;
       border: 1px solid var(--header-border-color);
       border-radius: 4px;
@@ -1773,8 +1671,6 @@
       position: relative;
       box-shadow: 0 12px 34px rgba(0,0,0,0.85);
     }
-
-    /* 내부 비례 스케일링 스테이지 (800x450 기준 -> 창 크기에 맞춰 통째로 축소/확대) */
     .scale-stage {
       width: 800px;
       height: 450px;
@@ -1782,18 +1678,17 @@
       position: relative;
       background: #000;
     }
+    #yt-iframe-holder {
+      width: 100%;
+      height: 100%;
+    }
     .scale-stage iframe {
-      width: 800px;
-      height: 450px;
+      width: 100%;
+      height: 100%;
       border: none;
       display: block;
     }
-
-    /* 드래그·리사이즈 중 iframe 간섭 차단 및 책갈피 오프스크린 숨김(재생 유지) */
-    #floating-player-modal.interacting .scale-stage iframe {
-      pointer-events: none;
-    }
-    /* iOS WebKit은 opacity:0 또는 화면밖(-9999px) iframe을 강제 정지하므로 화면내 2px/0.01로 재생 유지 */
+    #floating-player-modal.interacting .scale-stage iframe { pointer-events: none; }
     #floating-player-modal.docked-hidden {
       opacity: 0.004 !important;
       pointer-events: none !important;
@@ -1807,7 +1702,7 @@
       z-index: -1 !important;
     }
 
-    /* 🎧 백그라운드 오디오 전용 플레이어 오버레이 (창 내부 표시) */
+    /* 🎧 백그라운드 오디오 전용 플레이어 오버레이 */
     .bg-audio-overlay {
       position: absolute;
       inset: 0;
@@ -1841,11 +1736,7 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    .bg-overlay-ctrl {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
+    .bg-overlay-ctrl { display: flex; align-items: center; gap: 10px; }
     .bg-play-btn {
       width: 34px;
       height: 34px;
@@ -1860,13 +1751,9 @@
       align-items: center;
       justify-content: center;
     }
-    .bg-time-text {
-      font-size: 10.5px;
-      color: #ccc;
-      font-variant-numeric: tabular-nums;
-    }
+    .bg-time-text { font-size: 10.5px; color: #ccc; font-variant-numeric: tabular-nums; }
 
-    /* 상단 투명 드래그 핸들 바 (원하는 위치 이동 & 화면 밖 날리기) */
+    /* 상단 투명 드래그 핸들 바 */
     .player-drag-bar {
       position: absolute;
       top: 0;
@@ -1891,7 +1778,7 @@
       pointer-events: none;
     }
 
-    /* 4각 모서리 얇고 투명도 60% L자 꺾기 리사이즈 핸들 (큰테두리 색상 연동) */
+    /* 4각 모서리 L자 꺾기 리사이즈 핸들 */
     .resizer {
       position: absolute;
       width: 22px;
@@ -1910,35 +1797,15 @@
       pointer-events: none;
     }
     .resizer.tl { top: 0; left: 0; cursor: nwse-resize; }
-    .resizer.tl::after {
-      top: 0; left: 0;
-      border-top: 2px solid var(--header-border-color);
-      border-left: 2px solid var(--header-border-color);
-      border-top-left-radius: 2px;
-    }
+    .resizer.tl::after { top: 0; left: 0; border-top: 2px solid var(--header-border-color); border-left: 2px solid var(--header-border-color); border-top-left-radius: 2px; }
     .resizer.tr { top: 0; right: 0; cursor: nesw-resize; }
-    .resizer.tr::after {
-      top: 0; right: 0;
-      border-top: 2px solid var(--header-border-color);
-      border-right: 2px solid var(--header-border-color);
-      border-top-right-radius: 2px;
-    }
+    .resizer.tr::after { top: 0; right: 0; border-top: 2px solid var(--header-border-color); border-right: 2px solid var(--header-border-color); border-top-right-radius: 2px; }
     .resizer.bl { bottom: 0; left: 0; cursor: nesw-resize; }
-    .resizer.bl::after {
-      bottom: 0; left: 0;
-      border-bottom: 2px solid var(--header-border-color);
-      border-left: 2px solid var(--header-border-color);
-      border-bottom-left-radius: 2px;
-    }
+    .resizer.bl::after { bottom: 0; left: 0; border-bottom: 2px solid var(--header-border-color); border-left: 2px solid var(--header-border-color); border-bottom-left-radius: 2px; }
     .resizer.br { bottom: 0; right: 0; cursor: nwse-resize; }
-    .resizer.br::after {
-      bottom: 0; right: 0;
-      border-bottom: 2px solid var(--header-border-color);
-      border-right: 2px solid var(--header-border-color);
-      border-bottom-right-radius: 2px;
-    }
+    .resizer.br::after { bottom: 0; right: 0; border-bottom: 2px solid var(--header-border-color); border-right: 2px solid var(--header-border-color); border-bottom-right-radius: 2px; }
 
-    /* 일시정지/종료 시 YouTube '동영상 더보기' 등 불필요 추천 차단 & 원터치 재재생 마스크 */
+    /* 일시정지/종료 시 원터치 재재생 마스크 */
     .yt-pause-mask {
       position: absolute;
       inset: 0;
@@ -1952,7 +1819,6 @@
       cursor: pointer;
     }
     .yt-pause-mask.active { display: flex; }
-
     .yt-pause-play-circle {
       width: 46px;
       height: 46px;
@@ -1968,7 +1834,7 @@
       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7);
     }
 
-    /* 4. [핵심] 하부 초소형 우측 닫기 탭 (✕ · 큰테두리색 투명도 + 창쪽 오목곡선) */
+    /* 4. 하부 초소형 우측 닫기 탭 */
     .modal-bottom-tabs {
       display: flex;
       justify-content: flex-end;
@@ -1986,11 +1852,7 @@
       touch-action: none;
     }
     .bottom-drag-spacer:active { cursor: grabbing; }
-    .tab-group-right {
-      display: flex;
-      align-items: flex-start;
-      pointer-events: auto;
-    }
+    .tab-group-right { display: flex; align-items: flex-start; pointer-events: auto; }
     .bookmark-tab {
       pointer-events: auto;
       background: var(--header-border-color);
@@ -2009,14 +1871,8 @@
       white-space: nowrap;
       line-height: 1.15;
     }
-    .bookmark-tab:active {
-      opacity: 0.95;
-      transform: scale(0.95);
-    }
-    .bookmark-tab.tab-close {
-      z-index: 3;
-      padding: 1.5px 8px 2px 8px;
-    }
+    .bookmark-tab:active { opacity: 0.95; transform: scale(0.95); }
+    .bookmark-tab.tab-close { z-index: 3; padding: 1.5px 8px 2px 8px; }
     .tab-close-ear {
       position: absolute;
       top: 0;
@@ -2025,13 +1881,11 @@
       pointer-events: none;
       overflow: visible;
     }
-    .tab-close-ear path {
-      fill: var(--header-border-color);
-    }
+    .tab-close-ear path { fill: var(--header-border-color); }
     .tab-close-ear.ear-l { left: -7.5px; }
     .tab-close-ear.ear-r { right: -7.5px; transform: scaleX(-1); }
 
-    /* 4-2. 슬라이드 책갈피 (스크롤 시 상시 표시 · 투명도 70% · 좌/우 한 손 이동 · ⚙/🎧/MP3/▶깜박) */
+    /* 4-2. 슬라이드 책갈피 */
     #slide-bookmark {
       position: fixed;
       top: auto;
@@ -2053,33 +1907,12 @@
       touch-action: none;
       transition: transform 0.36s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.32s ease;
     }
-    body.auth-locked #slide-bookmark {
-      display: none !important;
-    }
-    #slide-bookmark.dock-left {
-      left: 0;
-      right: auto;
-      border-left: none;
-      border-radius: 0 13px 13px 0;
-      transform-origin: left center;
-    }
-    #slide-bookmark.dock-right {
-      right: 0;
-      left: auto;
-      border-right: none;
-      border-radius: 13px 0 0 13px;
-      transform-origin: right center;
-    }
-    #slide-bookmark.dock-right:not(.sb-tucked) {
-      transform: scale(1.04);
-    }
-    #slide-bookmark.dock-left:not(.sb-tucked) {
-      transform: scale(1.04);
-    }
-    #slide-bookmark.dock-free {
-      border-radius: 15px;
-      transform-origin: center center;
-    }
+    body.auth-locked #slide-bookmark { display: none !important; }
+    #slide-bookmark.dock-left { left: 0; right: auto; border-left: none; border-radius: 0 13px 13px 0; transform-origin: left center; }
+    #slide-bookmark.dock-right { right: 0; left: auto; border-right: none; border-radius: 13px 0 0 13px; transform-origin: right center; }
+    #slide-bookmark.dock-right:not(.sb-tucked),
+    #slide-bookmark.dock-left:not(.sb-tucked) { transform: scale(1.04); }
+    #slide-bookmark.dock-free { border-radius: 15px; transform-origin: center center; }
     .sb-wall-ear {
       position: absolute;
       width: 14px;
@@ -2089,31 +1922,16 @@
       display: block;
     }
     .sb-wall-ear .sb-ear-fill { fill: var(--bookmark-bg); }
-    .sb-wall-ear .sb-ear-stroke {
-      fill: none;
-      stroke: var(--bookmark-border);
-      stroke-width: 2;
-      stroke-linecap: butt;
-    }
+    .sb-wall-ear .sb-ear-stroke { fill: none; stroke: var(--bookmark-border); stroke-width: 2; stroke-linecap: butt; }
     #slide-bookmark.dock-right .sb-ear-top { right: 0; top: -15px; transform: none; }
     #slide-bookmark.dock-right .sb-ear-bottom { right: 0; bottom: -15px; transform: scaleY(-1); }
     #slide-bookmark.dock-left .sb-ear-top { left: 0; top: -15px; transform: scaleX(-1); }
     #slide-bookmark.dock-left .sb-ear-bottom { left: 0; bottom: -15px; transform: scale(-1, -1); }
     #slide-bookmark.dock-free .sb-wall-ear { display: none; }
-    #slide-bookmark.sb-tucked {
-      transition: transform 1.15s cubic-bezier(0.4, 0, 0.2, 1), opacity 1.15s ease;
-    }
-    #slide-bookmark.dock-right.sb-tucked {
-      transform: translateX(calc(100% - 6px)) scale(0.94);
-      opacity: calc(var(--bookmark-opacity) * 0.4);
-    }
-    #slide-bookmark.dock-left.sb-tucked {
-      transform: translateX(calc(-100% + 6px)) scale(0.94);
-      opacity: calc(var(--bookmark-opacity) * 0.4);
-    }
-    #slide-bookmark.sb-tucked .sb-btn {
-      pointer-events: none;
-    }
+    #slide-bookmark.sb-tucked { transition: transform 1.15s cubic-bezier(0.4, 0, 0.2, 1), opacity 1.15s ease; }
+    #slide-bookmark.dock-right.sb-tucked { transform: translateX(calc(100% - 6px)) scale(0.94); opacity: calc(var(--bookmark-opacity) * 0.4); }
+    #slide-bookmark.dock-left.sb-tucked { transform: translateX(calc(-100% + 6px)) scale(0.94); opacity: calc(var(--bookmark-opacity) * 0.4); }
+    #slide-bookmark.sb-tucked .sb-btn { pointer-events: none; }
     #slide-bookmark.dragging-bookmark {
       transition: none !important;
       opacity: 0.92 !important;
@@ -2157,41 +1975,19 @@
     .sb-btn-gear { font-size: 13px; }
     .sb-btn-bg { font-size: 12px; }
     .sb-btn-bg.bg-ready { box-shadow: inset 0 0 0 1.2px rgba(74, 222, 128, 0.95); }
-    .sb-btn-bg.bg-on {
-      background: rgba(255, 70, 140, 0.92);
-      box-shadow: 0 0 0 1.2px #ffffff;
-    }
+    .sb-btn-bg.bg-on { background: rgba(255, 70, 140, 0.92); box-shadow: 0 0 0 1.2px #ffffff; }
     .sb-btn-note { font-size: 14px; }
-    .sb-btn-note.has-track {
-      background: rgba(217, 56, 106, 0.88);
-      box-shadow: 0 0 0 1.2px rgba(255, 255, 255, 0.92);
-    }
-    .sb-btn-note.window-open {
-      background: rgba(255, 255, 255, 0.94);
-      color: #d9386a;
-      text-shadow: none;
-    }
+    .sb-btn-note.has-track { background: rgba(217, 56, 106, 0.88); box-shadow: 0 0 0 1.2px rgba(255, 255, 255, 0.92); }
+    .sb-btn-note.window-open { background: rgba(255, 255, 255, 0.94); color: #d9386a; text-shadow: none; }
     .sb-btn-mp3 { font-size: 8px; letter-spacing: -0.3px; }
     .sb-btn-play { font-size: 12px; }
     @keyframes sbPlayBlink {
       0%, 100% { opacity: 1; transform: scale(1); }
       50% { opacity: 0.25; transform: scale(0.92); }
     }
-    .sb-win-svg {
-      width: 13px;
-      height: 13px;
-      display: block;
-    }
-    #slide-bookmark.sb-playing .sb-tri-icon {
-      display: inline-block;
-      animation: sbPlayBlink 1.5s ease-in-out infinite;
-    }
-    /* 책갈피 크기 3단계 (1:보통 · 2:크게 · 3:더크게 - 버튼·이모지·SVG 비례 확대) */
-    #slide-bookmark.sb-size-2 {
-      width: 42px;
-      gap: 5px;
-      padding: 6px 3px 7px 3px;
-    }
+    .sb-win-svg { width: 13px; height: 13px; display: block; }
+    #slide-bookmark.sb-playing .sb-tri-icon { display: inline-block; animation: sbPlayBlink 1.5s ease-in-out infinite; }
+    #slide-bookmark.sb-size-2 { width: 42px; gap: 5px; padding: 6px 3px 7px 3px; }
     #slide-bookmark.sb-size-2 .sb-grip { height: 16px; }
     #slide-bookmark.sb-size-2 .sb-grip-bar { width: 20px; height: 3.5px; }
     #slide-bookmark.sb-size-2 .sb-btn { width: 32px; height: 30px; border-radius: 8px; }
@@ -2201,11 +1997,7 @@
     #slide-bookmark.sb-size-2 .sb-win-svg { width: 16px; height: 16px; }
     #slide-bookmark.sb-size-2 .sb-btn-mp3 { font-size: 9.5px; }
     #slide-bookmark.sb-size-2 .sb-btn-play { font-size: 15px; }
-    #slide-bookmark.sb-size-3 {
-      width: 50px;
-      gap: 6px;
-      padding: 7px 3px 8px 3px;
-    }
+    #slide-bookmark.sb-size-3 { width: 50px; gap: 6px; padding: 7px 3px 8px 3px; }
     #slide-bookmark.sb-size-3 .sb-grip { height: 18px; }
     #slide-bookmark.sb-size-3 .sb-grip-bar { width: 24px; height: 4px; }
     #slide-bookmark.sb-size-3 .sb-btn { width: 38px; height: 36px; border-radius: 9px; }
@@ -2216,7 +2008,7 @@
     #slide-bookmark.sb-size-3 .sb-btn-mp3 { font-size: 11px; }
     #slide-bookmark.sb-size-3 .sb-btn-play { font-size: 18px; }
 
-    /* 5. [신규] MP3 / 320kbps 음원추출 전용 모달 */
+    /* 5. MP3 / 320kbps 음원추출 전용 모달 */
     #mp3-modal-overlay {
       position: fixed;
       inset: 0;
@@ -2238,12 +2030,7 @@
       box-shadow: 0 15px 40px rgba(0,0,0,0.9);
       text-align: center;
     }
-    .mp3-modal-header {
-      font-size: 15px;
-      font-weight: 700;
-      color: #fff;
-      margin-bottom: 12px;
-    }
+    .mp3-modal-header { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 12px; }
     .mp3-track-name {
       font-size: 12px;
       color: #ccc;
@@ -2266,12 +2053,7 @@
       border-radius: 20px;
       margin-bottom: 15px;
     }
-    .mp3-status-text {
-      font-size: 11px;
-      color: #a1a1aa;
-      min-height: 16px;
-      margin-bottom: 8px;
-    }
+    .mp3-status-text { font-size: 11px; color: #a1a1aa; min-height: 16px; margin-bottom: 8px; }
     .mp3-progress-wrap {
       width: 100%;
       height: 6px;
@@ -2299,10 +2081,7 @@
       cursor: pointer;
       margin-bottom: 8px;
     }
-    .mp3-action-btn:disabled {
-      opacity: 0.6;
-      cursor: wait;
-    }
+    .mp3-action-btn:disabled { opacity: 0.6; cursor: wait; }
     .mp3-direct-link {
       display: none;
       width: 100%;
@@ -2340,11 +2119,294 @@
       font-weight: 700;
       cursor: pointer;
     }
+
+    /* =====================================================================
+       7. 샤오신 12.7인치 태블릿 전용 대화면 최적화 (정중앙 · 큰 폰트 · 쉬운 조작)
+       ===================================================================== */
+    body.tablet-mode {
+      padding: 0 calc(env(safe-area-inset-right, 0px) + 18px) calc(env(safe-area-inset-bottom, 0px) + 24px) calc(env(safe-area-inset-left, 0px) + 18px);
+    }
+
+    /* 로그인 / 2차 인증 대형 중앙 입력창 */
+    body.tablet-mode .auth-gate-box {
+      width: 240px;
+      gap: 14px;
+    }
+    body.tablet-mode .auth-name-block { gap: 10px; }
+    body.tablet-mode .auth-name-input,
+    body.tablet-mode #auth-gate-overlay .auth-gate-input,
+    body.tablet-mode .settings-auth-single-input {
+      height: 48px;
+      padding: 0 14px;
+      border-radius: 12px;
+      border-width: 2.5px;
+      font-size: 18px;
+    }
+    body.tablet-mode .settings-auth-single-input { width: 240px; }
+    body.tablet-mode .auth-remember-row { font-size: 15px; gap: 8px; }
+    body.tablet-mode .auth-remember-row input { width: 18px; height: 18px; }
+    body.tablet-mode .auth-saved-name-bar {
+      height: 46px;
+      padding: 0 14px;
+      border-radius: 12px;
+      font-size: 16px;
+    }
+    body.tablet-mode .auth-change-name-btn { font-size: 13px; padding: 4px 10px; border-radius: 7px; }
+    body.tablet-mode .auth-gate-btn { height: 48px; font-size: 16px; border-radius: 12px; }
+
+    /* 최상단 정중앙 검색창 모듈 + 드롭다운 */
+    body.tablet-mode .top-header {
+      margin-left: calc(-1 * (env(safe-area-inset-left, 0px) + 18px));
+      margin-right: calc(-1 * (env(safe-area-inset-right, 0px) + 18px));
+      padding: calc(env(safe-area-inset-top, 0px) + 10px) calc(env(safe-area-inset-right, 0px) + 18px) 8px calc(env(safe-area-inset-left, 0px) + 18px);
+    }
+    body.tablet-mode .header-unified-box {
+      width: 100%;
+      max-width: 780px;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 14px;
+      padding: 10px 12px 9px 12px;
+    }
+    body.tablet-mode .tab-history-drawer,
+    body.tablet-mode .filter-slide-wrap,
+    body.tablet-mode .status-bar {
+      width: 100%;
+      max-width: 780px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    body.tablet-mode .status-bar { font-size: 13.5px; padding-top: 4px; }
+    body.tablet-mode .header-top-row {
+      grid-template-columns: minmax(0, 1fr) 158px;
+      gap: 10px;
+    }
+    body.tablet-mode .header-right-slot { width: 158px; gap: 8px; }
+    body.tablet-mode .search-box { gap: 8px; }
+    body.tablet-mode .search-box input {
+      height: 44px;
+      padding: 0 14px;
+      border-radius: 10px;
+      font-size: 16px;
+    }
+    body.tablet-mode button.search-btn {
+      width: 54px;
+      height: 44px;
+      border-radius: 10px;
+    }
+    body.tablet-mode .yt-btn-icon,
+    body.tablet-mode .yt-btn-icon svg { width: 22px; height: 22px; }
+    body.tablet-mode .filter-toggle-btn {
+      height: 44px;
+      padding: 0 10px;
+      border-radius: 10px;
+      font-size: 15px;
+    }
+    body.tablet-mode .header-gear-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      font-size: 21px;
+    }
+    body.tablet-mode .header-mid-divider { margin: 8px 0 7px 0; }
+    body.tablet-mode .saved-tabs-row {
+      grid-template-columns: minmax(0, 1fr) 86px;
+      min-height: 56px;
+      padding: 5px 6px 5px 8px;
+      border-radius: 10px;
+    }
+    body.tablet-mode .tabs-scroll-area {
+      height: 52px;
+      padding: 3px 18px 3px 4px;
+    }
+    body.tablet-mode .history-tab {
+      padding: 4px 14px;
+      border-radius: 11px;
+    }
+    body.tablet-mode .tab-kw-text { font-size: 15px; line-height: 1.2; }
+    body.tablet-mode .tab-footnote { font-size: 10.5px; margin-top: 3px; }
+    body.tablet-mode .layout-mode-controls {
+      width: 86px;
+      height: 50px;
+      gap: 6px;
+      padding: 0 2px 0 10px;
+    }
+    body.tablet-mode .layout-emoji-btn { width: 35px; height: 38px; }
+    body.tablet-mode .layout-emoji-btn svg { width: 26px; height: 26px; }
+
+    /* 태블릿 드롭다운 (재생목록 / 검색조건) */
+    body.tablet-mode .tab-history-drawer.open { max-height: 420px; margin-top: 7px; }
+    body.tablet-mode .tab-history-inner { padding: 8px 12px; border-radius: 12px; }
+    body.tablet-mode .tab-history-head { font-size: 14.5px; padding-bottom: 6px; margin-bottom: 4px; }
+    body.tablet-mode .tab-history-close { padding: 5px 12px; font-size: 13px; border-radius: 7px; }
+    body.tablet-mode .tab-history-items { max-height: 350px; }
+    body.tablet-mode .tab-history-row { font-size: 16.5px; padding: 7px 6px; gap: 10px; line-height: 1.3; }
+    body.tablet-mode .tab-history-play { font-size: 13px; }
+    body.tablet-mode .tab-history-del { width: 32px; height: 32px; font-size: 16px; }
+
+    body.tablet-mode .filter-slide-wrap.open { max-height: 360px; margin-top: 8px; }
+    body.tablet-mode .filter-slide-inner { padding: 14px 16px; border-radius: 12px; }
+    body.tablet-mode .filter-panel-head { font-size: 14.5px; margin-bottom: 10px; }
+    body.tablet-mode .filter-order-hint { font-size: 13.5px; }
+    body.tablet-mode .filter-check-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+    body.tablet-mode .filter-check-item { padding: 10px 12px; font-size: 15px; gap: 9px; border-radius: 9px; }
+    body.tablet-mode .filter-check-item input[type="checkbox"] { width: 18px; height: 18px; }
+    body.tablet-mode .filter-reset-btn,
+    body.tablet-mode .filter-apply-btn { padding: 8px 16px; font-size: 14px; border-radius: 8px; }
+
+    /* 태블릿 피드 (큰 폰트 · 넓은 카드 · 1~5열) */
+    body.tablet-mode .video-grid { gap: 12px; }
+    body.tablet-mode .video-grid.cols-5 { grid-template-columns: repeat(5, 1fr); gap: 10px; }
+    body.tablet-mode .video-grid.cols-4 { grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    body.tablet-mode .video-grid.cols-3 { grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    body.tablet-mode .video-grid.cols-2 { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    body.tablet-mode .video-grid.cols-1 {
+      grid-template-columns: 1fr;
+      gap: 10px;
+      max-width: 920px;
+      margin: 0 auto;
+    }
+    body.tablet-mode .video-card { border-radius: 8px; }
+    body.tablet-mode .card-info { padding: 8px 10px; }
+    body.tablet-mode .video-title { font-size: 13.5px; line-height: 1.35; }
+    body.tablet-mode .video-meta { font-size: 11px; margin-top: 4px; }
+    body.tablet-mode .video-grid.cols-5 .video-title { font-size: 12.5px; }
+    body.tablet-mode .video-grid.cols-5 .video-meta { font-size: 10.5px; }
+    body.tablet-mode .video-grid.cols-4 .video-title { font-size: 13.5px; }
+    body.tablet-mode .video-grid.cols-3 .video-title { font-size: 15px; line-height: 1.35; }
+    body.tablet-mode .video-grid.cols-3 .video-meta { font-size: 12px; }
+    body.tablet-mode .video-grid.cols-2 .video-title { font-size: 16.5px; line-height: 1.38; }
+    body.tablet-mode .video-grid.cols-2 .video-meta { font-size: 13px; }
+    body.tablet-mode .video-grid.cols-2 .card-info { padding: 10px 12px; }
+    body.tablet-mode .video-grid.cols-1 .thumb-wrapper { width: 184px; min-width: 184px; height: 104px; }
+    body.tablet-mode .video-grid.cols-1 .card-info { padding: 10px 16px; }
+    body.tablet-mode .video-grid.cols-1 .video-title { font-size: 16.5px; line-height: 1.4; }
+    body.tablet-mode .video-grid.cols-1 .video-meta { font-size: 13px; margin-top: 6px; }
+    body.tablet-mode .video-grid.grid-full {
+      max-width: 840px;
+      width: 100%;
+      margin-left: auto;
+      margin-right: auto;
+      gap: 16px;
+    }
+    body.tablet-mode .video-grid.grid-full .video-card { border-radius: 10px; }
+    body.tablet-mode .video-grid.grid-full .card-info { padding: 12px 16px; }
+    body.tablet-mode .video-grid.grid-full .video-title { font-size: 17px; }
+    body.tablet-mode .video-grid.grid-full .video-meta { font-size: 13.5px; margin-top: 5px; }
+    body.tablet-mode .star-pin-btn {
+      top: 6px;
+      right: 6px;
+      width: 28px;
+      height: 28px;
+      font-size: 15px;
+    }
+    body.tablet-mode .feed-scroll-sentinel { height: 42px; font-size: 14px; }
+
+    /* 태블릿 플레이어 부유창 */
+    body.tablet-mode .modal-main-window { border-radius: 8px; border-width: 1.5px; }
+    body.tablet-mode .player-drag-bar { height: 32px; left: 34px; right: 34px; padding-top: 6px; }
+    body.tablet-mode .player-drag-pill { width: 54px; height: 5px; }
+    body.tablet-mode .resizer { width: 30px; height: 30px; }
+    body.tablet-mode .resizer::after { width: 15px; height: 15px; }
+    body.tablet-mode .bookmark-tab { font-size: 12px; padding: 3px 14px 4px 14px; border-radius: 0 0 10px 10px; }
+    body.tablet-mode .bookmark-tab.tab-close { padding: 3px 16px 4px 16px; }
+    body.tablet-mode .bottom-drag-spacer { height: 24px; }
+    body.tablet-mode .yt-pause-play-circle { width: 64px; height: 64px; font-size: 26px; }
+    body.tablet-mode .bg-overlay-badge { font-size: 13px; padding: 4px 12px; }
+    body.tablet-mode .bg-overlay-title { font-size: 16px; }
+    body.tablet-mode .bg-play-btn { width: 48px; height: 48px; font-size: 20px; }
+    body.tablet-mode .bg-time-text { font-size: 14px; }
+
+    /* 태블릿 슬라이드 책갈피 */
+    body.tablet-mode #slide-bookmark { width: 44px; gap: 6px; padding: 10px 4px 11px 4px; }
+    body.tablet-mode #slide-bookmark .sb-grip { height: 18px; }
+    body.tablet-mode #slide-bookmark .sb-grip-bar { width: 22px; height: 4px; }
+    body.tablet-mode #slide-bookmark .sb-btn { width: 34px; height: 32px; }
+    body.tablet-mode #slide-bookmark .sb-btn-gear { font-size: 17px; }
+    body.tablet-mode #slide-bookmark .sb-btn-bg { font-size: 16px; }
+    body.tablet-mode #slide-bookmark .sb-btn-note { font-size: 18px; }
+    body.tablet-mode #slide-bookmark .sb-win-svg { width: 18px; height: 18px; }
+    body.tablet-mode #slide-bookmark .sb-btn-mp3 { font-size: 10.5px; }
+    body.tablet-mode #slide-bookmark .sb-btn-play { font-size: 16px; }
+    body.tablet-mode #slide-bookmark.sb-size-2 { width: 52px; gap: 7px; padding: 10px 4px 11px 4px; }
+    body.tablet-mode #slide-bookmark.sb-size-2 .sb-btn { width: 40px; height: 38px; border-radius: 10px; }
+    body.tablet-mode #slide-bookmark.sb-size-2 .sb-btn-gear { font-size: 20px; }
+    body.tablet-mode #slide-bookmark.sb-size-2 .sb-btn-bg { font-size: 19px; }
+    body.tablet-mode #slide-bookmark.sb-size-2 .sb-btn-note { font-size: 21px; }
+    body.tablet-mode #slide-bookmark.sb-size-2 .sb-win-svg { width: 21px; height: 21px; }
+    body.tablet-mode #slide-bookmark.sb-size-2 .sb-btn-mp3 { font-size: 12px; }
+    body.tablet-mode #slide-bookmark.sb-size-2 .sb-btn-play { font-size: 19px; }
+    body.tablet-mode #slide-bookmark.sb-size-3 { width: 60px; gap: 8px; padding: 11px 4px 12px 4px; }
+    body.tablet-mode #slide-bookmark.sb-size-3 .sb-btn { width: 46px; height: 44px; border-radius: 11px; }
+    body.tablet-mode #slide-bookmark.sb-size-3 .sb-btn-gear { font-size: 23px; }
+    body.tablet-mode #slide-bookmark.sb-size-3 .sb-btn-bg { font-size: 22px; }
+    body.tablet-mode #slide-bookmark.sb-size-3 .sb-btn-note { font-size: 24px; }
+    body.tablet-mode #slide-bookmark.sb-size-3 .sb-win-svg { width: 24px; height: 24px; }
+    body.tablet-mode #slide-bookmark.sb-size-3 .sb-btn-mp3 { font-size: 13.5px; }
+    body.tablet-mode #slide-bookmark.sb-size-3 .sb-btn-play { font-size: 22px; }
+
+    /* 태블릿 설정 모달 & MP3 모달 */
+    body.tablet-mode .manage-modal-box {
+      width: min(92vw, 560px);
+      height: min(calc(100dvh - 24px), 840px);
+      padding: 14px 18px;
+      border-radius: 16px;
+    }
+    body.tablet-mode .settings-tab-btn { padding: 8px 16px; font-size: 14.5px; border-radius: 9px; }
+    body.tablet-mode .settings-x-btn { width: 34px; height: 34px; font-size: 16px; }
+    body.tablet-mode .manage-search-kw { font-size: 15px; }
+    body.tablet-mode .manage-search-meta { font-size: 12px; }
+    body.tablet-mode .manage-tree-link { font-size: 13.5px; padding: 3px 2px; }
+    body.tablet-mode .manage-tree-del { font-size: 15px; padding: 2px 6px; }
+    body.tablet-mode .manage-item-name { font-size: 15px; }
+    body.tablet-mode .manage-item-meta { font-size: 12.5px; }
+    body.tablet-mode .mini-btn { padding: 6px 11px; font-size: 13px; border-radius: 7px; }
+    body.tablet-mode .ui-opt-panel { gap: 7px; padding: 9px 11px; margin-bottom: 8px; border-radius: 10px; }
+    body.tablet-mode .ui-opt-lbl { font-size: 13px; }
+    body.tablet-mode .ui-opt-btn { padding: 5px 11px; font-size: 13px; border-radius: 7px; }
+    body.tablet-mode .ui-opacity-wrap { max-width: 260px; }
+    body.tablet-mode .ui-opacity-slider { width: 155px; height: 22px; }
+    body.tablet-mode .ui-opacity-val { font-size: 13px; min-width: 40px; }
+    body.tablet-mode .color-preview-bar { padding: 7px 10px; margin-bottom: 8px; }
+    body.tablet-mode .color-mod-badge,
+    body.tablet-mode .color-hex-label { font-size: 13px; }
+    body.tablet-mode .color-swatch-cur { width: 20px; height: 20px; }
+    body.tablet-mode .palette-256-grid { height: 288px; min-height: 270px; gap: 2px; padding: 4px; }
+    body.tablet-mode .ml-search,
+    body.tablet-mode .ml-cond,
+    body.tablet-mode .ml-gear { height: 28px; font-size: 11.5px; }
+    body.tablet-mode .ml-row2 { height: 34px; }
+    body.tablet-mode .ml-tab-plain,
+    body.tablet-mode .ml-tab-sel { font-size: 11px; }
+    body.tablet-mode .ml-panel-box,
+    body.tablet-mode .ml-bm-border,
+    body.tablet-mode .ml-feed-card { height: 36px; font-size: 11px; }
+    body.tablet-mode .ml-bm-bg,
+    body.tablet-mode .ml-feed-title { font-size: 10.5px; }
+    body.tablet-mode .auth-role-badge { font-size: 12px; padding: 3px 8px; }
+    body.tablet-mode .auth-user-name { font-size: 16px; }
+    body.tablet-mode .auth-stats-row { font-size: 13px; }
+    body.tablet-mode .settings-sec-title { font-size: 13.5px; margin: 12px 0 7px 0; }
+    body.tablet-mode .auth-form-input { font-size: 14px; padding: 9px 11px; }
+    body.tablet-mode .auth-form-btn { font-size: 14px; padding: 9px 14px; }
+    body.tablet-mode .db-diag-bar { font-size: 13px; padding: 8px 11px; }
+    body.tablet-mode .stream-api-head { font-size: 12.5px; }
+    body.tablet-mode .manage-close-btn { padding: 11px; font-size: 15px; border-radius: 10px; }
+
+    body.tablet-mode .mp3-modal-box { max-width: 440px; padding: 24px; border-radius: 16px; }
+    body.tablet-mode .mp3-modal-header { font-size: 19px; margin-bottom: 16px; }
+    body.tablet-mode .mp3-track-name { font-size: 15px; padding: 11px 14px; }
+    body.tablet-mode .mp3-quality-badge { font-size: 14px; padding: 7px 18px; }
+    body.tablet-mode .mp3-status-text { font-size: 14px; }
+    body.tablet-mode .mp3-action-btn,
+    body.tablet-mode .mp3-direct-link,
+    body.tablet-mode .mp3-sub-btn,
+    body.tablet-mode .mp3-close-btn { padding: 14px; font-size: 15px; border-radius: 10px; }
   </style>
 </head>
 <body>
 
-  <!-- 0. 미니멀 로그인 창 (무외곽 · 각창 흰색 두꺼운 점선 · NAME/CODE 흐릿핑크 · 기억 하기 · 키보드 회피) -->
+  <!-- 0. 미니멀 로그인 창 -->
   <div id="auth-gate-overlay">
     <div class="auth-gate-box">
       <div class="auth-name-block" id="authNameBlock">
@@ -2363,12 +2425,12 @@
     </div>
   </div>
 
-  <!-- 0-2. 설정 진입 2차 단일 점선 코드창 (156×36 · 4자리 일치 즉시 진입) -->
+  <!-- 0-2. 설정 진입 2차 단일 점선 코드창 -->
   <div id="settings-auth-overlay" onclick="if(event.target===this){closeSettingsAuthModal()}">
     <input type="password" id="settingsAuthCodeInput" class="settings-auth-single-input" maxlength="4" inputmode="numeric" placeholder="CODE" autocomplete="off" oninput="onSettingsAuthCodeTyping()" onkeydown="if(event.key==='Enter'){submitSettingsAuthCode()}">
   </div>
 
-  <!-- 1. 최상단 고정 헤더 (외곽 두꺼운 점선 + 검색창 바로 밑 가로 실선 구분 + 검색어 각주/2단계 터치) -->
+  <!-- 1. 최상단 고정 헤더 (태블릿에서는 정중앙 대형 모듈) -->
   <div class="top-header">
     <div class="header-unified-box">
       <svg class="header-dash-svg" preserveAspectRatio="none"><rect id="headerDashRect" x="1.2" y="1.2" width="calc(100% - 2.4px)" height="calc(100% - 2.4px)" rx="9" ry="9" fill="none" stroke="var(--header-border-color)" stroke-width="2.2" stroke-dasharray="4 3" vector-effect="non-scaling-stroke"/></svg>
@@ -2390,17 +2452,17 @@
       <!-- 검색창 바로 밑 가는 점선 구분 -->
       <div class="header-mid-divider"></div>
 
-      <!-- 2행: 검색어(하단 중앙 각주 MM.DD-00 · 세로점선 · 1회 재생목록/2회 즉시로드) + 우측 밀착 회색 이모지 2개 -->
+      <!-- 2행: 검색어 + 우측 레이아웃 전환 -->
       <div class="saved-tabs-row">
         <div class="tabs-scroll-area" id="savedTabsList"></div>
         <div class="layout-mode-controls">
           <button type="button" class="layout-emoji-btn" id="listModeBtn" onclick="setFeedListMode()" title="목록 보기"></button>
-          <button type="button" class="layout-emoji-btn" id="gridModeBtn" onclick="cycleFeedGridCols()" title="창 보기 (1→2→3→4)"></button>
+          <button type="button" class="layout-emoji-btn" id="gridModeBtn" onclick="cycleFeedGridCols()" title="창 보기"></button>
         </div>
       </div>
     </div>
 
-    <!-- 검색어 1회 터치 시 부드럽게 슬라이드 다운되는 해당 검색어 재생목록 -->
+    <!-- 검색어 1회 터치 시 슬라이드 다운되는 해당 검색어 재생목록 -->
     <div class="tab-history-drawer" id="tabHistoryDrawer">
       <div class="tab-history-inner">
         <div class="tab-history-head">
@@ -2411,7 +2473,7 @@
       </div>
     </div>
 
-    <!-- 검색조건 2열 풀다운 슬라이드 체크박스 패널 -->
+    <!-- 검색조건 풀다운 슬라이드 체크박스 패널 -->
     <div class="filter-slide-wrap" id="filterSlidePanel">
       <div class="filter-slide-inner">
         <div class="filter-panel-head">
@@ -2452,35 +2514,30 @@
     </div>
   </div>
 
-  <!-- 2. 가변 피드 (목록 1열 / 창 2~4열) -->
+  <!-- 2. 가변 피드 -->
   <div class="video-grid cols-2" id="results"></div>
   <div id="feedScrollSentinel" class="feed-scroll-sentinel"></div>
 
-  <!-- 3. 16:9 밀착형 독립 부유창 (Floating Window) -->
+  <!-- 3. 16:9 밀착형 독립 부유창 -->
   <div id="floating-player-modal">
     <div class="modal-main-window" id="modalWindow">
-      <!-- 상단 자유 이동 & 화면 밖 날리기 드래그 바 -->
       <div class="player-drag-bar" id="playerDragBar" title="드래그하여 이동 · 화면 밖으로 날리면 책갈피 최소화">
         <div class="player-drag-pill"></div>
       </div>
 
-      <!-- 4각 모서리 두꺼운 L자 꺾기 리사이즈 핸들 -->
       <div class="resizer tl" data-dir="tl"></div>
       <div class="resizer tr" data-dir="tr"></div>
       <div class="resizer bl" data-dir="bl"></div>
       <div class="resizer br" data-dir="br"></div>
 
-      <!-- 800x450 비례 스케일링 스테이지 (화면 확대/축소 시 유튜브 버튼이 함께 확대/축소됨) -->
       <div class="scale-stage" id="scaleStage">
         <div id="yt-iframe-holder"></div>
       </div>
 
-      <!-- 일시정지/종료 시 동영상 더보기 차단 & 원터치 재재생 마스크 -->
       <div class="yt-pause-mask" id="ytPauseMask" onclick="resumeYtFromMask()">
         <div class="yt-pause-play-circle">▶</div>
       </div>
 
-      <!-- 🎧 백그라운드 오디오 모드 활성 시 창 내부 표시 -->
       <div class="bg-audio-overlay" id="bgAudioOverlay">
         <div class="bg-overlay-badge">🎧 백그라운드 오디오 재생 중</div>
         <div class="bg-overlay-title" id="bgOverlayTitle">재생 중</div>
@@ -2491,7 +2548,6 @@
       </div>
     </div>
 
-    <!-- 하부 소형 우측 닫기 탭 ([✕]) -->
     <div class="modal-bottom-tabs">
       <div class="bottom-drag-spacer" id="bottomDragSpacer"></div>
       <div class="tab-group-right">
@@ -2504,7 +2560,7 @@
     </div>
   </div>
 
-  <!-- 3-2. 슬라이드 책갈피 (스크롤/재생 시 상시 표시 · 투명도 70% · 좌/우 한 손 이동 · ♪/▶/🎧/MP3/⚙) -->
+  <!-- 3-2. 슬라이드 책갈피 -->
   <div id="slide-bookmark" class="dock-right sb-size-1">
     <svg class="sb-wall-ear sb-ear-top" viewBox="0 0 14 17" aria-hidden="true"><path class="sb-ear-fill" d="M 14,0 Q 14,14 0,14 L 0,17 L 14,17 Z"/><path class="sb-ear-stroke" d="M 13.5,0 Q 13.5,14 0,14"/></svg>
     <svg class="sb-wall-ear sb-ear-bottom" viewBox="0 0 14 17" aria-hidden="true"><path class="sb-ear-fill" d="M 14,0 Q 14,14 0,14 L 0,17 L 14,17 Z"/><path class="sb-ear-stroke" d="M 13.5,0 Q 13.5,14 0,14"/></svg>
@@ -2550,7 +2606,7 @@
     </div>
   </div>
 
-  <!-- 5. 설정 모달 (고정 프레임 · 스크롤 최소 · 디테일 12모듈 레이아웃 · 적용후 닫기) -->
+  <!-- 5. 설정 모달 -->
   <div id="manage-modal-overlay">
     <div class="manage-modal-box">
       <div class="settings-tabs-header">
@@ -2610,6 +2666,14 @@
 
         <div class="ui-opt-panel">
           <div class="ui-opt-row">
+            <span class="ui-opt-lbl">화면 모드</span>
+            <div class="ui-opt-btns">
+              <button type="button" class="ui-opt-btn" data-vmode="auto" onclick="setViewModePreference('auto')">자동</button>
+              <button type="button" class="ui-opt-btn" data-vmode="mobile" onclick="setViewModePreference('mobile')">모바일</button>
+              <button type="button" class="ui-opt-btn" data-vmode="tablet" onclick="setViewModePreference('tablet')">태블릿</button>
+            </div>
+          </div>
+          <div class="ui-opt-row">
             <span class="ui-opt-lbl">책갈피 크기</span>
             <div class="ui-opt-btns">
               <button type="button" class="ui-opt-btn" data-bmsize="1" onclick="setBookmarkSize(1)">보통</button>
@@ -2660,7 +2724,7 @@
         <div class="palette-256-grid" id="palette256Grid"></div>
       </div>
 
-      <!-- 탭 2: 로그인 / DB 진단 / 관리자 구역 (최근 플레이 정보 삭제) -->
+      <!-- 탭 2: 로그인 / DB 진단 / 관리자 구역 -->
       <div class="settings-pane" id="settings-pane-auth">
         <div class="auth-profile-card" style="flex-shrink:0;">
           <div>
@@ -2686,7 +2750,6 @@
           </div>
         </div>
 
-        <!-- 관리자 전용 구역 (관리자 비번 입력 시 접근 가능) -->
         <div class="admin-divider" id="adminOnlySection" style="display:none; flex-direction:column;">
           <div class="settings-sec-title" style="margin-top:2px;">관리자 코드 변경</div>
           <div class="auth-form-row">
@@ -2720,11 +2783,9 @@
 
     const statusMsg = document.getElementById('status');
     const resultsContainer = document.getElementById('results');
-    
     const modal = document.getElementById('floating-player-modal');
     const modalWindow = document.getElementById('modalWindow');
     const scaleStage = document.getElementById('scaleStage');
-    // TUBE_LAB_V4_PLAYER_BG_PATCH
     const ytHolder = document.getElementById('yt-iframe-holder');
     const playerDragBar = document.getElementById('playerDragBar');
     const bottomDragSpacer = document.getElementById('bottomDragSpacer');
@@ -2748,7 +2809,6 @@
     const FB_COLLECTION = 'tube_search_tabs';
     const FALLBACK_THUMB = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='68' viewBox='0 0 120 68'%3E%3Crect width='120' height='68' fill='%23222'/%3E%3Ctext x='50%25' y='52%25' fill='%23666' font-size='10' text-anchor='middle' dominant-baseline='middle'%3ENo Image%3C/text%3E%3C/svg%3E";
 
-    // 항상 Firebase 자동 연결 고정 Config
     const DEFAULT_FIREBASE_CONFIG = {
       "apiKey": "AIzaSyBJdTUdDEvC6cyC15C80n8iNQj_Pl74iII",
       "authDomain": "tube-cdn.firebaseapp.com",
@@ -2758,9 +2818,9 @@
       "appId": "1:892351379651:web:ae4e8e40dfc55c933e4a76"
     };
 
-    // TUBE_LAB_V14_AUTH_NOTE_PATCH
     const REMEMBER_NAME_KEY = 'mytube_remember_name_v12';
     const PENDING_AUTH_SYNC_KEY = 'mytube_pending_auth_sync_v14';
+    const VIEW_MODE_STORAGE_KEY = 'mytube_view_mode_v23';
     const AUTH_DOC_ID = 'sys_auth';
     const PIN_DOC_ID = 'sys_pins';
     const TABS_INDEX_DOC_ID = 'sys_tabs_index';
@@ -2780,6 +2840,85 @@
     const TAB_CACHE_PREFIX = 'tube_tab_cache_v7_';
     const FILTER_LABELS = { recent: '최근순', korean: '한글순', size: '크기순', views: '조회순', hq: '화질순' };
     const memoryTabCache = new Map();
+
+    // 기기 자동 감지 & 모바일/태블릿 UI 프로필 분리 상태
+    let viewModePref = 'auto';
+    let isTabletMode = false;
+    let cloudDeviceProfiles = { mobile: null, tablet: null };
+    let deviceResizeTimer = null;
+
+    function getDeviceProfileKey() { return isTabletMode ? 'tablet' : 'mobile'; }
+    function getDeviceStorageSuffix() { return isTabletMode ? '_tablet' : ''; }
+    function detectAutoTabletMode() {
+      return Math.min(window.innerWidth, window.innerHeight) >= 600;
+    }
+
+    function updateViewModeButtonsUI() {
+      document.querySelectorAll('.ui-opt-btn[data-vmode]').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-vmode') === viewModePref);
+      });
+    }
+
+    function applyDeviceMode(reloadDeviceSettings = false) {
+      const nextIsTablet = viewModePref === 'tablet'
+        ? true
+        : (viewModePref === 'mobile' ? false : detectAutoTabletMode());
+      const changed = (nextIsTablet !== isTabletMode);
+      isTabletMode = nextIsTablet;
+      document.body.classList.toggle('tablet-mode', isTabletMode);
+      updateViewModeButtonsUI();
+
+      if (changed && reloadDeviceSettings && currentUser) {
+        lastPlayerWidth = 0;
+        initSavedUiOpts();
+        initFeedLayoutMode();
+        initSavedBookmarkPos();
+        if (slideBookmarkVisible) applyBookmarkPosition(dockSide);
+      } else if (slideBookmarkVisible) {
+        applyBookmarkPosition(dockSide);
+      }
+
+      // 열려 있는 부유창이 화면 회전/모드 전환 후 화면 밖으로 벗어나지 않게 보정
+      if (currentVideoId && !isDockedToBookmark && !isInlinePlaying && modal.style.display !== 'none') {
+        const { topPos, fitWidth } = getDefaultFullPlayerMetrics();
+        const targetW = changed ? fitWidth : Math.min(modal.offsetWidth || fitWidth, window.innerWidth - (isTabletMode ? 24 : 12));
+        const dims = apply16by9Scale(targetW);
+        if (changed) {
+          lastPlayerWidth = dims.width;
+          modal.style.left = Math.max(6, Math.round((window.innerWidth - dims.width) / 2)) + 'px';
+          modal.style.top = topPos + 'px';
+        } else {
+          const curL = modal.offsetLeft;
+          const curT = modal.offsetTop;
+          const maxL = Math.max(6, window.innerWidth - dims.width - 6);
+          const maxT = Math.max(4, window.innerHeight - dims.height - 32);
+          modal.style.left = Math.max(6, Math.min(maxL, curL)) + 'px';
+          modal.style.top = Math.max(4, Math.min(maxT, curT)) + 'px';
+        }
+      }
+    }
+
+    function setViewModePreference(pref) {
+      if (!['auto', 'mobile', 'tablet'].includes(pref)) pref = 'auto';
+      viewModePref = pref;
+      try { localStorage.setItem(VIEW_MODE_STORAGE_KEY, pref); } catch (e) {}
+      applyDeviceMode(true);
+    }
+
+    function initDeviceMode() {
+      try {
+        const saved = localStorage.getItem(VIEW_MODE_STORAGE_KEY);
+        if (saved && ['auto', 'mobile', 'tablet'].includes(saved)) {
+          viewModePref = saved;
+        }
+      } catch (e) {}
+      applyDeviceMode(false);
+    }
+
+    window.addEventListener('resize', () => {
+      clearTimeout(deviceResizeTimer);
+      deviceResizeTimer = setTimeout(() => applyDeviceMode(true), 140);
+    });
 
     const _k0=[48,48,48,48],_c9='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
     function _r3(){let o='';for(let i=0;i<3;i++)o+=_c9[(Math.random()*_c9.length)|0];return o;}
@@ -2815,7 +2954,6 @@
       }
     })();
 
-    // 14개 모듈 색상 메타 정의
     const THEME_MODULES = {
       appBg:           { label: '전체배경',    cssVar: '--app-bg',               def: '#0d0d0d' },
       headerBoxBg:     { label: '모듈배경',    cssVar: '--header-box-bg',        def: '#0d0d0d' },
@@ -2969,16 +3107,26 @@
     let currentVideoId = '';
     let currentVideoTitle = '';
 
-    // 1. 16:9 비율 완벽 유지 및 내부 요소 비례 스케일링 함수 (v4: 4각 모서리 보정용 치수 반환)
+    // 1. 16:9 비율 완벽 유지 및 태블릿 대화면 네이티브 해상도 지원
     function apply16by9Scale(newWidth) {
-      const clampedW = Math.max(180, Math.min(newWidth, window.innerWidth - 12));
-      const exactH = Math.round(clampedW * (9 / 16)); // 16:9 칼비율
+      const minW = isTabletMode ? 280 : MIN_PLAYER_WIDTH;
+      const maxW = Math.max(minW, window.innerWidth - (isTabletMode ? 24 : 12));
+      const clampedW = Math.max(minW, Math.min(newWidth, maxW));
+      const exactH = Math.round(clampedW * (9 / 16));
 
       modal.style.width = `${clampedW}px`;
       modalWindow.style.height = `${exactH}px`;
 
-      const scaleRatio = clampedW / BASE_STAGE_WIDTH;
-      scaleStage.style.transform = `scale(${scaleRatio})`;
+      if (clampedW > BASE_STAGE_WIDTH) {
+        scaleStage.style.width = `${clampedW}px`;
+        scaleStage.style.height = `${exactH}px`;
+        scaleStage.style.transform = 'scale(1)';
+      } else {
+        scaleStage.style.width = `${BASE_STAGE_WIDTH}px`;
+        scaleStage.style.height = `${Math.round(BASE_STAGE_WIDTH * (9 / 16))}px`;
+        const scaleRatio = clampedW / BASE_STAGE_WIDTH;
+        scaleStage.style.transform = `scale(${scaleRatio})`;
+      }
       return { width: clampedW, height: exactH };
     }
 
@@ -3000,7 +3148,6 @@
       throw new Error("검색 서버 응답 없음");
     }
 
-    // 유틸: 안전하게 videoId 추출
     function extractVideoId(item) {
       if (item.id) return String(item.id);
       const raw = String(item.url || '');
@@ -3015,28 +3162,22 @@
       return keyword.trim().replace(/[\/.#$\[\]]/g, '_').slice(0, 80);
     }
 
-    // 심플 제목 정제 (장식/이모지/중복문자/앞 괄호 태그 배제 -> 핵심 제목 앞으로)
     function simplifyTitle(rawTitle) {
       let s = String(rawTitle || '').trim();
       if (!s) return '제목 없음';
 
-      // 1) 이모지 및 장식 기호 제거
       s = s.replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\u{FE00}-\u{FE0F}\u{200D}]/gu, ' ');
       s = s.replace(/[★☆♥♡♪♫♬♩◆◇■□●○▶▷◀◁•※✦✧✔✓｜丨]/g, ' ');
 
-      // 2) 앞부분 말머리 괄호 태그([Playlist], [4K], 【HD】 등) 제거해 핵심 제목을 맨 앞으로
       const leadStripped = s.replace(/^\s*(?:[\[\(【《「<][^\]\)】》」>]{1,30}[\]\)】》」>]\s*)+/, '').trim();
       if (leadStripped.length >= 2) s = leadStripped;
 
-      // 3) 뒷부분 부가 괄호 태그 정리
       const tailStripped = s.replace(/(?:\s*[\[\(【《「<][^\]\)】》」>]{1,28}[\]\)】》」>]\s*)+$/, '').trim();
       if (tailStripped.length >= 2) s = tailStripped;
 
-      // 4) 연속 중복 특수문자 축약
       s = s.replace(/([!?~._=,])\1+/g, '$1');
       s = s.replace(/[~_=]{2,}/g, ' ');
 
-      // 5) 구분자(|, /, -, ·) 기준 중복 구절 배제
       const parts = s.split(/\s*[|\/·]\s*|\s+-\s+/).map(p => p.trim()).filter(Boolean);
       const uniqueParts = [];
       parts.forEach(part => {
@@ -3050,7 +3191,6 @@
       });
       if (uniqueParts.length > 0) s = uniqueParts.join(' ');
 
-      // 6) 인접 중복 단어 배제
       const words = s.split(/\s+/).filter(Boolean);
       const dedupWords = [];
       words.forEach(w => {
@@ -3064,7 +3204,6 @@
       return s.length >= 2 ? s : String(rawTitle || '').trim();
     }
 
-    // 재생창 동작 중 설정/조건/검색 등 조작 시 책갈피로 즉시 도킹
     function autoDockPlayerIfOpen() {
       if (isInlinePlaying) return;
       if (currentVideoId && !isDockedToBookmark && modal.style.display !== 'none' && !modal.classList.contains('docked-hidden')) {
@@ -3077,7 +3216,6 @@
       if (qInp) qInp.addEventListener('focus', () => autoDockPlayerIfOpen());
     })();
 
-    // 조건검색 풀다운 슬라이드 모달 제어
     function toggleFilterPanel() {
       const panel = document.getElementById('filterSlidePanel');
       if (!panel) return;
@@ -3153,21 +3291,16 @@
       }
       updateFilterUI();
       persistUserFilters(true);
-      if (currentFeedItems.length > 0) {
-        renderSortedFeed();
-      }
+      if (currentFeedItems.length > 0) renderSortedFeed();
     }
 
     function resetFilterConditions() {
       activeFilterOrder = [];
       updateFilterUI();
       persistUserFilters(true);
-      if (currentFeedItems.length > 0) {
-        renderSortedFeed();
-      }
+      if (currentFeedItems.length > 0) renderSortedFeed();
     }
 
-    // 유튜브 로고 스타일 검색 버튼 4단계 상태 머신 (연동:녹색▶ / 미연동:두꺼운흰색X / 동작중:연파랑▶깜박 / 재생중:흰색▶천천히깜박)
     function updateSearchBtnState() {
       const btn = document.getElementById('searchStateBtn');
       const iconBox = document.getElementById('searchStateIcon');
@@ -3190,7 +3323,6 @@
       updateSearchBtnState();
     }
 
-    // 재생창 일시정지/종료 시 '동영상 더보기' 차단 마스크 제어
     function showYtPauseMask() {
       const mask = document.getElementById('ytPauseMask');
       if (mask) mask.classList.add('active');
@@ -3206,7 +3338,6 @@
       updateSearchBtnState();
     }
 
-    // 테두리 없는 회색 목록 / 둥근 사각창(2:ㅁㅁ / 3:ㅁㅁ+밑에1 / 4:ㅁㅁ+ㅁㅁ) SVG & 진동
     function getListModeSvg() {
       return '<svg viewBox="0 0 20 20" width="20" height="20" fill="currentColor">' +
         '<rect x="1.5" y="3.5" width="3" height="3" rx="1"/>' +
@@ -3220,27 +3351,32 @@
 
     function getGridColsSvg(cols) {
       if (cols === 1) {
-        // 1개: 둥근 큰 사각창 1개 (좌우 꽉 찬 대형 피드)
         return '<svg viewBox="0 0 20 20" width="20" height="20" fill="currentColor">' +
           '<rect x="2.5" y="3.5" width="15" height="13" rx="2.5"/>' +
           '</svg>';
       }
       if (cols === 2) {
-        // 2개: 둥근 회색 사각창 나란히 ㅁㅁ
         return '<svg viewBox="0 0 20 20" width="20" height="20" fill="currentColor">' +
           '<rect x="2" y="6" width="7" height="7.5" rx="2"/>' +
           '<rect x="11" y="6" width="7" height="7.5" rx="2"/>' +
           '</svg>';
       }
       if (cols === 3) {
-        // 3개: 윗줄 ㅁㅁ + 밑에 1개
         return '<svg viewBox="0 0 20 20" width="20" height="20" fill="currentColor">' +
           '<rect x="2" y="2" width="7" height="7" rx="2"/>' +
           '<rect x="11" y="2" width="7" height="7" rx="2"/>' +
           '<rect x="2" y="11" width="7" height="7" rx="2"/>' +
           '</svg>';
       }
-      // 4개: ㅁㅁ / ㅁㅁ 사각 네 개
+      if (cols === 5) {
+        return '<svg viewBox="0 0 20 20" width="20" height="20" fill="currentColor">' +
+          '<rect x="1.5" y="3" width="5" height="5.5" rx="1.5"/>' +
+          '<rect x="7.5" y="3" width="5" height="5.5" rx="1.5"/>' +
+          '<rect x="13.5" y="3" width="5" height="5.5" rx="1.5"/>' +
+          '<rect x="4.5" y="11" width="5" height="5.5" rx="1.5"/>' +
+          '<rect x="10.5" y="11" width="5" height="5.5" rx="1.5"/>' +
+          '</svg>';
+      }
       return '<svg viewBox="0 0 20 20" width="20" height="20" fill="currentColor">' +
         '<rect x="2" y="2" width="7" height="7" rx="2"/>' +
         '<rect x="11" y="2" width="7" height="7" rx="2"/>' +
@@ -3260,14 +3396,18 @@
       }
     }
 
-    // 피드 레이아웃 전환 (목록 1열 / 창 1->2->3->4 순환 · 유저별 완전 분리)
     function applyFeedLayoutUI(saveToCloud = false) {
-      resultsContainer.classList.remove('cols-1', 'cols-2', 'cols-3', 'cols-4', 'grid-full');
+      resultsContainer.classList.remove('cols-1', 'cols-2', 'cols-3', 'cols-4', 'cols-5', 'grid-full');
       const listBtn = document.getElementById('listModeBtn');
       const gridBtn = document.getElementById('gridModeBtn');
+      const maxCols = isTabletMode ? 5 : 4;
+      if (currentGridCols > maxCols) currentGridCols = maxCols;
 
       if (listBtn) listBtn.innerHTML = getListModeSvg();
-      if (gridBtn) gridBtn.innerHTML = getGridColsSvg(currentGridCols);
+      if (gridBtn) {
+        gridBtn.innerHTML = getGridColsSvg(currentGridCols);
+        gridBtn.title = isTabletMode ? '창 보기 (1→2→3→4→5)' : '창 보기 (1→2→3→4)';
+      }
 
       if (currentFeedMode === 'list') {
         resultsContainer.classList.add('cols-1');
@@ -3285,7 +3425,7 @@
 
       if (currentUser) {
         try {
-          localStorage.setItem(LAYOUT_STORAGE_KEY + '_' + getUid(), JSON.stringify({
+          localStorage.setItem(LAYOUT_STORAGE_KEY + '_' + getUid() + getDeviceStorageSuffix(), JSON.stringify({
             mode: currentFeedMode,
             cols: currentGridCols
           }));
@@ -3296,16 +3436,17 @@
 
     function initFeedLayoutMode() {
       currentFeedMode = 'grid';
-      currentGridCols = 2;
+      currentGridCols = isTabletMode ? 3 : 2;
+      const validCols = isTabletMode ? [1, 2, 3, 4, 5] : [1, 2, 3, 4];
       if (currentUser) {
         try {
-          const raw = localStorage.getItem(LAYOUT_STORAGE_KEY + '_' + getUid());
+          const raw = localStorage.getItem(LAYOUT_STORAGE_KEY + '_' + getUid() + getDeviceStorageSuffix());
           if (raw) {
             const parsed = JSON.parse(raw);
             if (parsed && (parsed.mode === 'list' || parsed.mode === 'grid')) {
               currentFeedMode = parsed.mode;
             }
-            if (parsed && [1, 2, 3, 4].includes(Number(parsed.cols))) {
+            if (parsed && validCols.includes(Number(parsed.cols))) {
               currentGridCols = Number(parsed.cols);
             }
           }
@@ -3323,11 +3464,12 @@
 
     function cycleFeedGridCols() {
       const wasFullGrid = (currentFeedMode === 'grid' && currentGridCols === 1);
+      const maxCols = isTabletMode ? 5 : 4;
       if (currentFeedMode === 'list') {
         currentFeedMode = 'grid';
-        currentGridCols = 1; // 1(대형창)부터 시작
+        currentGridCols = 1;
       } else {
-        currentGridCols = currentGridCols >= 4 ? 1 : (currentGridCols + 1); // 1 -> 2 -> 3 -> 4 -> 1
+        currentGridCols = currentGridCols >= maxCols ? 1 : (currentGridCols + 1);
       }
       if (wasFullGrid && currentGridCols !== 1 && isInlinePlaying) {
         stopInlinePlayer(true);
@@ -3336,7 +3478,7 @@
       triggerLayoutHaptic(document.getElementById('gridModeBtn'));
     }
 
-    // 14개 모듈 단위 256 색상표 + 미니 레이아웃 인터랙티브 적용 엔진
+    // 14개 모듈 단위 256 색상표 + 미니 레이아웃
     function generate256HexColors() {
       const colors = [
         '#0d0d0d', '#18181b', '#1e293b', '#172554',
@@ -3382,7 +3524,6 @@
         currentThemeColors[key] = val;
         root.style.setProperty(meta.cssVar, val);
 
-        // 명도 기반 자동 글자색 보정 (검정 계열 배경 -> 흰색 글자 / 흰색 계열 배경 -> 검정 글자)
         if (meta.fgVar) {
           root.style.setProperty(meta.fgVar, isLightHexColor(val) ? '#111111' : '#ffffff');
         }
@@ -3546,23 +3687,23 @@
       document.querySelectorAll('.ui-opt-btn[data-bwidth]').forEach(b => {
         b.classList.toggle('active', Number(b.getAttribute('data-bwidth')) === bw);
       });
+      updateViewModeButtonsUI();
     }
 
     function persistUiOpts(saveToCloud = true) {
       if (!currentUser) return;
       try {
-        localStorage.setItem(UI_OPTS_STORAGE_KEY + '_' + getUid(), JSON.stringify(currentUiOpts));
+        localStorage.setItem(UI_OPTS_STORAGE_KEY + '_' + getUid() + getDeviceStorageSuffix(), JSON.stringify(currentUiOpts));
       } catch (e) {}
-      if (saveToCloud) {
-        saveUserProfileDocToCloud();
-      }
+      if (saveToCloud) saveUserProfileDocToCloud();
     }
 
     function initSavedUiOpts() {
       currentUiOpts = getDefaultUiOpts();
       if (currentUser) {
         try {
-          const raw = localStorage.getItem(UI_OPTS_STORAGE_KEY + '_' + getUid());
+          const raw = localStorage.getItem(UI_OPTS_STORAGE_KEY + '_' + getUid() + getDeviceStorageSuffix())
+            || (isTabletMode ? localStorage.getItem(UI_OPTS_STORAGE_KEY + '_' + getUid()) : null);
           if (raw) {
             const p = JSON.parse(raw);
             if (p && typeof p === 'object') {
@@ -3622,9 +3763,7 @@
       try {
         localStorage.setItem(`${THEME_STORAGE_KEY}_${getUid()}`, JSON.stringify(currentThemeColors));
       } catch (e) {}
-      if (saveToCloud) {
-        saveUserProfileDocToCloud();
-      }
+      if (saveToCloud) saveUserProfileDocToCloud();
     }
 
     function build256Palette() {
@@ -3671,7 +3810,6 @@
       initSavedUiOpts();
     }
 
-    // 별표(★) 최상단 고정 저장/로드 (사용자별 분리)
     function loadLocalPinsImmediate() {
       pinnedVideoIds = new Set();
       try {
@@ -3689,7 +3827,7 @@
       } catch (e) {}
     }
 
-    async function syncPinsFromFirebase() {
+   async function syncPinsFromFirebase() {
       if (!fbReady || !db || !currentUser) return;
       try {
         const snap = await db.collection(FB_COLLECTION).doc(getPinsDocId()).get();
@@ -3730,7 +3868,7 @@
       renderSortedFeed();
     }
 
-    // 3. 50개 단위 고속 검색 수집 (총 300개까지 스크롤 시 50개씩 추가 로드 & DB 효율화)
+    // 3. 50개 단위 고속 검색 수집
     function updateScrollSentinelUI() {
       const el = document.getElementById('feedScrollSentinel');
       if (!el) return;
@@ -3835,7 +3973,6 @@
       }
     }
 
-    // 스크롤 하단 도달 시 50개씩 추가 로드 (총 최대 300개, 정렬은 불러온 범위 내에서만 적용)
     async function loadMoreChunk50() {
       if (isSearching || isLoadingMore || !currentUser) return;
       if (currentFeedItems.length === 0 || currentFeedItems.length >= MAX_TAB_ITEMS) {
@@ -3843,7 +3980,6 @@
         return;
       }
 
-      // 1) 저장 탭(DB) 풀에서 다음 50개 단계적 노출
       if (currentFeedIsCache) {
         if (currentFeedItems.length >= dbFeedPool.length) {
           updateScrollSentinelUI();
@@ -3859,7 +3995,6 @@
         return;
       }
 
-      // 2) 실시간 검색 결과에서 다음 50개 추가 수집 + DB 증분 저장
       if (!activeSearchSession || activeSearchSession.exhausted || !activeSearchSession.nextpage) {
         updateScrollSentinelUI();
         return;
@@ -3920,7 +4055,6 @@
       return false;
     }
 
-    // 4. 청크 단위 데이터 수집 + 불러온 범위 한정 정렬 렌더링
     function appendChunkItems(items, maxLimit, seenIds, isFromCache = false, deferRender = false) {
       if (!items || !items.length) return;
       currentFeedIsCache = isFromCache;
@@ -3963,7 +4097,6 @@
       return aStr.localeCompare(bStr, 'ko', { numeric: true });
     }
 
-    // 피드 영상 터치 감도 둔화 엔진 (스크롤 직후 220ms 차단 + 8px 이동 차단 + 안정적 탭 시 실행)
     let lastFeedScrollTime = 0;
 
     function attachDampedCardTap(cardEl, onActivate) {
@@ -4182,7 +4315,6 @@
     }
 
     function renderSortedFeed(preserveInlineDom = false) {
-      // 인라인 재생 중 추가 50개 스크롤 로드 시 기존 재생 카드 DOM 유지 (영상 끊김 방지)
       if (preserveInlineDom && isInlinePlaying && resultsContainer.children.length > 0) {
         const existingVids = new Set();
         resultsContainer.querySelectorAll('.video-card').forEach(c => {
@@ -4203,7 +4335,6 @@
         stopInlinePlayer(true);
       }
 
-      // 정렬은 현재 불러온 범위(currentFeedItems) 내에서만 적용
       const sorted = [...currentFeedItems].sort((a, b) => {
         const aPin = pinnedVideoIds.has(a.id) ? 1 : 0;
         const bPin = pinnedVideoIds.has(b.id) ? 1 : 0;
@@ -4249,8 +4380,7 @@
       }
     }
 
-    // TUBE_LAB_V5_IOS_BG_PATCH
-    // 5. 부유창 재생 + iOS 26.3.1 무중단 백그라운드 오디오 엔진 (Piped+Invidious 다중 페일오버)
+    // 5. 부유창 재생 + 무중단 백그라운드 오디오 엔진
     const STREAM_PIPED_SERVERS = [
       'https://api.piped.private.coffee',
       'https://pipedapi.kavin.rocks',
@@ -4507,7 +4637,6 @@
       if (!cardEl || !item || !item.id) return;
       if (isInlinePlaying && inlineVideoId === item.id && cardEl.classList.contains('inline-playing')) return;
 
-      // 열려 있던 부유창 또는 이전 인라인 재생 정리 (소리 겹침 원천 차단)
       if (!isInlinePlaying && (currentVideoId || modal.style.display !== 'none')) {
         closePlayerModal();
       } else if (isInlinePlaying) {
@@ -4560,7 +4689,6 @@
       recordUserPlay(item.id, item.t);
     }
 
-    // iOS Safari / 홈화면 PWA 오디오 제스처 선행 잠금해제 (click/touchend 전역 보강)
     function unlockIosAudioOnce() {
       if (iosAudioUnlocked || isBgAudioPlaying) return;
       try {
@@ -4676,7 +4804,6 @@
       setTimeout(() => { if (statusMsg.innerText === msg) statusMsg.innerText = ''; }, ms);
     }
 
-    // 0순위 개인 서버 + 1순위 Piped/Invidious 8개 동시 병렬 레이스로 오디오 후보 고속 수집
     async function prefetchBgAudio(videoId) {
       prefetchedAudioCandidates = [];
       prefetchedVideoId = '';
@@ -4685,14 +4812,12 @@
 
       let candidates = [];
 
-      // 0순위: 사용자 지정 개인 오디오 서버
       if (customStreamApiUrl) {
         const customUrls = await fetchCustomStreamCandidates(videoId);
         if (currentVideoId !== videoId) return [];
         if (customUrls.length > 0) candidates = customUrls;
       }
 
-      // 1순위: 공개 Piped 5개 + Invidious 3개 동시 병렬 레이스 (가장 먼저 응답하는 살아있는 서버 즉시 채택)
       if (candidates.length === 0) {
         const tasks = [
           ...STREAM_PIPED_SERVERS.map(server => async () => {
@@ -4714,7 +4839,6 @@
       prefetchedVideoId = candidates.length > 0 ? videoId : '';
       updateBgModeUI();
 
-      // 도킹되어 있거나 백그라운드로 내려간 상태라면 프리패치 완료 즉시 오디오 전환
       if ((isDockedToBookmark || document.visibilityState === 'hidden') && !isBgAudioPlaying && !userPausedBg && candidates.length > 0) {
         activateBgAudioStream(lastKnownPlaySec);
       }
@@ -4743,7 +4867,6 @@
       }
     }
 
-    // 무중단 백그라운드 오디오 전환 (실제 'playing' 확인 전까지 YouTube iframe 절대 정지 안 함!)
     async function activateBgAudioStream(startSec = 0) {
       if (!currentVideoId) return false;
       if (prefetchedVideoId !== currentVideoId || prefetchedAudioCandidates.length === 0) {
@@ -4752,9 +4875,7 @@
           await prefetchBgAudio(currentVideoId);
         }
       }
-      if (prefetchedAudioCandidates.length === 0) {
-        return false;
-      }
+      if (prefetchedAudioCandidates.length === 0) return false;
 
       activeCandidateIdx = 0;
       userPausedBg = false;
@@ -4774,9 +4895,7 @@
         bgAudio.src = prefetchedAudioCandidates[idx];
         const p = bgAudio.play();
         if (p && typeof p.catch === 'function') {
-          p.catch(() => {
-            tryPlayCandidateAt(idx + 1);
-          });
+          p.catch(() => { tryPlayCandidateAt(idx + 1); });
         }
         return true;
       } catch (e) {
@@ -4800,8 +4919,17 @@
 
     function getDefaultFullPlayerMetrics() {
       const headerBox = document.querySelector('.header-unified-box');
-      const topPos = headerBox ? Math.max(52, Math.round(headerBox.getBoundingClientRect().bottom + 6)) : 96;
-      const maxH = Math.max(140, window.innerHeight - topPos - 36);
+      const topPos = headerBox
+        ? Math.max(52, Math.round(headerBox.getBoundingClientRect().bottom + (isTabletMode ? 10 : 6)))
+        : (isTabletMode ? 132 : 96);
+      const maxH = Math.max(140, window.innerHeight - topPos - (isTabletMode ? 48 : 36));
+      if (isTabletMode) {
+        const preferredW = window.innerWidth < 900
+          ? Math.min(window.innerWidth - 24, 780)
+          : Math.min(Math.round(window.innerWidth * 0.74), 920);
+        const fitWidth = Math.max(280, Math.min(window.innerWidth - 24, preferredW, Math.round(maxH * (16 / 9))));
+        return { topPos, fitWidth };
+      }
       const fitWidth = Math.max(MIN_PLAYER_WIDTH, Math.min(window.innerWidth - 12, Math.round(maxH * (16 / 9))));
       return { topPos, fitWidth };
     }
@@ -4817,7 +4945,6 @@
       currentVideoId = videoId;
       currentVideoTitle = title;
 
-      // 검색창 외곽 테두리 바로 밑에 모바일 가로폭 딱 맞는 최대 16:9 크기로 즉시 오픈
       const { topPos, fitWidth } = getDefaultFullPlayerMetrics();
       const dims = apply16by9Scale(fitWidth);
       lastPlayerWidth = dims.width;
@@ -4865,7 +4992,7 @@
       updatePlayingCardHighlight(true);
     }
 
-    // 5-2. Firebase 3필드 100% 호환 스키마({keyword, updatedAt, items}) + 진단 + 최종 피드 신속 복원
+    // 5-2. Firebase 연동 · 진단 · 기기별 프로필 분리 동기화
     function updateDbDiagUI() {
       const el = document.getElementById('dbDiagText');
       if (!el) return;
@@ -5363,7 +5490,6 @@
           user = findUserByNameAndCode(name, code);
         }
         if (!user) {
-          // 불일치 시 아무 반응 없이 입력된 코드만 삭제
           if (ci) {
             ci.value = '';
             ci.focus({ preventScroll: true });
@@ -5420,6 +5546,7 @@
 
     async function enterAppWithUser(user) {
       currentUser = user;
+      cloudDeviceProfiles = { mobile: null, tablet: null };
       try {
         localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({
           id: user.id,
@@ -5439,6 +5566,7 @@
       document.getElementById('query').value = '';
       statusMsg.innerText = '';
 
+      applyDeviceMode(false);
       initSavedBgColor();
       initFeedLayoutMode();
       initSavedFilters();
@@ -5471,6 +5599,7 @@
       closeSettingsAuthModal();
       settingsAdminUnlocked = false;
       currentUser = null;
+      cloudDeviceProfiles = { mobile: null, tablet: null };
       cachedTabsMeta = [];
       currentFeedItems = [];
       dbFeedPool = [];
@@ -5486,7 +5615,7 @@
       dockSide = 'right';
       lastPlayerWidth = 0;
       currentFeedMode = 'grid';
-      currentGridCols = 2;
+      currentGridCols = isTabletMode ? 3 : 2;
       currentThemeColors = getDefaultThemeColors();
       currentUiOpts = getDefaultUiOpts();
       applyThemeColorsToDOM();
@@ -5504,12 +5633,35 @@
 
     async function saveUserProfileDocToCloud() {
       if (!fbReady || !db || !currentUser) return;
+      const curKey = getDeviceProfileKey();
+      cloudDeviceProfiles[curKey] = {
+        uiOpts: { ...currentUiOpts },
+        layout: { mode: currentFeedMode, cols: currentGridCols },
+        bookmark: { side: dockSide, pos: savedBookmarkPos }
+      };
+
       const packedItems = [];
       packedItems.push({ id: '__theme__', data: currentThemeColors });
-      packedItems.push({ id: '__ui_opts__', data: currentUiOpts });
-      packedItems.push({ id: '__layout__', mode: currentFeedMode, cols: currentGridCols });
+
+      const mob = cloudDeviceProfiles.mobile;
+      if (mob) {
+        if (mob.uiOpts) packedItems.push({ id: '__ui_opts__', data: mob.uiOpts });
+        if (mob.layout) packedItems.push({ id: '__layout__', mode: mob.layout.mode, cols: mob.layout.cols });
+        if (mob.bookmark) packedItems.push({ id: '__bookmark__', side: mob.bookmark.side, pos: mob.bookmark.pos });
+      } else if (!isTabletMode) {
+        packedItems.push({ id: '__ui_opts__', data: currentUiOpts });
+        packedItems.push({ id: '__layout__', mode: currentFeedMode, cols: currentGridCols });
+        packedItems.push({ id: '__bookmark__', side: dockSide, pos: savedBookmarkPos });
+      }
+
+      const tab = cloudDeviceProfiles.tablet;
+      if (tab) {
+        if (tab.uiOpts) packedItems.push({ id: '__ui_opts_tablet__', data: tab.uiOpts });
+        if (tab.layout) packedItems.push({ id: '__layout_tablet__', mode: tab.layout.mode, cols: tab.layout.cols });
+        if (tab.bookmark) packedItems.push({ id: '__bookmark_tablet__', side: tab.bookmark.side, pos: tab.bookmark.pos });
+      }
+
       packedItems.push({ id: '__filters__', order: activeFilterOrder });
-      packedItems.push({ id: '__bookmark__', side: dockSide, pos: savedBookmarkPos });
       if (customStreamApiUrl) {
         packedItems.push({ id: '__stream_api__', url: customStreamApiUrl });
       }
@@ -5543,15 +5695,38 @@
           const d = snap.data();
           const list = Array.isArray(d.items) ? d.items : [];
           const themeEntry = list.find(it => it && it.id === '__theme__' && it.data);
-          const uiOptsEntry = list.find(it => it && it.id === '__ui_opts__' && it.data);
-          const layoutEntry = list.find(it => it && it.id === '__layout__');
+          const mobUiOpts = list.find(it => it && it.id === '__ui_opts__' && it.data);
+          const tabUiOpts = list.find(it => it && it.id === '__ui_opts_tablet__' && it.data);
+          const mobLayout = list.find(it => it && it.id === '__layout__');
+          const tabLayout = list.find(it => it && it.id === '__layout_tablet__');
+          const mobBm = list.find(it => it && it.id === '__bookmark__');
+          const tabBm = list.find(it => it && it.id === '__bookmark_tablet__');
           const filtersEntry = list.find(it => it && it.id === '__filters__' && Array.isArray(it.order));
-          const bmEntry = list.find(it => it && it.id === '__bookmark__');
           const streamApiEntry = list.find(it => it && it.id === '__stream_api__' && typeof it.url === 'string');
           const lastFeedEntry = list.find(it => it && it.id === '__last_feed__' && it.docId);
 
-          if (uiOptsEntry && uiOptsEntry.data) {
-            const uo = uiOptsEntry.data;
+          if (mobUiOpts || mobLayout || mobBm) {
+            cloudDeviceProfiles.mobile = {
+              uiOpts: mobUiOpts ? mobUiOpts.data : null,
+              layout: mobLayout ? { mode: mobLayout.mode, cols: mobLayout.cols } : null,
+              bookmark: mobBm ? { side: mobBm.side, pos: mobBm.pos } : null
+            };
+          }
+          if (tabUiOpts || tabLayout || tabBm) {
+            cloudDeviceProfiles.tablet = {
+              uiOpts: tabUiOpts ? tabUiOpts.data : null,
+              layout: tabLayout ? { mode: tabLayout.mode, cols: tabLayout.cols } : null,
+              bookmark: tabBm ? { side: tabBm.side, pos: tabBm.pos } : null
+            };
+          }
+
+          const activeUiOptsEntry = isTabletMode ? (tabUiOpts || mobUiOpts) : mobUiOpts;
+          const activeLayoutEntry = isTabletMode ? tabLayout : mobLayout;
+          const activeBmEntry = isTabletMode ? tabBm : mobBm;
+          const validCols = isTabletMode ? [1, 2, 3, 4, 5] : [1, 2, 3, 4];
+
+          if (activeUiOptsEntry && activeUiOptsEntry.data) {
+            const uo = activeUiOptsEntry.data;
             if ([1, 2, 3].includes(Number(uo.bmSize))) currentUiOpts.bmSize = Number(uo.bmSize);
             if (uo.bmOpacity !== undefined) currentUiOpts.bmOpacity = normalizeBmOpacity(uo.bmOpacity);
             if (uo.headerOpacity !== undefined) currentUiOpts.headerOpacity = normalizeHeaderOpacity(uo.headerOpacity);
@@ -5571,9 +5746,9 @@
             persistThemeColors(false);
           }
 
-          if (layoutEntry) {
-            if (layoutEntry.mode === 'list' || layoutEntry.mode === 'grid') currentFeedMode = layoutEntry.mode;
-            if ([1, 2, 3, 4].includes(Number(layoutEntry.cols))) currentGridCols = Number(layoutEntry.cols);
+          if (activeLayoutEntry) {
+            if (activeLayoutEntry.mode === 'list' || activeLayoutEntry.mode === 'grid') currentFeedMode = activeLayoutEntry.mode;
+            if (validCols.includes(Number(activeLayoutEntry.cols))) currentGridCols = Number(activeLayoutEntry.cols);
             applyFeedLayoutUI(false);
           }
 
@@ -5584,10 +5759,10 @@
             if (currentFeedItems.length > 0) renderSortedFeed();
           }
 
-          if (bmEntry) {
-            if (bmEntry.side === 'left' || bmEntry.side === 'right') dockSide = bmEntry.side;
-            if (bmEntry.pos && (bmEntry.pos.mode === 'left' || bmEntry.pos.mode === 'right') && isFinite(Number(bmEntry.pos.top))) {
-              savedBookmarkPos = { mode: bmEntry.pos.mode, top: Number(bmEntry.pos.top) };
+          if (activeBmEntry) {
+            if (activeBmEntry.side === 'left' || activeBmEntry.side === 'right') dockSide = activeBmEntry.side;
+            if (activeBmEntry.pos && (activeBmEntry.pos.mode === 'left' || activeBmEntry.pos.mode === 'right') && isFinite(Number(activeBmEntry.pos.top))) {
+              savedBookmarkPos = { mode: activeBmEntry.pos.mode, top: Number(activeBmEntry.pos.top) };
             }
             persistBookmarkPos(false);
             applyBookmarkPosition(dockSide);
@@ -5985,7 +6160,6 @@
       }, { passive: true });
     })();
 
-    // 검색어 2단계 터치: 1회 터치 -> 선택확대 + 재생목록 슬라이드 / 2회 터치 -> 피드 신속 로드
     function handleHistoryTabTap(tab) {
       if (selectedTabDocId !== tab.docId) {
         selectedTabDocId = tab.docId;
@@ -5994,7 +6168,6 @@
         openTabHistoryDrawer(tab);
         return;
       }
-      // 2회째 터치 -> 재생목록 닫고 전체 피드 신속 로드
       closeTabHistoryDrawer();
       loadTabData(tab.docId, tab.keyword, true);
     }
@@ -6224,7 +6397,7 @@
     function renderManageList() {
       manageTabList.innerHTML = '';
       if (cachedTabsMeta.length === 0) {
-        manageTabList.innerHTML = '<div style="font-size:11px; color:#888; text-align:center; padding:16px 0;">저장된 검색 목록이 없습니다.</div>';
+        manageTabList.innerHTML = '<div style="font-size:12px; color:#888; text-align:center; padding:16px 0;">저장된 검색 목록이 없습니다.</div>';
         return;
       }
 
@@ -6339,7 +6512,7 @@
 
       const users = authData.users || [];
       if (users.length === 0) {
-        listEl.innerHTML = '<div style="font-size:11px; color:#777; text-align:center; padding:10px 0;">등록된 사용자가 없습니다.</div>';
+        listEl.innerHTML = '<div style="font-size:12px; color:#777; text-align:center; padding:10px 0;">등록된 사용자가 없습니다.</div>';
         return;
       }
 
@@ -6498,6 +6671,7 @@
     }
 
     async function bootstrapApp() {
+      initDeviceMode();
       document.body.classList.add('auth-locked');
       initSavedBgColor();
       updateFilterUI();
@@ -6688,7 +6862,7 @@
       window.open('https://cobalt.tools/', '_blank', 'noopener,noreferrer');
     }
 
-    // 7. YouTube 재생 상태/오류 수신 + 재생불가 즉시삭제 + 슬라이드 책갈피 상태 연동
+    // 7. YouTube 재생 상태/오류 수신 + 슬라이드 책갈피 상태 연동
     window.addEventListener('message', (e) => {
       if (!e.data || typeof e.data !== 'string') return;
       try {
@@ -6807,13 +6981,13 @@
       }
     });
 
-    // 슬라이드 책갈피 (스크롤 시 상시 표시 / 10%단위 투명도 / 좌우 이동 / 유저별 위치 저장)
+    // 슬라이드 책갈피 (기기별 위치 분리 저장 + 화면 회전 시 자동 보정)
     let savedBookmarkPos = null;
 
     function persistBookmarkPos(saveToCloud = true) {
       if (!currentUser) return;
       try {
-        localStorage.setItem(BM_POS_STORAGE_PREFIX + getUid(), JSON.stringify({
+        localStorage.setItem(BM_POS_STORAGE_PREFIX + getUid() + getDeviceStorageSuffix(), JSON.stringify({
           side: dockSide,
           pos: savedBookmarkPos
         }));
@@ -6826,7 +7000,7 @@
       savedBookmarkPos = null;
       if (currentUser) {
         try {
-          const raw = localStorage.getItem(BM_POS_STORAGE_PREFIX + getUid());
+          const raw = localStorage.getItem(BM_POS_STORAGE_PREFIX + getUid() + getDeviceStorageSuffix());
           if (raw) {
             const p = JSON.parse(raw);
             if (p && (p.side === 'left' || p.side === 'right')) dockSide = p.side;
@@ -6946,7 +7120,7 @@
         if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; }
       };
 
-      bgModeTab.addEventListener('pointerdown', (e) => {
+      bgModeTab.addEventListener('pointerdown', () => {
         if (slideBookmark.classList.contains('sb-tucked')) return;
         isPressing = true;
         longTriggered = false;
@@ -7028,7 +7202,6 @@
     })();
 
     function onBlackoutOverlayTap() {
-      // 두 번 연속 터치 전까지 화면에 아무 픽셀도 띄우지 않고 완전 OFF 유지
       const now = Date.now();
       if (now - lastBlackoutTapTime <= 380) {
         lastBlackoutTapTime = 0;
@@ -7078,31 +7251,34 @@
 
     function applyBookmarkPosition(defaultSide) {
       slideBookmark.classList.remove('dock-left', 'dock-right', 'dock-free');
+      const bmH = slideBookmark.offsetHeight || (isTabletMode ? 240 : 180);
+      const maxTop = Math.max(52, window.innerHeight - bmH - 16);
       if (savedBookmarkPos) {
+        const clampedTop = Math.max(52, Math.min(maxTop, Number(savedBookmarkPos.top || 200)));
         if (savedBookmarkPos.mode === 'left') {
           slideBookmark.classList.add('dock-left');
           slideBookmark.style.left = '0px';
           slideBookmark.style.right = 'auto';
-          slideBookmark.style.top = `${savedBookmarkPos.top}px`;
+          slideBookmark.style.top = `${clampedTop}px`;
         } else {
           slideBookmark.classList.add('dock-right');
           slideBookmark.style.left = 'auto';
           slideBookmark.style.right = '0px';
-          slideBookmark.style.top = `${savedBookmarkPos.top}px`;
+          slideBookmark.style.top = `${clampedTop}px`;
         }
       } else {
         const side = defaultSide === 'left' ? 'left' : 'right';
         slideBookmark.classList.add(side === 'left' ? 'dock-left' : 'dock-right');
         slideBookmark.style.left = side === 'left' ? '0px' : 'auto';
         slideBookmark.style.right = side === 'right' ? '0px' : 'auto';
-        const bmH = slideBookmark.offsetHeight || 180;
-        const bottomTop = Math.max(260, window.innerHeight - bmH - 24);
+        const bottomTop = Math.max(52, Math.min(maxTop, window.innerHeight - bmH - 28));
         slideBookmark.style.top = bottomTop + 'px';
       }
     }
 
     function dockPlayerToBookmark(side) {
-      if (!isDockedToBookmark && modal.style.display !== 'none' && modal.offsetWidth >= MIN_PLAYER_WIDTH) {
+      const minW = isTabletMode ? 280 : MIN_PLAYER_WIDTH;
+      if (!isDockedToBookmark && modal.style.display !== 'none' && modal.offsetWidth >= minW) {
         lastPlayerWidth = modal.offsetWidth;
       }
       isDockedToBookmark = true;
@@ -7126,7 +7302,8 @@
       modal.style.display = 'block';
 
       const { topPos, fitWidth } = getDefaultFullPlayerMetrics();
-      const targetW = (lastPlayerWidth && lastPlayerWidth >= MIN_PLAYER_WIDTH) ? lastPlayerWidth : fitWidth;
+      const minW = isTabletMode ? 280 : MIN_PLAYER_WIDTH;
+      const targetW = (lastPlayerWidth && lastPlayerWidth >= minW) ? lastPlayerWidth : fitWidth;
       const dims = apply16by9Scale(targetW);
       lastPlayerWidth = dims.width;
       const centerLeft = Math.max(6, Math.round((window.innerWidth - dims.width) / 2));
@@ -7138,7 +7315,6 @@
       updateSlideBookmarkPlayUI();
     }
 
-    // 통합 스크롤 리스너: 스크롤 중 슬라이드 등장 · 3초 이상 무반응 시에만 천천히 숨김
     window.addEventListener('scroll', () => {
       lastFeedScrollTime = Date.now();
       if (currentUser) {
@@ -7227,7 +7403,7 @@
       sbGrip.addEventListener('pointercancel', finishSlideBookmarkDrag);
     }
 
-    // 7-2. 자유 드래그 이동 & 화면 밖 날리기(Flick/Slide Off-Screen)
+    // 7-2. 자유 드래그 이동 & 화면 밖 날리기
     let isDragging = false;
     let startX = 0, startY = 0, initLeft = 0, initTop = 0;
     let lastMoveX = 0, lastMoveTime = 0, velocityX = 0;
@@ -7252,7 +7428,7 @@
     playerDragBar.addEventListener('pointerdown', startPlayerDrag);
     bottomDragSpacer.addEventListener('pointerdown', startPlayerDrag);
 
-    // 8. 4각 모서리 16:9 정밀 확대/축소 로직 (반대편 대각선 모서리 완벽 고정)
+    // 8. 4각 모서리 16:9 정밀 확대/축소 로직
     let isResizing = false;
     let resizeDir = '';
     let startW = 320, startH = 180, resizeStartX = 0, resizeStartY = 0;
@@ -7284,7 +7460,6 @@
         lastMoveX = e.clientX;
         lastMoveTime = now;
 
-        // 좌/우는 제한 없이 화면 밖으로 날릴 수 있게 허용
         modal.style.left = `${initLeft + dx}px`;
         modal.style.top = `${Math.max(-30, Math.min(window.innerHeight - 55, initTop + dy))}px`;
         return;
@@ -7301,7 +7476,6 @@
         const dims = apply16by9Scale(targetW);
         lastPlayerWidth = dims.width;
 
-        // 좌측/상단 모서리 조작 시 반대편 우측/하단 모서리를 제자리에 고정
         if (resizeDir.includes('l')) {
           modal.style.left = `${initLeft + startW - dims.width}px`;
         }
@@ -7317,13 +7491,11 @@
         modal.classList.remove('interacting');
         const rect = modal.getBoundingClientRect();
 
-        // 창의 절반 가까이 좌/우 화면 바깥으로 나가거나 빠르게 좌/우로 날렸을 때 책갈피로 도킹
         if (rect.left + rect.width * 0.45 < 0 || (velocityX < -0.65 && rect.left < 28)) {
           dockPlayerToBookmark('left');
         } else if (rect.right - rect.width * 0.45 > window.innerWidth || (velocityX > 0.65 && rect.right > window.innerWidth - 28)) {
           dockPlayerToBookmark('right');
         } else {
-          // 화면 안에 머물렀다면 상단 이탈만 부드럽게 보정
           if (rect.top < 0) modal.style.top = '4px';
         }
       }
