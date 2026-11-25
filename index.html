@@ -18,6 +18,9 @@
   <style>
     :root {
       --app-bg: #0d0d0d;
+      --top-header-bg: var(--app-bg);
+      --header-box-bg: #0d0d0d;
+      --header-box-rgba: #0d0d0d;
       --header-border-color: #ffffff;
       --header-border-fg: #111111;
       --header-divider-color: #aaaaaa;
@@ -238,9 +241,11 @@
       position: sticky;
       top: 0;
       z-index: 100;
-      background: var(--app-bg);
-      padding: calc(env(safe-area-inset-top, 0px) + 6px) 0 4px 0;
-      width: 100%;
+      background: var(--top-header-bg);
+      margin-left: calc(-1 * (env(safe-area-inset-left, 0px) + 10px));
+      margin-right: calc(-1 * (env(safe-area-inset-right, 0px) + 10px));
+      padding: calc(env(safe-area-inset-top, 0px) + 6px) calc(env(safe-area-inset-right, 0px) + 10px) 4px calc(env(safe-area-inset-left, 0px) + 10px);
+      width: auto;
     }
     .header-unified-box {
       position: relative;
@@ -249,6 +254,7 @@
       margin-right: -4px;
       border-radius: 10px;
       padding: 6px 7px 5px 7px;
+      background: var(--header-box-rgba);
     }
     .header-dash-svg {
       position: absolute;
@@ -1104,6 +1110,7 @@
     }
     .ml-outer-dash {
       border: 2px dashed var(--header-border-color);
+      background: var(--header-box-rgba);
       border-radius: 7px;
       padding: 4px;
       margin-bottom: 5px;
@@ -1328,6 +1335,15 @@
       font-weight: 700;
       color: #d4d4d8;
       white-space: nowrap;
+    }
+    .ui-opt-lbl.clickable-mod {
+      cursor: pointer;
+      text-decoration: underline;
+      text-decoration-style: dotted;
+      text-underline-offset: 2px;
+    }
+    .ui-opt-lbl.clickable-mod.mod-active {
+      color: #f9a8d4;
     }
     .ui-opt-btns {
       display: inline-flex;
@@ -1658,13 +1674,17 @@
     .video-grid.grid-full {
       grid-template-columns: 1fr;
       gap: 10px;
-      width: calc(100% + 20px);
-      margin-left: -10px;
-      margin-right: -10px;
+      width: auto;
+      margin-left: calc(-1 * (env(safe-area-inset-left, 0px) + 10px));
+      margin-right: calc(-1 * (env(safe-area-inset-right, 0px) + 10px));
     }
     .video-grid.grid-full .video-card {
       border-radius: 0;
       width: 100%;
+      background: var(--card-title-bg);
+    }
+    .video-grid.grid-full .thumb-wrapper {
+      background: var(--app-bg);
     }
     .video-grid.grid-full .card-info {
       padding: 8px 12px 9px 12px;
@@ -2522,7 +2542,7 @@
       <!-- 탭 1-2: 디테일 14모듈 미니 레이아웃 + 256 색상표 -->
       <div class="settings-pane" id="settings-pane-color">
         <div class="mini-theme-layout mini-mod-hit mod-selected" id="miniThemeLayout" data-mod="appBg" onclick="selectThemeModule('appBg', event)">
-          <div class="ml-outer-dash mini-mod-hit" id="miniOuterDash" data-mod="headerBorder" onclick="selectThemeModule('headerBorder', event)" title="외곽테두리">
+          <div class="ml-outer-dash mini-mod-hit" id="miniOuterDash" data-mod="headerBorder" onclick="toggleHeaderBoxOrBorderModule(event)" title="외곽테두리 / 모듈배경 (터치 전환)">
             <div class="ml-row1">
               <div class="ml-search mini-mod-hit" data-mod="searchBg" onclick="selectThemeModule('searchBg', event)">
                 <span>검색창</span>
@@ -2576,7 +2596,14 @@
             </div>
           </div>
           <div class="ui-opt-row">
-            <span class="ui-opt-lbl">큰 테두리</span>
+            <span class="ui-opt-lbl clickable-mod" id="headerBoxBgModLbl" onclick="selectThemeModule('headerBoxBg', event)" title="터치하여 모듈배경 색상 선택">모듈배경 투명도</span>
+            <div class="ui-opacity-wrap">
+              <input type="range" id="headerOpacitySlider" class="ui-opacity-slider" min="0" max="100" step="10" value="100" oninput="setHeaderBoxOpacity(this.value, false)" onchange="setHeaderBoxOpacity(this.value, true)">
+              <span class="ui-opacity-val" id="headerOpacityVal">100%</span>
+            </div>
+          </div>
+          <div class="ui-opt-row">
+            <span class="ui-opt-lbl clickable-mod" id="headerBorderModLbl" onclick="selectThemeModule('headerBorder', event)" title="터치하여 외곽테두리 색상 선택">큰 테두리</span>
             <div class="ui-opt-btns">
               <button type="button" class="ui-opt-btn" data-bstyle="dashed" onclick="setHeaderBorderStyle('dashed')">점선</button>
               <button type="button" class="ui-opt-btn" data-bstyle="solid" onclick="setHeaderBorderStyle('solid')">실선</button>
@@ -2753,6 +2780,7 @@
     // 14개 모듈 색상 메타 정의
     const THEME_MODULES = {
       appBg:           { label: '전체배경',    cssVar: '--app-bg',               def: '#0d0d0d' },
+      headerBoxBg:     { label: '모듈배경',    cssVar: '--header-box-bg',        def: '#0d0d0d' },
       headerBorder:    { label: '외곽점선',    cssVar: '--header-border-color',  def: '#ffffff' },
       headerDivider:   { label: '구분실선',    cssVar: '--header-divider-color', def: '#aaaaaa' },
       searchBg:        { label: '검색창',      cssVar: '--search-bg',            def: '#1c1c1c', fgVar: '--search-fg' },
@@ -2787,7 +2815,7 @@
     let isYtVideoPlaying = false;
     let currentThemeColors = getDefaultThemeColors();
     function getDefaultUiOpts() {
-      return { bmSize: 1, bmOpacity: 70, borderStyle: 'dashed', borderWidth: 2 };
+      return { bmSize: 1, bmOpacity: 70, headerOpacity: 100, borderStyle: 'dashed', borderWidth: 2 };
     }
     let currentUiOpts = getDefaultUiOpts();
     let selectedThemeMod = 'appBg';
@@ -3321,12 +3349,39 @@
       });
 
       root.style.setProperty('--header-border-fg', isLightHexColor(currentThemeColors.headerBorder) ? '#111111' : '#ffffff');
+      applyHeaderBoxBgStyle();
       document.body.classList.toggle('light-bg', isLightHexColor(currentThemeColors.appBg));
       const tcMeta = document.getElementById('appThemeColorMeta');
       if (tcMeta && !document.body.classList.contains('blackout-active')) {
         tcMeta.setAttribute('content', currentThemeColors.appBg || '#0d0d0d');
       }
       updateSelectedModulePreviewUI();
+    }
+
+    function hexToRgbaStr(hex, alpha) {
+      const clean = String(hex || '#0d0d0d').replace('#', '');
+      if (clean.length !== 6) return `rgba(13, 13, 13, ${alpha})`;
+      const r = parseInt(clean.slice(0, 2), 16);
+      const g = parseInt(clean.slice(2, 4), 16);
+      const b = parseInt(clean.slice(4, 6), 16);
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
+    function normalizeHeaderOpacity(val) {
+      if (val === undefined || val === null || val === '') return 100;
+      const n = Math.round(Number(val) / 10) * 10;
+      if (!isFinite(n)) return 100;
+      return Math.min(100, Math.max(0, n));
+    }
+
+    function applyHeaderBoxBgStyle() {
+      const root = document.documentElement;
+      const op = normalizeHeaderOpacity(currentUiOpts.headerOpacity);
+      const hex = /^#[0-9a-fA-F]{6}$/.test(String(currentThemeColors.headerBoxBg || ''))
+        ? String(currentThemeColors.headerBoxBg).toLowerCase()
+        : THEME_MODULES.headerBoxBg.def;
+      root.style.setProperty('--header-box-rgba', op === 0 ? 'transparent' : hexToRgbaStr(hex, (op / 100).toFixed(2)));
+      root.style.setProperty('--top-header-bg', op < 100 ? 'transparent' : 'var(--app-bg)');
     }
 
     function updateSelectedModulePreviewUI() {
@@ -3341,11 +3396,23 @@
       if (hexEl) hexEl.textContent = curHex;
 
       document.querySelectorAll('#miniThemeLayout .mini-mod-hit, #miniThemeLayout').forEach(el => {
-        el.classList.toggle('mod-selected', el.getAttribute('data-mod') === selectedThemeMod);
+        const mod = el.getAttribute('data-mod');
+        const isMatch = mod === selectedThemeMod || (mod === 'headerBorder' && selectedThemeMod === 'headerBoxBg');
+        el.classList.toggle('mod-selected', isMatch);
       });
+      const boxLbl = document.getElementById('headerBoxBgModLbl');
+      const borderLbl = document.getElementById('headerBorderModLbl');
+      if (boxLbl) boxLbl.classList.toggle('mod-active', selectedThemeMod === 'headerBoxBg');
+      if (borderLbl) borderLbl.classList.toggle('mod-active', selectedThemeMod === 'headerBorder');
       document.querySelectorAll('#palette256Grid .palette-cell').forEach(cell => {
         cell.classList.toggle('selected', cell.dataset.color === curHex);
       });
+    }
+
+    function toggleHeaderBoxOrBorderModule(ev) {
+      if (ev && ev.stopPropagation) ev.stopPropagation();
+      selectedThemeMod = (selectedThemeMod === 'headerBoxBg') ? 'headerBorder' : 'headerBoxBg';
+      updateSelectedModulePreviewUI();
     }
 
     function selectThemeModule(modKey, ev) {
@@ -3386,15 +3453,22 @@
     function applyUiOptsToDOM() {
       const sz = [1, 2, 3].includes(Number(currentUiOpts.bmSize)) ? Number(currentUiOpts.bmSize) : 1;
       const op = normalizeBmOpacity(currentUiOpts.bmOpacity);
+      const hop = normalizeHeaderOpacity(currentUiOpts.headerOpacity);
       const st = currentUiOpts.borderStyle === 'solid' ? 'solid' : 'dashed';
       const bw = [1, 2, 3, 4, 5].includes(Number(currentUiOpts.borderWidth)) ? Number(currentUiOpts.borderWidth) : 2;
-      currentUiOpts = { bmSize: sz, bmOpacity: op, borderStyle: st, borderWidth: bw };
+      currentUiOpts = { bmSize: sz, bmOpacity: op, headerOpacity: hop, borderStyle: st, borderWidth: bw };
 
       document.documentElement.style.setProperty('--bookmark-opacity', String(op / 100));
       const opSlider = document.getElementById('bmOpacitySlider');
       const opVal = document.getElementById('bmOpacityVal');
       if (opSlider) opSlider.value = String(op);
       if (opVal) opVal.textContent = op + '%';
+
+      const hOpSlider = document.getElementById('headerOpacitySlider');
+      const hOpVal = document.getElementById('headerOpacityVal');
+      if (hOpSlider) hOpSlider.value = String(hop);
+      if (hOpVal) hOpVal.textContent = hop + '%';
+      applyHeaderBoxBgStyle();
 
       if (slideBookmark) {
         slideBookmark.classList.remove('sb-size-1', 'sb-size-2', 'sb-size-3');
@@ -3455,6 +3529,7 @@
             if (p && typeof p === 'object') {
               if ([1, 2, 3].includes(Number(p.bmSize))) currentUiOpts.bmSize = Number(p.bmSize);
               if (p.bmOpacity !== undefined) currentUiOpts.bmOpacity = normalizeBmOpacity(p.bmOpacity);
+              if (p.headerOpacity !== undefined) currentUiOpts.headerOpacity = normalizeHeaderOpacity(p.headerOpacity);
               if (p.borderStyle === 'solid' || p.borderStyle === 'dashed') currentUiOpts.borderStyle = p.borderStyle;
               if ([1, 2, 3, 4, 5].includes(Number(p.borderWidth))) currentUiOpts.borderWidth = Number(p.borderWidth);
             }
@@ -3472,6 +3547,12 @@
 
     function setBookmarkOpacity(val, saveToCloud = true) {
       currentUiOpts.bmOpacity = normalizeBmOpacity(val);
+      applyUiOptsToDOM();
+      persistUiOpts(saveToCloud);
+    }
+
+    function setHeaderBoxOpacity(val, saveToCloud = true) {
+      currentUiOpts.headerOpacity = normalizeHeaderOpacity(val);
       applyUiOptsToDOM();
       persistUiOpts(saveToCloud);
     }
@@ -5284,6 +5365,7 @@
             const uo = uiOptsEntry.data;
             if ([1, 2, 3].includes(Number(uo.bmSize))) currentUiOpts.bmSize = Number(uo.bmSize);
             if (uo.bmOpacity !== undefined) currentUiOpts.bmOpacity = normalizeBmOpacity(uo.bmOpacity);
+            if (uo.headerOpacity !== undefined) currentUiOpts.headerOpacity = normalizeHeaderOpacity(uo.headerOpacity);
             if (uo.borderStyle === 'solid' || uo.borderStyle === 'dashed') currentUiOpts.borderStyle = uo.borderStyle;
             if ([1, 2, 3, 4, 5].includes(Number(uo.borderWidth))) currentUiOpts.borderWidth = Number(uo.borderWidth);
             applyUiOptsToDOM();
