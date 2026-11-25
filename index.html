@@ -41,6 +41,8 @@
       --filter-btn-fg: #e5e5e5;
       --filter-panel-bg: #171717;
       --filter-panel-fg: #dddddd;
+      --history-panel-bg: #171717;
+      --history-panel-fg: #dddddd;
       --bookmark-bg: #ffb6cb;
       --bookmark-border: #ffffff;
       --bookmark-opacity: 0.7;
@@ -510,17 +512,20 @@
       margin-top: 0;
       transition: max-height 0.28s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.22s ease, margin-top 0.22s ease;
     }
+    .tab-history-drawer.instant-close {
+      transition: none !important;
+    }
     .tab-history-drawer.open {
-      max-height: 390px;
+      max-height: 310px;
       opacity: 1;
-      margin-top: 6px;
+      margin-top: 4px;
     }
     .tab-history-inner {
-      background: var(--filter-panel-bg);
-      color: var(--filter-panel-fg);
+      background: var(--history-panel-bg);
+      color: var(--history-panel-fg);
       border: 1px solid var(--header-border-color);
       border-radius: 9px;
-      padding: 8px 10px;
+      padding: 4px 8px;
       box-shadow: 0 10px 24px rgba(0, 0, 0, 0.68);
     }
     .tab-history-head {
@@ -528,24 +533,24 @@
       align-items: center;
       justify-content: space-between;
       gap: 6px;
-      padding-bottom: 6px;
-      margin-bottom: 4px;
+      padding-bottom: 3px;
+      margin-bottom: 1px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.14);
-      font-size: 12.5px;
+      font-size: 11.5px;
       font-weight: 700;
     }
     .tab-history-close {
-      padding: 3px 9px;
+      padding: 2px 8px;
       border-radius: 5px;
       border: none;
       background: #ffffff;
       color: #111111;
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 700;
       cursor: pointer;
     }
     .tab-history-items {
-      max-height: 325px;
+      max-height: 260px;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
       touch-action: pan-y;
@@ -553,19 +558,19 @@
     .tab-history-row {
       display: flex;
       align-items: center;
-      gap: 8px;
-      padding: 8px 4px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+      gap: 6px;
+      padding: 2.5px 3px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
       cursor: pointer;
       font-size: 14px;
       font-weight: 600;
-      line-height: 1.3;
-      color: var(--filter-panel-fg);
+      line-height: 1.15;
+      color: var(--history-panel-fg);
     }
     .tab-history-row:last-child { border-bottom: none; }
     .tab-history-row:active { background: rgba(255, 255, 255, 0.12); border-radius: 4px; }
     .tab-history-play {
-      font-size: 11px;
+      font-size: 10px;
       color: var(--header-border-color);
       flex-shrink: 0;
     }
@@ -577,14 +582,14 @@
       text-overflow: ellipsis;
     }
     .tab-history-del {
-      width: 26px;
-      height: 26px;
+      width: 22px;
+      height: 22px;
       border: none;
-      border-radius: 6px;
+      border-radius: 5px;
       background: transparent;
-      color: var(--filter-panel-fg);
+      color: var(--history-panel-fg);
       opacity: 0.72;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 800;
       line-height: 1;
       display: inline-flex;
@@ -1243,8 +1248,8 @@
     }
     .ml-row3-v12 {
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr 0.84fr;
-      gap: 4px;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 3px;
     }
     .ml-bm-border {
       height: 28px;
@@ -1280,6 +1285,10 @@
     .ml-filter-panel {
       background: var(--filter-panel-bg);
       color: var(--filter-panel-fg);
+    }
+    .ml-history-panel {
+      background: var(--history-panel-bg);
+      color: var(--history-panel-fg);
     }
     .ml-settings-panel {
       background: var(--settings-modal-bg);
@@ -2355,7 +2364,7 @@
           <button class="filter-toggle-btn" id="filterToggleBtn" onclick="toggleFilterPanel()">
             <span id="filterBtnLabel">▾ 조건</span>
           </button>
-          <button class="header-gear-btn" onclick="requestOpenSettings('search')" title="설정">⚙</button>
+          <button class="header-gear-btn" onclick="requestOpenSettings('color')" title="설정">⚙</button>
         </div>
       </div>
 
@@ -2485,7 +2494,7 @@
     <button type="button" class="sb-btn sb-btn-play" onclick="togglePlayFromBookmark()" title="재생/정지"><span class="sb-tri-icon" id="sbPlayIcon">▶</span></button>
     <button type="button" class="sb-btn sb-btn-bg" id="bgModeTab" onclick="enterBlackoutMode()" title="화면 끄기 (배터리 절전)">🎧</button>
     <button type="button" class="sb-btn sb-btn-mp3" onclick="openMp3FromBookmark()" title="MP3">MP3</button>
-    <button type="button" class="sb-btn sb-btn-gear" onclick="requestOpenSettings('search')" title="설정">⚙</button>
+    <button type="button" class="sb-btn sb-btn-gear" onclick="requestOpenSettings('color')" title="설정">⚙</button>
   </div>
 
   <!-- 3-2b. 배터리 절약 순수 검정(#000000) 절전 화면 오버레이 -->
@@ -2527,20 +2536,20 @@
     <div class="manage-modal-box">
       <div class="settings-tabs-header">
         <div class="settings-tabs-nav">
-          <button type="button" class="settings-tab-btn active" data-stab="search" onclick="switchSettingsTab('search')">검색</button>
-          <button type="button" class="settings-tab-btn" data-stab="color" onclick="switchSettingsTab('color')">색상변경</button>
+          <button type="button" class="settings-tab-btn" data-stab="search" onclick="switchSettingsTab('search')">검색</button>
+          <button type="button" class="settings-tab-btn active" data-stab="color" onclick="switchSettingsTab('color')">색상변경</button>
           <button type="button" class="settings-tab-btn" data-stab="auth" onclick="switchSettingsTab('auth')">로그인</button>
         </div>
         <button type="button" class="settings-x-btn" onclick="closeManageModal()" title="닫기">✕</button>
       </div>
 
       <!-- 탭 1: 검색 목록 관리 -->
-      <div class="settings-pane active" id="settings-pane-search">
+      <div class="settings-pane" id="settings-pane-search">
         <div class="manage-list" id="manageTabList"></div>
       </div>
 
       <!-- 탭 1-2: 디테일 14모듈 미니 레이아웃 + 256 색상표 -->
-      <div class="settings-pane" id="settings-pane-color">
+      <div class="settings-pane active" id="settings-pane-color">
         <div class="mini-theme-layout mini-mod-hit mod-selected" id="miniThemeLayout" data-mod="appBg" onclick="selectThemeModule('appBg', event)">
           <div class="ml-outer-dash mini-mod-hit" id="miniOuterDash" data-mod="headerBorder" onclick="toggleHeaderBoxOrBorderModule(event)" title="외곽테두리 / 모듈배경 (터치 전환)">
             <div class="ml-row1">
@@ -2567,8 +2576,9 @@
           </div>
 
           <div class="ml-row3-v12">
-            <div class="ml-panel-box ml-filter-panel mini-mod-hit" data-mod="filterPanelBg" onclick="selectThemeModule('filterPanelBg', event)">조건창배경</div>
-            <div class="ml-panel-box ml-settings-panel mini-mod-hit" data-mod="settingsModalBg" onclick="selectThemeModule('settingsModalBg', event)">설정창배경</div>
+            <div class="ml-panel-box ml-filter-panel mini-mod-hit" data-mod="filterPanelBg" onclick="selectThemeModule('filterPanelBg', event)" title="조건창배경">조건창</div>
+            <div class="ml-panel-box ml-history-panel mini-mod-hit" data-mod="historyPanelBg" onclick="selectThemeModule('historyPanelBg', event)" title="목록창배경">목록창</div>
+            <div class="ml-panel-box ml-settings-panel mini-mod-hit" data-mod="settingsModalBg" onclick="selectThemeModule('settingsModalBg', event)" title="설정창배경">설정창</div>
             <div class="ml-feed-card">
               <div class="ml-feed-thumb">썸네일</div>
               <div class="ml-feed-title mini-mod-hit" data-mod="cardTitleBg" onclick="selectThemeModule('cardTitleBg', event)">제목배경</div>
@@ -2794,6 +2804,7 @@
       cardTitleBg:     { label: '제목배경',    cssVar: '--card-title-bg',        def: '#161616', fgVar: '--card-title-fg' },
       filterBtnBg:     { label: '조건',        cssVar: '--filter-btn-bg',        def: '#1d1d1d', fgVar: '--filter-btn-fg' },
       filterPanelBg:   { label: '조건창배경',  cssVar: '--filter-panel-bg',      def: '#171717', fgVar: '--filter-panel-fg' },
+      historyPanelBg:  { label: '목록창배경',  cssVar: '--history-panel-bg',     def: '#171717', fgVar: '--history-panel-fg' },
       bookmarkBg:      { label: '책갈피배경',  cssVar: '--bookmark-bg',          def: '#ffb6cb' },
       bookmarkBorder:  { label: '책갈피테두리',cssVar: '--bookmark-border',      def: '#ffffff' }
     };
@@ -2827,7 +2838,7 @@
     let feedScrollObserver = null;
     let selectedTabDocId = '';
     let settingsAdminUnlocked = false;
-    let pendingSettingsTab = 'search';
+    let pendingSettingsTab = 'color';
     let pendingPlayTrack = null;
     let slideBookmarkVisible = false;
     let lockedBgScrollY = 0;
@@ -4945,11 +4956,11 @@
 
     let settingsAuthChecking = false;
 
-    function requestOpenSettings(tabName = 'search') {
+    function requestOpenSettings(tabName = 'color') {
       closeTabHistoryDrawer();
       closeFilterPanel();
       autoDockPlayerIfOpen();
-      pendingSettingsTab = tabName || 'search';
+      pendingSettingsTab = tabName || 'color';
       const ov = document.getElementById('settings-auth-overlay');
       const inp = document.getElementById('settingsAuthCodeInput');
       if (inp) inp.value = '';
@@ -5626,10 +5637,18 @@
       return `${mm}.${dd}-${pc}`;
     }
 
-    function closeTabHistoryDrawer() {
+    function closeTabHistoryDrawer(immediate = false) {
       activeDrawerDocId = '';
       const drawer = document.getElementById('tabHistoryDrawer');
-      if (drawer) drawer.classList.remove('open');
+      if (!drawer) return;
+      if (immediate) {
+        drawer.classList.add('instant-close');
+        drawer.classList.remove('open');
+        void drawer.offsetHeight;
+        requestAnimationFrame(() => drawer.classList.remove('instant-close'));
+      } else {
+        drawer.classList.remove('open');
+      }
     }
 
     function openTabHistoryDrawer(tab) {
@@ -5654,7 +5673,7 @@
         const row = document.createElement('div');
         row.className = 'tab-history-row';
         row.onclick = () => {
-          closeTabHistoryDrawer();
+          closeTabHistoryDrawer(true);
           activeTabKeyword = tab.keyword;
           renderSavedTabsBar();
           if (currentFeedMode === 'grid' && currentGridCols === 1) {
@@ -5702,15 +5721,93 @@
       closeTabHistoryDrawer();
     }, { passive: true });
 
+    let tabsCenterIdleTimer = null;
+    let tabsCenterRafId = null;
+    let isTabsTouching = false;
+    let isTabsAutoAnimating = false;
+
+    function cancelTabsCenterAnim() {
+      if (tabsCenterRafId) {
+        cancelAnimationFrame(tabsCenterRafId);
+        tabsCenterRafId = null;
+      }
+      isTabsAutoAnimating = false;
+    }
+
+    function smoothCenterSelectedTab(durationMs = 850) {
+      if (!selectedTabDocId || !savedTabsList) return;
+      const activeBtn = savedTabsList.querySelector('.history-tab.tab-selected');
+      if (!activeBtn) return;
+
+      const maxScroll = Math.max(0, savedTabsList.scrollWidth - savedTabsList.clientWidth);
+      if (maxScroll <= 0) return;
+
+      const rawTarget = activeBtn.offsetLeft - (savedTabsList.clientWidth - activeBtn.offsetWidth) / 2;
+      const targetLeft = Math.max(0, Math.min(maxScroll, Math.round(rawTarget)));
+      const startLeft = savedTabsList.scrollLeft;
+      const delta = targetLeft - startLeft;
+      if (Math.abs(delta) <= 3) return;
+
+      cancelTabsCenterAnim();
+      isTabsAutoAnimating = true;
+      const startTime = performance.now();
+
+      function step(now) {
+        if (!isTabsAutoAnimating || isTabsTouching) {
+          cancelTabsCenterAnim();
+          return;
+        }
+        const t = Math.min(1, (now - startTime) / durationMs);
+        const eased = t < 0.5 ? (4 * t * t * t) : (1 - Math.pow(-2 * t + 2, 3) / 2);
+        savedTabsList.scrollLeft = startLeft + delta * eased;
+        if (t < 1) {
+          tabsCenterRafId = requestAnimationFrame(step);
+        } else {
+          savedTabsList.scrollLeft = targetLeft;
+          cancelTabsCenterAnim();
+        }
+      }
+      tabsCenterRafId = requestAnimationFrame(step);
+    }
+
+    function scheduleTabsAutoCenter(delayMs = 1500) {
+      clearTimeout(tabsCenterIdleTimer);
+      if (!selectedTabDocId || isTabsTouching) return;
+      tabsCenterIdleTimer = setTimeout(() => {
+        if (!selectedTabDocId || isTabsTouching) return;
+        smoothCenterSelectedTab(850);
+      }, delayMs);
+    }
+
+    (function bindTabsAutoCenterEvents() {
+      if (!savedTabsList) return;
+      const onTouchStart = () => {
+        isTabsTouching = true;
+        clearTimeout(tabsCenterIdleTimer);
+        cancelTabsCenterAnim();
+      };
+      const onTouchEnd = () => {
+        isTabsTouching = false;
+        scheduleTabsAutoCenter(1500);
+      };
+      savedTabsList.addEventListener('pointerdown', onTouchStart, { passive: true });
+      savedTabsList.addEventListener('touchstart', onTouchStart, { passive: true });
+      savedTabsList.addEventListener('pointerup', onTouchEnd, { passive: true });
+      savedTabsList.addEventListener('pointercancel', onTouchEnd, { passive: true });
+      savedTabsList.addEventListener('touchend', onTouchEnd, { passive: true });
+      savedTabsList.addEventListener('touchcancel', onTouchEnd, { passive: true });
+      savedTabsList.addEventListener('scroll', () => {
+        if (isTabsAutoAnimating) return;
+        scheduleTabsAutoCenter(1500);
+      }, { passive: true });
+    })();
+
     // 검색어 2단계 터치: 1회 터치 -> 선택확대 + 재생목록 슬라이드 / 2회 터치 -> 피드 신속 로드
     function handleHistoryTabTap(tab) {
       if (selectedTabDocId !== tab.docId) {
         selectedTabDocId = tab.docId;
         renderSavedTabsBar();
-        const activeBtn = savedTabsList.querySelector('.history-tab.tab-selected');
-        if (activeBtn && activeBtn.scrollIntoView) {
-          activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-        }
+        smoothCenterSelectedTab(420);
         openTabHistoryDrawer(tab);
         return;
       }
@@ -5897,7 +5994,7 @@
       window.scrollTo(0, lockedBgScrollY);
     }
 
-    function openManageModal(tabName = 'search') {
+    function openManageModal(tabName = 'color') {
       lockBackgroundScroll();
       manageOverlay.style.display = 'flex';
       switchSettingsTab(tabName);
