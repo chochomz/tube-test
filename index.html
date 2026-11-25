@@ -19,6 +19,7 @@
     :root {
       --app-bg: #0d0d0d;
       --header-border-color: #ffffff;
+      --header-border-fg: #111111;
       --header-divider-color: #aaaaaa;
       --search-bg: #1c1c1c;
       --search-fg: #ffffff;
@@ -115,7 +116,7 @@
       height: 36px;
       padding: 0 10px;
       border-radius: 8px;
-      border: 2px dashed rgba(255, 255, 255, 0.92);
+      border: 2px dashed var(--header-border-color);
       background: rgba(16, 16, 20, 0.72);
       color: #ffffff;
       font-size: 13px;
@@ -138,7 +139,7 @@
     }
     .auth-name-input:focus,
     #auth-gate-overlay .auth-gate-input:focus {
-      border-color: #ffffff;
+      border-color: var(--header-border-color);
     }
     .auth-remember-row {
       display: inline-flex;
@@ -163,7 +164,7 @@
       align-items: center;
       justify-content: space-between;
       background: rgba(24, 24, 30, 0.75);
-      border: 2px dashed rgba(255, 255, 255, 0.92);
+      border: 2px dashed var(--header-border-color);
       border-radius: 8px;
       padding: 0 9px;
       font-size: 12px;
@@ -230,11 +231,14 @@
     .settings-auth-box {
       width: min(86vw, 232px);
       background: #17171b;
-      border: 1px solid rgba(255, 255, 255, 0.35);
+      border: 1.5px solid var(--header-border-color);
       border-radius: 11px;
       padding: 13px 12px 10px 12px;
       box-shadow: 0 14px 36px rgba(0, 0, 0, 0.88);
       text-align: center;
+    }
+    .settings-auth-box .auth-gate-input {
+      border-color: var(--header-border-color);
     }
     .settings-auth-actions {
       display: flex;
@@ -549,13 +553,14 @@
     }
     .saved-tabs-row {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 54px;
-      gap: 3px;
+      grid-template-columns: minmax(0, 1fr) 56px;
+      gap: 0;
       align-items: center;
       min-height: 40px;
       padding: 3px 4px 3px 5px;
       border-radius: 7px;
       background: var(--tabs-area-bg);
+      overflow: hidden;
     }
     .tabs-scroll-area {
       min-width: 0;
@@ -566,7 +571,9 @@
       overflow-x: auto;
       scrollbar-width: none;
       -ms-overflow-style: none;
-      padding: 2px 2px;
+      padding: 2px 14px 2px 2px;
+      -webkit-mask-image: linear-gradient(to right, #000 0%, #000 calc(100% - 14px), transparent 100%);
+      mask-image: linear-gradient(to right, #000 0%, #000 calc(100% - 14px), transparent 100%);
     }
     .tabs-scroll-area::-webkit-scrollbar { display: none; }
     .history-tab {
@@ -629,15 +636,21 @@
       text-underline-offset: 2px;
     }
 
-    /* 우측 피드 나열 전환 이모지 2개 (우측 바짝 밀착 + 간격 축소 + 별도 색상 + 진동) */
+    /* 우측 피드 나열 전환 이모지 2개 (우측 밀착 + 좌측 슬롯 음영으로 검색어 끼워들어감 연출) */
     .layout-mode-controls {
+      position: relative;
+      z-index: 3;
+      height: 36px;
       display: flex;
       align-items: center;
       justify-content: flex-end;
       gap: 2px;
-      width: 54px;
+      width: 56px;
       flex-shrink: 0;
-      padding-right: 1px;
+      padding: 0 1px 0 6px;
+      background: var(--tabs-area-bg);
+      border-left: 1px solid rgba(0, 0, 0, 0.14);
+      box-shadow: -7px 0 10px -4px rgba(0, 0, 0, 0.34);
     }
     .layout-emoji-btn {
       width: 24px;
@@ -704,7 +717,7 @@
       touch-action: pan-y;
       background: var(--settings-modal-bg);
       color: var(--settings-modal-fg);
-      border: 1px solid rgba(255, 255, 255, 0.75);
+      border: 1.5px solid var(--header-border-color);
       border-radius: 12px;
       padding: 9px 11px;
       box-shadow: 0 15px 40px rgba(0,0,0,0.9);
@@ -1292,21 +1305,32 @@
       outline-offset: -1px;
       z-index: 3;
     }
-    /* 배터리 절약 순수 검정(#000000) 절전 오버레이 */
+    /* 배터리 절약 순수 검정(#000000) 전체 OFF 절전 오버레이 */
     html.blackout-active,
     body.blackout-active {
       background: #000000 !important;
       background-color: #000000 !important;
+      color: #000000 !important;
       overscroll-behavior: none !important;
+    }
+    body.blackout-active .top-header,
+    body.blackout-active .video-grid,
+    body.blackout-active .feed-scroll-sentinel,
+    body.blackout-active #slide-bookmark,
+    body.blackout-active #manage-modal-overlay,
+    body.blackout-active #mp3-modal-overlay,
+    body.blackout-active #settings-auth-overlay {
+      visibility: hidden !important;
     }
     #battery-blackout-overlay {
       position: fixed;
-      top: -60px;
-      left: -20px;
-      right: -20px;
-      bottom: -60px;
+      top: -120px;
+      left: -40px;
+      right: -40px;
+      bottom: -120px;
+      min-height: 120lvh;
       z-index: 30000;
-      background: #000000;
+      background: #000000 !important;
       display: none;
       flex-direction: column;
       align-items: center;
@@ -1493,7 +1517,7 @@
       width: 100%;
       height: 180px; /* JS에서 16:9 비율로 실시간 동기화 */
       background: #000;
-      border: 1px solid rgba(255, 255, 255, 0.95);
+      border: 1px solid var(--header-border-color);
       border-radius: 4px;
       overflow: hidden;
       position: relative;
@@ -1617,12 +1641,13 @@
       pointer-events: none;
     }
 
-    /* 4각 모서리 얇고 투명도 60% L자 꺾기 리사이즈 핸들 */
+    /* 4각 모서리 얇고 투명도 60% L자 꺾기 리사이즈 핸들 (큰테두리 색상 연동) */
     .resizer {
       position: absolute;
       width: 22px;
       height: 22px;
       z-index: 22;
+      opacity: 0.6;
       touch-action: none;
     }
     .resizer::after {
@@ -1637,29 +1662,29 @@
     .resizer.tl { top: 0; left: 0; cursor: nwse-resize; }
     .resizer.tl::after {
       top: 0; left: 0;
-      border-top: 2px solid rgba(255, 255, 255, 0.60);
-      border-left: 2px solid rgba(255, 255, 255, 0.60);
+      border-top: 2px solid var(--header-border-color);
+      border-left: 2px solid var(--header-border-color);
       border-top-left-radius: 2px;
     }
     .resizer.tr { top: 0; right: 0; cursor: nesw-resize; }
     .resizer.tr::after {
       top: 0; right: 0;
-      border-top: 2px solid rgba(255, 255, 255, 0.60);
-      border-right: 2px solid rgba(255, 255, 255, 0.60);
+      border-top: 2px solid var(--header-border-color);
+      border-right: 2px solid var(--header-border-color);
       border-top-right-radius: 2px;
     }
     .resizer.bl { bottom: 0; left: 0; cursor: nesw-resize; }
     .resizer.bl::after {
       bottom: 0; left: 0;
-      border-bottom: 2px solid rgba(255, 255, 255, 0.60);
-      border-left: 2px solid rgba(255, 255, 255, 0.60);
+      border-bottom: 2px solid var(--header-border-color);
+      border-left: 2px solid var(--header-border-color);
       border-bottom-left-radius: 2px;
     }
     .resizer.br { bottom: 0; right: 0; cursor: nwse-resize; }
     .resizer.br::after {
       bottom: 0; right: 0;
-      border-bottom: 2px solid rgba(255, 255, 255, 0.60);
-      border-right: 2px solid rgba(255, 255, 255, 0.60);
+      border-bottom: 2px solid var(--header-border-color);
+      border-right: 2px solid var(--header-border-color);
       border-bottom-right-radius: 2px;
     }
 
@@ -1693,19 +1718,19 @@
       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7);
     }
 
-    /* 4. [핵심] 하부 소형 우측 닫기 탭 (✕) */
+    /* 4. [핵심] 하부 초소형 우측 닫기 탭 (✕ · 큰테두리색 투명도 + 창쪽 오목곡선) */
     .modal-bottom-tabs {
       display: flex;
       justify-content: flex-end;
       align-items: flex-start;
       width: 100%;
-      padding: 0 3px;
+      padding: 0 11px 0 3px;
       margin-top: -1px;
       pointer-events: none;
     }
     .bottom-drag-spacer {
       flex: 1;
-      height: 18px;
+      height: 15px;
       pointer-events: auto;
       cursor: grab;
       touch-action: none;
@@ -1718,31 +1743,43 @@
     }
     .bookmark-tab {
       pointer-events: auto;
-      background: rgba(255, 255, 255, 0.55);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      color: #111;
-      font-size: 9.5px;
-      font-weight: 700;
-      padding: 3px 9px;
-      border-radius: 0 0 8px 8px;
-      border: 1px solid rgba(255, 255, 255, 0.85);
-      border-top: none;
-      box-shadow: 1px 3px 8px rgba(0, 0, 0, 0.45);
+      background: var(--header-border-color);
+      color: var(--header-border-fg);
+      opacity: 0.68;
+      font-size: 8px;
+      font-weight: 800;
+      padding: 1.5px 8px 2px 8px;
+      border-radius: 0 0 7px 7px;
+      border: none;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.48));
       cursor: pointer;
       position: relative;
-      transition: background 0.15s;
+      overflow: visible;
+      transition: opacity 0.15s, transform 0.1s;
       white-space: nowrap;
-      line-height: 1.2;
+      line-height: 1.15;
     }
     .bookmark-tab:active {
-      background: rgba(255, 255, 255, 0.9);
+      opacity: 0.95;
+      transform: scale(0.95);
     }
-
     .bookmark-tab.tab-close {
       z-index: 3;
-      padding: 3px 10px;
+      padding: 1.5px 8px 2px 8px;
     }
+    .tab-close-ear {
+      position: absolute;
+      top: 0;
+      width: 8px;
+      height: 8px;
+      pointer-events: none;
+      overflow: visible;
+    }
+    .tab-close-ear path {
+      fill: var(--header-border-color);
+    }
+    .tab-close-ear.ear-l { left: -7.5px; }
+    .tab-close-ear.ear-r { right: -7.5px; transform: scaleX(-1); }
 
     /* 4-2. 슬라이드 책갈피 (스크롤 시 상시 표시 · 투명도 70% · 좌/우 한 손 이동 · ⚙/🎧/MP3/▶깜박) */
     #slide-bookmark {
@@ -1758,15 +1795,13 @@
       overflow: visible;
       opacity: var(--bookmark-opacity);
       background: var(--bookmark-bg);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      border: 1.5px solid var(--bookmark-border);
-      box-shadow: -2px 6px 18px rgba(0, 0, 0, 0.42);
+      border: 2px solid var(--bookmark-border);
+      filter: drop-shadow(-2px 4px 10px rgba(0, 0, 0, 0.44));
       user-select: none;
       -webkit-user-select: none;
       -webkit-touch-callout: none;
       touch-action: none;
-      transition: transform 0.36s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.32s ease, box-shadow 0.14s;
+      transition: transform 0.36s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.32s ease;
     }
     body.auth-locked #slide-bookmark {
       display: none !important;
@@ -1798,7 +1833,7 @@
     .sb-wall-ear {
       position: absolute;
       width: 14px;
-      height: 15px;
+      height: 17px;
       pointer-events: none;
       overflow: visible;
       display: block;
@@ -1807,16 +1842,16 @@
     .sb-wall-ear .sb-ear-stroke {
       fill: none;
       stroke: var(--bookmark-border);
-      stroke-width: 1.5;
-      stroke-linecap: round;
+      stroke-width: 2;
+      stroke-linecap: butt;
     }
-    #slide-bookmark.dock-right .sb-ear-top { right: 0; top: -13.5px; transform: none; }
-    #slide-bookmark.dock-right .sb-ear-bottom { right: 0; bottom: -13.5px; transform: scaleY(-1); }
-    #slide-bookmark.dock-left .sb-ear-top { left: 0; top: -13.5px; transform: scaleX(-1); }
-    #slide-bookmark.dock-left .sb-ear-bottom { left: 0; bottom: -13.5px; transform: scale(-1, -1); }
+    #slide-bookmark.dock-right .sb-ear-top { right: 0; top: -15px; transform: none; }
+    #slide-bookmark.dock-right .sb-ear-bottom { right: 0; bottom: -15px; transform: scaleY(-1); }
+    #slide-bookmark.dock-left .sb-ear-top { left: 0; top: -15px; transform: scaleX(-1); }
+    #slide-bookmark.dock-left .sb-ear-bottom { left: 0; bottom: -15px; transform: scale(-1, -1); }
     #slide-bookmark.dock-free .sb-wall-ear { display: none; }
     #slide-bookmark.sb-tucked {
-      transition: transform 0.85s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.85s ease, box-shadow 0.14s;
+      transition: transform 1.15s cubic-bezier(0.4, 0, 0.2, 1), opacity 1.15s ease;
     }
     #slide-bookmark.dock-right.sb-tucked {
       transform: translateX(calc(100% - 6px)) scale(0.94);
@@ -2206,7 +2241,9 @@
       <div class="bottom-drag-spacer" id="bottomDragSpacer"></div>
       <div class="tab-group-right">
         <div class="bookmark-tab tab-close" onclick="closePlayerModal()" title="닫기">
+          <svg class="tab-close-ear ear-l" viewBox="0 0 8 8" aria-hidden="true"><path d="M 0,0 L 8,0 L 8,8 Q 8,0 0,0 Z"/></svg>
           <span>✕</span>
+          <svg class="tab-close-ear ear-r" viewBox="0 0 8 8" aria-hidden="true"><path d="M 0,0 L 8,0 L 8,8 Q 8,0 0,0 Z"/></svg>
         </div>
       </div>
     </div>
@@ -2214,8 +2251,8 @@
 
   <!-- 3-2. 슬라이드 책갈피 (스크롤/재생 시 상시 표시 · 투명도 70% · 좌/우 한 손 이동 · ♪/▶/🎧/MP3/⚙) -->
   <div id="slide-bookmark" class="dock-right sb-size-1">
-    <svg class="sb-wall-ear sb-ear-top" viewBox="0 0 14 15" aria-hidden="true"><path class="sb-ear-fill" d="M 14,0 Q 14,13.5 0,13.5 L 0,15 L 14,15 Z"/><path class="sb-ear-stroke" d="M 14,0 Q 14,13.5 0,13.5"/></svg>
-    <svg class="sb-wall-ear sb-ear-bottom" viewBox="0 0 14 15" aria-hidden="true"><path class="sb-ear-fill" d="M 14,0 Q 14,13.5 0,13.5 L 0,15 L 14,15 Z"/><path class="sb-ear-stroke" d="M 14,0 Q 14,13.5 0,13.5"/></svg>
+    <svg class="sb-wall-ear sb-ear-top" viewBox="0 0 14 17" aria-hidden="true"><path class="sb-ear-fill" d="M 14,0 Q 14,14 0,14 L 0,17 L 14,17 Z"/><path class="sb-ear-stroke" d="M 13.5,0 Q 13.5,14 0,14"/></svg>
+    <svg class="sb-wall-ear sb-ear-bottom" viewBox="0 0 14 17" aria-hidden="true"><path class="sb-ear-fill" d="M 14,0 Q 14,14 0,14 L 0,17 L 14,17 Z"/><path class="sb-ear-stroke" d="M 13.5,0 Q 13.5,14 0,14"/></svg>
     <div class="sb-grip" id="sbDragGrip" title="드래그: 좌·우 이동"><span class="sb-grip-bar"></span></div>
     <button type="button" class="sb-btn sb-btn-note" id="sbNoteBtn" onclick="togglePlayerFromNote()" title="재생창 열기/접기"><span class="sb-note-icon"><svg class="sb-win-svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><rect x="6.5" y="2.5" width="11" height="9.5" rx="1.6"/><path d="M13.5 12v3.5a1.5 1.5 0 0 1-1.5 1.5H4a1.5 1.5 0 0 1-1.5-1.5V8A1.5 1.5 0 0 1 4 6.5h2.5"/></svg></span></button>
     <button type="button" class="sb-btn sb-btn-play" onclick="togglePlayFromBookmark()" title="재생/정지"><span class="sb-tri-icon" id="sbPlayIcon">▶</span></button>
@@ -2749,10 +2786,25 @@
       return s.length >= 2 ? s : String(rawTitle || '').trim();
     }
 
+    // 재생창 동작 중 설정/조건/검색 등 조작 시 책갈피로 즉시 도킹
+    function autoDockPlayerIfOpen() {
+      if (currentVideoId && !isDockedToBookmark && modal.style.display !== 'none' && !modal.classList.contains('docked-hidden')) {
+        dockPlayerToBookmark(dockSide || 'right');
+      }
+    }
+
+    (function bindQueryAutoDock() {
+      const qInp = document.getElementById('query');
+      if (qInp) qInp.addEventListener('focus', () => autoDockPlayerIfOpen());
+    })();
+
     // 조건검색 풀다운 슬라이드 모달 제어
     function toggleFilterPanel() {
       const panel = document.getElementById('filterSlidePanel');
-      if (panel) panel.classList.toggle('open');
+      if (!panel) return;
+      const willOpen = !panel.classList.contains('open');
+      if (willOpen) autoDockPlayerIfOpen();
+      panel.classList.toggle('open');
     }
 
     function closeFilterPanel() {
@@ -3039,6 +3091,7 @@
         }
       });
 
+      root.style.setProperty('--header-border-fg', isLightHexColor(currentThemeColors.headerBorder) ? '#111111' : '#ffffff');
       document.body.classList.toggle('light-bg', isLightHexColor(currentThemeColors.appBg));
       const tcMeta = document.getElementById('appThemeColorMeta');
       if (tcMeta && !document.body.classList.contains('blackout-active')) {
@@ -3075,7 +3128,11 @@
 
     function setSelectedModuleColor(hex, saveToCloud = true) {
       if (!/^#[0-9a-fA-F]{6}$/.test(String(hex || ''))) return;
-      currentThemeColors[selectedThemeMod] = String(hex).toLowerCase();
+      const cleanHex = String(hex).toLowerCase();
+      currentThemeColors[selectedThemeMod] = cleanHex;
+      if (selectedThemeMod === 'headerBorder') {
+        currentThemeColors.bookmarkBorder = cleanHex;
+      }
       applyThemeColorsToDOM();
       persistThemeColors(saveToCloud);
     }
@@ -3084,6 +3141,9 @@
       const meta = THEME_MODULES[selectedThemeMod];
       if (!meta) return;
       currentThemeColors[selectedThemeMod] = meta.def;
+      if (selectedThemeMod === 'headerBorder') {
+        currentThemeColors.bookmarkBorder = THEME_MODULES.headerBorder.def;
+      }
       applyThemeColorsToDOM();
       persistThemeColors(true);
     }
@@ -3490,6 +3550,20 @@
       }
     }
 
+    const AD_FILTER_REGEX = /(\[|\(|#|【|《)(광고|협찬|유료\s*광고|제품\s*협찬|제공|홍보|프로모션|ad|sponsored|promo)(\]|\)|\b|】|》)|\b(유료\s*광고|제품\s*협찬|쿠팡\s*파트너스|할인\s*코드|구매\s*링크|쇼핑\s*라이브|초특가|타임\s*특가|sponsored\s+by|paid\s+promotion|official\s+commercial|tv\s*cf|tvc)\b/i;
+
+    function isLikelyAdVideo(item) {
+      if (!item || typeof item !== 'object') return true;
+      if (item.type && item.type !== 'stream') return true;
+      const title = String(item.t !== undefined ? item.t : (item.title || ''));
+      const desc = String(item.shortDescription || '');
+      const uploader = String(item.uploaderName || '');
+      if (AD_FILTER_REGEX.test(title) || AD_FILTER_REGEX.test(desc)) return true;
+      const dur = Number(item.duration || item.d || 0);
+      if (dur > 0 && dur <= 60 && /(광고|홍보|쇼핑|홈쇼핑|스토어|마켓)/i.test(uploader)) return true;
+      return false;
+    }
+
     // 4. 청크 단위 데이터 수집 + 불러온 범위 한정 정렬 렌더링
     function appendChunkItems(items, maxLimit, seenIds, isFromCache = false, deferRender = false) {
       if (!items || !items.length) return;
@@ -3497,6 +3571,7 @@
 
       items.forEach(item => {
         if (currentFeedItems.length >= maxLimit || currentFeedItems.length >= MAX_TAB_ITEMS) return;
+        if (!isFromCache && isLikelyAdVideo(item)) return;
         const videoId = extractVideoId(item);
         if (!videoId || (seenIds && seenIds.has(videoId))) return;
         if (seenIds) seenIds.add(videoId);
@@ -4135,7 +4210,7 @@
 
       hideYtPauseMask();
       updateSearchBtnState();
-      revealSlideBookmark(3200);
+      revealSlideBookmark(SB_IDLE_HIDE_MS);
       updateBgModeUI();
       updateSlideBookmarkPlayUI();
       setupMediaSession(title, videoId);
@@ -4418,6 +4493,7 @@
     }
 
     function requestOpenSettings(tabName = 'search') {
+      autoDockPlayerIfOpen();
       pendingSettingsTab = tabName || 'search';
       const ov = document.getElementById('settings-auth-overlay');
       const inp = document.getElementById('settingsAuthCodeInput');
@@ -4539,6 +4615,32 @@
       syncAuthViewportForKeyboard();
     }
 
+    function applyRememberedUserBorderColor(savedName) {
+      let borderHex = THEME_MODULES.headerBorder.def;
+      const n = _normName(savedName);
+      if (n) {
+        let uid = '';
+        if (n === '관리자' || n.toLowerCase() === 'admin') uid = 'admin';
+        else {
+          const found = (authData.users || []).find(u => u && _normName(u.name) === n);
+          if (found) uid = found.id;
+        }
+        if (uid) {
+          try {
+            const raw = localStorage.getItem(THEME_STORAGE_KEY + '_' + uid);
+            if (raw) {
+              const p = JSON.parse(raw);
+              if (p && p.headerBorder && /^#[0-9a-fA-F]{6}$/.test(p.headerBorder)) {
+                borderHex = p.headerBorder.toLowerCase();
+              }
+            }
+          } catch (e) {}
+        }
+      }
+      document.documentElement.style.setProperty('--header-border-color', borderHex);
+      document.documentElement.style.setProperty('--header-border-fg', isLightHexColor(borderHex) ? '#111111' : '#ffffff');
+    }
+
     function showAuthGate(forceNameInput = false) {
       document.body.classList.add('auth-locked');
       slideBookmark.style.display = 'none';
@@ -4555,6 +4657,8 @@
       if (!forceNameInput) {
         try { savedName = _normName(localStorage.getItem(REMEMBER_NAME_KEY) || ''); } catch (e) {}
       }
+      applyRememberedUserBorderColor(savedName);
+
       if (savedName) {
         if (ni) ni.value = savedName;
         if (rc) rc.checked = true;
@@ -4576,9 +4680,7 @@
       if (!ci || authAutoChecking) return;
       const val = ci.value.trim();
       if (val.length === 4) {
-        const ni = document.getElementById('authNameInput');
-        const nm = ni ? ni.value.trim() : '';
-        if (nm) submitAuthCode();
+        submitAuthCode();
       }
     }
 
@@ -4589,7 +4691,11 @@
       const ci = document.getElementById('authCodeInput');
       const name = ni ? ni.value.trim().slice(0, 7) : '';
       const code = ci ? ci.value.trim() : '';
-      if (!name || code.length < 4) return; // 틀리거나 미완성이면 아무 동작 안 함
+      if (code.length < 4) return;
+      if (!name) {
+        if (ci) ci.value = '';
+        return;
+      }
 
       authAutoChecking = true;
       try {
@@ -4598,7 +4704,14 @@
           await loadAuthConfigFromCloud();
           user = findUserByNameAndCode(name, code);
         }
-        if (!user) return; // 틀리면 아무 동작 안 함
+        if (!user) {
+          // 불일치 시 아무 반응 없이 입력된 코드만 삭제
+          if (ci) {
+            ci.value = '';
+            ci.focus({ preventScroll: true });
+          }
+          return;
+        }
 
         if (ci) ci.blur();
         if (ni) ni.blur();
@@ -5474,21 +5587,7 @@
       updateSearchBtnState();
       initFirebaseAlways();
       await loadAuthConfigFromCloud();
-
-      try {
-        const saved = localStorage.getItem(SESSION_STORAGE_KEY);
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          const rawSessionCode = parsed && parsed.code ? _u4(parsed.code) : '';
-          const matched = rawSessionCode ? (parsed.name ? findUserByNameAndCode(parsed.name, rawSessionCode) : findUserByCode(rawSessionCode)) : null;
-          if (matched && matched.id === parsed.id) {
-            await enterAppWithUser(matched);
-            return;
-          }
-          localStorage.removeItem(SESSION_STORAGE_KEY);
-        }
-      } catch (e) {}
-
+      try { localStorage.removeItem(SESSION_STORAGE_KEY); } catch (e) {}
       showAuthGate(false);
     }
 
@@ -5837,9 +5936,10 @@
       }
     }
 
+    const SB_IDLE_HIDE_MS = 3000;
     let sbAutoHideTimer = null;
 
-    function scheduleSlideBookmarkHide(delayMs = 2400) {
+    function scheduleSlideBookmarkHide(delayMs = SB_IDLE_HIDE_MS) {
       clearTimeout(sbAutoHideTimer);
       sbAutoHideTimer = setTimeout(() => {
         if (bmIsDragging || document.body.classList.contains('auth-locked')) return;
@@ -5856,7 +5956,7 @@
       updateSlideBookmarkPlayUI();
     }
 
-    function revealSlideBookmark(holdMs = 2400) {
+    function revealSlideBookmark(holdMs = SB_IDLE_HIDE_MS) {
       if (document.body.classList.contains('auth-locked')) return;
       if (!slideBookmarkVisible) {
         showSlideBookmark(dockSide || 'right');
@@ -5872,32 +5972,17 @@
       slideBookmark.style.display = 'flex';
       slideBookmark.classList.remove('sb-tucked');
       updateSlideBookmarkPlayUI();
-      scheduleSlideBookmarkHide(2600);
+      scheduleSlideBookmarkHide(SB_IDLE_HIDE_MS);
     }
 
-    let blackoutHintTimer = null;
     let lastBlackoutTapTime = 0;
-
-    function showBlackoutHintBriefly(ms = 2400) {
-      const hint = document.getElementById('blackoutHint');
-      const titleEl = document.getElementById('blackoutTitle');
-      if (titleEl) {
-        titleEl.textContent = currentVideoTitle
-          ? (simplifyTitle(currentVideoTitle) + ' · 절전 재생 중')
-          : '배터리 절전 모드 · 화면 꺼짐';
-      }
-      if (!hint) return;
-      hint.classList.add('visible');
-      clearTimeout(blackoutHintTimer);
-      blackoutHintTimer = setTimeout(() => {
-        hint.classList.remove('visible');
-      }, ms);
-    }
 
     function enterBlackoutMode() {
       const ov = document.getElementById('battery-blackout-overlay');
       if (!ov) return;
       lastBlackoutTapTime = 0;
+      const hint = document.getElementById('blackoutHint');
+      if (hint) hint.classList.remove('visible');
       document.documentElement.classList.add('blackout-active');
       document.body.classList.add('blackout-active');
       const tcMeta = document.getElementById('appThemeColorMeta');
@@ -5912,13 +5997,11 @@
           if (p && typeof p.catch === 'function') p.catch(() => {});
         }
       } catch (e) {}
-      showBlackoutHintBriefly(2500);
     }
 
     function exitBlackoutMode() {
       const ov = document.getElementById('battery-blackout-overlay');
       if (!ov || !ov.classList.contains('active')) return;
-      clearTimeout(blackoutHintTimer);
       const hint = document.getElementById('blackoutHint');
       if (hint) hint.classList.remove('visible');
       ov.classList.remove('active');
@@ -5939,19 +6022,19 @@
     (function bindBlackoutGuards() {
       const ov = document.getElementById('battery-blackout-overlay');
       if (!ov) return;
-      ov.addEventListener('touchmove', (e) => { e.preventDefault(); }, { passive: false });
-      ov.addEventListener('wheel', (e) => { e.preventDefault(); }, { passive: false });
-      ov.addEventListener('contextmenu', (e) => { e.preventDefault(); });
+      ov.addEventListener('touchmove', (e) => { e.preventDefault(); e.stopPropagation(); }, { passive: false });
+      ov.addEventListener('wheel', (e) => { e.preventDefault(); e.stopPropagation(); }, { passive: false });
+      ov.addEventListener('contextmenu', (e) => { e.preventDefault(); e.stopPropagation(); });
     })();
 
     function onBlackoutOverlayTap() {
+      // 두 번 연속 터치 전까지 화면에 아무 픽셀도 띄우지 않고 완전 OFF 유지
       const now = Date.now();
       if (now - lastBlackoutTapTime <= 380) {
         lastBlackoutTapTime = 0;
         exitBlackoutMode();
       } else {
         lastBlackoutTapTime = now;
-        showBlackoutHintBriefly(2000);
       }
     }
 
@@ -6052,11 +6135,11 @@
       updateSlideBookmarkPlayUI();
     }
 
-    // 통합 스크롤 리스너: 스크롤 중 슬라이드 등장 · 스크롤 멈춤 시 슬며시 숨김
+    // 통합 스크롤 리스너: 스크롤 중 슬라이드 등장 · 3초 이상 무반응 시에만 천천히 숨김
     window.addEventListener('scroll', () => {
       lastFeedScrollTime = Date.now();
       if (currentUser) {
-        revealSlideBookmark(2400);
+        revealSlideBookmark(SB_IDLE_HIDE_MS);
       }
     }, { passive: true });
 
@@ -6064,10 +6147,16 @@
       if (slideBookmark.classList.contains('sb-tucked')) {
         e.preventDefault();
         e.stopPropagation();
-        revealSlideBookmark(3200);
+        revealSlideBookmark(SB_IDLE_HIDE_MS);
         return;
       }
-      scheduleSlideBookmarkHide(3200);
+      scheduleSlideBookmarkHide(SB_IDLE_HIDE_MS);
+    }, true);
+    slideBookmark.addEventListener('pointermove', () => {
+      if (!slideBookmark.classList.contains('sb-tucked')) scheduleSlideBookmarkHide(SB_IDLE_HIDE_MS);
+    }, { passive: true });
+    slideBookmark.addEventListener('click', () => {
+      if (!slideBookmark.classList.contains('sb-tucked')) scheduleSlideBookmarkHide(SB_IDLE_HIDE_MS);
     }, true);
 
     let bmIsDragging = false;
@@ -6128,7 +6217,7 @@
         savedBookmarkPos = { mode: snapSide, top: clampedTop };
         applyBookmarkPosition(snapSide);
         persistBookmarkPos(true);
-        scheduleSlideBookmarkHide(2400);
+        scheduleSlideBookmarkHide(SB_IDLE_HIDE_MS);
       }
 
       sbGrip.addEventListener('pointerup', finishSlideBookmarkDrag);
