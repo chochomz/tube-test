@@ -23,6 +23,7 @@
       --search-bg: #1c1c1c;
       --search-fg: #ffffff;
       --tabs-area-bg: #f9d5e5;
+      --tab-text-color: #261620;
       --tab-selected-bg: #d9386a;
       --tab-selected-fg: #ffffff;
       --layout-icon-color: #7e8086;
@@ -38,6 +39,8 @@
       --filter-panel-fg: #dddddd;
       --bookmark-bg: #ffb6cb;
       --bookmark-border: #ffffff;
+      --bookmark-opacity: 0.7;
+      --star-pin-color: #ffffff;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -89,7 +92,7 @@
       right: 0 !important;
       width: 100% !important;
       overflow: hidden !important;
-      touch-action: none !important;
+      overscroll-behavior: none !important;
     }
     .auth-gate-box {
       width: 156px;
@@ -271,7 +274,9 @@
     }
     .header-unified-box {
       position: relative;
-      width: 100%;
+      width: calc(100% + 8px);
+      margin-left: -4px;
+      margin-right: -4px;
       border-radius: 10px;
       padding: 6px 7px 5px 7px;
     }
@@ -479,10 +484,10 @@
     }
     .star-pin-btn:active { transform: scale(0.9); }
     .star-pin-btn.pinned {
-      background: rgba(255, 255, 255, 0.24);
-      border-color: #ffffff;
-      color: #ffffff;
-      text-shadow: 0 0 6px rgba(255, 255, 255, 0.95);
+      background: rgba(0, 0, 0, 0.62);
+      border-color: var(--star-pin-color);
+      color: var(--star-pin-color);
+      text-shadow: 0 0 6px var(--star-pin-color);
     }
 
     .search-box { display: flex; gap: 4px; width: 100%; min-width: 0; }
@@ -574,7 +579,7 @@
       border: none;
       border-radius: 9px;
       background: transparent;
-      color: #261620;
+      color: var(--tab-text-color);
       white-space: nowrap;
       flex-shrink: 0;
       cursor: pointer;
@@ -685,15 +690,18 @@
       display: none;
       align-items: center;
       justify-content: center;
-      padding: 6px;
+      padding: calc(env(safe-area-inset-top, 0px) + 8px) calc(env(safe-area-inset-right, 0px) + 6px) calc(env(safe-area-inset-bottom, 0px) + 8px) calc(env(safe-area-inset-left, 0px) + 6px);
+      touch-action: pan-y;
     }
     .manage-modal-box {
       width: min(96vw, 420px);
-      height: min(96dvh, 760px);
+      height: min(calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 16px), 740px);
+      max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 16px);
       overscroll-behavior: contain;
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      touch-action: pan-y;
       background: var(--settings-modal-bg);
       color: var(--settings-modal-fg);
       border: 1px solid rgba(255, 255, 255, 0.75);
@@ -758,11 +766,26 @@
     .settings-pane.active {
       display: flex;
     }
+    .settings-pane::-webkit-scrollbar,
+    .manage-list::-webkit-scrollbar {
+      width: 5px;
+    }
+    .settings-pane::-webkit-scrollbar-track,
+    .manage-list::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 4px;
+    }
+    .settings-pane::-webkit-scrollbar-thumb,
+    .manage-list::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.28);
+      border-radius: 4px;
+    }
     #settings-pane-auth {
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior: contain;
-      padding-right: 2px;
+      touch-action: pan-y;
+      padding-right: 4px;
     }
     #settings-pane-auth #adminOnlySection {
       flex: none !important;
@@ -783,6 +806,10 @@
       flex: 1;
       min-height: 0;
       overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+      touch-action: pan-y;
+      padding-right: 3px;
       margin-bottom: 4px;
     }
     .manage-item {
@@ -1001,9 +1028,10 @@
     .ml-tab-plain {
       font-size: 8.5px;
       font-weight: 700;
-      color: #2b1a23;
-      padding-right: 4px;
-      border-right: 1px dashed rgba(50,30,42,0.5);
+      color: var(--tab-text-color);
+      padding: 2px 5px 2px 3px;
+      border-radius: 4px;
+      border-right: 1px dashed rgba(50,30,42,0.45);
     }
     .ml-tab-sel {
       font-size: 8.5px;
@@ -1013,14 +1041,30 @@
       background: var(--tab-selected-bg);
       color: var(--tab-selected-fg);
     }
+    .ml-star-pin {
+      width: 17px;
+      height: 17px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.55);
+      border: 1.2px solid var(--star-pin-color);
+      color: var(--star-pin-color);
+      font-size: 10px;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-shadow: 0 0 4px var(--star-pin-color);
+      flex-shrink: 0;
+    }
     .ml-icons-box {
       display: inline-flex;
       align-items: center;
-      gap: 4px;
-      padding: 2px 4px;
+      gap: 5px;
+      padding: 1px 5px;
       border-radius: 4px;
       color: var(--layout-icon-color);
-      font-size: 10.5px;
+      font-size: 14px;
+      line-height: 1;
       font-weight: 700;
       flex-shrink: 0;
     }
@@ -1191,17 +1235,43 @@
       gap: 4px;
       flex-shrink: 0;
     }
+    .ui-opacity-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex: 1;
+      max-width: 210px;
+      justify-content: flex-end;
+    }
+    .ui-opacity-slider {
+      width: 118px;
+      height: 18px;
+      accent-color: #d9386a;
+      cursor: pointer;
+      touch-action: pan-x;
+    }
+    .ui-opacity-val {
+      font-size: 10px;
+      font-weight: 700;
+      color: #f9a8d4;
+      min-width: 30px;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
     #settings-pane-color {
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior: contain;
+      touch-action: pan-y;
+      padding-right: 4px;
     }
     .palette-256-grid {
       display: grid;
       grid-template-columns: repeat(16, 1fr);
       grid-template-rows: repeat(16, 1fr);
       gap: 1.5px;
-      flex: 1 0 auto;
+      flex: 0 0 auto;
+      height: 228px;
       min-height: 224px;
       background: #111;
       padding: 3px;
@@ -1216,6 +1286,11 @@
       border-radius: 2px;
       padding: 0;
       cursor: pointer;
+    }
+    .palette-cell.selected {
+      outline: 2px solid #ffffff;
+      outline-offset: -1px;
+      z-index: 3;
     }
     /* 배터리 절약 순수 검정(#000000) 절전 오버레이 */
     html.blackout-active,
@@ -1270,11 +1345,6 @@
       font-size: 11px;
       font-weight: 600;
       color: rgba(255, 255, 255, 0.20);
-    }
-    .palette-cell.selected {
-      outline: 2px solid #ffffff;
-      outline-offset: -1px;
-      z-index: 3;
     }
     .db-diag-bar {
       display: flex;
@@ -1607,27 +1677,7 @@
       cursor: pointer;
     }
     .yt-pause-mask.active { display: flex; }
-    .yt-unmute-badge {
-      position: absolute;
-      left: 50%;
-      bottom: 12px;
-      transform: translateX(-50%);
-      z-index: 20;
-      display: none;
-      align-items: center;
-      gap: 5px;
-      padding: 6px 14px;
-      border-radius: 999px;
-      border: 1.5px solid rgba(255, 255, 255, 0.9);
-      background: rgba(217, 56, 106, 0.92);
-      color: #ffffff;
-      font-size: 12px;
-      font-weight: 800;
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.72);
-      cursor: pointer;
-      white-space: nowrap;
-    }
-    .yt-unmute-badge.active { display: inline-flex; }
+
     .yt-pause-play-circle {
       width: 46px;
       height: 46px;
@@ -1705,12 +1755,13 @@
       align-items: center;
       gap: 4px;
       padding: 8px 3px 9px 3px;
-      opacity: 0.72;
+      overflow: visible;
+      opacity: var(--bookmark-opacity);
       background: var(--bookmark-bg);
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
       border: 1.5px solid var(--bookmark-border);
-      box-shadow: -2px 6px 18px rgba(0, 0, 0, 0.48), inset 1px 0 0 rgba(255, 255, 255, 0.35);
+      box-shadow: -2px 6px 18px rgba(0, 0, 0, 0.42);
       user-select: none;
       -webkit-user-select: none;
       -webkit-touch-callout: none;
@@ -1724,27 +1775,56 @@
       left: 0;
       right: auto;
       border-left: none;
-      border-radius: 0 22px 22px 0;
+      border-radius: 0 13px 13px 0;
+      transform-origin: left center;
     }
     #slide-bookmark.dock-right {
       right: 0;
       left: auto;
       border-right: none;
-      border-radius: 22px 0 0 22px;
+      border-radius: 13px 0 0 13px;
+      transform-origin: right center;
+    }
+    #slide-bookmark.dock-right:not(.sb-tucked) {
+      transform: scale(1.04);
+    }
+    #slide-bookmark.dock-left:not(.sb-tucked) {
+      transform: scale(1.04);
     }
     #slide-bookmark.dock-free {
-      border-radius: 22px;
+      border-radius: 15px;
+      transform-origin: center center;
     }
+    .sb-wall-ear {
+      position: absolute;
+      width: 14px;
+      height: 15px;
+      pointer-events: none;
+      overflow: visible;
+      display: block;
+    }
+    .sb-wall-ear .sb-ear-fill { fill: var(--bookmark-bg); }
+    .sb-wall-ear .sb-ear-stroke {
+      fill: none;
+      stroke: var(--bookmark-border);
+      stroke-width: 1.5;
+      stroke-linecap: round;
+    }
+    #slide-bookmark.dock-right .sb-ear-top { right: 0; top: -13.5px; transform: none; }
+    #slide-bookmark.dock-right .sb-ear-bottom { right: 0; bottom: -13.5px; transform: scaleY(-1); }
+    #slide-bookmark.dock-left .sb-ear-top { left: 0; top: -13.5px; transform: scaleX(-1); }
+    #slide-bookmark.dock-left .sb-ear-bottom { left: 0; bottom: -13.5px; transform: scale(-1, -1); }
+    #slide-bookmark.dock-free .sb-wall-ear { display: none; }
     #slide-bookmark.sb-tucked {
       transition: transform 0.85s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.85s ease, box-shadow 0.14s;
     }
     #slide-bookmark.dock-right.sb-tucked {
-      transform: translateX(calc(100% - 6px));
-      opacity: 0.28;
+      transform: translateX(calc(100% - 6px)) scale(0.94);
+      opacity: calc(var(--bookmark-opacity) * 0.4);
     }
     #slide-bookmark.dock-left.sb-tucked {
-      transform: translateX(calc(-100% + 6px));
-      opacity: 0.28;
+      transform: translateX(calc(-100% + 6px)) scale(0.94);
+      opacity: calc(var(--bookmark-opacity) * 0.4);
     }
     #slide-bookmark.sb-tucked .sb-btn {
       pointer-events: none;
@@ -2109,7 +2189,6 @@
       <div class="yt-pause-mask" id="ytPauseMask" onclick="resumeYtFromMask()">
         <div class="yt-pause-play-circle">▶</div>
       </div>
-      <button type="button" class="yt-unmute-badge" id="ytUnmuteBadge" onclick="unmuteYtFromBadge(event)">🔊 소리 켜기</button>
 
       <!-- 🎧 백그라운드 오디오 모드 활성 시 창 내부 표시 -->
       <div class="bg-audio-overlay" id="bgAudioOverlay">
@@ -2135,6 +2214,8 @@
 
   <!-- 3-2. 슬라이드 책갈피 (스크롤/재생 시 상시 표시 · 투명도 70% · 좌/우 한 손 이동 · ♪/▶/🎧/MP3/⚙) -->
   <div id="slide-bookmark" class="dock-right sb-size-1">
+    <svg class="sb-wall-ear sb-ear-top" viewBox="0 0 14 15" aria-hidden="true"><path class="sb-ear-fill" d="M 14,0 Q 14,13.5 0,13.5 L 0,15 L 14,15 Z"/><path class="sb-ear-stroke" d="M 14,0 Q 14,13.5 0,13.5"/></svg>
+    <svg class="sb-wall-ear sb-ear-bottom" viewBox="0 0 14 15" aria-hidden="true"><path class="sb-ear-fill" d="M 14,0 Q 14,13.5 0,13.5 L 0,15 L 14,15 Z"/><path class="sb-ear-stroke" d="M 14,0 Q 14,13.5 0,13.5"/></svg>
     <div class="sb-grip" id="sbDragGrip" title="드래그: 좌·우 이동"><span class="sb-grip-bar"></span></div>
     <button type="button" class="sb-btn sb-btn-note" id="sbNoteBtn" onclick="togglePlayerFromNote()" title="재생창 열기/접기"><span class="sb-note-icon"><svg class="sb-win-svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><rect x="6.5" y="2.5" width="11" height="9.5" rx="1.6"/><path d="M13.5 12v3.5a1.5 1.5 0 0 1-1.5 1.5H4a1.5 1.5 0 0 1-1.5-1.5V8A1.5 1.5 0 0 1 4 6.5h2.5"/></svg></span></button>
     <button type="button" class="sb-btn sb-btn-play" onclick="togglePlayFromBookmark()" title="재생/정지"><span class="sb-tri-icon" id="sbPlayIcon">▶</span></button>
@@ -2213,8 +2294,9 @@
 
             <div class="ml-row2 mini-mod-hit" data-mod="tabsAreaBg" onclick="selectThemeModule('tabsAreaBg', event)">
               <div class="ml-tabs-group">
-                <span class="ml-tab-plain">검색어</span>
+                <span class="ml-tab-plain mini-mod-hit" data-mod="tabTextColor" onclick="selectThemeModule('tabTextColor', event)" title="검색어 문자색">검색어</span>
                 <span class="ml-tab-sel mini-mod-hit" data-mod="tabSelectedBg" onclick="selectThemeModule('tabSelectedBg', event)">선택창</span>
+                <span class="ml-star-pin mini-mod-hit" data-mod="starPinColor" onclick="selectThemeModule('starPinColor', event)" title="별표 선택색상">★</span>
               </div>
               <span class="ml-icons-box mini-mod-hit" data-mod="layoutIconCol" onclick="selectThemeModule('layoutIconCol', event)">≡ ⊞</span>
             </div>
@@ -2243,6 +2325,13 @@
             </div>
           </div>
           <div class="ui-opt-row">
+            <span class="ui-opt-lbl">책갈피 투명도</span>
+            <div class="ui-opacity-wrap">
+              <input type="range" id="bmOpacitySlider" class="ui-opacity-slider" min="10" max="100" step="10" value="70" oninput="setBookmarkOpacity(this.value, false)" onchange="setBookmarkOpacity(this.value, true)">
+              <span class="ui-opacity-val" id="bmOpacityVal">70%</span>
+            </div>
+          </div>
+          <div class="ui-opt-row">
             <span class="ui-opt-lbl">큰 테두리</span>
             <div class="ui-opt-btns">
               <button type="button" class="ui-opt-btn" data-bstyle="dashed" onclick="setHeaderBorderStyle('dashed')">점선</button>
@@ -2251,6 +2340,8 @@
               <button type="button" class="ui-opt-btn" data-bwidth="1" onclick="setHeaderBorderWidth(1)">1</button>
               <button type="button" class="ui-opt-btn" data-bwidth="2" onclick="setHeaderBorderWidth(2)">2</button>
               <button type="button" class="ui-opt-btn" data-bwidth="3" onclick="setHeaderBorderWidth(3)">3</button>
+              <button type="button" class="ui-opt-btn" data-bwidth="4" onclick="setHeaderBorderWidth(4)">4</button>
+              <button type="button" class="ui-opt-btn" data-bwidth="5" onclick="setHeaderBorderWidth(5)">5</button>
             </div>
           </div>
         </div>
@@ -2371,6 +2462,8 @@
     const LAYOUT_STORAGE_KEY = 'tube_audio_lab_layout_v8';
     const THEME_STORAGE_KEY = 'mytube_theme_modules_v11';
     const UI_OPTS_STORAGE_KEY = 'mytube_ui_opts_v17';
+    const FILTERS_STORAGE_PREFIX = 'mytube_filters_v18_';
+    const BM_POS_STORAGE_PREFIX = 'mytube_bm_pos_v18_';
     const LAST_FEED_STORAGE_PREFIX = 'mytube_last_feed_v9_';
     const META_BACKUP_PREFIX = 'mytube_meta_backup_v8_';
     const PENDING_SYNC_PREFIX = 'mytube_pending_sync_v8_';
@@ -2420,7 +2513,9 @@
       headerDivider:   { label: '구분실선',    cssVar: '--header-divider-color', def: '#aaaaaa' },
       searchBg:        { label: '검색창',      cssVar: '--search-bg',            def: '#1c1c1c', fgVar: '--search-fg' },
       tabsAreaBg:      { label: '검색어배경',  cssVar: '--tabs-area-bg',         def: '#f9d5e5' },
+      tabTextColor:    { label: '검색어문자',  cssVar: '--tab-text-color',       def: '#261620' },
       tabSelectedBg:   { label: '선택창배경',  cssVar: '--tab-selected-bg',      def: '#d9386a', fgVar: '--tab-selected-fg' },
+      starPinColor:    { label: '별표색상',    cssVar: '--star-pin-color',       def: '#ffffff' },
       layoutIconCol:   { label: '목록·창색',   cssVar: '--layout-icon-color',    def: '#7e8086' },
       settingsBtnBg:   { label: '설정창',      cssVar: '--settings-btn-bg',      def: '#1d1d1d', fgVar: '--settings-btn-fg' },
       settingsModalBg: { label: '설정창배경',  cssVar: '--settings-modal-bg',    def: '#161616', fgVar: '--settings-modal-fg' },
@@ -2441,13 +2536,14 @@
     let currentUser = null;
     let currentFeedMode = 'grid';
     let currentGridCols = 2;
+    let lastPlayerWidth = 0;
     let fbVerified = false;
     let lastDbErrorMsg = '';
     let isAppWorking = false;
     let isYtVideoPlaying = false;
     let currentThemeColors = getDefaultThemeColors();
     function getDefaultUiOpts() {
-      return { bmSize: 1, borderStyle: 'dashed', borderWidth: 2 };
+      return { bmSize: 1, bmOpacity: 70, borderStyle: 'dashed', borderWidth: 2 };
     }
     let currentUiOpts = getDefaultUiOpts();
     let selectedThemeMod = 'appBg';
@@ -2690,6 +2786,30 @@
       });
     }
 
+    function persistUserFilters(saveToCloud = true) {
+      if (!currentUser) return;
+      try {
+        localStorage.setItem(FILTERS_STORAGE_PREFIX + getUid(), JSON.stringify(activeFilterOrder));
+      } catch (e) {}
+      if (saveToCloud) saveUserProfileDocToCloud();
+    }
+
+    function initSavedFilters() {
+      activeFilterOrder = [];
+      if (currentUser) {
+        try {
+          const raw = localStorage.getItem(FILTERS_STORAGE_PREFIX + getUid());
+          if (raw) {
+            const arr = JSON.parse(raw);
+            if (Array.isArray(arr)) {
+              activeFilterOrder = arr.filter(k => Object.prototype.hasOwnProperty.call(FILTER_LABELS, k));
+            }
+          }
+        } catch (e) {}
+      }
+      updateFilterUI();
+    }
+
     function onFilterCheckChange(checkbox) {
       const val = checkbox.value;
       if (checkbox.checked) {
@@ -2698,6 +2818,7 @@
         activeFilterOrder = activeFilterOrder.filter(k => k !== val);
       }
       updateFilterUI();
+      persistUserFilters(true);
       if (currentFeedItems.length > 0) {
         renderSortedFeed();
       }
@@ -2706,6 +2827,7 @@
     function resetFilterConditions() {
       activeFilterOrder = [];
       updateFilterUI();
+      persistUserFilters(true);
       if (currentFeedItems.length > 0) {
         renderSortedFeed();
       }
@@ -2798,8 +2920,8 @@
       }
     }
 
-    // 피드 레이아웃 전환 (목록 1열 / 창 2->3->4 순환)
-    function applyFeedLayoutUI() {
+    // 피드 레이아웃 전환 (목록 1열 / 창 2->3->4 순환 · 유저별 완전 분리)
+    function applyFeedLayoutUI(saveToCloud = false) {
       resultsContainer.classList.remove('cols-1', 'cols-2', 'cols-3', 'cols-4');
       const listBtn = document.getElementById('listModeBtn');
       const gridBtn = document.getElementById('gridModeBtn');
@@ -2817,33 +2939,40 @@
         if (gridBtn) gridBtn.classList.add('active');
       }
 
-      try {
-        localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify({
-          mode: currentFeedMode,
-          cols: currentGridCols
-        }));
-      } catch (e) {}
+      if (currentUser) {
+        try {
+          localStorage.setItem(LAYOUT_STORAGE_KEY + '_' + getUid(), JSON.stringify({
+            mode: currentFeedMode,
+            cols: currentGridCols
+          }));
+        } catch (e) {}
+        if (saveToCloud) saveUserProfileDocToCloud();
+      }
     }
 
     function initFeedLayoutMode() {
-      try {
-        const raw = localStorage.getItem(LAYOUT_STORAGE_KEY);
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          if (parsed && (parsed.mode === 'list' || parsed.mode === 'grid')) {
-            currentFeedMode = parsed.mode;
+      currentFeedMode = 'grid';
+      currentGridCols = 2;
+      if (currentUser) {
+        try {
+          const raw = localStorage.getItem(LAYOUT_STORAGE_KEY + '_' + getUid());
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (parsed && (parsed.mode === 'list' || parsed.mode === 'grid')) {
+              currentFeedMode = parsed.mode;
+            }
+            if (parsed && [2, 3, 4].includes(Number(parsed.cols))) {
+              currentGridCols = Number(parsed.cols);
+            }
           }
-          if (parsed && [2, 3, 4].includes(Number(parsed.cols))) {
-            currentGridCols = Number(parsed.cols);
-          }
-        }
-      } catch (e) {}
-      applyFeedLayoutUI();
+        } catch (e) {}
+      }
+      applyFeedLayoutUI(false);
     }
 
     function setFeedListMode() {
       currentFeedMode = 'list';
-      applyFeedLayoutUI();
+      applyFeedLayoutUI(true);
       triggerLayoutHaptic(document.getElementById('listModeBtn'));
     }
 
@@ -2854,7 +2983,7 @@
       } else {
         currentGridCols = currentGridCols >= 4 ? 2 : (currentGridCols + 1); // 2 -> 3 -> 4 -> 2
       }
-      applyFeedLayoutUI();
+      applyFeedLayoutUI(true);
       triggerLayoutHaptic(document.getElementById('gridModeBtn'));
     }
 
@@ -2959,11 +3088,24 @@
       persistThemeColors(true);
     }
 
+    function normalizeBmOpacity(val) {
+      const n = Math.round(Number(val) / 10) * 10;
+      if (!isFinite(n) || n < 10) return 70;
+      return Math.min(100, Math.max(10, n));
+    }
+
     function applyUiOptsToDOM() {
       const sz = [1, 2, 3].includes(Number(currentUiOpts.bmSize)) ? Number(currentUiOpts.bmSize) : 1;
+      const op = normalizeBmOpacity(currentUiOpts.bmOpacity);
       const st = currentUiOpts.borderStyle === 'solid' ? 'solid' : 'dashed';
-      const bw = [1, 2, 3].includes(Number(currentUiOpts.borderWidth)) ? Number(currentUiOpts.borderWidth) : 2;
-      currentUiOpts = { bmSize: sz, borderStyle: st, borderWidth: bw };
+      const bw = [1, 2, 3, 4, 5].includes(Number(currentUiOpts.borderWidth)) ? Number(currentUiOpts.borderWidth) : 2;
+      currentUiOpts = { bmSize: sz, bmOpacity: op, borderStyle: st, borderWidth: bw };
+
+      document.documentElement.style.setProperty('--bookmark-opacity', String(op / 100));
+      const opSlider = document.getElementById('bmOpacitySlider');
+      const opVal = document.getElementById('bmOpacityVal');
+      if (opSlider) opSlider.value = String(op);
+      if (opVal) opVal.textContent = op + '%';
 
       if (slideBookmark) {
         slideBookmark.classList.remove('sb-size-1', 'sb-size-2', 'sb-size-3');
@@ -2972,7 +3114,8 @@
 
       const rect = document.getElementById('headerDashRect');
       if (rect) {
-        const swMap = { 1: 1.4, 2: 2.2, 3: 3.4 };
+        const swMap = { 1: 1.2, 2: 1.8, 3: 2.5, 4: 3.2, 5: 4.0 };
+        const dashMap = { 1: '4 2.5', 2: '4.5 2.2', 3: '5 2.0', 4: '5.5 1.8', 5: '6 1.6' };
         const sw = swMap[bw];
         const inset = (sw / 2 + 0.2).toFixed(1);
         const minus = (Number(inset) * 2).toFixed(1);
@@ -2982,12 +3125,12 @@
         rect.setAttribute('height', 'calc(100% - ' + minus + 'px)');
         rect.setAttribute('stroke-width', String(sw));
         if (st === 'solid') rect.removeAttribute('stroke-dasharray');
-        else rect.setAttribute('stroke-dasharray', '4 3');
+        else rect.setAttribute('stroke-dasharray', dashMap[bw]);
       }
 
       const miniDash = document.getElementById('miniOuterDash');
       if (miniDash) {
-        const mwMap = { 1: '1.2px', 2: '2px', 3: '3px' };
+        const mwMap = { 1: '1px', 2: '1.6px', 3: '2.2px', 4: '2.8px', 5: '3.4px' };
         miniDash.style.borderStyle = st;
         miniDash.style.borderWidth = mwMap[bw];
       }
@@ -3004,31 +3147,31 @@
     }
 
     function persistUiOpts(saveToCloud = true) {
+      if (!currentUser) return;
       try {
-        localStorage.setItem(UI_OPTS_STORAGE_KEY, JSON.stringify(currentUiOpts));
-        if (currentUser) {
-          localStorage.setItem(UI_OPTS_STORAGE_KEY + '_' + getUid(), JSON.stringify(currentUiOpts));
-        }
+        localStorage.setItem(UI_OPTS_STORAGE_KEY + '_' + getUid(), JSON.stringify(currentUiOpts));
       } catch (e) {}
-      if (saveToCloud && currentUser) {
+      if (saveToCloud) {
         saveUserProfileDocToCloud();
       }
     }
 
     function initSavedUiOpts() {
       currentUiOpts = getDefaultUiOpts();
-      try {
-        const raw = (currentUser && localStorage.getItem(UI_OPTS_STORAGE_KEY + '_' + getUid())) ||
-                    localStorage.getItem(UI_OPTS_STORAGE_KEY);
-        if (raw) {
-          const p = JSON.parse(raw);
-          if (p && typeof p === 'object') {
-            if ([1, 2, 3].includes(Number(p.bmSize))) currentUiOpts.bmSize = Number(p.bmSize);
-            if (p.borderStyle === 'solid' || p.borderStyle === 'dashed') currentUiOpts.borderStyle = p.borderStyle;
-            if ([1, 2, 3].includes(Number(p.borderWidth))) currentUiOpts.borderWidth = Number(p.borderWidth);
+      if (currentUser) {
+        try {
+          const raw = localStorage.getItem(UI_OPTS_STORAGE_KEY + '_' + getUid());
+          if (raw) {
+            const p = JSON.parse(raw);
+            if (p && typeof p === 'object') {
+              if ([1, 2, 3].includes(Number(p.bmSize))) currentUiOpts.bmSize = Number(p.bmSize);
+              if (p.bmOpacity !== undefined) currentUiOpts.bmOpacity = normalizeBmOpacity(p.bmOpacity);
+              if (p.borderStyle === 'solid' || p.borderStyle === 'dashed') currentUiOpts.borderStyle = p.borderStyle;
+              if ([1, 2, 3, 4, 5].includes(Number(p.borderWidth))) currentUiOpts.borderWidth = Number(p.borderWidth);
+            }
           }
-        }
-      } catch (e) {}
+        } catch (e) {}
+      }
       applyUiOptsToDOM();
     }
 
@@ -3038,6 +3181,12 @@
       persistUiOpts(true);
     }
 
+    function setBookmarkOpacity(val, saveToCloud = true) {
+      currentUiOpts.bmOpacity = normalizeBmOpacity(val);
+      applyUiOptsToDOM();
+      persistUiOpts(saveToCloud);
+    }
+
     function setHeaderBorderStyle(st) {
       currentUiOpts.borderStyle = st === 'solid' ? 'solid' : 'dashed';
       applyUiOptsToDOM();
@@ -3045,7 +3194,7 @@
     }
 
     function setHeaderBorderWidth(bw) {
-      currentUiOpts.borderWidth = [1, 2, 3].includes(Number(bw)) ? Number(bw) : 2;
+      currentUiOpts.borderWidth = [1, 2, 3, 4, 5].includes(Number(bw)) ? Number(bw) : 2;
       applyUiOptsToDOM();
       persistUiOpts(true);
     }
@@ -3060,13 +3209,11 @@
     }
 
     function persistThemeColors(saveToCloud = true) {
+      if (!currentUser) return;
       try {
-        localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify(currentThemeColors));
-        if (currentUser) {
-          localStorage.setItem(`${THEME_STORAGE_KEY}_${getUid()}`, JSON.stringify(currentThemeColors));
-        }
+        localStorage.setItem(`${THEME_STORAGE_KEY}_${getUid()}`, JSON.stringify(currentThemeColors));
       } catch (e) {}
-      if (saveToCloud && currentUser) {
+      if (saveToCloud) {
         saveUserProfileDocToCloud();
       }
     }
@@ -3096,20 +3243,21 @@
 
     function initSavedBgColor() {
       currentThemeColors = getDefaultThemeColors();
-      try {
-        const raw = (currentUser && localStorage.getItem(`${THEME_STORAGE_KEY}_${getUid()}`)) ||
-                    localStorage.getItem(THEME_STORAGE_KEY);
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          if (parsed && typeof parsed === 'object') {
-            Object.keys(THEME_MODULES).forEach(k => {
-              if (parsed[k] && /^#[0-9a-fA-F]{6}$/.test(parsed[k])) {
-                currentThemeColors[k] = parsed[k].toLowerCase();
-              }
-            });
+      if (currentUser) {
+        try {
+          const raw = localStorage.getItem(`${THEME_STORAGE_KEY}_${getUid()}`);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (parsed && typeof parsed === 'object') {
+              Object.keys(THEME_MODULES).forEach(k => {
+                if (parsed[k] && /^#[0-9a-fA-F]{6}$/.test(parsed[k])) {
+                  currentThemeColors[k] = parsed[k].toLowerCase();
+                }
+              });
+            }
           }
-        }
-      } catch (e) {}
+        } catch (e) {}
+      }
       applyThemeColorsToDOM();
       initSavedUiOpts();
     }
@@ -3641,8 +3789,6 @@
     let activeCandidateIdx = 0;
     let pendingBgSeekSec = 0;
 
-    let ytAutoplayWatchdog = null;
-    let ytConfirmedPlaying = false;
     let isExtractingAudio = false;
     let mp3AbortCtrl = null;
 
@@ -3755,7 +3901,7 @@
       if (bgPlayToggleBtn) {
         bgPlayToggleBtn.textContent = bgAudio.paused ? '▶' : '❚❚';
       }
-      if (typeof updateSlideBookmarkPlayUI === 'function') updateSlideBookmarkPlayUI();
+      updateSlideBookmarkPlayUI();
     }
 
     function stopBgAudioClean() {
@@ -3921,25 +4067,6 @@
       }
     }
 
-    // 재생창 하단 [🎧] 원터치 백그라운드 오디오 모드 토글
-    function toggleBgAudioMode() {
-      if (!currentVideoId) return;
-      unlockIosAudioOnce();
-
-      if (isBgAudioPlaying) {
-        // BG 오디오 -> YouTube 영상 모드로 복귀
-        const resumeSec = Math.floor(bgAudio.currentTime || lastKnownPlaySec || 0);
-        lastKnownPlaySec = resumeSec;
-        stopBgAudioClean();
-        sendYtCommand('seekTo', [resumeSec, true]);
-        sendYtCommand('playVideo');
-        statusMsg.innerText = '영상 모드로 복귀';
-      } else {
-        // YouTube 영상 -> iOS 백그라운드 오디오 모드로 즉시 전환
-        activateBgAudioStream(lastKnownPlaySec);
-      }
-    }
-
     function toggleBgAudioPlayPause() {
       if (!isBgAudioPlaying) return;
       if (bgAudio.paused) {
@@ -3953,32 +4080,18 @@
     }
 
     let ytFrameReady = false;
-    let ytAutoMuted = false;
 
-    function showYtUnmuteBadge() {
-      const b = document.getElementById('ytUnmuteBadge');
-      if (b) b.classList.add('active');
-    }
-    function hideYtUnmuteBadge() {
-      const b = document.getElementById('ytUnmuteBadge');
-      if (b) b.classList.remove('active');
-    }
-    function unmuteYtFromBadge(ev) {
-      if (ev && ev.stopPropagation) ev.stopPropagation();
-      ytAutoMuted = false;
-      hideYtUnmuteBadge();
-      sendYtCommand('unMute');
-      sendYtCommand('setVolume', [100]);
-      sendYtCommand('playVideo');
+    function getDefaultFullPlayerMetrics() {
+      const headerBox = document.querySelector('.header-unified-box');
+      const topPos = headerBox ? Math.max(52, Math.round(headerBox.getBoundingClientRect().bottom + 6)) : 96;
+      const maxH = Math.max(140, window.innerHeight - topPos - 36);
+      const fitWidth = Math.max(MIN_PLAYER_WIDTH, Math.min(window.innerWidth - 12, Math.round(maxH * (16 / 9))));
+      return { topPos, fitWidth };
     }
 
     function openPlayerModal(videoId, title) {
       unlockIosAudioOnce();
       stopBgAudioClean();
-      clearTimeout(ytAutoplayWatchdog);
-      ytConfirmedPlaying = false;
-      ytAutoMuted = false;
-      hideYtUnmuteBadge();
       isDockedToBookmark = false;
       isYtVideoPlaying = false;
       lastKnownPlaySec = 0;
@@ -3987,11 +4100,9 @@
       currentVideoTitle = title;
 
       // 검색창 외곽 테두리 바로 밑에 모바일 가로폭 딱 맞는 최대 16:9 크기로 즉시 오픈
-      const headerBox = document.querySelector('.header-unified-box');
-      const topPos = headerBox ? Math.max(52, Math.round(headerBox.getBoundingClientRect().bottom + 6)) : 96;
-      const maxH = Math.max(140, window.innerHeight - topPos - 36);
-      const fitWidth = Math.max(MIN_PLAYER_WIDTH, Math.min(window.innerWidth - 12, Math.round(maxH * (16 / 9))));
+      const { topPos, fitWidth } = getDefaultFullPlayerMetrics();
       const dims = apply16by9Scale(fitWidth);
+      lastPlayerWidth = dims.width;
       const leftPos = Math.max(6, Math.round((window.innerWidth - dims.width) / 2));
 
       modal.classList.remove('interacting', 'docked-hidden');
@@ -4002,7 +4113,6 @@
       const existingFrame = document.getElementById('ytPlayerFrame');
       if (existingFrame && ytFrameReady) {
         sendYtCommand('loadVideoById', [videoId]);
-        sendYtCommand('unMute');
         sendYtCommand('playVideo');
       } else {
         ytFrameReady = false;
@@ -4017,13 +4127,7 @@
               frame.contentWindow.postMessage(JSON.stringify({ event: 'listening', id: 1 }), '*');
               frame.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'addEventListener', args: ['onError'] }), '*');
               frame.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'addEventListener', args: ['onStateChange'] }), '*');
-              frame.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'unMute', args: [] }), '*');
               frame.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'playVideo', args: [] }), '*');
-              setTimeout(() => {
-                if (currentVideoId === videoId && !ytConfirmedPlaying && !isBgAudioPlaying && !userPausedBg) {
-                  sendYtCommand('playVideo');
-                }
-              }, 350);
             } catch (e) {}
           });
         }
@@ -4031,23 +4135,12 @@
 
       hideYtPauseMask();
       updateSearchBtnState();
-      if (typeof revealSlideBookmark === 'function') revealSlideBookmark(3200);
-      else if (typeof showSlideBookmark === 'function') showSlideBookmark(dockSide || 'right');
+      revealSlideBookmark(3200);
       updateBgModeUI();
-      if (typeof updateSlideBookmarkPlayUI === 'function') updateSlideBookmarkPlayUI();
+      updateSlideBookmarkPlayUI();
       setupMediaSession(title, videoId);
       prefetchPromise = prefetchBgAudio(videoId);
       recordUserPlay(videoId);
-
-      // 1.2초 자동재생 2중 보장: 소리 자동재생이 차단되면 음소거 자동재생으로 즉시 시작 + [🔊 소리 켜기] 배지 표시
-      const targetId = videoId;
-      ytAutoplayWatchdog = setTimeout(() => {
-        if (currentVideoId !== targetId || ytConfirmedPlaying || isBgAudioPlaying || userPausedBg) return;
-        ytAutoMuted = true;
-        sendYtCommand('mute');
-        sendYtCommand('playVideo');
-        showYtUnmuteBadge();
-      }, 1200);
     }
 
     // 5-2. Firebase 3필드 100% 호환 스키마({keyword, updatedAt, items}) + 진단 + 최종 피드 신속 복원
@@ -4576,10 +4669,13 @@
       statusMsg.innerText = '';
 
       initSavedBgColor();
+      initFeedLayoutMode();
+      initSavedFilters();
+      initSavedBookmarkPos();
       loadLocalPinsImmediate();
       lastViewedFeed = loadLocalLastViewedFeed();
       updateSearchBtnState();
-      if (typeof initTuckedSlideBookmark === 'function') initTuckedSlideBookmark();
+      initTuckedSlideBookmark();
 
       if (lastViewedFeed) {
         const fastCached = getCachedTab(lastViewedFeed.docId);
@@ -4612,6 +4708,18 @@
       memoryTabCache.clear();
       activeTabKeyword = '';
       selectedTabDocId = '';
+      activeFilterOrder = [];
+      savedBookmarkPos = null;
+      dockSide = 'right';
+      lastPlayerWidth = 0;
+      currentFeedMode = 'grid';
+      currentGridCols = 2;
+      currentThemeColors = getDefaultThemeColors();
+      currentUiOpts = getDefaultUiOpts();
+      applyThemeColorsToDOM();
+      applyUiOptsToDOM();
+      applyFeedLayoutUI(false);
+      updateFilterUI();
       resultsContainer.innerHTML = '';
       savedTabsList.innerHTML = '';
       document.getElementById('query').value = '';
@@ -4626,6 +4734,9 @@
       const packedItems = [];
       packedItems.push({ id: '__theme__', data: currentThemeColors });
       packedItems.push({ id: '__ui_opts__', data: currentUiOpts });
+      packedItems.push({ id: '__layout__', mode: currentFeedMode, cols: currentGridCols });
+      packedItems.push({ id: '__filters__', order: activeFilterOrder });
+      packedItems.push({ id: '__bookmark__', side: dockSide, pos: savedBookmarkPos });
       if (lastViewedFeed && lastViewedFeed.docId) {
         packedItems.push({
           id: '__last_feed__',
@@ -4657,12 +4768,17 @@
           const list = Array.isArray(d.items) ? d.items : [];
           const themeEntry = list.find(it => it && it.id === '__theme__' && it.data);
           const uiOptsEntry = list.find(it => it && it.id === '__ui_opts__' && it.data);
+          const layoutEntry = list.find(it => it && it.id === '__layout__');
+          const filtersEntry = list.find(it => it && it.id === '__filters__' && Array.isArray(it.order));
+          const bmEntry = list.find(it => it && it.id === '__bookmark__');
           const lastFeedEntry = list.find(it => it && it.id === '__last_feed__' && it.docId);
+
           if (uiOptsEntry && uiOptsEntry.data) {
             const uo = uiOptsEntry.data;
             if ([1, 2, 3].includes(Number(uo.bmSize))) currentUiOpts.bmSize = Number(uo.bmSize);
+            if (uo.bmOpacity !== undefined) currentUiOpts.bmOpacity = normalizeBmOpacity(uo.bmOpacity);
             if (uo.borderStyle === 'solid' || uo.borderStyle === 'dashed') currentUiOpts.borderStyle = uo.borderStyle;
-            if ([1, 2, 3].includes(Number(uo.borderWidth))) currentUiOpts.borderWidth = Number(uo.borderWidth);
+            if ([1, 2, 3, 4, 5].includes(Number(uo.borderWidth))) currentUiOpts.borderWidth = Number(uo.borderWidth);
             applyUiOptsToDOM();
             persistUiOpts(false);
           }
@@ -4676,6 +4792,29 @@
             applyThemeColorsToDOM();
             persistThemeColors(false);
           }
+
+          if (layoutEntry) {
+            if (layoutEntry.mode === 'list' || layoutEntry.mode === 'grid') currentFeedMode = layoutEntry.mode;
+            if ([2, 3, 4].includes(Number(layoutEntry.cols))) currentGridCols = Number(layoutEntry.cols);
+            applyFeedLayoutUI(false);
+          }
+
+          if (filtersEntry) {
+            activeFilterOrder = filtersEntry.order.filter(k => Object.prototype.hasOwnProperty.call(FILTER_LABELS, k));
+            updateFilterUI();
+            persistUserFilters(false);
+            if (currentFeedItems.length > 0) renderSortedFeed();
+          }
+
+          if (bmEntry) {
+            if (bmEntry.side === 'left' || bmEntry.side === 'right') dockSide = bmEntry.side;
+            if (bmEntry.pos && (bmEntry.pos.mode === 'left' || bmEntry.pos.mode === 'right') && isFinite(Number(bmEntry.pos.top))) {
+              savedBookmarkPos = { mode: bmEntry.pos.mode, top: Number(bmEntry.pos.top) };
+            }
+            persistBookmarkPos(false);
+            applyBookmarkPosition(dockSide);
+          }
+
           if (lastFeedEntry && lastFeedEntry.docId) {
             const localAt = lastViewedFeed ? Number(lastViewedFeed.at || 0) : 0;
             if (Number(lastFeedEntry.at || 0) >= localAt) {
@@ -5356,11 +5495,7 @@
     bootstrapApp();
 
     function closePlayerModal() {
-      clearTimeout(ytAutoplayWatchdog);
-      ytConfirmedPlaying = false;
       ytFrameReady = false;
-      ytAutoMuted = false;
-      hideYtUnmuteBadge();
       stopBgAudioClean();
       isYtVideoPlaying = false;
       hideYtPauseMask();
@@ -5373,7 +5508,7 @@
       modal.style.display = 'none';
       updateBgModeUI();
       updateSearchBtnState();
-      if (typeof updateSlideBookmarkPlayUI === 'function') updateSlideBookmarkPlayUI();
+      updateSlideBookmarkPlayUI();
     }
 
     // 6. 고음질 음원 / MP3 320k 추출·저장 모달 제어
@@ -5548,16 +5683,12 @@
           }
           if (typeof msg.info.playerState === 'number') {
             if (msg.info.playerState === 1) {
-              ytConfirmedPlaying = true;
-              clearTimeout(ytAutoplayWatchdog);
               isYtVideoPlaying = true;
-              if (!ytAutoMuted) hideYtUnmuteBadge();
               hideYtPauseMask();
               updateSearchBtnState();
               updateSlideBookmarkPlayUI();
             } else if (msg.info.playerState === 2 || msg.info.playerState === 0) {
               isYtVideoPlaying = false;
-              if (msg.info.playerState === 0) { ytAutoMuted = false; hideYtUnmuteBadge(); }
               if (!isBgAudioPlaying && !isDockedToBookmark && currentVideoId) {
                 showYtPauseMask();
               }
@@ -5651,8 +5782,36 @@
       }
     });
 
-    // 슬라이드 책갈피 (스크롤 시 상시 표시 / 70% 투명 / 좌우 이동 / ⚙·🎧·MP3·▶깜박)
+    // 슬라이드 책갈피 (스크롤 시 상시 표시 / 10%단위 투명도 / 좌우 이동 / 유저별 위치 저장)
     let savedBookmarkPos = null;
+
+    function persistBookmarkPos(saveToCloud = true) {
+      if (!currentUser) return;
+      try {
+        localStorage.setItem(BM_POS_STORAGE_PREFIX + getUid(), JSON.stringify({
+          side: dockSide,
+          pos: savedBookmarkPos
+        }));
+      } catch (e) {}
+      if (saveToCloud) saveUserProfileDocToCloud();
+    }
+
+    function initSavedBookmarkPos() {
+      dockSide = 'right';
+      savedBookmarkPos = null;
+      if (currentUser) {
+        try {
+          const raw = localStorage.getItem(BM_POS_STORAGE_PREFIX + getUid());
+          if (raw) {
+            const p = JSON.parse(raw);
+            if (p && (p.side === 'left' || p.side === 'right')) dockSide = p.side;
+            if (p && p.pos && (p.pos.mode === 'left' || p.pos.mode === 'right') && isFinite(Number(p.pos.top))) {
+              savedBookmarkPos = { mode: p.pos.mode, top: Number(p.pos.top) };
+            }
+          }
+        } catch (e) {}
+      }
+    }
 
     function updateSlideBookmarkPlayUI() {
       const playingNow = isYtVideoPlaying || (isBgAudioPlaying && !bgAudio.paused);
@@ -5860,6 +6019,9 @@
     }
 
     function dockPlayerToBookmark(side) {
+      if (!isDockedToBookmark && modal.style.display !== 'none' && modal.offsetWidth >= MIN_PLAYER_WIDTH) {
+        lastPlayerWidth = modal.offsetWidth;
+      }
       isDockedToBookmark = true;
       dockSide = side === 'left' ? 'left' : 'right';
 
@@ -5879,11 +6041,13 @@
       modal.classList.remove('docked-hidden', 'interacting');
       modal.style.display = 'block';
 
-      const dims = apply16by9Scale(MIN_PLAYER_WIDTH);
+      const { topPos, fitWidth } = getDefaultFullPlayerMetrics();
+      const targetW = (lastPlayerWidth && lastPlayerWidth >= MIN_PLAYER_WIDTH) ? lastPlayerWidth : fitWidth;
+      const dims = apply16by9Scale(targetW);
+      lastPlayerWidth = dims.width;
       const centerLeft = Math.max(6, Math.round((window.innerWidth - dims.width) / 2));
-      const centerTop = Math.max(52, Math.round((window.innerHeight - (dims.height + 24)) / 2));
       modal.style.left = `${centerLeft}px`;
-      modal.style.top = `${centerTop}px`;
+      modal.style.top = `${topPos}px`;
       updateBgModeUI();
       updateSlideBookmarkPlayUI();
     }
@@ -5963,6 +6127,7 @@
         dockSide = snapSide;
         savedBookmarkPos = { mode: snapSide, top: clampedTop };
         applyBookmarkPosition(snapSide);
+        persistBookmarkPos(true);
         scheduleSlideBookmarkHide(2400);
       }
 
@@ -6042,6 +6207,7 @@
         const targetW = Math.abs(dx) >= Math.abs(dy) ? wFromX : wFromY;
 
         const dims = apply16by9Scale(targetW);
+        lastPlayerWidth = dims.width;
 
         // 좌측/상단 모서리 조작 시 반대편 우측/하단 모서리를 제자리에 고정
         if (resizeDir.includes('l')) {
