@@ -329,11 +329,7 @@
       transition: opacity 0.15s;
     }
     .filter-toggle-btn:active { opacity: 0.8; }
-    .filter-toggle-btn.has-active {
-      border: none;
-      background: var(--filter-btn-bg);
-      color: var(--filter-btn-fg);
-    }
+
     .filter-slide-wrap {
       max-height: 0;
       opacity: 0;
@@ -710,6 +706,17 @@
     .history-tab.tab-loaded:not(.tab-selected) .tab-kw-text {
       text-decoration: underline;
       text-underline-offset: 2px;
+    }
+    @keyframes tabBorderPulse {
+      0%, 100% {
+        box-shadow: 0 0 0 1.4px var(--header-border-color), 0 2px 8px rgba(0, 0, 0, 0.28);
+      }
+      50% {
+        box-shadow: 0 0 0 2.8px var(--header-border-color), 0 0 13px var(--header-border-color);
+      }
+    }
+    .history-tab.tab-selected.tab-pulse-ready {
+      animation: tabBorderPulse 1.55s ease-in-out infinite;
     }
 
     /* 우측 피드 나열 전환 이모지 2개 */
@@ -1432,12 +1439,13 @@
       overscroll-behavior: none !important;
     }
     body.blackout-active .top-header,
-    body.blackout-active .video-grid,
+    body.blackout-active:not(.inline-keep-alive) .video-grid,
     body.blackout-active .feed-scroll-sentinel,
     body.blackout-active #slide-bookmark,
     body.blackout-active #manage-modal-overlay,
     body.blackout-active #mp3-modal-overlay,
-    body.blackout-active #settings-auth-overlay { visibility: hidden !important; }
+    body.blackout-active #settings-auth-overlay,
+    body.blackout-active #tablet-info-modal { visibility: hidden !important; }
     #battery-blackout-overlay {
       position: fixed;
       top: -120px;
@@ -1458,29 +1466,216 @@
       -webkit-user-select: none;
     }
     #battery-blackout-overlay.active { display: flex; }
-    .blackout-hint {
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.6s ease;
-      display: flex;
+
+    /* 태블릿 전용 큰 테두리 6~8 및 플레이어 보조 탭 */
+    .tablet-only-bwidth { display: none; }
+    body.tablet-mode .tablet-only-bwidth { display: inline-flex; }
+    .tablet-only-tab { display: none; }
+    body.tablet-mode .tablet-only-tab { display: inline-flex; align-items: center; }
+
+    /* 태블릿 광고 최소화 Direct <video> 플레이어 & 로딩 마스크 */
+    #directVideoPlayer {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      object-fit: contain;
+      display: none;
+      z-index: 5;
+    }
+    #directVideoPlayer.active { display: block; }
+    .direct-loading-mask {
+      position: absolute;
+      inset: 0;
+      z-index: 6;
+      display: none;
       flex-direction: column;
       align-items: center;
-      gap: 6px;
+      justify-content: center;
+      gap: 10px;
+      background-color: #0b0b0e;
+      background-size: cover;
+      background-position: center;
     }
-    .blackout-hint.visible { opacity: 1; }
-    .blackout-hint-title {
-      font-size: 12px;
+    .direct-loading-mask::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.68);
+    }
+    .direct-loading-mask.active { display: flex; }
+    .direct-loading-badge {
+      position: relative;
+      z-index: 2;
+      padding: 7px 14px;
+      border-radius: 999px;
+      background: rgba(16, 16, 22, 0.85);
+      border: 1.5px solid var(--header-border-color);
+      color: #ffffff;
+      font-size: 13px;
       font-weight: 700;
-      color: rgba(255, 255, 255, 0.28);
-      max-width: 82vw;
+    }
+
+    /* 태블릿 전용 독립 우측 '더보기 · 내용' 자유 이동/리사이즈/비례 스케일 창 */
+    #tablet-info-modal {
+      position: fixed;
+      z-index: 9001;
+      display: none;
+      flex-direction: column;
+      background: var(--settings-modal-bg);
+      color: var(--settings-modal-fg);
+      border: 1.5px solid var(--header-border-color);
+      border-radius: 10px;
+      box-shadow: 0 12px 34px rgba(0, 0, 0, 0.82);
+      overflow: hidden;
+      --ti-scale: 1;
+      touch-action: none;
+    }
+    body:not(.tablet-mode) #tablet-info-modal { display: none !important; }
+    #tablet-info-modal.ti-interacting { user-select: none; -webkit-user-select: none; }
+    .ti-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      padding: calc(7px * var(--ti-scale)) calc(10px * var(--ti-scale));
+      background: rgba(255, 255, 255, 0.06);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+      cursor: grab;
+      touch-action: none;
+      flex-shrink: 0;
+    }
+    .ti-header:active { cursor: grabbing; }
+    .ti-header-label {
+      font-size: calc(12px * var(--ti-scale));
+      font-weight: 800;
+      opacity: 0.9;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    .blackout-hint-sub {
-      font-size: 11px;
-      font-weight: 600;
-      color: rgba(255, 255, 255, 0.20);
+    .ti-close-btn {
+      width: calc(24px * var(--ti-scale));
+      height: calc(24px * var(--ti-scale));
+      min-width: 20px;
+      min-height: 20px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      background: rgba(0, 0, 0, 0.35);
+      color: inherit;
+      font-size: calc(12px * var(--ti-scale));
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .ti-body {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
+      overscroll-behavior: contain;
+      padding: calc(11px * var(--ti-scale)) calc(12px * var(--ti-scale)) calc(18px * var(--ti-scale)) calc(12px * var(--ti-scale));
+      user-select: text;
+      -webkit-user-select: text;
+    }
+    .ti-body::-webkit-scrollbar { width: 5px; }
+    .ti-body::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.28); border-radius: 4px; }
+    .ti-title {
+      font-size: calc(14.5px * var(--ti-scale));
+      font-weight: 800;
+      line-height: 1.38;
+      margin-bottom: calc(6px * var(--ti-scale));
+      word-break: break-word;
+    }
+    .ti-meta {
+      font-size: calc(11.5px * var(--ti-scale));
+      line-height: 1.45;
+      opacity: 0.76;
+      margin-bottom: calc(8px * var(--ti-scale));
+      word-break: break-word;
+    }
+    .ti-divider {
+      height: 1px;
+      background: rgba(255, 255, 255, 0.14);
+      margin-bottom: calc(9px * var(--ti-scale));
+    }
+    .ti-desc {
+      font-size: calc(12.5px * var(--ti-scale));
+      line-height: 1.62;
+      opacity: 0.92;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .ti-resizer {
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      z-index: 25;
+      touch-action: none;
+    }
+    .ti-resizer::after {
+      content: "";
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      box-sizing: border-box;
+      opacity: 0.65;
+      pointer-events: none;
+    }
+    .ti-resizer.tl { top: 0; left: 0; cursor: nwse-resize; }
+    .ti-resizer.tl::after { top: 1px; left: 1px; border-top: 2px solid var(--header-border-color); border-left: 2px solid var(--header-border-color); }
+    .ti-resizer.tr { top: 0; right: 0; cursor: nesw-resize; }
+    .ti-resizer.tr::after { top: 1px; right: 1px; border-top: 2px solid var(--header-border-color); border-right: 2px solid var(--header-border-color); }
+    .ti-resizer.bl { bottom: 0; left: 0; cursor: nesw-resize; }
+    .ti-resizer.bl::after { bottom: 1px; left: 1px; border-bottom: 2px solid var(--header-border-color); border-left: 2px solid var(--header-border-color); }
+    .ti-resizer.br { bottom: 0; right: 0; cursor: nwse-resize; }
+    .ti-resizer.br::after { bottom: 1px; right: 1px; border-bottom: 2px solid var(--header-border-color); border-right: 2px solid var(--header-border-color); }
+    .ti-edge-b {
+      position: absolute;
+      left: 22px;
+      right: 22px;
+      bottom: 0;
+      height: 13px;
+      z-index: 24;
+      cursor: ns-resize;
+      touch-action: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .ti-edge-b::after {
+      content: "";
+      width: 38px;
+      height: 3.5px;
+      border-radius: 3px;
+      background: var(--header-border-color);
+      opacity: 0.55;
+      pointer-events: none;
+    }
+    .ti-edge-r {
+      position: absolute;
+      top: 22px;
+      bottom: 22px;
+      right: 0;
+      width: 10px;
+      z-index: 23;
+      cursor: ew-resize;
+      touch-action: none;
+    }
+    .ti-edge-l {
+      position: absolute;
+      top: 22px;
+      bottom: 22px;
+      left: 0;
+      width: 10px;
+      z-index: 23;
+      cursor: ew-resize;
+      touch-action: none;
     }
     .db-diag-bar {
       display: flex;
@@ -2532,6 +2727,10 @@
 
       <div class="scale-stage" id="scaleStage">
         <div id="yt-iframe-holder"></div>
+        <video id="directVideoPlayer" playsinline controls controlsList="nodownload"></video>
+        <div class="direct-loading-mask" id="directLoadingMask">
+          <div class="direct-loading-badge" id="directLoadingBadge">광고 없는 스트림 연결 중...</div>
+        </div>
       </div>
 
       <div class="yt-pause-mask" id="ytPauseMask" onclick="resumeYtFromMask()">
@@ -2550,7 +2749,13 @@
 
     <div class="modal-bottom-tabs">
       <div class="bottom-drag-spacer" id="bottomDragSpacer"></div>
-      <div class="tab-group-right">
+      <div class="tab-group-right" style="gap: 4px;">
+        <div class="bookmark-tab tablet-only-tab" id="tabletStreamToggleTab" onclick="toggleTabletStreamMode()" title="광고 없는 직접 스트림 / YouTube 전환">
+          <span id="tabletStreamToggleLabel">직접</span>
+        </div>
+        <div class="bookmark-tab tablet-only-tab" id="tabletInfoToggleTab" onclick="toggleTabletInfoModal()" title="우측 더보기 정보창 열기/닫기">
+          <span>정보</span>
+        </div>
         <div class="bookmark-tab tab-close" onclick="closePlayerModal()" title="닫기">
           <svg class="tab-close-ear ear-l" viewBox="0 0 8 8" aria-hidden="true"><path d="M 0,0 L 8,0 L 8,8 Q 8,0 0,0 Z"/></svg>
           <span>✕</span>
@@ -2558,6 +2763,27 @@
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- 3-1b. 태블릿 전용 독립 우측 '더보기 · 내용' 스크롤 창 -->
+  <div id="tablet-info-modal" style="--ti-scale: 1;">
+    <div class="ti-header" id="tiDragBar" title="드래그하여 자유 배치">
+      <span class="ti-header-label">영상 정보 · 더보기</span>
+      <button type="button" class="ti-close-btn" onclick="hideTabletInfoModal(true)" title="닫기">✕</button>
+    </div>
+    <div class="ti-body" id="tiBody">
+      <div class="ti-title" id="tiTitle">-</div>
+      <div class="ti-meta" id="tiMeta">정보 불러오는 중...</div>
+      <div class="ti-divider"></div>
+      <div class="ti-desc" id="tiDesc">영상 상세 내용을 불러오고 있습니다...</div>
+    </div>
+    <div class="ti-resizer tl" data-tidir="tl"></div>
+    <div class="ti-resizer tr" data-tidir="tr"></div>
+    <div class="ti-resizer bl" data-tidir="bl"></div>
+    <div class="ti-resizer br" data-tidir="br"></div>
+    <div class="ti-edge-b" data-tidir="b" title="아래로 당겨 더 많은 내용 보기"></div>
+    <div class="ti-edge-r" data-tidir="r"></div>
+    <div class="ti-edge-l" data-tidir="l"></div>
   </div>
 
   <!-- 3-2. 슬라이드 책갈피 -->
@@ -2573,12 +2799,7 @@
   </div>
 
   <!-- 3-2b. 배터리 절약 순수 검정(#000000) 절전 화면 오버레이 -->
-  <div id="battery-blackout-overlay" onclick="onBlackoutOverlayTap()">
-    <div class="blackout-hint" id="blackoutHint">
-      <div class="blackout-hint-title" id="blackoutTitle">배터리 절전 모드 · 재생 유지 중</div>
-      <div class="blackout-hint-sub">화면을 두 번 터치하면 켜집니다</div>
-    </div>
-  </div>
+  <div id="battery-blackout-overlay" onclick="onBlackoutOverlayTap()"></div>
 
   <!-- 3-3. 브라우저 백그라운드 오디오 재생 유지용 네이티브 오디오 요소 -->
   <audio id="bgAudioPlayer" playsinline preload="auto" style="display:none;"></audio>
@@ -2706,6 +2927,9 @@
               <button type="button" class="ui-opt-btn" data-bwidth="3" onclick="setHeaderBorderWidth(3)">3</button>
               <button type="button" class="ui-opt-btn" data-bwidth="4" onclick="setHeaderBorderWidth(4)">4</button>
               <button type="button" class="ui-opt-btn" data-bwidth="5" onclick="setHeaderBorderWidth(5)">5</button>
+              <button type="button" class="ui-opt-btn tablet-only-bwidth" data-bwidth="6" onclick="setHeaderBorderWidth(6)">6</button>
+              <button type="button" class="ui-opt-btn tablet-only-bwidth" data-bwidth="7" onclick="setHeaderBorderWidth(7)">7</button>
+              <button type="button" class="ui-opt-btn tablet-only-bwidth" data-bwidth="8" onclick="setHeaderBorderWidth(8)">8</button>
             </div>
           </div>
         </div>
@@ -2825,7 +3049,6 @@
     const PIN_DOC_ID = 'sys_pins';
     const TABS_INDEX_DOC_ID = 'sys_tabs_index';
     const MIN_PLAYER_WIDTH = 180;
-    const SESSION_STORAGE_KEY = 'tube_audio_lab_session_v7';
     const AUTH_CACHE_KEY = 'tube_audio_lab_auth_cache_v7';
     const LAYOUT_STORAGE_KEY = 'tube_audio_lab_layout_v8';
     const THEME_STORAGE_KEY = 'mytube_theme_modules_v11';
@@ -2874,8 +3097,14 @@
         initFeedLayoutMode();
         initSavedBookmarkPos();
         if (slideBookmarkVisible) applyBookmarkPosition(dockSide);
-      } else if (slideBookmarkVisible) {
-        applyBookmarkPosition(dockSide);
+      } else {
+        applyUiOptsToDOM();
+        if (slideBookmarkVisible) applyBookmarkPosition(dockSide);
+      }
+      if (!isTabletMode) {
+        hideTabletInfoModal(false);
+      } else if (currentVideoId && !isDockedToBookmark && !isInlinePlaying && !tiUserClosed) {
+        clampTabletInfoModalToViewport();
       }
 
       // 열려 있는 부유창이 화면 회전/모드 전환 후 화면 밖으로 벗어나지 않게 보정
@@ -3003,7 +3232,19 @@
     let isLoadingMore = false;
     let feedScrollObserver = null;
     let selectedTabDocId = '';
+    let tabArmedDocId = '';
     let settingsAdminUnlocked = false;
+    let isDirectVideoActive = false;
+    let tabletAdFreeMode = true;
+    let directVideoCandidates = [];
+    let directVideoCandIdx = 0;
+    let directVideoAttemptSeq = 0;
+    const videoStreamDetailCache = new Map();
+    let tiUserCustomized = false;
+    let tiUserClosed = false;
+    let blackoutWakeLock = null;
+    let blackoutWatchdogTimer = null;
+    let blackoutWantPlaying = false;
     let pendingSettingsTab = 'color';
     let pendingPlayTrack = null;
     let slideBookmarkVisible = false;
@@ -3117,14 +3358,17 @@
       modal.style.width = `${clampedW}px`;
       modalWindow.style.height = `${exactH}px`;
 
-      if (clampedW > BASE_STAGE_WIDTH) {
+      if (isDirectVideoActive) {
         scaleStage.style.width = `${clampedW}px`;
         scaleStage.style.height = `${exactH}px`;
         scaleStage.style.transform = 'scale(1)';
       } else {
-        scaleStage.style.width = `${BASE_STAGE_WIDTH}px`;
-        scaleStage.style.height = `${Math.round(BASE_STAGE_WIDTH * (9 / 16))}px`;
-        const scaleRatio = clampedW / BASE_STAGE_WIDTH;
+        // 태블릿 YouTube 임베드 폴백 시 대형 데스크톱 광고 티어 회피를 위해 모바일급 640x360 기준 스케일링 적용
+        const stageBaseW = isTabletMode ? 640 : BASE_STAGE_WIDTH;
+        const stageBaseH = Math.round(stageBaseW * (9 / 16));
+        scaleStage.style.width = `${stageBaseW}px`;
+        scaleStage.style.height = `${stageBaseH}px`;
+        const scaleRatio = clampedW / stageBaseW;
         scaleStage.style.transform = `scale(${scaleRatio})`;
       }
       return { width: clampedW, height: exactH };
@@ -3635,7 +3879,9 @@
       const op = normalizeBmOpacity(currentUiOpts.bmOpacity);
       const hop = normalizeHeaderOpacity(currentUiOpts.headerOpacity);
       const st = currentUiOpts.borderStyle === 'solid' ? 'solid' : 'dashed';
-      const bw = [1, 2, 3, 4, 5].includes(Number(currentUiOpts.borderWidth)) ? Number(currentUiOpts.borderWidth) : 2;
+      const maxBw = isTabletMode ? 8 : 5;
+      const rawBw = Number(currentUiOpts.borderWidth);
+      const bw = (Number.isInteger(rawBw) && rawBw >= 1 && rawBw <= maxBw) ? rawBw : Math.min(maxBw, Math.max(1, rawBw || 2));
       currentUiOpts = { bmSize: sz, bmOpacity: op, headerOpacity: hop, borderStyle: st, borderWidth: bw };
 
       document.documentElement.style.setProperty('--bookmark-opacity', String(op / 100));
@@ -3657,9 +3903,9 @@
 
       const rect = document.getElementById('headerDashRect');
       if (rect) {
-        const swMap = { 1: 1.2, 2: 1.8, 3: 2.5, 4: 3.2, 5: 4.0 };
-        const dashMap = { 1: '4 2.5', 2: '4.5 2.2', 3: '5 2.0', 4: '5.5 1.8', 5: '6 1.6' };
-        const sw = swMap[bw];
+        const swMap = { 1: 1.2, 2: 1.8, 3: 2.5, 4: 3.2, 5: 4.0, 6: 4.8, 7: 5.6, 8: 6.5 };
+        const dashMap = { 1: '4 2.5', 2: '4.5 2.2', 3: '5 2.0', 4: '5.5 1.8', 5: '6 1.6', 6: '6.8 1.6', 7: '7.6 1.6', 8: '8.5 1.6' };
+        const sw = swMap[bw] || 1.8;
         const inset = (sw / 2 + 0.2).toFixed(1);
         const minus = (Number(inset) * 2).toFixed(1);
         rect.setAttribute('x', inset);
@@ -3668,14 +3914,14 @@
         rect.setAttribute('height', 'calc(100% - ' + minus + 'px)');
         rect.setAttribute('stroke-width', String(sw));
         if (st === 'solid') rect.removeAttribute('stroke-dasharray');
-        else rect.setAttribute('stroke-dasharray', dashMap[bw]);
+        else rect.setAttribute('stroke-dasharray', dashMap[bw] || '4.5 2.2');
       }
 
       const miniDash = document.getElementById('miniOuterDash');
       if (miniDash) {
-        const mwMap = { 1: '1px', 2: '1.6px', 3: '2.2px', 4: '2.8px', 5: '3.4px' };
+        const mwMap = { 1: '1px', 2: '1.6px', 3: '2.2px', 4: '2.8px', 5: '3.4px', 6: '4.0px', 7: '4.6px', 8: '5.2px' };
         miniDash.style.borderStyle = st;
-        miniDash.style.borderWidth = mwMap[bw];
+        miniDash.style.borderWidth = mwMap[bw] || '1.6px';
       }
 
       document.querySelectorAll('.ui-opt-btn[data-bmsize]').forEach(b => {
@@ -3711,7 +3957,7 @@
               if (p.bmOpacity !== undefined) currentUiOpts.bmOpacity = normalizeBmOpacity(p.bmOpacity);
               if (p.headerOpacity !== undefined) currentUiOpts.headerOpacity = normalizeHeaderOpacity(p.headerOpacity);
               if (p.borderStyle === 'solid' || p.borderStyle === 'dashed') currentUiOpts.borderStyle = p.borderStyle;
-              if ([1, 2, 3, 4, 5].includes(Number(p.borderWidth))) currentUiOpts.borderWidth = Number(p.borderWidth);
+              if ([1, 2, 3, 4, 5, 6, 7, 8].includes(Number(p.borderWidth))) currentUiOpts.borderWidth = Number(p.borderWidth);
             }
           }
         } catch (e) {}
@@ -3744,7 +3990,9 @@
     }
 
     function setHeaderBorderWidth(bw) {
-      currentUiOpts.borderWidth = [1, 2, 3, 4, 5].includes(Number(bw)) ? Number(bw) : 2;
+      const maxBw = isTabletMode ? 8 : 5;
+      const n = Number(bw);
+      currentUiOpts.borderWidth = (Number.isInteger(n) && n >= 1 && n <= maxBw) ? n : 2;
       applyUiOptsToDOM();
       persistUiOpts(true);
     }
@@ -3921,6 +4169,7 @@
       activeSearchSession = null;
       currentFeedIsCache = false;
       activeTabKeyword = '';
+      tabArmedDocId = '';
       renderSavedTabsBar();
       resultsContainer.innerHTML = '';
       statusMsg.innerText = '';
@@ -4764,7 +5013,10 @@
         });
         navigator.mediaSession.setActionHandler('play', () => {
           userPausedBg = false;
-          if (bgAudio.src && (isBgAudioPlaying || isDockedToBookmark)) {
+          const dv = document.getElementById('directVideoPlayer');
+          if (isDirectVideoActive && dv && dv.src) {
+            dv.play().catch(() => {});
+          } else if (bgAudio.src && (isBgAudioPlaying || isDockedToBookmark)) {
             bgAudio.play().catch(() => {});
           } else {
             sendYtCommand('playVideo');
@@ -4772,14 +5024,21 @@
         });
         navigator.mediaSession.setActionHandler('pause', () => {
           userPausedBg = true;
-          if (isBgAudioPlaying) bgAudio.pause();
+          const dv = document.getElementById('directVideoPlayer');
+          if (isDirectVideoActive && dv && dv.src) dv.pause();
+          else if (isBgAudioPlaying) bgAudio.pause();
           else sendYtCommand('pauseVideo');
         });
         navigator.mediaSession.setActionHandler('seekbackward', () => {
-          if (isBgAudioPlaying) bgAudio.currentTime = Math.max(0, bgAudio.currentTime - 10);
+          const dv = document.getElementById('directVideoPlayer');
+          if (isDirectVideoActive && dv && dv.src) dv.currentTime = Math.max(0, dv.currentTime - 10);
+          else if (isBgAudioPlaying) bgAudio.currentTime = Math.max(0, bgAudio.currentTime - 10);
         });
         navigator.mediaSession.setActionHandler('seekforward', () => {
-          if (isBgAudioPlaying && isFinite(bgAudio.duration)) {
+          const dv = document.getElementById('directVideoPlayer');
+          if (isDirectVideoActive && dv && dv.src && isFinite(dv.duration)) {
+            dv.currentTime = Math.min(dv.duration, dv.currentTime + 10);
+          } else if (isBgAudioPlaying && isFinite(bgAudio.duration)) {
             bgAudio.currentTime = Math.min(bgAudio.duration, bgAudio.currentTime + 10);
           }
         });
@@ -4917,52 +5176,143 @@
 
     let ytFrameReady = false;
 
-    function getDefaultFullPlayerMetrics() {
-      const headerBox = document.querySelector('.header-unified-box');
-      const topPos = headerBox
-        ? Math.max(52, Math.round(headerBox.getBoundingClientRect().bottom + (isTabletMode ? 10 : 6)))
-        : (isTabletMode ? 132 : 96);
-      const maxH = Math.max(140, window.innerHeight - topPos - (isTabletMode ? 48 : 36));
-      if (isTabletMode) {
-        const preferredW = window.innerWidth < 900
-          ? Math.min(window.innerWidth - 24, 780)
-          : Math.min(Math.round(window.innerWidth * 0.74), 920);
-        const fitWidth = Math.max(280, Math.min(window.innerWidth - 24, preferredW, Math.round(maxH * (16 / 9))));
-        return { topPos, fitWidth };
-      }
-      const fitWidth = Math.max(MIN_PLAYER_WIDTH, Math.min(window.innerWidth - 12, Math.round(maxH * (16 / 9))));
-      return { topPos, fitWidth };
+    const TI_BASE_WIDTH = 300;
+
+    function formatDescriptionText(raw) {
+      if (!raw) return '';
+      let s = String(raw);
+      s = s.replace(/<br\s*\/?>/gi, '\n');
+      s = s.replace(/<\/(p|div|li|h[1-6])>/gi, '\n');
+      s = s.replace(/<[^>]+>/g, '');
+      const ta = document.createElement('textarea');
+      ta.innerHTML = s;
+      return ta.value.replace(/\n{3,}/g, '\n\n').trim();
     }
 
-    function openPlayerModal(videoId, title) {
-      if (isInlinePlaying) stopInlinePlayer(false);
-      unlockIosAudioOnce();
-      stopBgAudioClean();
-      isDockedToBookmark = false;
-      isYtVideoPlaying = false;
-      lastKnownPlaySec = 0;
+    function parseVideoDetailFromApi(data, baseOrigin, videoId) {
+      if (!data || typeof data !== 'object') return null;
+      const audioUrls = parseAudioUrlsFromGenericData(data, baseOrigin, videoId);
+      const videoUrls = [];
+      const seenV = new Set();
+      const addV = (u) => { if (u && typeof u === 'string' && !seenV.has(u)) { seenV.add(u); videoUrls.push(u); } };
+      const dv = document.getElementById('directVideoPlayer');
+      const canHls = !!(dv && typeof dv.canPlayType === 'function' && dv.canPlayType('application/vnd.apple.mpegurl'));
 
-      currentVideoId = videoId;
-      currentVideoTitle = title;
+      if (Array.isArray(data.videoStreams)) {
+        const muxedMp4 = data.videoStreams
+          .filter(s => s && s.url && !s.videoOnly && /mp4/i.test(s.mimeType || ''))
+          .sort((a, b) => (parseInt(b.quality, 10) || 0) - (parseInt(a.quality, 10) || 0));
+        muxedMp4.forEach(s => addV(s.url));
+      }
+      if (canHls && typeof data.hls === 'string') {
+        addV(data.hls);
+      }
+      if (Array.isArray(data.formatStreams) && baseOrigin) {
+        const invMp4 = data.formatStreams
+          .filter(f => f && /video\/mp4/i.test(f.type || ''))
+          .sort((a, b) => (parseInt(b.qualityLabel, 10) || 0) - (parseInt(a.qualityLabel, 10) || 0));
+        invMp4.forEach(f => {
+          if (f.itag) addV(baseOrigin + '/latest_version?id=' + videoId + '&itag=' + f.itag + '&local=true');
+          else if (f.url) addV(f.url);
+        });
+      }
 
-      const { topPos, fitWidth } = getDefaultFullPlayerMetrics();
-      const dims = apply16by9Scale(fitWidth);
-      lastPlayerWidth = dims.width;
-      const leftPos = Math.max(6, Math.round((window.innerWidth - dims.width) / 2));
+      const desc = formatDescriptionText(data.description || data.descriptionHtml || '');
+      const uploader = String(data.uploader || data.author || '').trim();
+      const uploadDate = String(data.uploadDate || data.publishedText || '').trim();
+      const views = Number(data.views !== undefined ? data.views : (data.viewCount || 0)) || 0;
+      const likes = Number(data.likes !== undefined ? data.likes : (data.likeCount || 0)) || 0;
+      const duration = Number(data.duration || data.lengthSeconds || 0) || 0;
+      const title = String(data.title || '').trim();
 
-      modal.classList.remove('interacting', 'docked-hidden');
-      modal.style.left = leftPos + 'px';
-      modal.style.top = topPos + 'px';
-      modal.style.display = 'block';
+      if (!desc && !uploader && videoUrls.length === 0 && audioUrls.length === 0) return null;
+      return { title, uploader, uploadDate, views, likes, duration, description: desc, audioUrls, videoUrls };
+    }
+
+    function raceFirstDetail(promiseFns) {
+      return new Promise((resolve) => {
+        let settled = false;
+        let pending = promiseFns.length;
+        if (pending === 0) { resolve(null); return; }
+        promiseFns.forEach(fn => {
+          Promise.resolve().then(fn).then(obj => {
+            if (!settled && obj) {
+              settled = true;
+              resolve(obj);
+            } else if (--pending === 0 && !settled) {
+              resolve(null);
+            }
+          }).catch(() => {
+            if (--pending === 0 && !settled) resolve(null);
+          });
+        });
+      });
+    }
+
+    async function fetchVideoStreamDetails(videoId) {
+      if (!videoId) return null;
+      if (videoStreamDetailCache.has(videoId)) return videoStreamDetailCache.get(videoId);
+
+      const tasks = [];
+      if (customStreamApiUrl && !customStreamApiUrl.includes('{id}')) {
+        const base = customStreamApiUrl.replace(/\/+$/, '');
+        tasks.push(async () => parseVideoDetailFromApi(await fetchJsonWithTimeout(base + '/streams/' + videoId, 4500), base, videoId));
+        tasks.push(async () => parseVideoDetailFromApi(await fetchJsonWithTimeout(base + '/api/v1/videos/' + videoId, 4500), base, videoId));
+      }
+      STREAM_PIPED_SERVERS.forEach(server => {
+        tasks.push(async () => parseVideoDetailFromApi(await fetchJsonWithTimeout(server + '/streams/' + videoId, 4800), server, videoId));
+      });
+      STREAM_INVIDIOUS_SERVERS.forEach(inv => {
+        tasks.push(async () => parseVideoDetailFromApi(await fetchJsonWithTimeout(inv + '/api/v1/videos/' + videoId, 4800), inv, videoId));
+      });
+
+      const detail = await raceFirstDetail(tasks);
+      if (detail) {
+        if (videoStreamDetailCache.size >= 40) {
+          const firstKey = videoStreamDetailCache.keys().next().value;
+          videoStreamDetailCache.delete(firstKey);
+        }
+        videoStreamDetailCache.set(videoId, detail);
+      }
+      return detail;
+    }
+
+    function updateTabletStreamTabUI() {
+      const lbl = document.getElementById('tabletStreamToggleLabel');
+      if (!lbl) return;
+      lbl.textContent = isDirectVideoActive ? '직접·무광고' : 'YT';
+    }
+
+    function stopDirectVideoClean() {
+      const dv = document.getElementById('directVideoPlayer');
+      const mask = document.getElementById('directLoadingMask');
+      if (mask) mask.classList.remove('active');
+      if (dv) {
+        try {
+          dv.pause();
+          dv.removeAttribute('src');
+          dv.load();
+        } catch (e) {}
+        dv.classList.remove('active');
+      }
+      isDirectVideoActive = false;
+      directVideoCandidates = [];
+      directVideoCandIdx = 0;
+      updateTabletStreamTabUI();
+    }
+
+    function mountYoutubeEmbed(videoId, reuseExisting = true) {
+      stopDirectVideoClean();
+      apply16by9Scale(modal.offsetWidth || lastPlayerWidth || getDefaultFullPlayerMetrics().fitWidth);
 
       const existingFrame = document.getElementById('ytPlayerFrame');
-      if (existingFrame && ytFrameReady) {
+      if (reuseExisting && existingFrame && ytFrameReady) {
         sendYtCommand('loadVideoById', [videoId]);
         sendYtCommand('playVideo');
       } else {
         ytFrameReady = false;
         const originParam = (location.protocol === 'http:' || location.protocol === 'https:') ? ('&origin=' + encodeURIComponent(location.origin)) : '';
-        ytHolder.innerHTML = '<iframe id="ytPlayerFrame" src="https://www.youtube-nocookie.com/embed/' + videoId + '?autoplay=1&controls=1&fs=1&enablejsapi=1&modestbranding=1&rel=0&playsinline=1&iv_load_policy=3&cc_load_policy=0&disablekb=1' + originParam + '" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>';
+        ytHolder.innerHTML = '<iframe id="ytPlayerFrame" referrerpolicy="no-referrer" src="https://www.youtube-nocookie.com/embed/' + videoId + '?autoplay=1&controls=1&fs=1&enablejsapi=1&modestbranding=1&rel=0&playsinline=1&iv_load_policy=3&cc_load_policy=0&disablekb=1' + originParam + '" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>';
 
         const frame = document.getElementById('ytPlayerFrame');
         if (frame) {
@@ -4977,6 +5327,382 @@
           });
         }
       }
+      updateTabletStreamTabUI();
+    }
+
+    function tryPlayDirectCandidateAt(idx, videoId, seq) {
+      if (seq !== directVideoAttemptSeq || currentVideoId !== videoId) return;
+      const dv = document.getElementById('directVideoPlayer');
+      const mask = document.getElementById('directLoadingMask');
+      if (!dv || idx >= directVideoCandidates.length) {
+        if (mask) mask.classList.remove('active');
+        mountYoutubeEmbed(videoId, false);
+        return;
+      }
+      directVideoCandIdx = idx;
+      isDirectVideoActive = true;
+      apply16by9Scale(modal.offsetWidth || lastPlayerWidth || getDefaultFullPlayerMetrics().fitWidth);
+      dv.classList.add('active');
+      dv.src = directVideoCandidates[idx];
+      const p = dv.play();
+      if (p && typeof p.catch === 'function') {
+        p.catch(() => {
+          if (seq === directVideoAttemptSeq && currentVideoId === videoId) {
+            tryPlayDirectCandidateAt(idx + 1, videoId, seq);
+          }
+        });
+      }
+    }
+
+    async function tryPlayDirectVideo(videoId, detailPromise) {
+      const seq = ++directVideoAttemptSeq;
+      const mask = document.getElementById('directLoadingMask');
+      const badge = document.getElementById('directLoadingBadge');
+      ytHolder.innerHTML = '';
+      ytFrameReady = false;
+      if (mask) {
+        mask.style.backgroundImage = 'url("' + getFastThumbUrl(videoId) + '")';
+        mask.classList.add('active');
+      }
+      if (badge) badge.textContent = '광고 없는 스트림 연결 중...';
+
+      const detail = await Promise.race([
+        detailPromise,
+        new Promise(res => setTimeout(() => res(null), 2800))
+      ]);
+
+      if (seq !== directVideoAttemptSeq || currentVideoId !== videoId) return;
+
+      if (detail && Array.isArray(detail.videoUrls) && detail.videoUrls.length > 0) {
+        directVideoCandidates = detail.videoUrls;
+        directVideoCandIdx = 0;
+        if (detail.audioUrls && detail.audioUrls.length > 0) {
+          prefetchedAudioCandidates = detail.audioUrls;
+          prefetchedVideoId = videoId;
+          updateBgModeUI();
+        }
+        tryPlayDirectCandidateAt(0, videoId, seq);
+      } else {
+        if (mask) mask.classList.remove('active');
+        mountYoutubeEmbed(videoId, false);
+      }
+    }
+
+    function toggleTabletStreamMode() {
+      if (!currentVideoId || !isTabletMode) return;
+      if (isDirectVideoActive) {
+        tabletAdFreeMode = false;
+        directVideoAttemptSeq++;
+        mountYoutubeEmbed(currentVideoId, false);
+        showTempBgStatus('YouTube 기본 플레이어로 전환됨', 2000);
+      } else {
+        tabletAdFreeMode = true;
+        const p = fetchVideoStreamDetails(currentVideoId);
+        tryPlayDirectVideo(currentVideoId, p);
+        showTempBgStatus('광고 없는 직접 스트림 연결 시도 중...', 2200);
+      }
+    }
+
+    (function bindDirectVideoEvents() {
+      const dv = document.getElementById('directVideoPlayer');
+      if (!dv) return;
+      dv.addEventListener('playing', () => {
+        const mask = document.getElementById('directLoadingMask');
+        if (mask) mask.classList.remove('active');
+        if (isBgAudioPlaying) stopBgAudioClean();
+        hideYtPauseMask();
+        isDirectVideoActive = true;
+        updateTabletStreamTabUI();
+        updateSearchBtnState();
+        updateSlideBookmarkPlayUI();
+        if ('mediaSession' in navigator) {
+          try { navigator.mediaSession.playbackState = 'playing'; } catch (e) {}
+        }
+      });
+      dv.addEventListener('pause', () => {
+        updateSlideBookmarkPlayUI();
+        if ('mediaSession' in navigator && isDirectVideoActive) {
+          try { navigator.mediaSession.playbackState = 'paused'; } catch (e) {}
+        }
+      });
+      dv.addEventListener('timeupdate', () => {
+        if (isDirectVideoActive && dv.currentTime > 0) {
+          lastKnownPlaySec = dv.currentTime;
+        }
+      });
+      dv.addEventListener('error', () => {
+        if (!isDirectVideoActive || !currentVideoId) return;
+        tryPlayDirectCandidateAt(directVideoCandIdx + 1, currentVideoId, directVideoAttemptSeq);
+      });
+    })();
+
+    // 태블릿 독립 우측 더보기창 제어 (자유 이동 / 하단·모서리 리사이즈 / 비례 확대축소)
+    function applyTabletInfoDimensions(w, h) {
+      const tiModal = document.getElementById('tablet-info-modal');
+      if (!tiModal) return { width: 280, height: 320 };
+      const minW = 175;
+      const maxW = Math.max(minW, window.innerWidth - 20);
+      const minH = 120;
+      const maxH = Math.max(minH, window.innerHeight - 24);
+      const clampedW = Math.max(minW, Math.min(maxW, Math.round(w)));
+      const clampedH = Math.max(minH, Math.min(maxH, Math.round(h)));
+      const scale = Math.max(0.68, Math.min(1.65, clampedW / TI_BASE_WIDTH));
+      tiModal.style.width = clampedW + 'px';
+      tiModal.style.height = clampedH + 'px';
+      tiModal.style.setProperty('--ti-scale', scale.toFixed(3));
+      return { width: clampedW, height: clampedH };
+    }
+
+    function clampTabletInfoModalToViewport() {
+      const tiModal = document.getElementById('tablet-info-modal');
+      if (!tiModal || tiModal.style.display === 'none') return;
+      const curW = tiModal.offsetWidth || 280;
+      const curH = tiModal.offsetHeight || 320;
+      const dims = applyTabletInfoDimensions(curW, curH);
+      const maxL = Math.max(8, window.innerWidth - dims.width - 8);
+      const maxT = Math.max(8, window.innerHeight - dims.height - 8);
+      tiModal.style.left = Math.max(8, Math.min(maxL, tiModal.offsetLeft)) + 'px';
+      tiModal.style.top = Math.max(8, Math.min(maxT, tiModal.offsetTop)) + 'px';
+    }
+
+    function hideTabletInfoModal(byUser = false) {
+      const tiModal = document.getElementById('tablet-info-modal');
+      if (tiModal) tiModal.style.display = 'none';
+      if (byUser) tiUserClosed = true;
+    }
+
+    function toggleTabletInfoModal() {
+      if (!isTabletMode || !currentVideoId) return;
+      const tiModal = document.getElementById('tablet-info-modal');
+      if (!tiModal) return;
+      if (tiModal.style.display === 'flex') {
+        hideTabletInfoModal(true);
+      } else {
+        tiUserClosed = false;
+        openTabletInfoModal(currentVideoId, currentVideoTitle, fetchVideoStreamDetails(currentVideoId));
+      }
+    }
+
+    function renderTabletInfoContent(videoId, fallbackTitle, detail) {
+      if (currentVideoId !== videoId) return;
+      const titleEl = document.getElementById('tiTitle');
+      const metaEl = document.getElementById('tiMeta');
+      const descEl = document.getElementById('tiDesc');
+      if (!titleEl || !metaEl || !descEl) return;
+
+      const feedItem = currentFeedItems.find(it => it && it.id === videoId);
+      const dispTitle = (detail && detail.title) || fallbackTitle || (feedItem && feedItem.t) || '제목 없음';
+      titleEl.textContent = dispTitle;
+
+      const metaParts = [];
+      if (detail && detail.uploader) metaParts.push(detail.uploader);
+      if (detail && detail.views) metaParts.push('조회수 ' + formatKoreanViews(detail.views));
+      else if (feedItem && feedItem.v) metaParts.push('조회수 ' + formatKoreanViews(feedItem.v));
+      if (detail && detail.likes) metaParts.push('좋아요 ' + formatKoreanViews(detail.likes));
+      if (detail && detail.uploadDate) metaParts.push(detail.uploadDate);
+      else if (feedItem && feedItem.u) metaParts.push(formatFeedMeta(feedItem.u, feedItem.v).split(' - ')[0]);
+      const dur = (detail && detail.duration) || (feedItem && feedItem.d) || 0;
+      if (dur > 0) metaParts.push('길이 ' + formatSec(dur));
+
+      metaEl.textContent = metaParts.length > 0 ? metaParts.join(' · ') : '상세 정보 확인 중...';
+
+      if (detail) {
+        descEl.textContent = detail.description ? detail.description : '등록된 영상 상세 설명이 없습니다.';
+      } else {
+        descEl.textContent = '영상 상세 내용을 불러오고 있습니다...';
+      }
+    }
+
+    function openTabletInfoModal(videoId, title, detailPromise) {
+      if (!isTabletMode) {
+        hideTabletInfoModal(false);
+        return;
+      }
+      const tiModal = document.getElementById('tablet-info-modal');
+      if (!tiModal) return;
+
+      renderTabletInfoContent(videoId, title, videoStreamDetailCache.get(videoId) || null);
+      tiModal.style.display = 'flex';
+
+      if (!tiUserCustomized) {
+        const playerRect = modal.getBoundingClientRect();
+        const gap = 10;
+        const rightAvail = window.innerWidth - playerRect.right - gap - 10;
+        const initW = rightAvail >= 190
+          ? Math.min(350, rightAvail)
+          : Math.min(310, Math.max(195, Math.round(window.innerWidth * 0.30)));
+        const initH = Math.max(
+          playerRect.height || 260,
+          Math.min(window.innerHeight - playerRect.top - 22, Math.round((playerRect.height || 260) * 1.15))
+        );
+        const dims = applyTabletInfoDimensions(initW, initH);
+        const targetLeft = rightAvail >= 190
+          ? Math.round(playerRect.right + gap)
+          : Math.max(10, window.innerWidth - dims.width - 10);
+        const targetTop = Math.max(8, Math.min(window.innerHeight - dims.height - 10, Math.round(playerRect.top)));
+        tiModal.style.left = targetLeft + 'px';
+        tiModal.style.top = targetTop + 'px';
+      } else {
+        clampTabletInfoModalToViewport();
+      }
+
+      const bodyEl = document.getElementById('tiBody');
+      if (bodyEl) bodyEl.scrollTop = 0;
+
+      if (detailPromise && typeof detailPromise.then === 'function') {
+        detailPromise.then(detail => {
+          if (currentVideoId !== videoId) return;
+          if (detail) {
+            renderTabletInfoContent(videoId, title, detail);
+          } else {
+            const descEl = document.getElementById('tiDesc');
+            if (descEl && descEl.textContent.includes('불러오고 있습니다')) {
+              descEl.textContent = '상세 설명을 불러오지 못했습니다. (공개 API 응답 지연)';
+            }
+          }
+        });
+      }
+    }
+
+    (function bindTabletInfoInteractions() {
+      const tiModal = document.getElementById('tablet-info-modal');
+      const tiDragBar = document.getElementById('tiDragBar');
+      if (!tiModal || !tiDragBar) return;
+
+      let tiDragging = false;
+      let tiResizing = false;
+      let tiDir = '';
+      let tiStartX = 0, tiStartY = 0, tiInitL = 0, tiInitT = 0, tiInitW = 280, tiInitH = 300;
+
+      tiDragBar.addEventListener('pointerdown', (e) => {
+        if (e.target && e.target.closest && e.target.closest('.ti-close-btn')) return;
+        tiDragging = true;
+        tiUserCustomized = true;
+        tiModal.classList.add('ti-interacting');
+        try { tiDragBar.setPointerCapture(e.pointerId); } catch (err) {}
+        tiStartX = e.clientX;
+        tiStartY = e.clientY;
+        tiInitL = tiModal.offsetLeft;
+        tiInitT = tiModal.offsetTop;
+        e.preventDefault();
+        e.stopPropagation();
+      });
+
+      tiModal.querySelectorAll('[data-tidir]').forEach(handle => {
+        handle.addEventListener('pointerdown', (e) => {
+          tiResizing = true;
+          tiUserCustomized = true;
+          tiDir = handle.getAttribute('data-tidir') || 'br';
+          tiModal.classList.add('ti-interacting');
+          try { handle.setPointerCapture(e.pointerId); } catch (err) {}
+          tiStartX = e.clientX;
+          tiStartY = e.clientY;
+          tiInitL = tiModal.offsetLeft;
+          tiInitT = tiModal.offsetTop;
+          tiInitW = tiModal.offsetWidth;
+          tiInitH = tiModal.offsetHeight;
+          e.preventDefault();
+          e.stopPropagation();
+        });
+      });
+
+      window.addEventListener('pointermove', (e) => {
+        if (tiDragging) {
+          const dx = e.clientX - tiStartX;
+          const dy = e.clientY - tiStartY;
+          const maxL = Math.max(4, window.innerWidth - tiModal.offsetWidth - 4);
+          const maxT = Math.max(4, window.innerHeight - tiModal.offsetHeight - 4);
+          tiModal.style.left = Math.max(4, Math.min(maxL, tiInitL + dx)) + 'px';
+          tiModal.style.top = Math.max(4, Math.min(maxT, tiInitT + dy)) + 'px';
+          return;
+        }
+        if (tiResizing) {
+          const dx = e.clientX - tiStartX;
+          const dy = e.clientY - tiStartY;
+          let nextW = tiInitW;
+          let nextH = tiInitH;
+          if (tiDir.includes('r')) nextW = tiInitW + dx;
+          if (tiDir.includes('l')) nextW = tiInitW - dx;
+          if (tiDir.includes('b')) nextH = tiInitH + dy;
+          if (tiDir.includes('t')) nextH = tiInitH - dy;
+
+          const dims = applyTabletInfoDimensions(nextW, nextH);
+          if (tiDir.includes('l')) {
+            tiModal.style.left = Math.max(4, tiInitL + tiInitW - dims.width) + 'px';
+          }
+          if (tiDir.includes('t')) {
+            tiModal.style.top = Math.max(4, tiInitT + tiInitH - dims.height) + 'px';
+          }
+        }
+      });
+
+      const endTiAction = () => {
+        if (tiDragging || tiResizing) {
+          tiDragging = false;
+          tiResizing = false;
+          tiModal.classList.remove('ti-interacting');
+        }
+      };
+      window.addEventListener('pointerup', endTiAction);
+      window.addEventListener('pointercancel', endTiAction);
+    })();
+
+    function getDefaultFullPlayerMetrics() {
+      const headerBox = document.querySelector('.header-unified-box');
+      const topPos = headerBox
+        ? Math.max(52, Math.round(headerBox.getBoundingClientRect().bottom + (isTabletMode ? 10 : 6)))
+        : (isTabletMode ? 132 : 96);
+      const maxH = Math.max(140, window.innerHeight - topPos - (isTabletMode ? 48 : 36));
+      if (isTabletMode) {
+        const preferredW = window.innerWidth >= 960
+          ? Math.min(Math.round(window.innerWidth * 0.60), 760)
+          : Math.min(Math.round(window.innerWidth * 0.64), 600);
+        const fitWidth = Math.max(280, Math.min(window.innerWidth - 24, preferredW, Math.round(maxH * (16 / 9))));
+        return { topPos, fitWidth };
+      }
+      const fitWidth = Math.max(MIN_PLAYER_WIDTH, Math.min(window.innerWidth - 12, Math.round(maxH * (16 / 9))));
+      return { topPos, fitWidth };
+    }
+
+    function openPlayerModal(videoId, title) {
+      if (isInlinePlaying) stopInlinePlayer(false);
+      unlockIosAudioOnce();
+      stopBgAudioClean();
+      stopDirectVideoClean();
+      directVideoAttemptSeq++;
+      isDockedToBookmark = false;
+      isYtVideoPlaying = false;
+      lastKnownPlaySec = 0;
+
+      currentVideoId = videoId;
+      currentVideoTitle = title;
+
+      const { topPos, fitWidth } = getDefaultFullPlayerMetrics();
+      const dims = apply16by9Scale(fitWidth);
+      lastPlayerWidth = dims.width;
+
+      let leftPos = Math.max(6, Math.round((window.innerWidth - dims.width) / 2));
+      if (isTabletMode) {
+        const estInfoW = Math.min(340, Math.max(220, Math.round(window.innerWidth * 0.27)));
+        if (window.innerWidth >= dims.width + estInfoW + 34) {
+          leftPos = Math.max(12, Math.round((window.innerWidth - (dims.width + 10 + estInfoW)) / 2));
+        } else {
+          leftPos = 12;
+        }
+      }
+
+      modal.classList.remove('interacting', 'docked-hidden');
+      modal.style.left = leftPos + 'px';
+      modal.style.top = topPos + 'px';
+      modal.style.display = 'block';
+
+      const detailPromise = isTabletMode ? fetchVideoStreamDetails(videoId) : null;
+
+      if (isTabletMode && tabletAdFreeMode) {
+        tryPlayDirectVideo(videoId, detailPromise);
+      } else {
+        mountYoutubeEmbed(videoId, true);
+      }
 
       closeTabHistoryDrawer();
       closeFilterPanel();
@@ -4990,6 +5716,10 @@
       prefetchPromise = prefetchBgAudio(videoId);
       recordUserPlay(videoId, title);
       updatePlayingCardHighlight(true);
+
+      if (isTabletMode && !tiUserClosed) {
+        openTabletInfoModal(videoId, title, detailPromise);
+      }
     }
 
     // 5-2. Firebase 연동 · 진단 · 기기별 프로필 분리 동기화
@@ -5547,18 +6277,13 @@
     async function enterAppWithUser(user) {
       currentUser = user;
       cloudDeviceProfiles = { mobile: null, tablet: null };
-      try {
-        localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({
-          id: user.id,
-          role: user.role,
-          name: user.name,
-          code: _p4(_u4(user.code))
-        }));
-      } catch (e) {}
-
       document.body.classList.remove('auth-locked');
       activeTabKeyword = '';
       selectedTabDocId = '';
+      tabArmedDocId = '';
+      tiUserClosed = false;
+      tiUserCustomized = false;
+      tabArmedDocId = '';
       currentFeedItems = [];
       dbFeedPool = [];
       activeSearchSession = null;
@@ -5627,7 +6352,6 @@
       document.getElementById('query').value = '';
       statusMsg.innerText = '';
       updateScrollSentinelUI();
-      try { localStorage.removeItem(SESSION_STORAGE_KEY); } catch (e) {}
       showAuthGate(true);
     }
 
@@ -5731,7 +6455,7 @@
             if (uo.bmOpacity !== undefined) currentUiOpts.bmOpacity = normalizeBmOpacity(uo.bmOpacity);
             if (uo.headerOpacity !== undefined) currentUiOpts.headerOpacity = normalizeHeaderOpacity(uo.headerOpacity);
             if (uo.borderStyle === 'solid' || uo.borderStyle === 'dashed') currentUiOpts.borderStyle = uo.borderStyle;
-            if ([1, 2, 3, 4, 5].includes(Number(uo.borderWidth))) currentUiOpts.borderWidth = Number(uo.borderWidth);
+            if ([1, 2, 3, 4, 5, 6, 7, 8].includes(Number(uo.borderWidth))) currentUiOpts.borderWidth = Number(uo.borderWidth);
             applyUiOptsToDOM();
             persistUiOpts(false);
           }
@@ -5995,8 +6719,12 @@
       return `${mm}.${dd}-${pc}`;
     }
 
-    function closeTabHistoryDrawer(immediate = false) {
+    function closeTabHistoryDrawer(immediate = false, keepArmed = false) {
       activeDrawerDocId = '';
+      if (!keepArmed && tabArmedDocId) {
+        tabArmedDocId = '';
+        renderSavedTabsBar();
+      }
       const drawer = document.getElementById('tabHistoryDrawer');
       if (!drawer) return;
       if (immediate) {
@@ -6017,7 +6745,7 @@
 
       const hist = normalizeTabHist(tab && tab.hist).slice(0, MAX_TAB_HISTORY);
       if (hist.length === 0) {
-        closeTabHistoryDrawer();
+        closeTabHistoryDrawer(false, true);
         return;
       }
 
@@ -6161,15 +6889,25 @@
     })();
 
     function handleHistoryTabTap(tab) {
-      if (selectedTabDocId !== tab.docId) {
-        selectedTabDocId = tab.docId;
+      const drawer = document.getElementById('tabHistoryDrawer');
+      const isDrawerOpenForThis = !!(drawer && drawer.classList.contains('open') && activeDrawerDocId === tab.docId);
+      const isArmedForThis = (tabArmedDocId === tab.docId);
+
+      // 선택+대기(목록열림 또는 테두리 깜빡임) 상태에서 재터치 -> 목록 닫고 피드 실행 + 깜빡임 종료
+      if (selectedTabDocId === tab.docId && (isDrawerOpenForThis || isArmedForThis)) {
+        tabArmedDocId = '';
+        closeTabHistoryDrawer(false, true);
         renderSavedTabsBar();
-        smoothCenterSelectedTab(420);
-        openTabHistoryDrawer(tab);
+        loadTabData(tab.docId, tab.keyword, true);
         return;
       }
-      closeTabHistoryDrawer();
-      loadTabData(tab.docId, tab.keyword, true);
+
+      // 1회 터치 또는 목록 닫힘 후 재터치 -> 선택 + 테두리 서서히 깜빡임 + 목록 열기 (무한 반복)
+      selectedTabDocId = tab.docId;
+      tabArmedDocId = tab.docId;
+      renderSavedTabsBar();
+      smoothCenterSelectedTab(420);
+      openTabHistoryDrawer(tab);
     }
 
     function renderSavedTabsBar() {
@@ -6178,7 +6916,8 @@
         const btn = document.createElement('button');
         const isSel = selectedTabDocId === tab.docId;
         const isLoaded = activeTabKeyword === tab.keyword;
-        btn.className = 'history-tab' + (isSel ? ' tab-selected' : '') + (isLoaded ? ' tab-loaded' : '');
+        const isPulse = isSel && tabArmedDocId === tab.docId;
+        btn.className = 'history-tab' + (isSel ? ' tab-selected' : '') + (isPulse ? ' tab-pulse-ready' : '') + (isLoaded ? ' tab-loaded' : '');
         btn.onclick = () => handleHistoryTabTap(tab);
 
         const label = document.createElement('span');
@@ -6258,7 +6997,8 @@
     function renderDbTabItems(items, keyword) {
       if (isInlinePlaying) stopInlinePlayer(true);
       activeTabKeyword = keyword;
-      document.getElementById('query').value = keyword;
+      const qEl = document.getElementById('query');
+      if (qEl) qEl.value = '';
       currentFeedItems = [];
       activeSearchSession = null;
       dbFeedPool = stripThumbField(items).slice(0, MAX_TAB_ITEMS);
@@ -6559,11 +7299,6 @@
       setPendingAuthSync(true);
       if (isAdminUser()) {
         currentUser.code = wrapped;
-        try {
-          localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({
-            id: currentUser.id, role: currentUser.role, name: currentUser.name, code: wrapped
-          }));
-        } catch (e) {}
       }
       const res = await saveAuthConfigToCloud();
       if (inp) inp.value = '';
@@ -6657,6 +7392,7 @@
       saveLocalMetaBackup(cachedTabsMeta);
       if (activeTabKeyword === keyword) activeTabKeyword = '';
       if (selectedTabDocId === docId) selectedTabDocId = '';
+      if (tabArmedDocId === docId) tabArmedDocId = '';
       renderSavedTabsBar();
       if (manageOverlay.style.display === 'flex') renderManageList();
 
@@ -6680,7 +7416,7 @@
       updateSearchBtnState();
       initFirebaseAlways();
       await loadAuthConfigFromCloud();
-      try { localStorage.removeItem(SESSION_STORAGE_KEY); } catch (e) {}
+      try { localStorage.removeItem('tube_audio_lab_session_v7'); } catch (e) {}
       showAuthGate(false);
     }
 
@@ -6692,6 +7428,9 @@
         return;
       }
       ytFrameReady = false;
+      directVideoAttemptSeq++;
+      stopDirectVideoClean();
+      hideTabletInfoModal(false);
       stopBgAudioClean();
       isYtVideoPlaying = false;
       hideYtPauseMask();
@@ -6887,6 +7626,13 @@
               updateSlideBookmarkPlayUI();
             } else if (msg.info.playerState === 2 || msg.info.playerState === 0) {
               isYtVideoPlaying = false;
+              if (msg.info.playerState === 2 && document.body.classList.contains('blackout-active') && blackoutWantPlaying && !userPausedBg && !isBgAudioPlaying && !isDirectVideoActive && currentVideoId) {
+                setTimeout(() => {
+                  if (document.body.classList.contains('blackout-active') && blackoutWantPlaying && !userPausedBg && !isYtVideoPlaying && !isBgAudioPlaying) {
+                    sendYtCommand('playVideo');
+                  }
+                }, 750);
+              }
               if (!isBgAudioPlaying && !isDockedToBookmark && !isInlinePlaying && currentVideoId) {
                 showYtPauseMask();
               }
@@ -6914,6 +7660,8 @@
       if (bgAudio.src === SILENT_WAV_URI) return;
       isBgAudioPlaying = true;
       hideYtPauseMask();
+      const dv = document.getElementById('directVideoPlayer');
+      if (dv && !dv.paused) { try { dv.pause(); } catch (e) {} }
       sendYtCommand('pauseVideo');
       setupMediaSession(currentVideoTitle, currentVideoId);
       if ('mediaSession' in navigator) {
@@ -6972,7 +7720,17 @@
     });
 
     document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'hidden' && currentVideoId) {
+      if (document.visibilityState === 'visible') {
+        if (document.body.classList.contains('blackout-active')) {
+          requestBlackoutWakeLock();
+          if (blackoutWantPlaying && !userPausedBg && currentVideoId) {
+            const dv = document.getElementById('directVideoPlayer');
+            if (isDirectVideoActive && dv && dv.paused && !dv.ended) dv.play().catch(() => {});
+            else if (isBgAudioPlaying && bgAudio.paused && !bgAudio.ended) bgAudio.play().catch(() => {});
+            else if (!isBgAudioPlaying && !isDirectVideoActive && !isYtVideoPlaying) sendYtCommand('playVideo');
+          }
+        }
+      } else if (document.visibilityState === 'hidden' && currentVideoId) {
         if (isBgAudioPlaying && bgAudio.paused && !userPausedBg) {
           bgAudio.play().catch(() => {});
         } else if (!isBgAudioPlaying && !userPausedBg && iosAudioUnlocked && prefetchedVideoId === currentVideoId && prefetchedAudioCandidates.length > 0) {
@@ -7013,7 +7771,8 @@
     }
 
     function updateSlideBookmarkPlayUI() {
-      const playingNow = isYtVideoPlaying || (isBgAudioPlaying && !bgAudio.paused);
+      const dv = document.getElementById('directVideoPlayer');
+      const playingNow = isYtVideoPlaying || (isBgAudioPlaying && !bgAudio.paused) || (isDirectVideoActive && dv && !dv.paused);
       slideBookmark.classList.toggle('sb-playing', playingNow);
       const icon = document.getElementById('sbPlayIcon');
       if (icon) icon.textContent = playingNow ? '▶' : '■';
@@ -7153,17 +7912,70 @@
       });
     })();
 
+    async function requestBlackoutWakeLock() {
+      if (!('wakeLock' in navigator) || !navigator.wakeLock || !navigator.wakeLock.request) return;
+      try {
+        if (blackoutWakeLock && !blackoutWakeLock.released) return;
+        blackoutWakeLock = await navigator.wakeLock.request('screen');
+        blackoutWakeLock.addEventListener('release', () => { blackoutWakeLock = null; });
+      } catch (e) {}
+    }
+
+    function releaseBlackoutWakeLock() {
+      if (blackoutWakeLock) {
+        try { blackoutWakeLock.release(); } catch (e) {}
+        blackoutWakeLock = null;
+      }
+    }
+
+    function startBlackoutWatchdog() {
+      stopBlackoutWatchdog();
+      blackoutWatchdogTimer = setInterval(() => {
+        if (!document.body.classList.contains('blackout-active')) {
+          stopBlackoutWatchdog();
+          return;
+        }
+        requestBlackoutWakeLock();
+        if (!blackoutWantPlaying || !currentVideoId || userPausedBg) return;
+
+        const dv = document.getElementById('directVideoPlayer');
+        if (isDirectVideoActive && dv && dv.src) {
+          if (dv.paused && !dv.ended) dv.play().catch(() => {});
+          return;
+        }
+        if (isBgAudioPlaying) {
+          if (bgAudio.paused && !bgAudio.ended) bgAudio.play().catch(() => {});
+          return;
+        }
+        if (!isYtVideoPlaying) {
+          sendYtCommand('playVideo');
+        } else {
+          sendYtCommand('getPlayerState');
+        }
+      }, 4000);
+    }
+
+    function stopBlackoutWatchdog() {
+      if (blackoutWatchdogTimer) {
+        clearInterval(blackoutWatchdogTimer);
+        blackoutWatchdogTimer = null;
+      }
+    }
+
     function enterBlackoutMode() {
       const ov = document.getElementById('battery-blackout-overlay');
       if (!ov) return;
       lastBlackoutTapTime = 0;
-      const hint = document.getElementById('blackoutHint');
-      if (hint) hint.classList.remove('visible');
+      const dv = document.getElementById('directVideoPlayer');
+      blackoutWantPlaying = !!(currentVideoId && (isYtVideoPlaying || (isBgAudioPlaying && !bgAudio.paused) || (isDirectVideoActive && dv && !dv.paused)));
       document.documentElement.classList.add('blackout-active');
       document.body.classList.add('blackout-active');
+      if (isInlinePlaying) document.body.classList.add('inline-keep-alive');
       setSafariThemeColor('#000000', true);
       lockBackgroundScroll();
       ov.classList.add('active');
+      requestBlackoutWakeLock();
+      startBlackoutWatchdog();
       try {
         const fsEl = document.documentElement;
         const reqFs = fsEl.requestFullscreen || fsEl.webkitRequestFullscreen || fsEl.msRequestFullscreen;
@@ -7177,11 +7989,12 @@
     function exitBlackoutMode() {
       const ov = document.getElementById('battery-blackout-overlay');
       if (!ov || !ov.classList.contains('active')) return;
-      const hint = document.getElementById('blackoutHint');
-      if (hint) hint.classList.remove('visible');
+      stopBlackoutWatchdog();
+      releaseBlackoutWakeLock();
+      blackoutWantPlaying = false;
       ov.classList.remove('active');
       document.documentElement.classList.remove('blackout-active');
-      document.body.classList.remove('blackout-active');
+      document.body.classList.remove('blackout-active', 'inline-keep-alive');
       setSafariThemeColor(currentThemeColors.appBg || '#0d0d0d', false);
       try {
         const exitFs = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
@@ -7226,10 +8039,13 @@
 
     function togglePlayFromBookmark() {
       if (!currentVideoId) return;
-      const playingNow = isYtVideoPlaying || (isBgAudioPlaying && !bgAudio.paused);
+      const dv = document.getElementById('directVideoPlayer');
+      const playingNow = isYtVideoPlaying || (isBgAudioPlaying && !bgAudio.paused) || (isDirectVideoActive && dv && !dv.paused);
       if (playingNow) {
         userPausedBg = true;
-        if (isBgAudioPlaying) {
+        if (isDirectVideoActive && dv && dv.src) {
+          dv.pause();
+        } else if (isBgAudioPlaying) {
           bgAudio.pause();
         } else {
           sendYtCommand('pauseVideo');
@@ -7237,7 +8053,9 @@
         }
       } else {
         userPausedBg = false;
-        if (isBgAudioPlaying) {
+        if (isDirectVideoActive && dv && dv.src) {
+          dv.play().catch(() => {});
+        } else if (isBgAudioPlaying) {
           bgAudio.play().catch(() => {});
         } else {
           hideYtPauseMask();
@@ -7286,6 +8104,7 @@
       document.body.classList.remove('player-open');
 
       modal.classList.add('docked-hidden');
+      hideTabletInfoModal(false);
       showSlideBookmark(dockSide);
       updateBgModeUI();
 
@@ -7313,6 +8132,9 @@
       updatePlayingCardHighlight(true);
       updateBgModeUI();
       updateSlideBookmarkPlayUI();
+      if (isTabletMode && !tiUserClosed && currentVideoId) {
+        openTabletInfoModal(currentVideoId, currentVideoTitle, fetchVideoStreamDetails(currentVideoId));
+      }
     }
 
     window.addEventListener('scroll', () => {
