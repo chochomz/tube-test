@@ -1592,66 +1592,252 @@
       cursor: pointer;
       flex-shrink: 0;
     }
-    .ti-pinned-box {
+    .ti-header-left {
+      display: inline-flex;
+      align-items: center;
+      gap: calc(6px * var(--ti-scale));
+      min-width: 0;
+      flex: 1;
+    }
+    .ti-back-btn {
       display: none;
-      margin-top: calc(12px * var(--ti-scale));
-      padding: calc(9px * var(--ti-scale)) calc(10px * var(--ti-scale));
-      border-radius: 8px;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px dashed rgba(255, 255, 255, 0.28);
-    }
-    .ti-pinned-box.visible { display: block; }
-    .ti-pinned-head {
-      font-size: calc(11.5px * var(--ti-scale));
+      padding: calc(2.5px * var(--ti-scale)) calc(7px * var(--ti-scale));
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      background: rgba(255, 255, 255, 0.14);
+      color: inherit;
+      font-size: calc(10.5px * var(--ti-scale));
       font-weight: 800;
-      color: #f9a8d4;
-      margin-bottom: calc(5px * var(--ti-scale));
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
-    .ti-pinned-text {
-      font-size: calc(12px * var(--ti-scale));
-      line-height: 1.58;
-      opacity: 0.94;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
+    .ti-back-btn.visible { display: inline-flex; align-items: center; }
     .ti-body {
       flex: 1;
       min-height: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      padding: 0;
+    }
+    .shorts-list-view {
+      flex: 1;
+      min-height: 0;
+      height: 100%;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
       touch-action: pan-y;
       overscroll-behavior: contain;
-      padding: calc(11px * var(--ti-scale)) calc(12px * var(--ti-scale)) calc(18px * var(--ti-scale)) calc(12px * var(--ti-scale));
-      user-select: text;
-      -webkit-user-select: text;
+      padding: calc(6px * var(--ti-scale));
+      display: flex;
+      flex-direction: column;
+      gap: calc(6px * var(--ti-scale));
+      scroll-snap-type: y proximity;
     }
-    .ti-body::-webkit-scrollbar { width: 5px; }
-    .ti-body::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.28); border-radius: 4px; }
-    .ti-title {
-      font-size: calc(14.5px * var(--ti-scale));
-      font-weight: 800;
-      line-height: 1.38;
-      margin-bottom: calc(6px * var(--ti-scale));
-      word-break: break-word;
+    .shorts-list-view::-webkit-scrollbar { width: 4px; }
+    .shorts-list-view::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.28); border-radius: 4px; }
+    .shorts-status-msg {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 16px;
+      font-size: calc(12px * var(--ti-scale));
+      opacity: 0.78;
+      line-height: 1.5;
     }
-    .ti-meta {
-      font-size: calc(11.5px * var(--ti-scale));
-      line-height: 1.45;
-      opacity: 0.76;
-      margin-bottom: calc(8px * var(--ti-scale));
-      word-break: break-word;
+    /* 기본 화면에 정확히 3개의 관련 쇼츠 카드가 세로로 표시 + 상하 스크롤 확장 */
+    .shorts-card {
+      flex: 0 0 calc((100% - (calc(6px * var(--ti-scale)) * 2)) / 3);
+      min-height: calc(74px * var(--ti-scale));
+      display: flex;
+      align-items: stretch;
+      gap: calc(8px * var(--ti-scale));
+      padding: calc(5px * var(--ti-scale));
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      cursor: pointer;
+      scroll-snap-align: start;
+      transition: background 0.14s, border-color 0.14s;
+      overflow: hidden;
     }
-    .ti-divider {
-      height: 1px;
+    .shorts-card:active {
       background: rgba(255, 255, 255, 0.14);
-      margin-bottom: calc(9px * var(--ti-scale));
+      border-color: var(--header-border-color);
     }
-    .ti-desc {
-      font-size: calc(12.5px * var(--ti-scale));
-      line-height: 1.62;
-      opacity: 0.92;
-      white-space: pre-wrap;
+    .shorts-card.active-short {
+      border-color: var(--header-border-color);
+      background: rgba(217, 56, 106, 0.18);
+    }
+    .shorts-thumb-box {
+      position: relative;
+      width: calc(68px * var(--ti-scale));
+      min-width: calc(56px * var(--ti-scale));
+      border-radius: 6px;
+      overflow: hidden;
+      background: #111;
+      flex-shrink: 0;
+    }
+    .shorts-thumb-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .shorts-play-badge {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.22);
+      color: #ffffff;
+      font-size: calc(15px * var(--ti-scale));
+      text-shadow: 0 1px 6px rgba(0, 0, 0, 0.85);
+      pointer-events: none;
+    }
+    .shorts-dur-tag {
+      position: absolute;
+      right: 3px;
+      bottom: 3px;
+      padding: 1px 4px;
+      border-radius: 4px;
+      background: rgba(0, 0, 0, 0.78);
+      color: #ffffff;
+      font-size: calc(9px * var(--ti-scale));
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      pointer-events: none;
+    }
+    .shorts-card-info {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: calc(4px * var(--ti-scale));
+    }
+    .shorts-card-title {
+      font-size: calc(12px * var(--ti-scale));
+      font-weight: 700;
+      line-height: 1.32;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
       word-break: break-word;
+    }
+    .shorts-card-meta {
+      font-size: calc(10px * var(--ti-scale));
+      opacity: 0.68;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* 쇼츠 터치 시 상하 스와이프 쇼츠 플레이어 뷰 */
+    .shorts-player-view {
+      display: none;
+      flex: 1;
+      min-height: 0;
+      flex-direction: column;
+      background: #000;
+      overflow: hidden;
+    }
+    .shorts-player-view.active { display: flex; }
+    .shorts-stage-wrap {
+      position: relative;
+      flex: 1;
+      min-height: 0;
+      background: #000;
+      overflow: hidden;
+    }
+    #shortsIframeHolder {
+      width: 100%;
+      height: 100%;
+    }
+    #shortsIframeHolder iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+    .shorts-swipe-zone {
+      position: absolute;
+      top: 0;
+      bottom: 42px;
+      width: 24px;
+      z-index: 6;
+      touch-action: none;
+    }
+    .shorts-swipe-zone.left { left: 0; }
+    .shorts-swipe-zone.right { right: 0; width: 42px; }
+    .shorts-nav-col {
+      position: absolute;
+      right: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 8;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: calc(6px * var(--ti-scale));
+    }
+    .shorts-nav-btn {
+      width: calc(30px * var(--ti-scale));
+      height: calc(30px * var(--ti-scale));
+      min-width: 26px;
+      min-height: 26px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(255, 255, 255, 0.72);
+      background: rgba(0, 0, 0, 0.56);
+      color: #ffffff;
+      font-size: calc(12px * var(--ti-scale));
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .shorts-nav-btn:active { transform: scale(0.9); background: rgba(217, 56, 106, 0.8); }
+    .shorts-nav-idx {
+      padding: 2px 5px;
+      border-radius: 6px;
+      background: rgba(0, 0, 0, 0.65);
+      color: #f9a8d4;
+      font-size: calc(9.5px * var(--ti-scale));
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      pointer-events: none;
+    }
+    .shorts-caption-bar {
+      flex-shrink: 0;
+      padding: calc(7px * var(--ti-scale)) calc(10px * var(--ti-scale)) calc(14px * var(--ti-scale)) calc(10px * var(--ti-scale));
+      background: var(--settings-modal-bg);
+      color: var(--settings-modal-fg);
+      border-top: 1px solid rgba(255, 255, 255, 0.14);
+      touch-action: none;
+      cursor: ns-resize;
+    }
+    .shorts-caption-title {
+      font-size: calc(11.5px * var(--ti-scale));
+      font-weight: 700;
+      line-height: 1.3;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .shorts-caption-sub {
+      font-size: calc(9.5px * var(--ti-scale));
+      opacity: 0.66;
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .ti-resizer {
       position: absolute;
@@ -2795,10 +2981,10 @@
     <div class="modal-bottom-tabs">
       <div class="bottom-drag-spacer" id="bottomDragSpacer"></div>
       <div class="tab-group-right" style="gap: 4px;">
-        <div class="bookmark-tab tablet-only-tab" id="tabletInfoToggleTab" onclick="toggleTabletInfoModal()" title="우측 더보기 정보창 열기/닫기">
-          <span>정보</span>
+        <div class="bookmark-tab tablet-only-tab" id="tabletInfoToggleTab" onclick="toggleTabletInfoModal()" title="관련 쇼츠 창 열기/닫기">
+          <span>쇼츠</span>
         </div>
-        <div class="bookmark-tab mobile-only-tab" id="mobileInfoToggleTab" onclick="toggleMobileInfoModal()" title="영상 정보 · 더보기">
+        <div class="bookmark-tab mobile-only-tab" id="mobileInfoToggleTab" onclick="toggleMobileInfoModal()" title="관련 쇼츠 보기">
           <svg class="mobile-more-svg" viewBox="0 0 20 15" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" aria-hidden="true">
             <rect x="1.5" y="1.5" width="17" height="12" rx="2.8"/>
             <circle cx="6.2" cy="7.5" r="1.25" fill="currentColor" stroke="none"/>
@@ -2818,20 +3004,32 @@
   <!-- 3-1b. 태블릿 전용 독립 우측 '더보기 · 내용' 스크롤 창 -->
   <div id="tablet-info-modal" style="--ti-scale: 1;">
     <div class="ti-header" id="tiDragBar" title="드래그하여 자유 배치">
-      <span class="ti-header-label">영상 정보 · 더보기</span>
+      <div class="ti-header-left">
+        <button type="button" class="ti-back-btn" id="shortsBackToListBtn" onclick="exitShortsPlayerToList()" title="쇼츠 목록으로">≡ 목록</button>
+        <span class="ti-header-label" id="shortsHeaderLabel">▶ 관련 쇼츠</span>
+      </div>
       <div class="ti-header-actions">
-        <button type="button" class="ti-refresh-btn" onclick="reloadCurrentVideoInfo()" title="상세설명·레시피 다시 불러오기">↻</button>
+        <button type="button" class="ti-refresh-btn" onclick="reloadRelatedShorts()" title="관련 쇼츠 다시 검색">↻</button>
         <button type="button" class="ti-close-btn" onclick="hideTabletInfoModal(true)" title="닫기">✕</button>
       </div>
     </div>
     <div class="ti-body" id="tiBody">
-      <div class="ti-title" id="tiTitle">-</div>
-      <div class="ti-meta" id="tiMeta">정보 불러오는 중...</div>
-      <div class="ti-divider"></div>
-      <div class="ti-desc" id="tiDesc">영상 상세 내용을 불러오고 있습니다...</div>
-      <div class="ti-pinned-box" id="tiPinnedWrap">
-        <div class="ti-pinned-head">📌 고정 댓글 (레시피 · 추가 안내)</div>
-        <div class="ti-pinned-text" id="tiPinnedText"></div>
+      <div class="shorts-list-view" id="shortsListView"></div>
+      <div class="shorts-player-view" id="shortsPlayerView">
+        <div class="shorts-stage-wrap" id="shortsStageWrap">
+          <div id="shortsIframeHolder"></div>
+          <div class="shorts-swipe-zone left" id="shortsSwipeL"></div>
+          <div class="shorts-swipe-zone right" id="shortsSwipeR"></div>
+          <div class="shorts-nav-col">
+            <button type="button" class="shorts-nav-btn" onclick="stepRelatedShort(-1)" title="이전 쇼츠">▲</button>
+            <span class="shorts-nav-idx" id="shortsNavIdx">1/1</span>
+            <button type="button" class="shorts-nav-btn" onclick="stepRelatedShort(1)" title="다음 쇼츠">▼</button>
+          </div>
+        </div>
+        <div class="shorts-caption-bar" id="shortsCaptionBar" title="위/아래 스와이프: 이전·다음 쇼츠">
+          <div class="shorts-caption-title" id="shortsCaptionTitle">-</div>
+          <div class="shorts-caption-sub" id="shortsCaptionSub">위/아래 스와이프 또는 ▲▼ 이동</div>
+        </div>
       </div>
     </div>
     <div class="ti-resizer tl" data-tidir="tl"></div>
@@ -3301,7 +3499,13 @@
     let directVideoCandidates = [];
     let directVideoCandIdx = 0;
     let directVideoAttemptSeq = 0;
-    const videoStreamDetailCache = new Map();
+    const relatedShortsCache = new Map();
+    let currentShortsList = [];
+    let currentShortsIdx = -1;
+    let isShortsPlaying = false;
+    let shortsFrameReady = false;
+    let shortsFetchSeq = 0;
+    let currentShortsQueryKey = '';
     let tiUserCustomized = false;
     let tiUserClosed = false;
     let tiLastDeviceMode = '';
@@ -5243,285 +5447,108 @@
 
     const TI_BASE_WIDTH = 300;
 
-    function formatDescriptionText(raw) {
-      if (!raw) return '';
-      let s = String(raw);
-      s = s.replace(/<br\s*\/?>/gi, '\n');
-      s = s.replace(/<\/(p|div|li|h[1-6])>/gi, '\n');
-      s = s.replace(/<[^>]+>/g, '');
-      const ta = document.createElement('textarea');
-      ta.innerHTML = s;
-      return ta.value.replace(/\n{3,}/g, '\n\n').trim();
+    function getRelatedShortsKeyword(title) {
+      if (activeTabKeyword && activeTabKeyword.trim()) {
+        return activeTabKeyword.trim();
+      }
+      const cleaned = simplifyTitle(title || currentVideoTitle || '')
+        .replace(/[^가-힣a-zA-Z0-9\s]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+      if (!cleaned) return '인기';
+      return cleaned.split(' ').slice(0, 3).join(' ');
     }
 
-    function parseVideoDetailFromApi(data, baseOrigin, videoId) {
-      if (!data || typeof data !== 'object') return null;
-      const audioUrls = parseAudioUrlsFromGenericData(data, baseOrigin, videoId);
-      const videoUrls = [];
-      const seenV = new Set();
-      const addV = (u) => { if (u && typeof u === 'string' && !seenV.has(u)) { seenV.add(u); videoUrls.push(u); } };
-      const dv = document.getElementById('directVideoPlayer');
-      const canHls = !!(dv && typeof dv.canPlayType === 'function' && dv.canPlayType('application/vnd.apple.mpegurl'));
-
-      if (Array.isArray(data.videoStreams)) {
-        const muxedMp4 = data.videoStreams
-          .filter(s => s && s.url && !s.videoOnly && /mp4/i.test(s.mimeType || ''))
-          .sort((a, b) => (parseInt(b.quality, 10) || 0) - (parseInt(a.quality, 10) || 0));
-        muxedMp4.forEach(s => addV(s.url));
-      }
-      if (canHls && typeof data.hls === 'string') {
-        addV(data.hls);
-      }
-      if (Array.isArray(data.formatStreams) && baseOrigin) {
-        const invMp4 = data.formatStreams
-          .filter(f => f && /video\/mp4/i.test(f.type || ''))
-          .sort((a, b) => (parseInt(b.qualityLabel, 10) || 0) - (parseInt(a.qualityLabel, 10) || 0));
-        invMp4.forEach(f => {
-          if (f.itag) addV(baseOrigin + '/latest_version?id=' + videoId + '&itag=' + f.itag + '&local=true');
-          else if (f.url) addV(f.url);
-        });
-      }
-
-      const desc = formatDescriptionText(data.description || data.descriptionHtml || '');
-      const uploader = String(data.uploader || data.author || '').trim();
-      const uploadDate = String(data.uploadDate || data.publishedText || '').trim();
-      const views = Number(data.views !== undefined ? data.views : (data.viewCount || 0)) || 0;
-      const likes = Number(data.likes !== undefined ? data.likes : (data.likeCount || 0)) || 0;
-      const duration = Number(data.duration || data.lengthSeconds || 0) || 0;
-      const title = String(data.title || '').trim();
-
-      if (!desc && !uploader && videoUrls.length === 0 && audioUrls.length === 0) return null;
-      return { title, uploader, uploadDate, views, likes, duration, description: desc, audioUrls, videoUrls };
-    }
-
-    function raceFirstDetail(promiseFns) {
-      return new Promise((resolve) => {
-        let settled = false;
-        let pending = promiseFns.length;
-        if (pending === 0) { resolve(null); return; }
-        promiseFns.forEach(fn => {
-          Promise.resolve().then(fn).then(obj => {
-            if (!settled && obj) {
-              settled = true;
-              resolve(obj);
-            } else if (--pending === 0 && !settled) {
-              resolve(null);
-            }
-          }).catch(() => {
-            if (--pending === 0 && !settled) resolve(null);
+    function collectLocalSeedShorts(excludeVideoId) {
+      const seen = new Set();
+      if (excludeVideoId) seen.add(excludeVideoId);
+      const out = [];
+      const sources = [...currentFeedItems, ...dbFeedPool];
+      for (const it of sources) {
+        if (!it || !it.id || seen.has(it.id)) continue;
+        const dur = Number(it.d || 0);
+        const title = String(it.t || '');
+        if ((dur > 0 && dur <= 65) || /#shorts|쇼츠/i.test(title)) {
+          seen.add(it.id);
+          out.push({
+            id: it.id,
+            t: simplifyTitle(title),
+            d: dur,
+            v: Number(it.v || 0) || 0,
+            u: Number(it.u || 0) || 0
           });
-        });
-      });
-    }
-
-    const INFO_EXTRA_PIPED = [
-      'https://pipedapi.r4fo.com',
-      'https://pipedapi.ducks.party'
-    ];
-    const INFO_EXTRA_INVIDIOUS = [
-      'https://invidious.jing.rocks',
-      'https://iv.datura.network'
-    ];
-
-    async function fetchTextWithTimeout(url, timeoutMs = 6500) {
-      const ctrl = new AbortController();
-      const timer = setTimeout(() => ctrl.abort(), timeoutMs);
-      try {
-        const res = await fetch(url, { signal: ctrl.signal });
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        return await res.text();
-      } finally {
-        clearTimeout(timer);
-      }
-    }
-
-    async function fetchYoutubeOembed(videoId) {
-      try {
-        const data = await fetchJsonWithTimeout(
-          'https://www.youtube.com/oembed?url=' + encodeURIComponent('https://www.youtube.com/watch?v=' + videoId) + '&format=json',
-          4000
-        );
-        if (data && (data.title || data.author_name)) {
-          return {
-            title: String(data.title || '').trim(),
-            uploader: String(data.author_name || '').trim()
-          };
-        }
-      } catch (e) {}
-      return null;
-    }
-
-    function extractWatchPageMeta(html) {
-      if (!html || html.length < 1000) return null;
-      let description = '';
-      let title = '';
-      let uploader = '';
-      let views = 0;
-      let duration = 0;
-      let uploadDate = '';
-
-      // 1) YouTube 원본 전체 상세설명 (요리 레시피 전문 포함, 잘림 없음)
-      const sdMatch = html.match(/"shortDescription":"((?:\\.|[^"\\])*)"/);
-      if (sdMatch && sdMatch[1]) {
-        try { description = JSON.parse('"' + sdMatch[1] + '"').trim(); } catch (e) {}
-      }
-      if (!description) {
-        const attrMatch = html.match(/"attributedDescriptionBodyText":\{"content":"((?:\\.|[^"\\])*)"/);
-        if (attrMatch && attrMatch[1]) {
-          try { description = JSON.parse('"' + attrMatch[1] + '"').trim(); } catch (e) {}
+          if (out.length >= 12) break;
         }
       }
-
-      const titleMatch = html.match(/"videoDetails":\{[^}]*?"title":"((?:\\.|[^"\\])*)"/);
-      if (titleMatch && titleMatch[1]) {
-        try { title = JSON.parse('"' + titleMatch[1] + '"').trim(); } catch (e) {}
-      }
-      const authorMatch = html.match(/"videoDetails":\{[^}]*?"author":"((?:\\.|[^"\\])*)"/);
-      if (authorMatch && authorMatch[1]) {
-        try { uploader = JSON.parse('"' + authorMatch[1] + '"').trim(); } catch (e) {}
-      }
-      const vcMatch = html.match(/"viewCount":"(\d+)"/);
-      if (vcMatch) views = Number(vcMatch[1]) || 0;
-      const lenMatch = html.match(/"lengthSeconds":"(\d+)"/);
-      if (lenMatch) duration = Number(lenMatch[1]) || 0;
-      const dateMatch = html.match(/"publishDate":"([^"]+)"/);
-      if (dateMatch) uploadDate = dateMatch[1];
-
-      if (!description) return null;
-      return { title, uploader, uploadDate, views, likes: 0, duration, description, audioUrls: [], videoUrls: [] };
+      return out;
     }
 
-    async function fetchYoutubeWatchDescription(videoId) {
-      const targetUrl = 'https://www.youtube.com/watch?v=' + encodeURIComponent(videoId) + '&hl=ko';
-      const proxyUrls = [
-        'https://api.allorigins.win/raw?url=' + encodeURIComponent(targetUrl),
-        'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(targetUrl)
-      ];
-      return raceFirstDetail(proxyUrls.map(u => async () => {
-        const html = await fetchTextWithTimeout(u, 7000);
-        return extractWatchPageMeta(html);
-      }));
-    }
+    async function fetchRelatedShorts(keyword, excludeVideoId, forceRefresh = false) {
+      const kw = String(keyword || '').trim() || '인기';
+      const cacheKey = kw.toLowerCase();
+      currentShortsQueryKey = kw;
 
-    async function fetchPinnedComment(videoId) {
-      const pipedAll = [...STREAM_PIPED_SERVERS, ...INFO_EXTRA_PIPED];
-      const invAll = [...STREAM_INVIDIOUS_SERVERS, ...INFO_EXTRA_INVIDIOUS];
-      const tasks = [
-        ...pipedAll.map(server => async () => {
-          const data = await fetchJsonWithTimeout(server + '/comments/' + videoId, 5000);
-          const list = data && Array.isArray(data.comments) ? data.comments : [];
-          const pinned = list.find(c => c && (c.pinned || c.isPinned));
-          if (!pinned) return null;
-          const text = formatDescriptionText(pinned.commentText || pinned.content || '');
-          return text ? { author: String(pinned.author || '').trim(), text } : null;
-        }),
-        ...invAll.map(inv => async () => {
-          const data = await fetchJsonWithTimeout(inv + '/api/v1/comments/' + videoId, 5000);
-          const list = data && Array.isArray(data.comments) ? data.comments : [];
-          const pinned = list.find(c => c && (c.isPinned || c.pinned));
-          if (!pinned) return null;
-          const text = formatDescriptionText(pinned.contentHtml || pinned.content || '');
-          return text ? { author: String(pinned.author || '').trim(), text } : null;
-        })
-      ];
-      return raceFirstDetail(tasks);
-    }
-
-    async function fetchVideoStreamDetails(videoId, forceRefresh = false) {
-      if (!videoId) return null;
-      if (!forceRefresh && videoStreamDetailCache.has(videoId)) {
-        const cached = videoStreamDetailCache.get(videoId);
-        if (cached && cached.description) return cached;
+      if (!forceRefresh && relatedShortsCache.has(cacheKey)) {
+        return relatedShortsCache.get(cacheKey).filter(s => s && s.id && s.id !== excludeVideoId);
       }
 
-      const oembedPromise = fetchYoutubeOembed(videoId);
-      const pipedAll = [...STREAM_PIPED_SERVERS, ...INFO_EXTRA_PIPED];
-      const invAll = [...STREAM_INVIDIOUS_SERVERS, ...INFO_EXTRA_INVIDIOUS];
+      const seen = new Set();
+      if (excludeVideoId) seen.add(excludeVideoId);
+      const primaryShorts = [];
+      const fallbackShorts = [];
 
-      const descTasks = [
-        // YouTube 원본 watch 페이지에서 레시피 전문 직접 추출 (Piped/Invidious 차단 대비 최강 백업)
-        async () => fetchYoutubeWatchDescription(videoId)
-      ];
-
-      if (customStreamApiUrl && !customStreamApiUrl.includes('{id}')) {
-        const base = customStreamApiUrl.replace(/\/+$/, '');
-        descTasks.push(async () => {
-          const obj = parseVideoDetailFromApi(await fetchJsonWithTimeout(base + '/streams/' + videoId, 5000), base, videoId);
-          return (obj && obj.description) ? obj : null;
-        });
-        descTasks.push(async () => {
-          const obj = parseVideoDetailFromApi(await fetchJsonWithTimeout(base + '/api/v1/videos/' + videoId, 5000), base, videoId);
-          return (obj && obj.description) ? obj : null;
-        });
-      }
-
-      pipedAll.forEach(server => {
-        descTasks.push(async () => {
-          const obj = parseVideoDetailFromApi(await fetchJsonWithTimeout(server + '/streams/' + videoId, 5500), server, videoId);
-          return (obj && obj.description) ? obj : null;
-        });
-      });
-
-      invAll.forEach(inv => {
-        descTasks.push(async () => {
-          const obj = parseVideoDetailFromApi(await fetchJsonWithTimeout(inv + '/api/v1/videos/' + videoId, 5500), inv, videoId);
-          return (obj && obj.description) ? obj : null;
-        });
-      });
-
-      const [richDetail, oembed] = await Promise.all([
-        raceFirstDetail(descTasks),
-        oembedPromise
-      ]);
-
-      let merged = richDetail ? { ...richDetail } : null;
-      if (!merged && oembed) {
-        merged = {
-          title: oembed.title,
-          uploader: oembed.uploader,
-          uploadDate: '',
-          views: 0,
-          likes: 0,
-          duration: 0,
-          description: '',
-          audioUrls: [],
-          videoUrls: []
-        };
-      } else if (merged && oembed) {
-        if (!merged.title && oembed.title) merged.title = oembed.title;
-        if (!merged.uploader && oembed.uploader) merged.uploader = oembed.uploader;
-      }
-
-      if (merged) {
-        if (videoStreamDetailCache.size >= 40) {
-          const firstKey = videoStreamDetailCache.keys().next().value;
-          videoStreamDetailCache.delete(firstKey);
+      const localSeeds = collectLocalSeedShorts(excludeVideoId);
+      localSeeds.forEach(s => {
+        if (!seen.has(s.id)) {
+          seen.add(s.id);
+          primaryShorts.push(s);
         }
-        videoStreamDetailCache.set(videoId, merged);
+      });
 
-        // 요리 영상 고정 댓글(레시피) 백그라운드 보너스 조회 -> 도착 즉시 더보기창에 자동 표시
-        fetchPinnedComment(videoId).then(pinObj => {
-          if (!pinObj || !pinObj.text) return;
-          merged.pinnedComment = pinObj;
-          if (currentVideoId === videoId) {
-            renderTabletInfoContent(videoId, currentVideoTitle, merged);
+      const queries = [kw + ' #shorts', kw + ' shorts'];
+      for (let qi = 0; qi < queries.length; qi++) {
+        if (primaryShorts.length >= 15) break;
+        try {
+          const { data } = await smartFetch('/search?q=' + encodeURIComponent(queries[qi]) + '&filter=videos');
+          const items = (data && Array.isArray(data.items)) ? data.items : [];
+          for (const raw of items) {
+            if (!raw || isLikelyAdVideo(raw)) continue;
+            const vid = extractVideoId(raw);
+            if (!vid || seen.has(vid)) continue;
+            seen.add(vid);
+            const rawTitle = String(raw.title || '제목 없음');
+            const dur = Number(raw.duration || 0) || 0;
+            const views = Number(raw.views || 0) || 0;
+            const uploaded = Number(raw.uploaded || 0) || 0;
+            const obj = { id: vid, t: simplifyTitle(rawTitle), d: dur, v: views, u: uploaded };
+
+            const isShortItem = (raw.isShort === true) ||
+              /\/shorts\//i.test(String(raw.url || '')) ||
+              (dur > 0 && dur <= 65) ||
+              /#shorts|쇼츠/i.test(rawTitle);
+
+            if (isShortItem) {
+              primaryShorts.push(obj);
+            } else if (dur <= 240) {
+              fallbackShorts.push(obj);
+            }
           }
-        }).catch(() => {});
+        } catch (e) {}
       }
-      return merged;
-    }
 
-    function reloadCurrentVideoInfo() {
-      if (!currentVideoId) return;
-      videoStreamDetailCache.delete(currentVideoId);
-      const descEl = document.getElementById('tiDesc');
-      if (descEl) descEl.textContent = '상세설명 · 레시피 정보를 다시 불러오는 중...';
-      const pinWrap = document.getElementById('tiPinnedWrap');
-      if (pinWrap) pinWrap.classList.remove('visible');
-      const p = fetchVideoStreamDetails(currentVideoId, true);
-      p.then(detail => {
-        if (currentVideoId) renderTabletInfoContent(currentVideoId, currentVideoTitle, detail);
-      });
+      // 기본 3개 이상 확보(최대 25개): 쇼츠 우선 + 부족 시 짧은 관련 영상 자동 보충
+      const combined = primaryShorts.length >= 3
+        ? primaryShorts.slice(0, 25)
+        : [...primaryShorts, ...fallbackShorts].slice(0, 25);
+
+      if (combined.length > 0) {
+        if (relatedShortsCache.size >= 30) {
+          const firstKey = relatedShortsCache.keys().next().value;
+          relatedShortsCache.delete(firstKey);
+        }
+        relatedShortsCache.set(cacheKey, combined);
+      }
+      return combined;
     }
 
     function updateTabletStreamTabUI() {
@@ -5637,61 +5664,224 @@
       }
     }
 
-    function toggleTabletStreamMode() {
-      if (!currentVideoId || !isTabletMode) return;
-      if (isDirectVideoActive) {
-        tabletAdFreeMode = false;
-        directVideoAttemptSeq++;
-        mountYoutubeEmbed(currentVideoId, false);
-        showTempBgStatus('YouTube 기본 플레이어로 전환됨', 2000);
-      } else {
-        tabletAdFreeMode = true;
-        const p = fetchVideoStreamDetails(currentVideoId);
-        tryPlayDirectVideo(currentVideoId, p);
-        showTempBgStatus('광고 없는 직접 스트림 연결 시도 중...', 2200);
+    function sendShortsYtCommand(func, args = []) {
+      const frame = document.getElementById('shortsYtFrame');
+      if (!frame || !frame.contentWindow) return;
+      try {
+        frame.contentWindow.postMessage(JSON.stringify({ event: 'command', func, args }), '*');
+      } catch (e) {}
+    }
+
+    function pauseShortsPlayer() {
+      if (!isShortsPlaying) return;
+      sendShortsYtCommand('pauseVideo');
+      isShortsPlaying = false;
+    }
+
+    function stopShortsPlayerClean() {
+      const holder = document.getElementById('shortsIframeHolder');
+      if (holder) holder.innerHTML = '';
+      shortsFrameReady = false;
+      isShortsPlaying = false;
+      currentShortsIdx = -1;
+      const pv = document.getElementById('shortsPlayerView');
+      const lv = document.getElementById('shortsListView');
+      const backBtn = document.getElementById('shortsBackToListBtn');
+      const hdrLbl = document.getElementById('shortsHeaderLabel');
+      if (pv) pv.classList.remove('active');
+      if (lv) lv.style.display = 'flex';
+      if (backBtn) backBtn.classList.remove('visible');
+      if (hdrLbl) hdrLbl.textContent = currentShortsQueryKey ? ('▶ ' + currentShortsQueryKey + ' 쇼츠') : '▶ 관련 쇼츠';
+    }
+
+    function exitShortsPlayerToList() {
+      stopShortsPlayerClean();
+      renderShortsListView(currentShortsList);
+    }
+
+    function renderShortsListView(list, loadingText = '') {
+      const lv = document.getElementById('shortsListView');
+      const hdrLbl = document.getElementById('shortsHeaderLabel');
+      if (!lv) return;
+
+      if (hdrLbl) {
+        const cntText = Array.isArray(list) && list.length > 0 ? (' (' + list.length + ')') : '';
+        hdrLbl.textContent = (currentShortsQueryKey ? ('▶ ' + currentShortsQueryKey + ' 쇼츠') : '▶ 관련 쇼츠') + cntText;
+      }
+
+      if (loadingText && (!list || list.length === 0)) {
+        lv.innerHTML = '<div class="shorts-status-msg">' + loadingText + '</div>';
+        return;
+      }
+      if (!list || list.length === 0) {
+        lv.innerHTML = '<div class="shorts-status-msg">관련 쇼츠를 찾지 못했습니다.<br>우측 상단 ↻ 버튼으로 다시 검색해 보세요.</div>';
+        return;
+      }
+
+      lv.innerHTML = '';
+      const frag = document.createDocumentFragment();
+      list.forEach((item, idx) => {
+        const card = document.createElement('div');
+        card.className = 'shorts-card' + (idx === currentShortsIdx ? ' active-short' : '');
+        card.onclick = () => playRelatedShortAt(idx);
+
+        const thumbBox = document.createElement('div');
+        thumbBox.className = 'shorts-thumb-box';
+        const img = document.createElement('img');
+        img.src = getFastThumbUrl(item.id);
+        img.loading = 'lazy';
+        img.decoding = 'async';
+        img.onerror = function() { this.onerror = null; this.src = FALLBACK_THUMB; };
+        thumbBox.appendChild(img);
+
+        const playBadge = document.createElement('div');
+        playBadge.className = 'shorts-play-badge';
+        playBadge.textContent = '▶';
+        thumbBox.appendChild(playBadge);
+
+        if (item.d > 0) {
+          const durTag = document.createElement('span');
+          durTag.className = 'shorts-dur-tag';
+          durTag.textContent = formatSec(item.d);
+          thumbBox.appendChild(durTag);
+        }
+
+        const info = document.createElement('div');
+        info.className = 'shorts-card-info';
+        const titleEl = document.createElement('div');
+        titleEl.className = 'shorts-card-title';
+        titleEl.textContent = item.t;
+        const metaEl = document.createElement('div');
+        metaEl.className = 'shorts-card-meta';
+        metaEl.textContent = formatFeedMeta(item.u, item.v);
+        info.appendChild(titleEl);
+        info.appendChild(metaEl);
+
+        card.appendChild(thumbBox);
+        card.appendChild(info);
+        frag.appendChild(card);
+      });
+      lv.appendChild(frag);
+    }
+
+    function playRelatedShortAt(idx) {
+      if (!Array.isArray(currentShortsList) || currentShortsList.length === 0) return;
+      const safeIdx = ((idx % currentShortsList.length) + currentShortsList.length) % currentShortsList.length;
+      const item = currentShortsList[safeIdx];
+      if (!item || !item.id) return;
+
+      // 소리 겹침 방지: 왼쪽 메인 영상 & 백그라운드 오디오 자동 일시정지
+      sendYtCommand('pauseVideo');
+      isYtVideoPlaying = false;
+      if (isBgAudioPlaying && !bgAudio.paused) {
+        userPausedBg = true;
+        bgAudio.pause();
+      }
+      updateSlideBookmarkPlayUI();
+
+      currentShortsIdx = safeIdx;
+      isShortsPlaying = true;
+
+      const lv = document.getElementById('shortsListView');
+      const pv = document.getElementById('shortsPlayerView');
+      const backBtn = document.getElementById('shortsBackToListBtn');
+      const hdrLbl = document.getElementById('shortsHeaderLabel');
+      const navIdx = document.getElementById('shortsNavIdx');
+      const capTitle = document.getElementById('shortsCaptionTitle');
+      const capSub = document.getElementById('shortsCaptionSub');
+
+      if (lv) lv.style.display = 'none';
+      if (pv) pv.classList.add('active');
+      if (backBtn) backBtn.classList.add('visible');
+      if (hdrLbl) hdrLbl.textContent = '쇼츠 ' + (safeIdx + 1) + '/' + currentShortsList.length;
+      if (navIdx) navIdx.textContent = (safeIdx + 1) + '/' + currentShortsList.length;
+      if (capTitle) capTitle.textContent = item.t;
+      if (capSub) capSub.textContent = formatFeedMeta(item.u, item.v) + (item.d > 0 ? (' · ' + formatSec(item.d)) : '') + ' · 위/아래 스와이프';
+
+      const holder = document.getElementById('shortsIframeHolder');
+      const existing = document.getElementById('shortsYtFrame');
+      if (existing && shortsFrameReady) {
+        sendShortsYtCommand('loadVideoById', [item.id]);
+        sendShortsYtCommand('playVideo');
+      } else if (holder) {
+        shortsFrameReady = false;
+        const originParam = (location.protocol === 'http:' || location.protocol === 'https:') ? ('&origin=' + encodeURIComponent(location.origin)) : '';
+        holder.innerHTML = '<iframe id="shortsYtFrame" src="https://www.youtube-nocookie.com/embed/' + item.id + '?autoplay=1&controls=1&fs=1&enablejsapi=1&modestbranding=1&rel=0&playsinline=1&iv_load_policy=3&cc_load_policy=0' + originParam + '" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>';
+        const frame = document.getElementById('shortsYtFrame');
+        if (frame) {
+          frame.addEventListener('load', () => {
+            shortsFrameReady = true;
+            try {
+              frame.contentWindow.postMessage(JSON.stringify({ event: 'listening', id: 3 }), '*');
+              frame.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'addEventListener', args: ['onStateChange'] }), '*');
+              frame.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'playVideo', args: [] }), '*');
+            } catch (e) {}
+          });
+        }
       }
     }
 
-    (function bindDirectVideoEvents() {
-      const dv = document.getElementById('directVideoPlayer');
-      if (!dv) return;
-      dv.addEventListener('playing', () => {
-        const mask = document.getElementById('directLoadingMask');
-        if (mask) mask.classList.remove('active');
-        if (isBgAudioPlaying) stopBgAudioClean();
-        hideYtPauseMask();
-        isDirectVideoActive = true;
-        updateTabletStreamTabUI();
-        updateSearchBtnState();
-        updateSlideBookmarkPlayUI();
-        if ('mediaSession' in navigator) {
-          try { navigator.mediaSession.playbackState = 'playing'; } catch (e) {}
-        }
+    function stepRelatedShort(delta) {
+      if (!Array.isArray(currentShortsList) || currentShortsList.length === 0) return;
+      const base = currentShortsIdx < 0 ? 0 : currentShortsIdx;
+      playRelatedShortAt(base + delta);
+    }
+
+    function reloadRelatedShorts() {
+      if (!currentVideoId) return;
+      stopShortsPlayerClean();
+      const kw = getRelatedShortsKeyword(currentVideoTitle);
+      relatedShortsCache.delete(kw.toLowerCase());
+      openTabletInfoModal(currentVideoId, currentVideoTitle, true);
+    }
+
+    (function bindShortsSwipeGestures() {
+      const targets = [
+        document.getElementById('shortsSwipeL'),
+        document.getElementById('shortsSwipeR'),
+        document.getElementById('shortsCaptionBar')
+      ].filter(Boolean);
+
+      targets.forEach(el => {
+        let sy = 0, active = false;
+        el.addEventListener('pointerdown', (e) => {
+          sy = e.clientY;
+          active = true;
+          try { el.setPointerCapture(e.pointerId); } catch (err) {}
+          e.stopPropagation();
+        });
+        el.addEventListener('pointerup', (e) => {
+          if (!active) return;
+          active = false;
+          const dy = e.clientY - sy;
+          if (dy <= -36) stepRelatedShort(1);
+          else if (dy >= 36) stepRelatedShort(-1);
+        });
+        el.addEventListener('pointercancel', () => { active = false; });
       });
-      dv.addEventListener('pause', () => {
-        updateSlideBookmarkPlayUI();
-        if ('mediaSession' in navigator && isDirectVideoActive) {
-          try { navigator.mediaSession.playbackState = 'paused'; } catch (e) {}
-        }
-      });
-      dv.addEventListener('timeupdate', () => {
-        if (isDirectVideoActive && dv.currentTime > 0) {
-          lastKnownPlaySec = dv.currentTime;
-        }
-      });
-      dv.addEventListener('error', () => {
-        if (!isDirectVideoActive || !currentVideoId || !dv.getAttribute('src')) return;
-        tryPlayDirectCandidateAt(directVideoCandIdx + 1, currentVideoId, directVideoAttemptSeq);
-      });
+
+      const pv = document.getElementById('shortsPlayerView');
+      if (pv) {
+        let lastWheel = 0;
+        pv.addEventListener('wheel', (e) => {
+          if (!pv.classList.contains('active')) return;
+          const now = Date.now();
+          if (now - lastWheel < 420) return;
+          if (Math.abs(e.deltaY) >= 24) {
+            lastWheel = now;
+            stepRelatedShort(e.deltaY > 0 ? 1 : -1);
+          }
+        }, { passive: true });
+      }
     })();
 
-    // 모바일·태블릿 공용 독립 더보기창 제어 (자유 이동 / 하단·모서리 리사이즈 / 비례 확대축소)
+    // 모바일·태블릿 공용 독립 관련 쇼츠 창 제어 (자유 이동 / 하단·모서리 리사이즈 / 비례 확대축소)
     function applyTabletInfoDimensions(w, h) {
       const tiModal = document.getElementById('tablet-info-modal');
       if (!tiModal) return { width: 280, height: 320 };
       const minW = isTabletMode ? 175 : 168;
       const maxW = Math.max(minW, window.innerWidth - 16);
-      const minH = 115;
+      const minH = 140;
       const maxH = Math.max(minH, window.innerHeight - 20);
       const clampedW = Math.max(minW, Math.min(maxW, Math.round(w)));
       const clampedH = Math.max(minH, Math.min(maxH, Math.round(h)));
@@ -5716,6 +5906,7 @@
     }
 
     function hideTabletInfoModal(byUser = false) {
+      stopShortsPlayerClean();
       const tiModal = document.getElementById('tablet-info-modal');
       if (tiModal) tiModal.style.display = 'none';
       if (byUser) tiUserClosed = true;
@@ -5729,7 +5920,7 @@
         hideTabletInfoModal(true);
       } else {
         tiUserClosed = false;
-        openTabletInfoModal(currentVideoId, currentVideoTitle, fetchVideoStreamDetails(currentVideoId));
+        openTabletInfoModal(currentVideoId, currentVideoTitle, false);
       }
     }
 
@@ -5741,61 +5932,11 @@
         hideTabletInfoModal(true);
       } else {
         tiUserClosed = false;
-        openTabletInfoModal(currentVideoId, currentVideoTitle, fetchVideoStreamDetails(currentVideoId));
+        openTabletInfoModal(currentVideoId, currentVideoTitle, false);
       }
     }
 
-    function renderTabletInfoContent(videoId, fallbackTitle, detail) {
-      if (currentVideoId !== videoId) return;
-      const titleEl = document.getElementById('tiTitle');
-      const metaEl = document.getElementById('tiMeta');
-      const descEl = document.getElementById('tiDesc');
-      const pinWrap = document.getElementById('tiPinnedWrap');
-      const pinText = document.getElementById('tiPinnedText');
-      if (!titleEl || !metaEl || !descEl) return;
-
-      const feedItem = currentFeedItems.find(it => it && it.id === videoId);
-      const dispTitle = (detail && detail.title) || fallbackTitle || (feedItem && feedItem.t) || '제목 없음';
-      titleEl.textContent = dispTitle;
-
-      const metaParts = [];
-      const uploaderName = (detail && detail.uploader) || (feedItem && feedItem._up) || '';
-      if (uploaderName) metaParts.push(uploaderName);
-      if (detail && detail.views) metaParts.push('조회수 ' + formatKoreanViews(detail.views));
-      else if (feedItem && feedItem.v) metaParts.push('조회수 ' + formatKoreanViews(feedItem.v));
-      if (detail && detail.likes) metaParts.push('좋아요 ' + formatKoreanViews(detail.likes));
-      if (detail && detail.uploadDate) metaParts.push(detail.uploadDate);
-      else if (feedItem && feedItem.u) metaParts.push(formatFeedMeta(feedItem.u, feedItem.v).split(' - ')[0]);
-      const dur = (detail && detail.duration) || (feedItem && feedItem.d) || 0;
-      if (dur > 0) metaParts.push('길이 ' + formatSec(dur));
-
-      metaEl.textContent = metaParts.length > 0 ? metaParts.join(' · ') : '상세 정보 확인 중...';
-
-      if (detail && detail.description) {
-        descEl.textContent = detail.description;
-      } else if (detail && !detail.description) {
-        descEl.textContent = (feedItem && feedItem._sd)
-          ? feedItem._sd
-          : '상세 설명을 불러오지 못했습니다. 우측 상단 ↻ 버튼을 눌러 다시 시도해 주세요.';
-      } else {
-        descEl.textContent = (feedItem && feedItem._sd)
-          ? (feedItem._sd + '\n\n(전체 상세설명 · 레시피 불러오는 중...)')
-          : '영상 상세설명 · 레시피 정보를 불러오고 있습니다...';
-      }
-
-      if (pinWrap && pinText) {
-        if (detail && detail.pinnedComment && detail.pinnedComment.text) {
-          const authorPrefix = detail.pinnedComment.author ? ('[' + detail.pinnedComment.author + ']\n') : '';
-          pinText.textContent = authorPrefix + detail.pinnedComment.text;
-          pinWrap.classList.add('visible');
-        } else {
-          pinText.textContent = '';
-          pinWrap.classList.remove('visible');
-        }
-      }
-    }
-
-    function openTabletInfoModal(videoId, title, detailPromise) {
+    function openTabletInfoModal(videoId, title, forceRefresh = false) {
       const tiModal = document.getElementById('tablet-info-modal');
       if (!tiModal) return;
 
@@ -5805,7 +5946,7 @@
       }
       tiLastDeviceMode = curDev;
 
-      renderTabletInfoContent(videoId, title, videoStreamDetailCache.get(videoId) || null);
+      stopShortsPlayerClean();
       tiModal.style.display = 'flex';
 
       if (!tiUserCustomized) {
@@ -5817,8 +5958,8 @@
           const initW = rightAvail >= 190
             ? Math.min(480, rightAvail)
             : Math.min(320, Math.max(195, Math.round(window.innerWidth * 0.32)));
-          const maxAvailH = Math.max(220, window.innerHeight - playerRect.top - 16);
-          const initH = Math.min(maxAvailH, Math.max(playerRect.height || 280, Math.round((playerRect.height || 280) * 1.28)));
+          const maxAvailH = Math.max(240, window.innerHeight - playerRect.top - 16);
+          const initH = Math.min(maxAvailH, Math.max(playerRect.height || 290, Math.round((playerRect.height || 290) * 1.24)));
           const dims = applyTabletInfoDimensions(initW, initH);
           const targetLeft = rightAvail >= 190
             ? Math.round(playerRect.right + gap)
@@ -5830,12 +5971,12 @@
           const gap = 8;
           const initW = Math.min(window.innerWidth - 16, Math.max(220, Math.round(playerRect.width || (window.innerWidth - 16))));
           const belowSpace = window.innerHeight - playerRect.bottom - gap - 14;
-          const initH = belowSpace >= 140
-            ? Math.min(260, belowSpace)
-            : Math.min(240, Math.max(150, Math.round(window.innerHeight * 0.36)));
+          const initH = belowSpace >= 180
+            ? Math.min(290, belowSpace)
+            : Math.min(260, Math.max(180, Math.round(window.innerHeight * 0.40)));
           const dims = applyTabletInfoDimensions(initW, initH);
           const targetLeft = Math.max(8, Math.min(window.innerWidth - dims.width - 8, Math.round(playerRect.left)));
-          const targetTop = belowSpace >= 140
+          const targetTop = belowSpace >= 180
             ? Math.round(playerRect.bottom + gap)
             : Math.max(10, window.innerHeight - dims.height - 12);
           tiModal.style.left = targetLeft + 'px';
@@ -5845,22 +5986,23 @@
         clampTabletInfoModalToViewport();
       }
 
-      const bodyEl = document.getElementById('tiBody');
-      if (bodyEl) bodyEl.scrollTop = 0;
+      const kw = getRelatedShortsKeyword(title);
+      currentShortsQueryKey = kw;
+      const seedShorts = collectLocalSeedShorts(videoId);
+      currentShortsList = seedShorts;
+      renderShortsListView(seedShorts, '관련 쇼츠 3개 이상 검색 중...');
 
-      if (detailPromise && typeof detailPromise.then === 'function') {
-        detailPromise.then(detail => {
-          if (currentVideoId !== videoId) return;
-          if (detail) {
-            renderTabletInfoContent(videoId, title, detail);
-          } else {
-            const descEl = document.getElementById('tiDesc');
-            if (descEl && descEl.textContent.includes('불러오고 있습니다')) {
-              descEl.textContent = '상세 설명을 불러오지 못했습니다. (공개 API 응답 지연)';
-            }
-          }
-        });
-      }
+      const lv = document.getElementById('shortsListView');
+      if (lv) lv.scrollTop = 0;
+
+      const mySeq = ++shortsFetchSeq;
+      fetchRelatedShorts(kw, videoId, forceRefresh).then(list => {
+        if (mySeq !== shortsFetchSeq || currentVideoId !== videoId) return;
+        currentShortsList = list;
+        if (!isShortsPlaying) {
+          renderShortsListView(list);
+        }
+      });
     }
 
     (function bindTabletInfoInteractions() {
@@ -5998,8 +6140,6 @@
       modal.style.top = topPos + 'px';
       modal.style.display = 'block';
 
-      const detailPromise = isTabletMode ? fetchVideoStreamDetails(videoId) : null;
-
       // 안정적 재생 + 광고 최소(youtube-nocookie + 모바일급 소형 뷰포트 스케일)
       mountYoutubeEmbed(videoId, true);
 
@@ -6017,7 +6157,7 @@
       updatePlayingCardHighlight(true);
 
       if (isTabletMode && !tiUserClosed) {
-        openTabletInfoModal(videoId, title, detailPromise);
+        openTabletInfoModal(videoId, title, false);
       } else if (!isTabletMode) {
         hideTabletInfoModal(false);
       }
@@ -8035,6 +8175,23 @@
       if (!e.data || typeof e.data !== 'string') return;
       try {
         const msg = JSON.parse(e.data);
+        const shortsFrame = document.getElementById('shortsYtFrame');
+        if (shortsFrame && e.source === shortsFrame.contentWindow) {
+          if (msg.event === 'infoDelivery' && msg.info && typeof msg.info.playerState === 'number') {
+            if (msg.info.playerState === 1) {
+              isShortsPlaying = true;
+              sendYtCommand('pauseVideo');
+              isYtVideoPlaying = false;
+              updateSlideBookmarkPlayUI();
+            } else if (msg.info.playerState === 0) {
+              // 쇼츠 종료 시 자동으로 다음 쇼츠 슬라이드!
+              stepRelatedShort(1);
+            } else if (msg.info.playerState === 2) {
+              isShortsPlaying = false;
+            }
+          }
+          return;
+        }
         if (msg.event === 'onError' && currentVideoId) {
           if (isDirectVideoActive) return;
           const errNum = Number(msg.info);
@@ -8058,6 +8215,7 @@
           if (typeof msg.info.playerState === 'number') {
             if (msg.info.playerState === 1) {
               isYtVideoPlaying = true;
+              pauseShortsPlayer();
               hideYtPauseMask();
               updateSearchBtnState();
               updateSlideBookmarkPlayUI();
@@ -8570,7 +8728,7 @@
       updateBgModeUI();
       updateSlideBookmarkPlayUI();
       if (isTabletMode && !tiUserClosed && currentVideoId) {
-        openTabletInfoModal(currentVideoId, currentVideoTitle, fetchVideoStreamDetails(currentVideoId));
+        openTabletInfoModal(currentVideoId, currentVideoTitle, false);
       }
     }
 
