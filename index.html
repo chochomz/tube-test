@@ -1469,19 +1469,11 @@
     }
     #battery-blackout-overlay.active { display: flex; }
 
-    /* 태블릿 전용 큰 테두리 6~8 및 플레이어 보조 탭 + 모바일 전용 [...] 더보기 탭 */
+    /* 태블릿 전용 큰 테두리 6~8 및 플레이어 보조 탭 (모바일 쇼츠 미사용) */
     .tablet-only-bwidth { display: none; }
     body.tablet-mode .tablet-only-bwidth { display: inline-flex; }
     .tablet-only-tab { display: none; }
     body.tablet-mode .tablet-only-tab { display: inline-flex; align-items: center; }
-    .mobile-only-tab {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1.5px 6px 2px 6px !important;
-    }
-    body.tablet-mode .mobile-only-tab { display: none; }
-    .mobile-more-svg { width: 14px; height: 11px; display: block; }
 
     /* 태블릿 광고 최소화 Direct <video> 플레이어 & 로딩 마스크 */
     #directVideoPlayer {
@@ -1542,10 +1534,7 @@
       --ti-scale: 1;
       touch-action: none;
     }
-    body:not(.tablet-mode) #tablet-info-modal {
-      border-radius: 8px;
-      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.86);
-    }
+    body:not(.tablet-mode) #tablet-info-modal { display: none !important; }
     #tablet-info-modal.ti-interacting { user-select: none; -webkit-user-select: none; }
     .ti-header {
       display: flex;
@@ -1595,24 +1584,28 @@
     .ti-header-left {
       display: inline-flex;
       align-items: center;
-      gap: calc(6px * var(--ti-scale));
+      gap: 6px;
       min-width: 0;
       flex: 1;
     }
-    .ti-back-btn {
-      display: none;
-      padding: calc(2.5px * var(--ti-scale)) calc(7px * var(--ti-scale));
+    .ti-auto-btn {
+      height: 24px;
+      padding: 0 8px;
       border-radius: 6px;
-      border: 1px solid rgba(255, 255, 255, 0.28);
-      background: rgba(255, 255, 255, 0.14);
-      color: inherit;
-      font-size: calc(10.5px * var(--ti-scale));
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      background: rgba(0, 0, 0, 0.35);
+      color: #a1a1aa;
+      font-size: 11px;
       font-weight: 800;
       cursor: pointer;
       white-space: nowrap;
       flex-shrink: 0;
     }
-    .ti-back-btn.visible { display: inline-flex; align-items: center; }
+    .ti-auto-btn.on {
+      background: rgba(217, 56, 106, 0.85);
+      border-color: var(--header-border-color);
+      color: #ffffff;
+    }
     .ti-body {
       flex: 1;
       min-height: 0;
@@ -1621,6 +1614,7 @@
       overflow: hidden;
       padding: 0;
     }
+    /* 창 확대/축소에 맞춰 카드 비율 유지 + 1~3열 및 세로 갯수 자동 확장 그리드 */
     .shorts-list-view {
       flex: 1;
       min-height: 0;
@@ -1629,53 +1623,54 @@
       -webkit-overflow-scrolling: touch;
       touch-action: pan-y;
       overscroll-behavior: contain;
-      padding: calc(6px * var(--ti-scale));
-      display: flex;
-      flex-direction: column;
-      gap: calc(6px * var(--ti-scale));
-      scroll-snap-type: y proximity;
+      padding: 6px 6px 16px 6px;
+      display: grid;
+      grid-template-columns: repeat(var(--shorts-cols, 1), minmax(0, 1fr));
+      grid-auto-rows: var(--shorts-card-h, 114px);
+      gap: 6px;
+      align-content: start;
     }
-    .shorts-list-view::-webkit-scrollbar { width: 4px; }
+    .shorts-list-view::-webkit-scrollbar { width: 5px; }
     .shorts-list-view::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.28); border-radius: 4px; }
     .shorts-status-msg {
-      flex: 1;
+      grid-column: 1 / -1;
       display: flex;
       align-items: center;
       justify-content: center;
       text-align: center;
-      padding: 16px;
-      font-size: calc(12px * var(--ti-scale));
+      padding: 24px 12px;
+      font-size: 13px;
       opacity: 0.78;
       line-height: 1.5;
     }
-    /* 기본 화면에 정확히 3개의 관련 쇼츠 카드가 세로로 표시 + 상하 스크롤 확장 */
     .shorts-card {
-      flex: 0 0 calc((100% - (calc(6px * var(--ti-scale)) * 2)) / 3);
-      min-height: calc(74px * var(--ti-scale));
+      position: relative;
+      height: 100%;
       display: flex;
       align-items: stretch;
       gap: calc(8px * var(--ti-scale));
       padding: calc(5px * var(--ti-scale));
       border-radius: 8px;
       background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.12);
+      border: 1.5px solid rgba(255, 255, 255, 0.12);
       cursor: pointer;
-      scroll-snap-align: start;
       transition: background 0.14s, border-color 0.14s;
       overflow: hidden;
     }
     .shorts-card:active {
-      background: rgba(255, 255, 255, 0.14);
+      background: rgba(255, 255, 255, 0.15);
       border-color: var(--header-border-color);
     }
     .shorts-card.active-short {
       border-color: var(--header-border-color);
-      background: rgba(217, 56, 106, 0.18);
+      background: rgba(217, 56, 106, 0.22);
+      box-shadow: inset 0 0 0 1px var(--header-border-color);
     }
     .shorts-thumb-box {
       position: relative;
-      width: calc(68px * var(--ti-scale));
-      min-width: calc(56px * var(--ti-scale));
+      height: 100%;
+      aspect-ratio: 9 / 11;
+      max-width: 42%;
       border-radius: 6px;
       overflow: hidden;
       background: #111;
@@ -1693,7 +1688,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(0, 0, 0, 0.22);
+      background: rgba(0, 0, 0, 0.2);
       color: #ffffff;
       font-size: calc(15px * var(--ti-scale));
       text-shadow: 0 1px 6px rgba(0, 0, 0, 0.85);
@@ -1707,7 +1702,7 @@
       border-radius: 4px;
       background: rgba(0, 0, 0, 0.78);
       color: #ffffff;
-      font-size: calc(9px * var(--ti-scale));
+      font-size: calc(9.5px * var(--ti-scale));
       font-weight: 700;
       font-variant-numeric: tabular-nums;
       pointer-events: none;
@@ -1719,13 +1714,14 @@
       flex-direction: column;
       justify-content: center;
       gap: calc(4px * var(--ti-scale));
+      padding-right: 18px;
     }
     .shorts-card-title {
-      font-size: calc(12px * var(--ti-scale));
+      font-size: calc(12.5px * var(--ti-scale));
       font-weight: 700;
       line-height: 1.32;
       display: -webkit-box;
-      -webkit-line-clamp: 2;
+      -webkit-line-clamp: 3;
       -webkit-box-orient: vertical;
       overflow: hidden;
       word-break: break-word;
@@ -1738,106 +1734,38 @@
       text-overflow: ellipsis;
       font-variant-numeric: tabular-nums;
     }
-
-    /* 쇼츠 터치 시 상하 스와이프 쇼츠 플레이어 뷰 */
-    .shorts-player-view {
-      display: none;
-      flex: 1;
-      min-height: 0;
-      flex-direction: column;
-      background: #000;
-      overflow: hidden;
-    }
-    .shorts-player-view.active { display: flex; }
-    .shorts-stage-wrap {
-      position: relative;
-      flex: 1;
-      min-height: 0;
-      background: #000;
-      overflow: hidden;
-    }
-    #shortsIframeHolder {
-      width: 100%;
-      height: 100%;
-    }
-    #shortsIframeHolder iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-      display: block;
-    }
-    .shorts-swipe-zone {
+    .shorts-star-btn {
       position: absolute;
-      top: 0;
-      bottom: 42px;
-      width: 24px;
-      z-index: 6;
-      touch-action: none;
-    }
-    .shorts-swipe-zone.left { left: 0; }
-    .shorts-swipe-zone.right { right: 0; width: 42px; }
-    .shorts-nav-col {
-      position: absolute;
-      right: 6px;
-      top: 50%;
-      transform: translateY(-50%);
-      z-index: 8;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: calc(6px * var(--ti-scale));
-    }
-    .shorts-nav-btn {
-      width: calc(30px * var(--ti-scale));
-      height: calc(30px * var(--ti-scale));
-      min-width: 26px;
-      min-height: 26px;
+      top: 4px;
+      right: 4px;
+      z-index: 3;
+      width: 22px;
+      height: 22px;
       border-radius: 50%;
-      border: 1.5px solid rgba(255, 255, 255, 0.72);
-      background: rgba(0, 0, 0, 0.56);
-      color: #ffffff;
-      font-size: calc(12px * var(--ti-scale));
-      font-weight: 800;
-      display: inline-flex;
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      background: rgba(0, 0, 0, 0.48);
+      color: rgba(255, 255, 255, 0.75);
+      font-size: 12px;
+      line-height: 1;
+      display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
+      padding: 0;
     }
-    .shorts-nav-btn:active { transform: scale(0.9); background: rgba(217, 56, 106, 0.8); }
-    .shorts-nav-idx {
-      padding: 2px 5px;
-      border-radius: 6px;
-      background: rgba(0, 0, 0, 0.65);
-      color: #f9a8d4;
-      font-size: calc(9.5px * var(--ti-scale));
-      font-weight: 800;
-      font-variant-numeric: tabular-nums;
-      pointer-events: none;
+    .shorts-star-btn.pinned {
+      border-color: var(--star-pin-color);
+      color: var(--star-pin-color);
+      text-shadow: 0 0 6px var(--star-pin-color);
     }
-    .shorts-caption-bar {
-      flex-shrink: 0;
-      padding: calc(7px * var(--ti-scale)) calc(10px * var(--ti-scale)) calc(14px * var(--ti-scale)) calc(10px * var(--ti-scale));
-      background: var(--settings-modal-bg);
-      color: var(--settings-modal-fg);
-      border-top: 1px solid rgba(255, 255, 255, 0.14);
-      touch-action: none;
-      cursor: ns-resize;
-    }
-    .shorts-caption-title {
-      font-size: calc(11.5px * var(--ti-scale));
-      font-weight: 700;
-      line-height: 1.3;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .shorts-caption-sub {
-      font-size: calc(9.5px * var(--ti-scale));
-      opacity: 0.66;
-      margin-top: 2px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+    .shorts-sentinel {
+      grid-column: 1 / -1;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11.5px;
+      opacity: 0.7;
     }
     .ti-resizer {
       position: absolute;
@@ -2984,14 +2912,6 @@
         <div class="bookmark-tab tablet-only-tab" id="tabletInfoToggleTab" onclick="toggleTabletInfoModal()" title="관련 쇼츠 창 열기/닫기">
           <span>쇼츠</span>
         </div>
-        <div class="bookmark-tab mobile-only-tab" id="mobileInfoToggleTab" onclick="toggleMobileInfoModal()" title="관련 쇼츠 보기">
-          <svg class="mobile-more-svg" viewBox="0 0 20 15" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" aria-hidden="true">
-            <rect x="1.5" y="1.5" width="17" height="12" rx="2.8"/>
-            <circle cx="6.2" cy="7.5" r="1.25" fill="currentColor" stroke="none"/>
-            <circle cx="10" cy="7.5" r="1.25" fill="currentColor" stroke="none"/>
-            <circle cx="13.8" cy="7.5" r="1.25" fill="currentColor" stroke="none"/>
-          </svg>
-        </div>
         <div class="bookmark-tab tab-close" onclick="closePlayerModal()" title="닫기">
           <svg class="tab-close-ear ear-l" viewBox="0 0 8 8" aria-hidden="true"><path d="M 0,0 L 8,0 L 8,8 Q 8,0 0,0 Z"/></svg>
           <span>✕</span>
@@ -3005,32 +2925,16 @@
   <div id="tablet-info-modal" style="--ti-scale: 1;">
     <div class="ti-header" id="tiDragBar" title="드래그하여 자유 배치">
       <div class="ti-header-left">
-        <button type="button" class="ti-back-btn" id="shortsBackToListBtn" onclick="exitShortsPlayerToList()" title="쇼츠 목록으로">≡ 목록</button>
         <span class="ti-header-label" id="shortsHeaderLabel">▶ 관련 쇼츠</span>
       </div>
       <div class="ti-header-actions">
+        <button type="button" class="ti-auto-btn on" id="shortsAutoNextBtn" onclick="toggleShortsAutoNext()" title="쇼츠 종료 시 다음 쇼츠 자동 연속 재생">연속</button>
         <button type="button" class="ti-refresh-btn" onclick="reloadRelatedShorts()" title="관련 쇼츠 다시 검색">↻</button>
         <button type="button" class="ti-close-btn" onclick="hideTabletInfoModal(true)" title="닫기">✕</button>
       </div>
     </div>
     <div class="ti-body" id="tiBody">
       <div class="shorts-list-view" id="shortsListView"></div>
-      <div class="shorts-player-view" id="shortsPlayerView">
-        <div class="shorts-stage-wrap" id="shortsStageWrap">
-          <div id="shortsIframeHolder"></div>
-          <div class="shorts-swipe-zone left" id="shortsSwipeL"></div>
-          <div class="shorts-swipe-zone right" id="shortsSwipeR"></div>
-          <div class="shorts-nav-col">
-            <button type="button" class="shorts-nav-btn" onclick="stepRelatedShort(-1)" title="이전 쇼츠">▲</button>
-            <span class="shorts-nav-idx" id="shortsNavIdx">1/1</span>
-            <button type="button" class="shorts-nav-btn" onclick="stepRelatedShort(1)" title="다음 쇼츠">▼</button>
-          </div>
-        </div>
-        <div class="shorts-caption-bar" id="shortsCaptionBar" title="위/아래 스와이프: 이전·다음 쇼츠">
-          <div class="shorts-caption-title" id="shortsCaptionTitle">-</div>
-          <div class="shorts-caption-sub" id="shortsCaptionSub">위/아래 스와이프 또는 ▲▼ 이동</div>
-        </div>
-      </div>
     </div>
     <div class="ti-resizer tl" data-tidir="tl"></div>
     <div class="ti-resizer tr" data-tidir="tr"></div>
@@ -3502,13 +3406,14 @@
     const relatedShortsCache = new Map();
     let currentShortsList = [];
     let currentShortsIdx = -1;
-    let isShortsPlaying = false;
-    let shortsFrameReady = false;
     let shortsFetchSeq = 0;
     let currentShortsQueryKey = '';
+    let shortsSession = null;
+    let shortsScrollObserver = null;
     let tiUserCustomized = false;
-    let tiUserClosed = false;
-    let tiLastDeviceMode = '';
+    let shortsPanelOpen = false;
+    let shortsAutoNext = true;
+    let activePlayingShortId = '';
     let blackoutWakeLock = null;
     let blackoutWatchdogTimer = null;
     let blackoutWantPlaying = false;
@@ -4381,6 +4286,7 @@
       }
       savePinsToCloud();
       renderSortedFeed();
+      if (typeof updateShortsStarUI === 'function') updateShortsStarUI();
     }
 
     // 3. 50개 단위 고속 검색 수집
@@ -5459,6 +5365,49 @@
       return cleaned.split(' ').slice(0, 3).join(' ');
     }
 
+    function isKoreanShortItem(item) {
+      const text = String((item && item.t) || '') + ' ' + String((item && item.up) || '');
+      return /[가-힣]/.test(text);
+    }
+
+    function sortShortsKoreanRecent(list) {
+      return [...(list || [])].sort((a, b) => {
+        const aKo = isKoreanShortItem(a) ? 1 : 0;
+        const bKo = isKoreanShortItem(b) ? 1 : 0;
+        if (aKo !== bKo) return bKo - aKo;
+        const aU = Number(a.u || 0);
+        const bU = Number(b.u || 0);
+        if (aU !== bU) return bU - aU;
+        return Number(b.v || 0) - Number(a.v || 0);
+      });
+    }
+
+    function extractShortBatchFromRaw(rawItems, seenIds) {
+      const primary = [];
+      const fallback = [];
+      for (const raw of (rawItems || [])) {
+        if (!raw || isLikelyAdVideo(raw)) continue;
+        const vid = extractVideoId(raw);
+        if (!vid || seenIds.has(vid)) continue;
+        seenIds.add(vid);
+        const rawTitle = String(raw.title || '제목 없음');
+        const dur = Number(raw.duration || 0) || 0;
+        const views = Number(raw.views || 0) || 0;
+        const uploaded = Number(raw.uploaded || 0) || 0;
+        const up = String(raw.uploaderName || raw.author || '').trim();
+        const obj = { id: vid, t: simplifyTitle(rawTitle), d: dur, v: views, u: uploaded, up };
+
+        const isShortItem = (raw.isShort === true) ||
+          /\/shorts\//i.test(String(raw.url || '')) ||
+          (dur > 0 && dur <= 65) ||
+          /#shorts|쇼츠/i.test(rawTitle);
+
+        if (isShortItem) primary.push(obj);
+        else if (dur <= 210) fallback.push(obj);
+      }
+      return { primary, fallback };
+    }
+
     function collectLocalSeedShorts(excludeVideoId) {
       const seen = new Set();
       if (excludeVideoId) seen.add(excludeVideoId);
@@ -5475,80 +5424,167 @@
             t: simplifyTitle(title),
             d: dur,
             v: Number(it.v || 0) || 0,
-            u: Number(it.u || 0) || 0
+            u: Number(it.u || 0) || 0,
+            up: String(it._up || '').trim()
           });
-          if (out.length >= 12) break;
         }
       }
-      return out;
+      return sortShortsKoreanRecent(out).slice(0, 12);
     }
 
-    async function fetchRelatedShorts(keyword, excludeVideoId, forceRefresh = false) {
+    async function initRelatedShortsFeed(keyword, excludeVideoId, forceRefresh = false) {
       const kw = String(keyword || '').trim() || '인기';
       const cacheKey = kw.toLowerCase();
       currentShortsQueryKey = kw;
+      const mySeq = ++shortsFetchSeq;
 
+      const seenIds = new Set();
+      if (excludeVideoId) seenIds.add(excludeVideoId);
+
+      // 캐시가 있고 강제 새로고침이 아니면 즉시 표시 + 기존 세션 복원
       if (!forceRefresh && relatedShortsCache.has(cacheKey)) {
-        return relatedShortsCache.get(cacheKey).filter(s => s && s.id && s.id !== excludeVideoId);
+        const cached = relatedShortsCache.get(cacheKey);
+        currentShortsList = cached.items.filter(s => s && s.id !== excludeVideoId);
+        shortsSession = {
+          keyword: kw,
+          cacheKey,
+          query: cached.query,
+          server: cached.server,
+          nextpage: cached.nextpage,
+          exhausted: cached.exhausted,
+          loading: false,
+          altIdx: cached.altIdx || 0,
+          seenIds: new Set([...seenIds, ...currentShortsList.map(s => s.id)])
+        };
+        renderShortsListView(currentShortsList, false);
+        return;
       }
-
-      const seen = new Set();
-      if (excludeVideoId) seen.add(excludeVideoId);
-      const primaryShorts = [];
-      const fallbackShorts = [];
 
       const localSeeds = collectLocalSeedShorts(excludeVideoId);
-      localSeeds.forEach(s => {
-        if (!seen.has(s.id)) {
-          seen.add(s.id);
-          primaryShorts.push(s);
+      localSeeds.forEach(s => seenIds.add(s.id));
+      currentShortsList = localSeeds;
+      renderShortsListView(localSeeds, true);
+
+      const queryList = [kw + ' 쇼츠 #shorts', kw + ' #shorts', kw + ' shorts'];
+      shortsSession = {
+        keyword: kw,
+        cacheKey,
+        queries: queryList,
+        altIdx: 0,
+        query: queryList[0],
+        server: '',
+        nextpage: null,
+        exhausted: false,
+        loading: true,
+        seenIds
+      };
+
+      try {
+        const { data, server } = await smartFetch('/search?q=' + encodeURIComponent(shortsSession.query) + '&filter=videos');
+        if (mySeq !== shortsFetchSeq || !shortsSession) return;
+        shortsSession.server = server;
+        shortsSession.nextpage = data && data.nextpage ? data.nextpage : null;
+
+        const { primary, fallback } = extractShortBatchFromRaw(data && data.items, shortsSession.seenIds);
+        let firstBatch = primary.length >= 3 ? primary : [...primary, ...fallback];
+
+        // 초기 스크롤 감각 확보를 위해 6개 미만이면 nextpage 1회 선제 로드
+        if (firstBatch.length < 6 && shortsSession.nextpage) {
+          try {
+            const npRes = await fetch(server + '/nextpage/search?nextpage=' + encodeURIComponent(shortsSession.nextpage) + '&q=' + encodeURIComponent(shortsSession.query) + '&filter=videos');
+            const npData = await npRes.json();
+            if (mySeq !== shortsFetchSeq || !shortsSession) return;
+            shortsSession.nextpage = npData && npData.nextpage ? npData.nextpage : null;
+            const extra = extractShortBatchFromRaw(npData && npData.items, shortsSession.seenIds);
+            firstBatch = [...firstBatch, ...(extra.primary.length > 0 ? extra.primary : extra.fallback)];
+          } catch (e) {}
         }
+
+        const merged = sortShortsKoreanRecent([...localSeeds, ...firstBatch]);
+        currentShortsList = merged;
+        shortsSession.loading = false;
+        saveShortsCacheSnapshot();
+        renderShortsListView(currentShortsList, false);
+      } catch (err) {
+        if (mySeq !== shortsFetchSeq || !shortsSession) return;
+        shortsSession.loading = false;
+        renderShortsListView(currentShortsList, false);
+      }
+    }
+
+    function saveShortsCacheSnapshot() {
+      if (!shortsSession || !shortsSession.cacheKey) return;
+      if (relatedShortsCache.size >= 25) {
+        const firstKey = relatedShortsCache.keys().next().value;
+        relatedShortsCache.delete(firstKey);
+      }
+      relatedShortsCache.set(shortsSession.cacheKey, {
+        items: [...currentShortsList],
+        query: shortsSession.query,
+        server: shortsSession.server,
+        nextpage: shortsSession.nextpage,
+        exhausted: shortsSession.exhausted,
+        altIdx: shortsSession.altIdx
       });
+    }
 
-      const queries = [kw + ' #shorts', kw + ' shorts'];
-      for (let qi = 0; qi < queries.length; qi++) {
-        if (primaryShorts.length >= 15) break;
-        try {
-          const { data } = await smartFetch('/search?q=' + encodeURIComponent(queries[qi]) + '&filter=videos');
-          const items = (data && Array.isArray(data.items)) ? data.items : [];
-          for (const raw of items) {
-            if (!raw || isLikelyAdVideo(raw)) continue;
-            const vid = extractVideoId(raw);
-            if (!vid || seen.has(vid)) continue;
-            seen.add(vid);
-            const rawTitle = String(raw.title || '제목 없음');
-            const dur = Number(raw.duration || 0) || 0;
-            const views = Number(raw.views || 0) || 0;
-            const uploaded = Number(raw.uploaded || 0) || 0;
-            const obj = { id: vid, t: simplifyTitle(rawTitle), d: dur, v: views, u: uploaded };
+    async function loadMoreRelatedShorts() {
+      if (!isTabletMode || !shortsPanelOpen || !shortsSession || shortsSession.loading || shortsSession.exhausted) return;
+      const mySeq = shortsFetchSeq;
+      shortsSession.loading = true;
+      updateShortsSentinelText('관련 쇼츠 불러오는 중...');
 
-            const isShortItem = (raw.isShort === true) ||
-              /\/shorts\//i.test(String(raw.url || '')) ||
-              (dur > 0 && dur <= 65) ||
-              /#shorts|쇼츠/i.test(rawTitle);
+      try {
+        let added = [];
+        let attempts = 0;
 
-            if (isShortItem) {
-              primaryShorts.push(obj);
-            } else if (dur <= 240) {
-              fallbackShorts.push(obj);
+        while (added.length < 3 && attempts < 3) {
+          attempts++;
+          if (shortsSession.nextpage && shortsSession.server) {
+            const nextPath = '/nextpage/search?nextpage=' + encodeURIComponent(shortsSession.nextpage) + '&q=' + encodeURIComponent(shortsSession.query) + '&filter=videos';
+            const res = await fetch(shortsSession.server + nextPath);
+            if (!res.ok) throw new Error('nextpage failed');
+            const data = await res.json();
+            if (mySeq !== shortsFetchSeq || !shortsSession) return;
+            shortsSession.nextpage = data && data.nextpage ? data.nextpage : null;
+            const batch = extractShortBatchFromRaw(data && data.items, shortsSession.seenIds);
+            const picked = batch.primary.length > 0 ? batch.primary : batch.fallback;
+            added = [...added, ...picked];
+          } else {
+            // 현재 쿼리 nextpage 소진 시 다음 쇼츠 쿼리로 자연스럽게 이어 무한 로드
+            const queries = shortsSession.queries || [shortsSession.keyword + ' 쇼츠 #shorts', shortsSession.keyword + ' #shorts', shortsSession.keyword + ' shorts'];
+            shortsSession.altIdx = (shortsSession.altIdx || 0) + 1;
+            if (shortsSession.altIdx >= queries.length) {
+              shortsSession.exhausted = true;
+              break;
             }
+            shortsSession.query = queries[shortsSession.altIdx];
+            const { data, server } = await smartFetch('/search?q=' + encodeURIComponent(shortsSession.query) + '&filter=videos');
+            if (mySeq !== shortsFetchSeq || !shortsSession) return;
+            shortsSession.server = server;
+            shortsSession.nextpage = data && data.nextpage ? data.nextpage : null;
+            const batch = extractShortBatchFromRaw(data && data.items, shortsSession.seenIds);
+            const picked = batch.primary.length > 0 ? batch.primary : batch.fallback;
+            added = [...added, ...picked];
           }
-        } catch (e) {}
-      }
-
-      // 기본 3개 이상 확보(최대 25개): 쇼츠 우선 + 부족 시 짧은 관련 영상 자동 보충
-      const combined = primaryShorts.length >= 3
-        ? primaryShorts.slice(0, 25)
-        : [...primaryShorts, ...fallbackShorts].slice(0, 25);
-
-      if (combined.length > 0) {
-        if (relatedShortsCache.size >= 30) {
-          const firstKey = relatedShortsCache.keys().next().value;
-          relatedShortsCache.delete(firstKey);
         }
-        relatedShortsCache.set(cacheKey, combined);
+
+        if (mySeq !== shortsFetchSeq || !shortsSession) return;
+
+        if (added.length > 0) {
+          const sortedAdded = sortShortsKoreanRecent(added);
+          const startIdx = currentShortsList.length;
+          currentShortsList = [...currentShortsList, ...sortedAdded];
+          appendShortsCardsToDOM(sortedAdded, startIdx);
+          updateShortsHeaderCount();
+          saveShortsCacheSnapshot();
+        }
+      } catch (e) {
+        if (shortsSession) shortsSession.nextpage = null;
+      } finally {
+        if (shortsSession) shortsSession.loading = false;
+        updateShortsSentinelText(shortsSession && shortsSession.exhausted ? '모든 관련 쇼츠를 불러왔습니다' : '▼ 스크롤하여 쇼츠 더 보기');
       }
-      return combined;
     }
 
     function updateTabletStreamTabUI() {
@@ -5664,53 +5700,142 @@
       }
     }
 
-    function sendShortsYtCommand(func, args = []) {
-      const frame = document.getElementById('shortsYtFrame');
-      if (!frame || !frame.contentWindow) return;
-      try {
-        frame.contentWindow.postMessage(JSON.stringify({ event: 'command', func, args }), '*');
-      } catch (e) {}
-    }
-
-    function pauseShortsPlayer() {
-      if (!isShortsPlaying) return;
-      sendShortsYtCommand('pauseVideo');
-      isShortsPlaying = false;
-    }
-
-    function stopShortsPlayerClean() {
-      const holder = document.getElementById('shortsIframeHolder');
-      if (holder) holder.innerHTML = '';
-      shortsFrameReady = false;
-      isShortsPlaying = false;
-      currentShortsIdx = -1;
-      const pv = document.getElementById('shortsPlayerView');
-      const lv = document.getElementById('shortsListView');
-      const backBtn = document.getElementById('shortsBackToListBtn');
+    function updateShortsHeaderCount() {
       const hdrLbl = document.getElementById('shortsHeaderLabel');
-      if (pv) pv.classList.remove('active');
-      if (lv) lv.style.display = 'flex';
-      if (backBtn) backBtn.classList.remove('visible');
-      if (hdrLbl) hdrLbl.textContent = currentShortsQueryKey ? ('▶ ' + currentShortsQueryKey + ' 쇼츠') : '▶ 관련 쇼츠';
+      if (!hdrLbl) return;
+      const cnt = currentShortsList.length > 0 ? (' (' + currentShortsList.length + ')') : '';
+      hdrLbl.textContent = (currentShortsQueryKey ? ('▶ ' + currentShortsQueryKey + ' 쇼츠') : '▶ 관련 쇼츠') + cnt;
     }
 
-    function exitShortsPlayerToList() {
-      stopShortsPlayerClean();
-      renderShortsListView(currentShortsList);
+    function updateShortsSentinelText(msg) {
+      const el = document.getElementById('shortsScrollSentinel');
+      if (el) el.textContent = msg;
     }
 
-    function renderShortsListView(list, loadingText = '') {
+    function updateActiveShortCardHighlight(scrollIntoView = false) {
       const lv = document.getElementById('shortsListView');
-      const hdrLbl = document.getElementById('shortsHeaderLabel');
       if (!lv) return;
+      let activeEl = null;
+      lv.querySelectorAll('.shorts-card').forEach(card => {
+        const isAct = !!(activePlayingShortId && card.dataset.sid === activePlayingShortId);
+        card.classList.toggle('active-short', isAct);
+        if (isAct) activeEl = card;
+      });
+      if (scrollIntoView && activeEl && activeEl.scrollIntoView) {
+        activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
 
-      if (hdrLbl) {
-        const cntText = Array.isArray(list) && list.length > 0 ? (' (' + list.length + ')') : '';
-        hdrLbl.textContent = (currentShortsQueryKey ? ('▶ ' + currentShortsQueryKey + ' 쇼츠') : '▶ 관련 쇼츠') + cntText;
+    function updateShortsStarUI() {
+      const lv = document.getElementById('shortsListView');
+      if (!lv) return;
+      lv.querySelectorAll('.shorts-star-btn').forEach(btn => {
+        const vid = btn.dataset.vid;
+        const isPin = !!(vid && pinnedVideoIds.has(vid));
+        btn.classList.toggle('pinned', isPin);
+        btn.textContent = isPin ? '★' : '☆';
+      });
+    }
+
+    function createShortCardElement(item, idx) {
+      const isPin = pinnedVideoIds.has(item.id);
+      const isAct = !!(activePlayingShortId && activePlayingShortId === item.id);
+      const card = document.createElement('div');
+      card.className = 'shorts-card' + (isAct ? ' active-short' : '');
+      card.dataset.sid = item.id;
+      card.onclick = () => playShortInLeftPlayer(item, idx);
+
+      const thumbBox = document.createElement('div');
+      thumbBox.className = 'shorts-thumb-box';
+      const img = document.createElement('img');
+      img.src = getFastThumbUrl(item.id);
+      img.loading = 'lazy';
+      img.decoding = 'async';
+      img.onerror = function() { this.onerror = null; this.src = FALLBACK_THUMB; };
+      thumbBox.appendChild(img);
+
+      const playBadge = document.createElement('div');
+      playBadge.className = 'shorts-play-badge';
+      playBadge.textContent = '▶';
+      thumbBox.appendChild(playBadge);
+
+      if (item.d > 0) {
+        const durTag = document.createElement('span');
+        durTag.className = 'shorts-dur-tag';
+        durTag.textContent = formatSec(item.d);
+        thumbBox.appendChild(durTag);
       }
 
-      if (loadingText && (!list || list.length === 0)) {
-        lv.innerHTML = '<div class="shorts-status-msg">' + loadingText + '</div>';
+      const info = document.createElement('div');
+      info.className = 'shorts-card-info';
+      const titleEl = document.createElement('div');
+      titleEl.className = 'shorts-card-title';
+      titleEl.textContent = item.t;
+      const metaEl = document.createElement('div');
+      metaEl.className = 'shorts-card-meta';
+      const metaParts = [];
+      if (item.up) metaParts.push(item.up);
+      metaParts.push(formatFeedMeta(item.u, item.v));
+      metaEl.textContent = metaParts.join(' · ');
+      info.appendChild(titleEl);
+      info.appendChild(metaEl);
+
+      const starBtn = document.createElement('button');
+      starBtn.type = 'button';
+      starBtn.className = 'shorts-star-btn' + (isPin ? ' pinned' : '');
+      starBtn.dataset.vid = item.id;
+      starBtn.textContent = isPin ? '★' : '☆';
+      starBtn.title = isPin ? '상단 고정 해제' : '별표 고정';
+      starBtn.onclick = (e) => {
+        e.stopPropagation();
+        togglePinVideo(item.id);
+      };
+
+      card.appendChild(thumbBox);
+      card.appendChild(info);
+      card.appendChild(starBtn);
+      return card;
+    }
+
+    function bindShortsInfiniteObserver() {
+      const lv = document.getElementById('shortsListView');
+      const sentinel = document.getElementById('shortsScrollSentinel');
+      if (shortsScrollObserver) {
+        shortsScrollObserver.disconnect();
+        shortsScrollObserver = null;
+      }
+      if (!lv || !sentinel || typeof IntersectionObserver === 'undefined') return;
+      shortsScrollObserver = new IntersectionObserver((entries) => {
+        if (entries.some(e => e.isIntersecting)) {
+          loadMoreRelatedShorts();
+        }
+      }, { root: lv, rootMargin: '160px' });
+      shortsScrollObserver.observe(sentinel);
+    }
+
+    function appendShortsCardsToDOM(items, startIdx) {
+      const lv = document.getElementById('shortsListView');
+      const sentinel = document.getElementById('shortsScrollSentinel');
+      if (!lv || !items || items.length === 0) return;
+      const frag = document.createDocumentFragment();
+      items.forEach((item, offset) => {
+        frag.appendChild(createShortCardElement(item, startIdx + offset));
+      });
+      if (sentinel && sentinel.parentNode === lv) {
+        lv.insertBefore(frag, sentinel);
+      } else {
+        lv.appendChild(frag);
+      }
+    }
+
+    function renderShortsListView(list, isLoadingInitial = false) {
+      const lv = document.getElementById('shortsListView');
+      if (!lv) return;
+      updateShortsHeaderCount();
+      lv.innerHTML = '';
+
+      if (isLoadingInitial && (!list || list.length === 0)) {
+        lv.innerHTML = '<div class="shorts-status-msg">한국·최신 관련 쇼츠 검색 중...</div>';
         return;
       }
       if (!list || list.length === 0) {
@@ -5718,177 +5843,105 @@
         return;
       }
 
-      lv.innerHTML = '';
       const frag = document.createDocumentFragment();
       list.forEach((item, idx) => {
-        const card = document.createElement('div');
-        card.className = 'shorts-card' + (idx === currentShortsIdx ? ' active-short' : '');
-        card.onclick = () => playRelatedShortAt(idx);
-
-        const thumbBox = document.createElement('div');
-        thumbBox.className = 'shorts-thumb-box';
-        const img = document.createElement('img');
-        img.src = getFastThumbUrl(item.id);
-        img.loading = 'lazy';
-        img.decoding = 'async';
-        img.onerror = function() { this.onerror = null; this.src = FALLBACK_THUMB; };
-        thumbBox.appendChild(img);
-
-        const playBadge = document.createElement('div');
-        playBadge.className = 'shorts-play-badge';
-        playBadge.textContent = '▶';
-        thumbBox.appendChild(playBadge);
-
-        if (item.d > 0) {
-          const durTag = document.createElement('span');
-          durTag.className = 'shorts-dur-tag';
-          durTag.textContent = formatSec(item.d);
-          thumbBox.appendChild(durTag);
-        }
-
-        const info = document.createElement('div');
-        info.className = 'shorts-card-info';
-        const titleEl = document.createElement('div');
-        titleEl.className = 'shorts-card-title';
-        titleEl.textContent = item.t;
-        const metaEl = document.createElement('div');
-        metaEl.className = 'shorts-card-meta';
-        metaEl.textContent = formatFeedMeta(item.u, item.v);
-        info.appendChild(titleEl);
-        info.appendChild(metaEl);
-
-        card.appendChild(thumbBox);
-        card.appendChild(info);
-        frag.appendChild(card);
+        frag.appendChild(createShortCardElement(item, idx));
       });
+      const sentinel = document.createElement('div');
+      sentinel.id = 'shortsScrollSentinel';
+      sentinel.className = 'shorts-sentinel';
+      sentinel.textContent = isLoadingInitial ? '추가 쇼츠 불러오는 중...' : (shortsSession && shortsSession.exhausted ? '모든 관련 쇼츠를 불러왔습니다' : '▼ 스크롤하여 쇼츠 더 보기');
+      frag.appendChild(sentinel);
       lv.appendChild(frag);
+      bindShortsInfiniteObserver();
     }
 
-    function playRelatedShortAt(idx) {
-      if (!Array.isArray(currentShortsList) || currentShortsList.length === 0) return;
-      const safeIdx = ((idx % currentShortsList.length) + currentShortsList.length) % currentShortsList.length;
-      const item = currentShortsList[safeIdx];
+    // 우측 쇼츠 클릭 -> 오른쪽 목록·스크롤 100% 유지 + 왼쪽 재생창에서만 즉시 재생!
+    function playShortInLeftPlayer(item, idx) {
       if (!item || !item.id) return;
+      unlockIosAudioOnce();
+      stopBgAudioClean();
+      stopDirectVideoClean();
+      directVideoAttemptSeq++;
 
-      // 소리 겹침 방지: 왼쪽 메인 영상 & 백그라운드 오디오 자동 일시정지
-      sendYtCommand('pauseVideo');
+      currentVideoId = item.id;
+      currentVideoTitle = item.t;
+      activePlayingShortId = item.id;
+      currentShortsIdx = idx;
       isYtVideoPlaying = false;
-      if (isBgAudioPlaying && !bgAudio.paused) {
-        userPausedBg = true;
-        bgAudio.pause();
+      lastKnownPlaySec = 0;
+
+      if (isDockedToBookmark || modal.style.display === 'none' || modal.classList.contains('docked-hidden')) {
+        isDockedToBookmark = false;
+        modal.classList.remove('docked-hidden', 'interacting');
+        modal.style.display = 'block';
+        document.body.classList.add('player-open');
       }
+
+      mountYoutubeEmbed(item.id, true, 0);
+      hideYtPauseMask();
+      updateSearchBtnState();
+      updateBgModeUI();
       updateSlideBookmarkPlayUI();
+      setupMediaSession(item.t, item.id);
+      prefetchPromise = prefetchBgAudio(item.id);
+      recordUserPlay(item.id, item.t);
+      updatePlayingCardHighlight(false);
+      updateActiveShortCardHighlight(false);
 
-      currentShortsIdx = safeIdx;
-      isShortsPlaying = true;
-
-      const lv = document.getElementById('shortsListView');
-      const pv = document.getElementById('shortsPlayerView');
-      const backBtn = document.getElementById('shortsBackToListBtn');
-      const hdrLbl = document.getElementById('shortsHeaderLabel');
-      const navIdx = document.getElementById('shortsNavIdx');
-      const capTitle = document.getElementById('shortsCaptionTitle');
-      const capSub = document.getElementById('shortsCaptionSub');
-
-      if (lv) lv.style.display = 'none';
-      if (pv) pv.classList.add('active');
-      if (backBtn) backBtn.classList.add('visible');
-      if (hdrLbl) hdrLbl.textContent = '쇼츠 ' + (safeIdx + 1) + '/' + currentShortsList.length;
-      if (navIdx) navIdx.textContent = (safeIdx + 1) + '/' + currentShortsList.length;
-      if (capTitle) capTitle.textContent = item.t;
-      if (capSub) capSub.textContent = formatFeedMeta(item.u, item.v) + (item.d > 0 ? (' · ' + formatSec(item.d)) : '') + ' · 위/아래 스와이프';
-
-      const holder = document.getElementById('shortsIframeHolder');
-      const existing = document.getElementById('shortsYtFrame');
-      if (existing && shortsFrameReady) {
-        sendShortsYtCommand('loadVideoById', [item.id]);
-        sendShortsYtCommand('playVideo');
-      } else if (holder) {
-        shortsFrameReady = false;
-        const originParam = (location.protocol === 'http:' || location.protocol === 'https:') ? ('&origin=' + encodeURIComponent(location.origin)) : '';
-        holder.innerHTML = '<iframe id="shortsYtFrame" src="https://www.youtube-nocookie.com/embed/' + item.id + '?autoplay=1&controls=1&fs=1&enablejsapi=1&modestbranding=1&rel=0&playsinline=1&iv_load_policy=3&cc_load_policy=0' + originParam + '" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>';
-        const frame = document.getElementById('shortsYtFrame');
-        if (frame) {
-          frame.addEventListener('load', () => {
-            shortsFrameReady = true;
-            try {
-              frame.contentWindow.postMessage(JSON.stringify({ event: 'listening', id: 3 }), '*');
-              frame.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'addEventListener', args: ['onStateChange'] }), '*');
-              frame.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'playVideo', args: [] }), '*');
-            } catch (e) {}
-          });
-        }
+      // 끝자락 3개 이내에 도달하면 다음 쇼츠 미리 무한 로드
+      if (idx >= currentShortsList.length - 3) {
+        loadMoreRelatedShorts();
       }
     }
 
-    function stepRelatedShort(delta) {
-      if (!Array.isArray(currentShortsList) || currentShortsList.length === 0) return;
-      const base = currentShortsIdx < 0 ? 0 : currentShortsIdx;
-      playRelatedShortAt(base + delta);
+    function toggleShortsAutoNext() {
+      shortsAutoNext = !shortsAutoNext;
+      const btn = document.getElementById('shortsAutoNextBtn');
+      if (btn) btn.classList.toggle('on', shortsAutoNext);
     }
 
     function reloadRelatedShorts() {
-      if (!currentVideoId) return;
-      stopShortsPlayerClean();
+      if (!isTabletMode || !currentVideoId) return;
       const kw = getRelatedShortsKeyword(currentVideoTitle);
       relatedShortsCache.delete(kw.toLowerCase());
-      openTabletInfoModal(currentVideoId, currentVideoTitle, true);
+      initRelatedShortsFeed(kw, currentVideoId, true);
     }
 
-    (function bindShortsSwipeGestures() {
-      const targets = [
-        document.getElementById('shortsSwipeL'),
-        document.getElementById('shortsSwipeR'),
-        document.getElementById('shortsCaptionBar')
-      ].filter(Boolean);
-
-      targets.forEach(el => {
-        let sy = 0, active = false;
-        el.addEventListener('pointerdown', (e) => {
-          sy = e.clientY;
-          active = true;
-          try { el.setPointerCapture(e.pointerId); } catch (err) {}
-          e.stopPropagation();
-        });
-        el.addEventListener('pointerup', (e) => {
-          if (!active) return;
-          active = false;
-          const dy = e.clientY - sy;
-          if (dy <= -36) stepRelatedShort(1);
-          else if (dy >= 36) stepRelatedShort(-1);
-        });
-        el.addEventListener('pointercancel', () => { active = false; });
-      });
-
-      const pv = document.getElementById('shortsPlayerView');
-      if (pv) {
-        let lastWheel = 0;
-        pv.addEventListener('wheel', (e) => {
-          if (!pv.classList.contains('active')) return;
-          const now = Date.now();
-          if (now - lastWheel < 420) return;
-          if (Math.abs(e.deltaY) >= 24) {
-            lastWheel = now;
-            stepRelatedShort(e.deltaY > 0 ? 1 : -1);
-          }
-        }, { passive: true });
-      }
-    })();
-
-    // 모바일·태블릿 공용 독립 관련 쇼츠 창 제어 (자유 이동 / 하단·모서리 리사이즈 / 비례 확대축소)
+    // 태블릿 전용 우측 쇼츠창 리사이즈: 창 확대/축소 시 카드 비율 유지 + 1~3열 및 세로 표시 갯수 자동 확장
     function applyTabletInfoDimensions(w, h) {
       const tiModal = document.getElementById('tablet-info-modal');
-      if (!tiModal) return { width: 280, height: 320 };
-      const minW = isTabletMode ? 175 : 168;
-      const maxW = Math.max(minW, window.innerWidth - 16);
-      const minH = 140;
-      const maxH = Math.max(minH, window.innerHeight - 20);
+      if (!tiModal) return { width: 320, height: 400 };
+      const minW = 200;
+      const maxW = Math.max(minW, window.innerWidth - 20);
+      const minH = 180;
+      const maxH = Math.max(minH, window.innerHeight - 24);
       const clampedW = Math.max(minW, Math.min(maxW, Math.round(w)));
       const clampedH = Math.max(minH, Math.min(maxH, Math.round(h)));
-      const baseW = isTabletMode ? TI_BASE_WIDTH : 275;
-      const scale = Math.max(0.68, Math.min(1.65, clampedW / baseW));
+
+      const cols = clampedW >= 660 ? 3 : (clampedW >= 430 ? 2 : 1);
+      const bodyH = Math.max(120, clampedH - 52);
+      let cardH = 114;
+      if (cols === 1) {
+        if (clampedW < 250) {
+          cardH = Math.max(82, Math.round(clampedW * 0.44));
+        } else if (bodyH <= 440) {
+          // 기본 화면 높이에서는 정확히 3개가 딱 들어맞게 계산
+          cardH = Math.max(88, Math.min(134, Math.floor((bodyH - 18) / 3)));
+        } else {
+          // 하단을 크게 늘리면 카드 비율(118px) 유지하며 4, 5, 6...개로 세로 갯수 자동 증가!
+          cardH = 118;
+        }
+      } else {
+        // 2열·3열 확대 시 카드 비율 유지하며 가로·세로 갯수 동시 증가!
+        cardH = Math.max(102, Math.min(136, Math.round((clampedW / cols) * 0.46)));
+      }
+      const scale = Math.max(0.76, Math.min(1.12, (clampedW / cols) / 310));
+
       tiModal.style.width = clampedW + 'px';
       tiModal.style.height = clampedH + 'px';
+      tiModal.style.setProperty('--shorts-cols', String(cols));
+      tiModal.style.setProperty('--shorts-card-h', cardH + 'px');
       tiModal.style.setProperty('--ti-scale', scale.toFixed(3));
       return { width: clampedW, height: clampedH };
     }
@@ -5896,8 +5949,8 @@
     function clampTabletInfoModalToViewport() {
       const tiModal = document.getElementById('tablet-info-modal');
       if (!tiModal || tiModal.style.display === 'none') return;
-      const curW = tiModal.offsetWidth || 280;
-      const curH = tiModal.offsetHeight || 320;
+      const curW = tiModal.offsetWidth || 320;
+      const curH = tiModal.offsetHeight || 400;
       const dims = applyTabletInfoDimensions(curW, curH);
       const maxL = Math.max(8, window.innerWidth - dims.width - 8);
       const maxT = Math.max(8, window.innerHeight - dims.height - 8);
@@ -5906,10 +5959,13 @@
     }
 
     function hideTabletInfoModal(byUser = false) {
-      stopShortsPlayerClean();
+      if (shortsScrollObserver) {
+        shortsScrollObserver.disconnect();
+        shortsScrollObserver = null;
+      }
       const tiModal = document.getElementById('tablet-info-modal');
       if (tiModal) tiModal.style.display = 'none';
-      if (byUser) tiUserClosed = true;
+      if (byUser) shortsPanelOpen = false;
     }
 
     function toggleTabletInfoModal() {
@@ -5919,90 +5975,47 @@
       if (tiModal.style.display === 'flex') {
         hideTabletInfoModal(true);
       } else {
-        tiUserClosed = false;
-        openTabletInfoModal(currentVideoId, currentVideoTitle, false);
-      }
-    }
-
-    function toggleMobileInfoModal() {
-      if (!currentVideoId) return;
-      const tiModal = document.getElementById('tablet-info-modal');
-      if (!tiModal) return;
-      if (tiModal.style.display === 'flex') {
-        hideTabletInfoModal(true);
-      } else {
-        tiUserClosed = false;
+        shortsPanelOpen = true;
         openTabletInfoModal(currentVideoId, currentVideoTitle, false);
       }
     }
 
     function openTabletInfoModal(videoId, title, forceRefresh = false) {
+      if (!isTabletMode) {
+        hideTabletInfoModal(false);
+        return;
+      }
       const tiModal = document.getElementById('tablet-info-modal');
       if (!tiModal) return;
 
-      const curDev = isTabletMode ? 'tablet' : 'mobile';
-      if (tiLastDeviceMode && tiLastDeviceMode !== curDev) {
-        tiUserCustomized = false;
-      }
-      tiLastDeviceMode = curDev;
-
-      stopShortsPlayerClean();
+      shortsPanelOpen = true;
       tiModal.style.display = 'flex';
 
       if (!tiUserCustomized) {
         const playerRect = modal.getBoundingClientRect();
-        if (isTabletMode) {
-          const gap = 10;
-          const rightMargin = 14;
-          const rightAvail = window.innerWidth - playerRect.right - gap - rightMargin;
-          const initW = rightAvail >= 190
-            ? Math.min(480, rightAvail)
-            : Math.min(320, Math.max(195, Math.round(window.innerWidth * 0.32)));
-          const maxAvailH = Math.max(240, window.innerHeight - playerRect.top - 16);
-          const initH = Math.min(maxAvailH, Math.max(playerRect.height || 290, Math.round((playerRect.height || 290) * 1.24)));
-          const dims = applyTabletInfoDimensions(initW, initH);
-          const targetLeft = rightAvail >= 190
-            ? Math.round(playerRect.right + gap)
-            : Math.max(10, window.innerWidth - dims.width - rightMargin);
-          const targetTop = Math.max(6, Math.min(window.innerHeight - dims.height - 10, Math.round(playerRect.top)));
-          tiModal.style.left = targetLeft + 'px';
-          tiModal.style.top = targetTop + 'px';
-        } else {
-          const gap = 8;
-          const initW = Math.min(window.innerWidth - 16, Math.max(220, Math.round(playerRect.width || (window.innerWidth - 16))));
-          const belowSpace = window.innerHeight - playerRect.bottom - gap - 14;
-          const initH = belowSpace >= 180
-            ? Math.min(290, belowSpace)
-            : Math.min(260, Math.max(180, Math.round(window.innerHeight * 0.40)));
-          const dims = applyTabletInfoDimensions(initW, initH);
-          const targetLeft = Math.max(8, Math.min(window.innerWidth - dims.width - 8, Math.round(playerRect.left)));
-          const targetTop = belowSpace >= 180
-            ? Math.round(playerRect.bottom + gap)
-            : Math.max(10, window.innerHeight - dims.height - 12);
-          tiModal.style.left = targetLeft + 'px';
-          tiModal.style.top = targetTop + 'px';
-        }
+        const gap = 10;
+        const rightMargin = 14;
+        const rightAvail = window.innerWidth - playerRect.right - gap - rightMargin;
+        const initW = rightAvail >= 200
+          ? Math.min(480, rightAvail)
+          : Math.min(340, Math.max(210, Math.round(window.innerWidth * 0.34)));
+        const maxAvailH = Math.max(260, window.innerHeight - playerRect.top - 16);
+        const initH = Math.min(maxAvailH, Math.max(360, playerRect.height || 380));
+        const dims = applyTabletInfoDimensions(initW, initH);
+        const targetLeft = rightAvail >= 200
+          ? Math.round(playerRect.right + gap)
+          : Math.max(10, window.innerWidth - dims.width - rightMargin);
+        const targetTop = Math.max(6, Math.min(window.innerHeight - dims.height - 10, Math.round(playerRect.top)));
+        tiModal.style.left = targetLeft + 'px';
+        tiModal.style.top = targetTop + 'px';
       } else {
         clampTabletInfoModalToViewport();
       }
 
       const kw = getRelatedShortsKeyword(title);
-      currentShortsQueryKey = kw;
-      const seedShorts = collectLocalSeedShorts(videoId);
-      currentShortsList = seedShorts;
-      renderShortsListView(seedShorts, '관련 쇼츠 3개 이상 검색 중...');
-
       const lv = document.getElementById('shortsListView');
       if (lv) lv.scrollTop = 0;
-
-      const mySeq = ++shortsFetchSeq;
-      fetchRelatedShorts(kw, videoId, forceRefresh).then(list => {
-        if (mySeq !== shortsFetchSeq || currentVideoId !== videoId) return;
-        currentShortsList = list;
-        if (!isShortsPlaying) {
-          renderShortsListView(list);
-        }
-      });
+      initRelatedShortsFeed(kw, videoId, forceRefresh);
     }
 
     (function bindTabletInfoInteractions() {
@@ -6156,9 +6169,10 @@
       recordUserPlay(videoId, title);
       updatePlayingCardHighlight(true);
 
-      if (isTabletMode && !tiUserClosed) {
+      activePlayingShortId = '';
+      if (isTabletMode && shortsPanelOpen) {
         openTabletInfoModal(videoId, title, false);
-      } else if (!isTabletMode) {
+      } else {
         hideTabletInfoModal(false);
       }
     }
@@ -6723,8 +6737,9 @@
       activeTabKeyword = '';
       selectedTabDocId = '';
       tabArmedDocId = '';
-      tiUserClosed = false;
+      shortsPanelOpen = false;
       tiUserCustomized = false;
+      activePlayingShortId = '';
       tabArmedDocId = '';
       currentFeedItems = [];
       dbFeedPool = [];
@@ -8175,23 +8190,6 @@
       if (!e.data || typeof e.data !== 'string') return;
       try {
         const msg = JSON.parse(e.data);
-        const shortsFrame = document.getElementById('shortsYtFrame');
-        if (shortsFrame && e.source === shortsFrame.contentWindow) {
-          if (msg.event === 'infoDelivery' && msg.info && typeof msg.info.playerState === 'number') {
-            if (msg.info.playerState === 1) {
-              isShortsPlaying = true;
-              sendYtCommand('pauseVideo');
-              isYtVideoPlaying = false;
-              updateSlideBookmarkPlayUI();
-            } else if (msg.info.playerState === 0) {
-              // 쇼츠 종료 시 자동으로 다음 쇼츠 슬라이드!
-              stepRelatedShort(1);
-            } else if (msg.info.playerState === 2) {
-              isShortsPlaying = false;
-            }
-          }
-          return;
-        }
         if (msg.event === 'onError' && currentVideoId) {
           if (isDirectVideoActive) return;
           const errNum = Number(msg.info);
@@ -8215,12 +8213,28 @@
           if (typeof msg.info.playerState === 'number') {
             if (msg.info.playerState === 1) {
               isYtVideoPlaying = true;
-              pauseShortsPlayer();
               hideYtPauseMask();
               updateSearchBtnState();
               updateSlideBookmarkPlayUI();
             } else if (msg.info.playerState === 2 || msg.info.playerState === 0) {
               isYtVideoPlaying = false;
+              // 우측 쇼츠에서 재생한 영상이 끝나면 '연속' ON 시 자동으로 다음 쇼츠를 왼쪽 재생창에 이어서 재생
+              if (msg.info.playerState === 0 && isTabletMode && shortsAutoNext && activePlayingShortId && currentVideoId === activePlayingShortId && currentShortsList.length > 0) {
+                const nextIdx = currentShortsIdx + 1;
+                if (nextIdx < currentShortsList.length) {
+                  playShortInLeftPlayer(currentShortsList[nextIdx], nextIdx);
+                  updateActiveShortCardHighlight(true);
+                  return;
+                } else if (shortsSession && !shortsSession.exhausted) {
+                  loadMoreRelatedShorts().then(() => {
+                    if (currentShortsList[nextIdx]) {
+                      playShortInLeftPlayer(currentShortsList[nextIdx], nextIdx);
+                      updateActiveShortCardHighlight(true);
+                    }
+                  });
+                  return;
+                }
+              }
               if (msg.info.playerState === 2 && document.body.classList.contains('blackout-active') && blackoutWantPlaying && !userPausedBg && !isBgAudioPlaying && !isDirectVideoActive && currentVideoId) {
                 setTimeout(() => {
                   if (document.body.classList.contains('blackout-active') && blackoutWantPlaying && !userPausedBg && !isYtVideoPlaying && !isBgAudioPlaying) {
@@ -8727,7 +8741,7 @@
       updatePlayingCardHighlight(true);
       updateBgModeUI();
       updateSlideBookmarkPlayUI();
-      if (isTabletMode && !tiUserClosed && currentVideoId) {
+      if (isTabletMode && shortsPanelOpen && currentVideoId) {
         openTabletInfoModal(currentVideoId, currentVideoTitle, false);
       }
     }
