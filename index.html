@@ -7,9 +7,11 @@
 
   <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1384/1384060.png">
   <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/1384/1384060.png">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" id="appThemeColorMeta" content="#0d0d0d">
+  <link rel="manifest" id="appWebManifest" href='data:application/manifest+json;charset=utf-8,{"name":"myTube","short_name":"myTube","display":"standalone","orientation":"any","background_color":"#0d0d0d","theme_color":"#0d0d0d","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/1384/1384060.png","sizes":"512x512","type":"image/png"}]}'>
 
   <!-- TUBE_LAB_V7_PATCH: Firebase Compat SDK (Firestore 상시 연결) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -1467,11 +1469,19 @@
     }
     #battery-blackout-overlay.active { display: flex; }
 
-    /* 태블릿 전용 큰 테두리 6~8 및 플레이어 보조 탭 */
+    /* 태블릿 전용 큰 테두리 6~8 및 플레이어 보조 탭 + 모바일 전용 [...] 더보기 탭 */
     .tablet-only-bwidth { display: none; }
     body.tablet-mode .tablet-only-bwidth { display: inline-flex; }
     .tablet-only-tab { display: none; }
     body.tablet-mode .tablet-only-tab { display: inline-flex; align-items: center; }
+    .mobile-only-tab {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5px 6px 2px 6px !important;
+    }
+    body.tablet-mode .mobile-only-tab { display: none; }
+    .mobile-more-svg { width: 14px; height: 11px; display: block; }
 
     /* 태블릿 광고 최소화 Direct <video> 플레이어 & 로딩 마스크 */
     #directVideoPlayer {
@@ -1532,7 +1542,10 @@
       --ti-scale: 1;
       touch-action: none;
     }
-    body:not(.tablet-mode) #tablet-info-modal { display: none !important; }
+    body:not(.tablet-mode) #tablet-info-modal {
+      border-radius: 8px;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.86);
+    }
     #tablet-info-modal.ti-interacting { user-select: none; -webkit-user-select: none; }
     .ti-header {
       display: flex;
@@ -2350,10 +2363,13 @@
     body.tablet-mode .auth-gate-btn { height: 48px; font-size: 16px; border-radius: 12px; }
 
     /* 최상단 정중앙 검색창 모듈 + 드롭다운 */
+    body.tablet-mode {
+      overscroll-behavior-y: none;
+    }
     body.tablet-mode .top-header {
       margin-left: calc(-1 * (env(safe-area-inset-left, 0px) + 18px));
       margin-right: calc(-1 * (env(safe-area-inset-right, 0px) + 18px));
-      padding: calc(env(safe-area-inset-top, 0px) + 10px) calc(env(safe-area-inset-right, 0px) + 18px) 8px calc(env(safe-area-inset-left, 0px) + 18px);
+      padding: calc(env(safe-area-inset-top, 0px) + 2px) calc(env(safe-area-inset-right, 0px) + 18px) 6px calc(env(safe-area-inset-left, 0px) + 18px);
     }
     body.tablet-mode .header-unified-box {
       width: 100%;
@@ -2756,6 +2772,14 @@
         <div class="bookmark-tab tablet-only-tab" id="tabletInfoToggleTab" onclick="toggleTabletInfoModal()" title="우측 더보기 정보창 열기/닫기">
           <span>정보</span>
         </div>
+        <div class="bookmark-tab mobile-only-tab" id="mobileInfoToggleTab" onclick="toggleMobileInfoModal()" title="영상 정보 · 더보기">
+          <svg class="mobile-more-svg" viewBox="0 0 20 15" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" aria-hidden="true">
+            <rect x="1.5" y="1.5" width="17" height="12" rx="2.8"/>
+            <circle cx="6.2" cy="7.5" r="1.25" fill="currentColor" stroke="none"/>
+            <circle cx="10" cy="7.5" r="1.25" fill="currentColor" stroke="none"/>
+            <circle cx="13.8" cy="7.5" r="1.25" fill="currentColor" stroke="none"/>
+          </svg>
+        </div>
         <div class="bookmark-tab tab-close" onclick="closePlayerModal()" title="닫기">
           <svg class="tab-close-ear ear-l" viewBox="0 0 8 8" aria-hidden="true"><path d="M 0,0 L 8,0 L 8,8 Q 8,0 0,0 Z"/></svg>
           <span>✕</span>
@@ -3101,10 +3125,15 @@
         applyUiOptsToDOM();
         if (slideBookmarkVisible) applyBookmarkPosition(dockSide);
       }
-      if (!isTabletMode) {
-        hideTabletInfoModal(false);
-      } else if (currentVideoId && !isDockedToBookmark && !isInlinePlaying && !tiUserClosed) {
-        clampTabletInfoModalToViewport();
+      if (changed) {
+        tiUserCustomized = false;
+        if (!isTabletMode) {
+          hideTabletInfoModal(false);
+        }
+      }
+      if (currentVideoId && !isDockedToBookmark && !isInlinePlaying) {
+        const tiEl = document.getElementById('tablet-info-modal');
+        if (tiEl && tiEl.style.display === 'flex') clampTabletInfoModalToViewport();
       }
 
       // 열려 있는 부유창이 화면 회전/모드 전환 후 화면 밖으로 벗어나지 않게 보정
@@ -3242,6 +3271,7 @@
     const videoStreamDetailCache = new Map();
     let tiUserCustomized = false;
     let tiUserClosed = false;
+    let tiLastDeviceMode = '';
     let blackoutWakeLock = null;
     let blackoutWatchdogTimer = null;
     let blackoutWantPlaying = false;
@@ -5301,18 +5331,20 @@
       updateTabletStreamTabUI();
     }
 
-    function mountYoutubeEmbed(videoId, reuseExisting = true) {
+    function mountYoutubeEmbed(videoId, reuseExisting = true, startSec = 0) {
       stopDirectVideoClean();
       apply16by9Scale(modal.offsetWidth || lastPlayerWidth || getDefaultFullPlayerMetrics().fitWidth);
 
+      const resumeAt = Math.max(0, Math.floor(Number(startSec || 0)));
       const existingFrame = document.getElementById('ytPlayerFrame');
-      if (reuseExisting && existingFrame && ytFrameReady) {
+      if (reuseExisting && existingFrame && ytFrameReady && resumeAt === 0) {
         sendYtCommand('loadVideoById', [videoId]);
         sendYtCommand('playVideo');
       } else {
         ytFrameReady = false;
         const originParam = (location.protocol === 'http:' || location.protocol === 'https:') ? ('&origin=' + encodeURIComponent(location.origin)) : '';
-        ytHolder.innerHTML = '<iframe id="ytPlayerFrame" referrerpolicy="no-referrer" src="https://www.youtube-nocookie.com/embed/' + videoId + '?autoplay=1&controls=1&fs=1&enablejsapi=1&modestbranding=1&rel=0&playsinline=1&iv_load_policy=3&cc_load_policy=0&disablekb=1' + originParam + '" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>';
+        const startParam = resumeAt > 0 ? ('&start=' + resumeAt) : '';
+        ytHolder.innerHTML = '<iframe id="ytPlayerFrame" src="https://www.youtube-nocookie.com/embed/' + videoId + '?autoplay=1&controls=1&fs=1&enablejsapi=1&modestbranding=1&rel=0&playsinline=1&iv_load_policy=3&cc_load_policy=0&disablekb=1' + startParam + originParam + '" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>';
 
         const frame = document.getElementById('ytPlayerFrame');
         if (frame) {
@@ -5336,7 +5368,7 @@
       const mask = document.getElementById('directLoadingMask');
       if (!dv || idx >= directVideoCandidates.length) {
         if (mask) mask.classList.remove('active');
-        mountYoutubeEmbed(videoId, false);
+        mountYoutubeEmbed(videoId, false, lastKnownPlaySec);
         return;
       }
       directVideoCandIdx = idx;
@@ -5384,7 +5416,7 @@
         tryPlayDirectCandidateAt(0, videoId, seq);
       } else {
         if (mask) mask.classList.remove('active');
-        mountYoutubeEmbed(videoId, false);
+        mountYoutubeEmbed(videoId, false, lastKnownPlaySec);
       }
     }
 
@@ -5431,22 +5463,23 @@
         }
       });
       dv.addEventListener('error', () => {
-        if (!isDirectVideoActive || !currentVideoId) return;
+        if (!isDirectVideoActive || !currentVideoId || !dv.getAttribute('src')) return;
         tryPlayDirectCandidateAt(directVideoCandIdx + 1, currentVideoId, directVideoAttemptSeq);
       });
     })();
 
-    // 태블릿 독립 우측 더보기창 제어 (자유 이동 / 하단·모서리 리사이즈 / 비례 확대축소)
+    // 모바일·태블릿 공용 독립 더보기창 제어 (자유 이동 / 하단·모서리 리사이즈 / 비례 확대축소)
     function applyTabletInfoDimensions(w, h) {
       const tiModal = document.getElementById('tablet-info-modal');
       if (!tiModal) return { width: 280, height: 320 };
-      const minW = 175;
-      const maxW = Math.max(minW, window.innerWidth - 20);
-      const minH = 120;
-      const maxH = Math.max(minH, window.innerHeight - 24);
+      const minW = isTabletMode ? 175 : 168;
+      const maxW = Math.max(minW, window.innerWidth - 16);
+      const minH = 115;
+      const maxH = Math.max(minH, window.innerHeight - 20);
       const clampedW = Math.max(minW, Math.min(maxW, Math.round(w)));
       const clampedH = Math.max(minH, Math.min(maxH, Math.round(h)));
-      const scale = Math.max(0.68, Math.min(1.65, clampedW / TI_BASE_WIDTH));
+      const baseW = isTabletMode ? TI_BASE_WIDTH : 275;
+      const scale = Math.max(0.68, Math.min(1.65, clampedW / baseW));
       tiModal.style.width = clampedW + 'px';
       tiModal.style.height = clampedH + 'px';
       tiModal.style.setProperty('--ti-scale', scale.toFixed(3));
@@ -5473,6 +5506,18 @@
 
     function toggleTabletInfoModal() {
       if (!isTabletMode || !currentVideoId) return;
+      const tiModal = document.getElementById('tablet-info-modal');
+      if (!tiModal) return;
+      if (tiModal.style.display === 'flex') {
+        hideTabletInfoModal(true);
+      } else {
+        tiUserClosed = false;
+        openTabletInfoModal(currentVideoId, currentVideoTitle, fetchVideoStreamDetails(currentVideoId));
+      }
+    }
+
+    function toggleMobileInfoModal() {
+      if (!currentVideoId) return;
       const tiModal = document.getElementById('tablet-info-modal');
       if (!tiModal) return;
       if (tiModal.style.display === 'flex') {
@@ -5514,34 +5559,52 @@
     }
 
     function openTabletInfoModal(videoId, title, detailPromise) {
-      if (!isTabletMode) {
-        hideTabletInfoModal(false);
-        return;
-      }
       const tiModal = document.getElementById('tablet-info-modal');
       if (!tiModal) return;
+
+      const curDev = isTabletMode ? 'tablet' : 'mobile';
+      if (tiLastDeviceMode && tiLastDeviceMode !== curDev) {
+        tiUserCustomized = false;
+      }
+      tiLastDeviceMode = curDev;
 
       renderTabletInfoContent(videoId, title, videoStreamDetailCache.get(videoId) || null);
       tiModal.style.display = 'flex';
 
       if (!tiUserCustomized) {
         const playerRect = modal.getBoundingClientRect();
-        const gap = 10;
-        const rightAvail = window.innerWidth - playerRect.right - gap - 10;
-        const initW = rightAvail >= 190
-          ? Math.min(350, rightAvail)
-          : Math.min(310, Math.max(195, Math.round(window.innerWidth * 0.30)));
-        const initH = Math.max(
-          playerRect.height || 260,
-          Math.min(window.innerHeight - playerRect.top - 22, Math.round((playerRect.height || 260) * 1.15))
-        );
-        const dims = applyTabletInfoDimensions(initW, initH);
-        const targetLeft = rightAvail >= 190
-          ? Math.round(playerRect.right + gap)
-          : Math.max(10, window.innerWidth - dims.width - 10);
-        const targetTop = Math.max(8, Math.min(window.innerHeight - dims.height - 10, Math.round(playerRect.top)));
-        tiModal.style.left = targetLeft + 'px';
-        tiModal.style.top = targetTop + 'px';
+        if (isTabletMode) {
+          const gap = 10;
+          const rightAvail = window.innerWidth - playerRect.right - gap - 10;
+          const initW = rightAvail >= 190
+            ? Math.min(350, rightAvail)
+            : Math.min(310, Math.max(195, Math.round(window.innerWidth * 0.30)));
+          const initH = Math.max(
+            playerRect.height || 260,
+            Math.min(window.innerHeight - playerRect.top - 22, Math.round((playerRect.height || 260) * 1.15))
+          );
+          const dims = applyTabletInfoDimensions(initW, initH);
+          const targetLeft = rightAvail >= 190
+            ? Math.round(playerRect.right + gap)
+            : Math.max(10, window.innerWidth - dims.width - 10);
+          const targetTop = Math.max(6, Math.min(window.innerHeight - dims.height - 10, Math.round(playerRect.top)));
+          tiModal.style.left = targetLeft + 'px';
+          tiModal.style.top = targetTop + 'px';
+        } else {
+          const gap = 8;
+          const initW = Math.min(window.innerWidth - 16, Math.max(220, Math.round(playerRect.width || (window.innerWidth - 16))));
+          const belowSpace = window.innerHeight - playerRect.bottom - gap - 14;
+          const initH = belowSpace >= 140
+            ? Math.min(260, belowSpace)
+            : Math.min(240, Math.max(150, Math.round(window.innerHeight * 0.36)));
+          const dims = applyTabletInfoDimensions(initW, initH);
+          const targetLeft = Math.max(8, Math.min(window.innerWidth - dims.width - 8, Math.round(playerRect.left)));
+          const targetTop = belowSpace >= 140
+            ? Math.round(playerRect.bottom + gap)
+            : Math.max(10, window.innerHeight - dims.height - 12);
+          tiModal.style.left = targetLeft + 'px';
+          tiModal.style.top = targetTop + 'px';
+        }
       } else {
         clampTabletInfoModalToViewport();
       }
@@ -5648,18 +5711,21 @@
     })();
 
     function getDefaultFullPlayerMetrics() {
-      const headerBox = document.querySelector('.header-unified-box');
-      const topPos = headerBox
-        ? Math.max(52, Math.round(headerBox.getBoundingClientRect().bottom + (isTabletMode ? 10 : 6)))
-        : (isTabletMode ? 132 : 96);
-      const maxH = Math.max(140, window.innerHeight - topPos - (isTabletMode ? 48 : 36));
       if (isTabletMode) {
+        // 태블릿 재생창은 검색 모듈 밑이 아니라 최상단(배터리·시간 표시줄 바로 아래)부터 시작
+        const topPos = 6;
+        const maxH = Math.max(160, window.innerHeight - topPos - 42);
         const preferredW = window.innerWidth >= 960
           ? Math.min(Math.round(window.innerWidth * 0.60), 760)
           : Math.min(Math.round(window.innerWidth * 0.64), 600);
         const fitWidth = Math.max(280, Math.min(window.innerWidth - 24, preferredW, Math.round(maxH * (16 / 9))));
         return { topPos, fitWidth };
       }
+      const headerBox = document.querySelector('.header-unified-box');
+      const topPos = headerBox
+        ? Math.max(52, Math.round(headerBox.getBoundingClientRect().bottom + 6))
+        : 96;
+      const maxH = Math.max(140, window.innerHeight - topPos - 36);
       const fitWidth = Math.max(MIN_PLAYER_WIDTH, Math.min(window.innerWidth - 12, Math.round(maxH * (16 / 9))));
       return { topPos, fitWidth };
     }
@@ -5719,6 +5785,8 @@
 
       if (isTabletMode && !tiUserClosed) {
         openTabletInfoModal(videoId, title, detailPromise);
+      } else if (!isTabletMode) {
+        hideTabletInfoModal(false);
       }
     }
 
@@ -6278,6 +6346,7 @@
       currentUser = user;
       cloudDeviceProfiles = { mobile: null, tablet: null };
       document.body.classList.remove('auth-locked');
+      window.scrollTo(0, 0);
       activeTabKeyword = '';
       selectedTabDocId = '';
       tabArmedDocId = '';
@@ -7406,7 +7475,133 @@
       }
     }
 
+    function updateDynamicWebManifest() {
+      try {
+        const link = document.getElementById('appWebManifest');
+        if (!link) return;
+        const manifestObj = {
+          name: 'myTube',
+          short_name: 'myTube',
+          start_url: location.href,
+          scope: location.origin + '/',
+          display: 'standalone',
+          orientation: 'any',
+          background_color: '#0d0d0d',
+          theme_color: '#0d0d0d',
+          icons: [
+            { src: 'https://cdn-icons-png.flaticon.com/512/1384/1384060.png', sizes: '512x512', type: 'image/png' }
+          ]
+        };
+        const blob = new Blob([JSON.stringify(manifestObj)], { type: 'application/manifest+json' });
+        link.href = URL.createObjectURL(blob);
+      } catch (e) {}
+    }
+
+    function initTabletSmartScroll() {
+      let tsY = 0, tsX = 0, lastY = 0, lastT = 0;
+      let fastFlickUnlocked = false;
+      let isTracking = false;
+      let inertiaRaf = 0;
+      let lastVel = 0;
+
+      function isIgnoredTarget(el) {
+        if (!el || !el.closest) return false;
+        return !!el.closest(
+          '#floating-player-modal, #tablet-info-modal, #slide-bookmark, #manage-modal-overlay, ' +
+          '#mp3-modal-overlay, #settings-auth-overlay, #auth-gate-overlay, #battery-blackout-overlay, ' +
+          '#tabHistoryDrawer, #filterSlidePanel, #savedTabsList, input, textarea, select'
+        );
+      }
+
+      function cancelInertia() {
+        if (inertiaRaf) { cancelAnimationFrame(inertiaRaf); inertiaRaf = 0; }
+      }
+
+      document.addEventListener('touchstart', (e) => {
+        cancelInertia();
+        if (!isTabletMode || e.touches.length !== 1) { isTracking = false; return; }
+        if (document.body.classList.contains('auth-locked') ||
+            document.body.classList.contains('modal-scroll-locked') ||
+            document.body.classList.contains('blackout-active')) {
+          isTracking = false;
+          return;
+        }
+        if (isIgnoredTarget(e.target)) { isTracking = false; return; }
+        const t = e.touches[0];
+        tsX = t.clientX;
+        tsY = t.clientY;
+        lastY = t.clientY;
+        lastT = performance.now();
+        fastFlickUnlocked = false;
+        lastVel = 0;
+        isTracking = true;
+      }, { passive: true });
+
+      document.addEventListener('touchmove', (e) => {
+        if (!isTracking || !isTabletMode || e.touches.length !== 1) return;
+        const t = e.touches[0];
+        const now = performance.now();
+        const dt = Math.max(1, now - lastT);
+        const stepY = t.clientY - lastY;
+        const totalDx = Math.abs(t.clientX - tsX);
+        const totalDy = Math.abs(t.clientY - tsY);
+        const instVel = stepY / dt;
+
+        lastY = t.clientY;
+        lastT = now;
+
+        if (totalDx > totalDy && totalDx > 10) {
+          isTracking = false;
+          return;
+        }
+
+        if (stepY > 0) {
+          lastVel = instVel;
+          // 빠르게 내림 스크롤(>= 0.85 px/ms)일 때만 Chrome URL 창이 따라 내려오도록 네이티브 허용
+          if (instVel >= 0.85) {
+            fastFlickUnlocked = true;
+          }
+          if (!fastFlickUnlocked) {
+            // 서서히 내림 스크롤: 기본 제스처 차단 + 프로그래매틱 이동 -> Chrome URL 창 고정 유지
+            if (e.cancelable) e.preventDefault();
+            if (window.scrollY > 0) {
+              window.scrollBy(0, -stepY);
+            }
+          }
+        } else if (stepY < 0) {
+          fastFlickUnlocked = false;
+          lastVel = 0;
+        }
+      }, { passive: false });
+
+      document.addEventListener('touchend', () => {
+        if (!isTracking) return;
+        isTracking = false;
+        if (!fastFlickUnlocked && lastVel > 0.08 && lastVel < 0.85 && window.scrollY > 0) {
+          let v = Math.min(12, lastVel * 14);
+          const step = () => {
+            if (v < 0.35 || window.scrollY <= 0) { inertiaRaf = 0; return; }
+            window.scrollBy(0, -v);
+            v *= 0.88;
+            inertiaRaf = requestAnimationFrame(step);
+          };
+          inertiaRaf = requestAnimationFrame(step);
+        }
+      }, { passive: true });
+
+      document.addEventListener('touchcancel', () => {
+        isTracking = false;
+        cancelInertia();
+      }, { passive: true });
+    }
+
     async function bootstrapApp() {
+      if ('scrollRestoration' in history) {
+        try { history.scrollRestoration = 'manual'; } catch (e) {}
+      }
+      window.scrollTo(0, 0);
+      updateDynamicWebManifest();
+      initTabletSmartScroll();
       initDeviceMode();
       document.body.classList.add('auth-locked');
       initSavedBgColor();
@@ -7607,13 +7802,28 @@
       try {
         const msg = JSON.parse(e.data);
         if (msg.event === 'onError' && currentVideoId) {
-          handleUnplayableVideo(currentVideoId);
+          if (isDirectVideoActive) return;
+          const errNum = Number(msg.info);
+          // 100(삭제됨)/2(잘못된 ID)만 피드에서 제거, 101/150/153(임베드 정책 오류)은 창 증발 방지 + Direct 폴백 시도
+          if (errNum === 100 || errNum === 2) {
+            handleUnplayableVideo(currentVideoId);
+          } else if (isTabletMode && !isDirectVideoActive) {
+            tryPlayDirectVideo(currentVideoId, fetchVideoStreamDetails(currentVideoId));
+          }
           return;
         }
         if (msg.event === 'infoDelivery' && msg.info) {
-          if (typeof msg.info.errorCode === 'number' && [2, 5, 100, 101, 150].includes(msg.info.errorCode) && currentVideoId) {
-            handleUnplayableVideo(currentVideoId);
-            return;
+          if (typeof msg.info.errorCode === 'number' && currentVideoId) {
+            if (isDirectVideoActive) return;
+            const ec = msg.info.errorCode;
+            if (ec === 100 || ec === 2) {
+              handleUnplayableVideo(currentVideoId);
+              return;
+            }
+            if ([101, 150, 153].includes(ec) && isTabletMode) {
+              tryPlayDirectVideo(currentVideoId, fetchVideoStreamDetails(currentVideoId));
+              return;
+            }
           }
           if (typeof msg.info.currentTime === 'number') {
             lastKnownPlaySec = msg.info.currentTime;
