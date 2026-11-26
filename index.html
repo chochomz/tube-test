@@ -891,6 +891,28 @@
       margin-bottom: 6px;
     }
 
+    .manage-search-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 2px 2px 6px 2px;
+      margin-bottom: 5px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      flex-shrink: 0;
+    }
+    .manage-search-count {
+      font-size: 11px;
+      font-weight: 700;
+      color: #b5b5be;
+      font-variant-numeric: tabular-nums;
+    }
+    .mini-btn:disabled {
+      opacity: 0.38;
+      cursor: not-allowed;
+    }
+    body.tablet-mode .manage-search-toolbar { padding: 3px 2px 9px 2px; margin-bottom: 7px; }
+    body.tablet-mode .manage-search-count { font-size: 13.5px; }
     .manage-list {
       display: flex;
       flex-direction: column;
@@ -1953,19 +1975,40 @@
     .video-grid.cols-1 .video-title { font-size: 12px; line-height: 1.35; -webkit-line-clamp: 2; }
     .video-meta {
       margin-top: 2px;
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 4px;
       text-align: left;
       font-size: 7.5px;
       line-height: 1.2;
       color: var(--card-title-fg);
+      font-variant-numeric: tabular-nums;
+    }
+    .video-meta-left {
+      flex: 1;
+      min-width: 0;
       opacity: 0.56;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      font-variant-numeric: tabular-nums;
+    }
+    .video-meta-dur {
+      flex-shrink: 0;
+      font-size: 9px;
+      font-weight: 700;
+      line-height: 1.1;
+      color: var(--card-title-fg);
+      opacity: 0.92;
+      white-space: nowrap;
+      letter-spacing: -0.2px;
     }
     .video-grid.cols-3 .video-meta { font-size: 8.5px; }
+    .video-grid.cols-3 .video-meta-dur { font-size: 10.5px; }
     .video-grid.cols-2 .video-meta { font-size: 9.5px; }
+    .video-grid.cols-2 .video-meta-dur { font-size: 11.5px; }
     .video-grid.cols-1 .video-meta { font-size: 10.5px; margin-top: 4px; }
+    .video-grid.cols-1 .video-meta-dur { font-size: 13px; }
     .video-meta-size { display: none; }
     .video-grid.cols-1 .video-meta-size { display: inline; }
 
@@ -1982,6 +2025,7 @@
     .video-grid.grid-full .card-info { padding: 8px 12px 9px 12px; }
     .video-grid.grid-full .video-title { font-size: 13.5px; font-weight: 600; line-height: 1.35; -webkit-line-clamp: 2; }
     .video-grid.grid-full .video-meta { font-size: 11px; margin-top: 4px; }
+    .video-grid.grid-full .video-meta-dur { font-size: 13.5px; }
     .video-grid.grid-full .video-meta-size { display: inline; }
     .video-grid.grid-full .thumb-wrapper iframe.inline-yt-frame {
       position: absolute;
@@ -2475,7 +2519,7 @@
        7. 샤오신 12.7인치 태블릿 전용 대화면 최적화 (정중앙 · 큰 폰트 · 쉬운 조작)
        ===================================================================== */
     body.tablet-mode {
-      padding: 0 calc(env(safe-area-inset-right, 0px) + 18px) calc(env(safe-area-inset-bottom, 0px) + 24px) calc(env(safe-area-inset-left, 0px) + 18px);
+      padding: 0 calc(env(safe-area-inset-right, 0px) + 12px) calc(env(safe-area-inset-bottom, 0px) + 20px) calc(env(safe-area-inset-left, 0px) + 12px);
     }
 
     /* 로그인 / 2차 인증 대형 중앙 입력창 */
@@ -2510,9 +2554,9 @@
       overscroll-behavior-y: none;
     }
     body.tablet-mode .top-header {
-      margin-left: calc(-1 * (env(safe-area-inset-left, 0px) + 18px));
-      margin-right: calc(-1 * (env(safe-area-inset-right, 0px) + 18px));
-      padding: calc(env(safe-area-inset-top, 0px) + 2px) calc(env(safe-area-inset-right, 0px) + 18px) 6px calc(env(safe-area-inset-left, 0px) + 18px);
+      margin-left: calc(-1 * (env(safe-area-inset-left, 0px) + 12px));
+      margin-right: calc(-1 * (env(safe-area-inset-right, 0px) + 12px));
+      padding: calc(env(safe-area-inset-top, 0px) + 2px) calc(env(safe-area-inset-right, 0px) + 12px) 6px calc(env(safe-area-inset-left, 0px) + 12px);
     }
     body.tablet-mode .header-unified-box {
       width: 100%;
@@ -2608,45 +2652,52 @@
     body.tablet-mode .filter-reset-btn,
     body.tablet-mode .filter-apply-btn { padding: 8px 16px; font-size: 14px; border-radius: 8px; }
 
-    /* 태블릿 피드 (큰 폰트 · 넓은 카드 · 1~5열) */
-    body.tablet-mode .video-grid { gap: 12px; }
-    body.tablet-mode .video-grid.cols-5 { grid-template-columns: repeat(5, 1fr); gap: 10px; }
-    body.tablet-mode .video-grid.cols-4 { grid-template-columns: repeat(4, 1fr); gap: 12px; }
-    body.tablet-mode .video-grid.cols-3 { grid-template-columns: repeat(3, 1fr); gap: 14px; }
-    body.tablet-mode .video-grid.cols-2 { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    /* 태블릿 피드 (큰 폰트 · 균형 잡힌 좁은 간극 · 1~5열) */
+    body.tablet-mode .video-grid { gap: 7px; }
+    body.tablet-mode .video-grid.cols-5 { grid-template-columns: repeat(5, 1fr); gap: 6px; }
+    body.tablet-mode .video-grid.cols-4 { grid-template-columns: repeat(4, 1fr); gap: 7px; }
+    body.tablet-mode .video-grid.cols-3 { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    body.tablet-mode .video-grid.cols-2 { grid-template-columns: repeat(2, 1fr); gap: 10px; }
     body.tablet-mode .video-grid.cols-1 {
       grid-template-columns: 1fr;
-      gap: 10px;
+      gap: 6px;
       max-width: 920px;
       margin: 0 auto;
     }
-    body.tablet-mode .video-card { border-radius: 8px; }
-    body.tablet-mode .card-info { padding: 8px 10px; }
-    body.tablet-mode .video-title { font-size: 13.5px; line-height: 1.35; }
-    body.tablet-mode .video-meta { font-size: 11px; margin-top: 4px; }
+    body.tablet-mode .video-card { border-radius: 7px; }
+    body.tablet-mode .card-info { padding: 6px 8px; }
+    body.tablet-mode .video-title { font-size: 13.5px; line-height: 1.32; }
+    body.tablet-mode .video-meta { font-size: 11px; margin-top: 3px; gap: 6px; }
+    body.tablet-mode .video-meta-dur { font-size: 13px; }
     body.tablet-mode .video-grid.cols-5 .video-title { font-size: 12.5px; }
     body.tablet-mode .video-grid.cols-5 .video-meta { font-size: 10.5px; }
+    body.tablet-mode .video-grid.cols-5 .video-meta-dur { font-size: 12.5px; }
     body.tablet-mode .video-grid.cols-4 .video-title { font-size: 13.5px; }
-    body.tablet-mode .video-grid.cols-3 .video-title { font-size: 15px; line-height: 1.35; }
+    body.tablet-mode .video-grid.cols-4 .video-meta-dur { font-size: 13px; }
+    body.tablet-mode .video-grid.cols-3 .video-title { font-size: 15px; line-height: 1.34; }
     body.tablet-mode .video-grid.cols-3 .video-meta { font-size: 12px; }
-    body.tablet-mode .video-grid.cols-2 .video-title { font-size: 16.5px; line-height: 1.38; }
+    body.tablet-mode .video-grid.cols-3 .video-meta-dur { font-size: 14.5px; }
+    body.tablet-mode .video-grid.cols-2 .video-title { font-size: 16.5px; line-height: 1.36; }
     body.tablet-mode .video-grid.cols-2 .video-meta { font-size: 13px; }
-    body.tablet-mode .video-grid.cols-2 .card-info { padding: 10px 12px; }
+    body.tablet-mode .video-grid.cols-2 .video-meta-dur { font-size: 15.5px; }
+    body.tablet-mode .video-grid.cols-2 .card-info { padding: 8px 10px; }
     body.tablet-mode .video-grid.cols-1 .thumb-wrapper { width: 184px; min-width: 184px; height: 104px; }
-    body.tablet-mode .video-grid.cols-1 .card-info { padding: 10px 16px; }
-    body.tablet-mode .video-grid.cols-1 .video-title { font-size: 16.5px; line-height: 1.4; }
-    body.tablet-mode .video-grid.cols-1 .video-meta { font-size: 13px; margin-top: 6px; }
+    body.tablet-mode .video-grid.cols-1 .card-info { padding: 8px 12px; }
+    body.tablet-mode .video-grid.cols-1 .video-title { font-size: 16.5px; line-height: 1.38; }
+    body.tablet-mode .video-grid.cols-1 .video-meta { font-size: 13px; margin-top: 5px; }
+    body.tablet-mode .video-grid.cols-1 .video-meta-dur { font-size: 16px; }
     body.tablet-mode .video-grid.grid-full {
       max-width: 840px;
       width: 100%;
       margin-left: auto;
       margin-right: auto;
-      gap: 16px;
+      gap: 10px;
     }
-    body.tablet-mode .video-grid.grid-full .video-card { border-radius: 10px; }
-    body.tablet-mode .video-grid.grid-full .card-info { padding: 12px 16px; }
+    body.tablet-mode .video-grid.grid-full .video-card { border-radius: 9px; }
+    body.tablet-mode .video-grid.grid-full .card-info { padding: 10px 14px; }
     body.tablet-mode .video-grid.grid-full .video-title { font-size: 17px; }
-    body.tablet-mode .video-grid.grid-full .video-meta { font-size: 13.5px; margin-top: 5px; }
+    body.tablet-mode .video-grid.grid-full .video-meta { font-size: 13.5px; margin-top: 4px; }
+    body.tablet-mode .video-grid.grid-full .video-meta-dur { font-size: 16.5px; }
     body.tablet-mode .star-pin-btn {
       top: 6px;
       right: 6px;
@@ -3000,6 +3051,10 @@
 
       <!-- 탭 1: 검색 목록 관리 -->
       <div class="settings-pane" id="settings-pane-search">
+        <div class="manage-search-toolbar">
+          <span class="manage-search-count" id="manageSearchCount">저장된 검색어 0개</span>
+          <button type="button" class="mini-btn danger" id="deleteAllTabsBtn" onclick="deleteAllTabDocs()" disabled>전체삭제</button>
+        </div>
         <div class="manage-list" id="manageTabList"></div>
       </div>
 
@@ -3629,7 +3684,12 @@
 
     (function bindQueryAutoDock() {
       const qInp = document.getElementById('query');
-      if (qInp) qInp.addEventListener('focus', () => autoDockPlayerIfOpen());
+      if (qInp) {
+        qInp.addEventListener('focus', () => {
+          if (qInp.value) qInp.value = '';
+          autoDockPlayerIfOpen();
+        });
+      }
     })();
 
     function toggleFilterPanel() {
@@ -4614,6 +4674,18 @@
       return parts.join(' - ');
     }
 
+    function formatDuration(sec) {
+      const total = Math.floor(Number(sec || 0));
+      if (!isFinite(total) || total <= 0) return '';
+      const h = Math.floor(total / 3600);
+      const m = Math.floor((total % 3600) / 60);
+      const s = total % 60;
+      if (h > 0) {
+        return `${h}:${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+      }
+      return `${m}:${s < 10 ? '0' : ''}${s}`;
+    }
+
     async function handleUnplayableVideo(badVideoId) {
       if (!badVideoId) return;
 
@@ -4723,13 +4795,25 @@
 
       const metaEl = document.createElement('div');
       metaEl.className = 'video-meta';
-      metaEl.textContent = formatFeedMeta(item.u, item.v);
+
+      const metaLeft = document.createElement('span');
+      metaLeft.className = 'video-meta-left';
+      metaLeft.textContent = formatFeedMeta(item.u, item.v);
       const estSize = estimateVideoFileSize(item.d, item.q);
       if (estSize) {
         const sizeSpan = document.createElement('span');
         sizeSpan.className = 'video-meta-size';
         sizeSpan.textContent = ' · ' + estSize;
-        metaEl.appendChild(sizeSpan);
+        metaLeft.appendChild(sizeSpan);
+      }
+      metaEl.appendChild(metaLeft);
+
+      const durText = formatDuration(item.d);
+      if (durText) {
+        const durSpan = document.createElement('span');
+        durSpan.className = 'video-meta-dur';
+        durSpan.textContent = durText;
+        metaEl.appendChild(durSpan);
       }
       info.appendChild(metaEl);
 
@@ -5354,15 +5438,17 @@
     const TI_BASE_WIDTH = 300;
 
     function getRelatedShortsKeyword(title) {
-      if (activeTabKeyword && activeTabKeyword.trim()) {
-        return activeTabKeyword.trim();
-      }
       const cleaned = simplifyTitle(title || currentVideoTitle || '')
         .replace(/[^가-힣a-zA-Z0-9\s]/g, ' ')
         .replace(/\s+/g, ' ')
         .trim();
-      if (!cleaned) return '인기';
-      return cleaned.split(' ').slice(0, 3).join(' ');
+      if (cleaned && cleaned.length >= 2) {
+        return cleaned.split(' ').slice(0, 3).join(' ');
+      }
+      if (activeTabKeyword && activeTabKeyword.trim()) {
+        return activeTabKeyword.trim();
+      }
+      return '인기';
     }
 
     function isKoreanShortItem(item) {
@@ -5434,7 +5520,7 @@
 
     async function initRelatedShortsFeed(keyword, excludeVideoId, forceRefresh = false) {
       const kw = String(keyword || '').trim() || '인기';
-      const cacheKey = kw.toLowerCase();
+      const cacheKey = (kw + '::' + String(excludeVideoId || '')).toLowerCase();
       currentShortsQueryKey = kw;
       const mySeq = ++shortsFetchSeq;
 
@@ -5859,6 +5945,8 @@
     // 우측 쇼츠 클릭 -> 오른쪽 목록·스크롤 100% 유지 + 왼쪽 재생창에서만 즉시 재생!
     function playShortInLeftPlayer(item, idx) {
       if (!item || !item.id) return;
+      const qEl = document.getElementById('query');
+      if (qEl && document.activeElement !== qEl) qEl.value = '';
       unlockIosAudioOnce();
       stopBgAudioClean();
       stopDirectVideoClean();
@@ -5904,7 +5992,7 @@
     function reloadRelatedShorts() {
       if (!isTabletMode || !currentVideoId) return;
       const kw = getRelatedShortsKeyword(currentVideoTitle);
-      relatedShortsCache.delete(kw.toLowerCase());
+      relatedShortsCache.delete((kw + '::' + String(currentVideoId || '')).toLowerCase());
       initRelatedShortsFeed(kw, currentVideoId, true);
     }
 
@@ -6029,7 +6117,7 @@
       let tiStartX = 0, tiStartY = 0, tiInitL = 0, tiInitT = 0, tiInitW = 280, tiInitH = 300;
 
       tiDragBar.addEventListener('pointerdown', (e) => {
-        if (e.target && e.target.closest && e.target.closest('.ti-close-btn')) return;
+        if (e.target && e.target.closest && e.target.closest('button, .ti-close-btn, .ti-auto-btn, .ti-refresh-btn')) return;
         tiDragging = true;
         tiUserCustomized = true;
         tiModal.classList.add('ti-interacting');
@@ -6171,7 +6259,7 @@
 
       activePlayingShortId = '';
       if (isTabletMode && shortsPanelOpen) {
-        openTabletInfoModal(videoId, title, false);
+        openTabletInfoModal(videoId, title, true);
       } else {
         hideTabletInfoModal(false);
       }
@@ -7346,6 +7434,8 @@
     })();
 
     function handleHistoryTabTap(tab) {
+      const qEl = document.getElementById('query');
+      if (qEl && document.activeElement !== qEl) qEl.value = '';
       const drawer = document.getElementById('tabHistoryDrawer');
       const isDrawerOpenForThis = !!(drawer && drawer.classList.contains('open') && activeDrawerDocId === tab.docId);
       const isArmedForThis = (tabArmedDocId === tab.docId);
@@ -7592,6 +7682,11 @@
     }
 
     function renderManageList() {
+      const cntEl = document.getElementById('manageSearchCount');
+      const delAllBtn = document.getElementById('deleteAllTabsBtn');
+      if (cntEl) cntEl.textContent = `저장된 검색어 ${cachedTabsMeta.length}개`;
+      if (delAllBtn) delAllBtn.disabled = cachedTabsMeta.length === 0;
+
       manageTabList.innerHTML = '';
       if (cachedTabsMeta.length === 0) {
         manageTabList.innerHTML = '<div style="font-size:12px; color:#888; text-align:center; padding:16px 0;">저장된 검색 목록이 없습니다.</div>';
@@ -7859,6 +7954,52 @@
           await syncTabsIndexToCloud();
         } catch (err) {
           recordDbError(err);
+        }
+      }
+    }
+
+    async function deleteAllTabDocs() {
+      if (!currentUser || cachedTabsMeta.length === 0) return;
+      const total = cachedTabsMeta.length;
+      if (!confirm(`저장된 검색 목록 전체(${total}개)를 모두 삭제할까요?\n(삭제 후 복구할 수 없습니다)`)) return;
+
+      const targetDocIds = cachedTabsMeta.map(t => t.docId).filter(Boolean);
+      targetDocIds.forEach(docId => {
+        removeCachedTab(docId);
+        clearPendingSync(docId);
+      });
+
+      cachedTabsMeta = [];
+      saveLocalMetaBackup([]);
+      activeTabKeyword = '';
+      selectedTabDocId = '';
+      tabArmedDocId = '';
+      lastViewedFeed = null;
+      try { localStorage.removeItem(LAST_FEED_STORAGE_PREFIX + getUid()); } catch (e) {}
+      closeTabHistoryDrawer(true);
+
+      if (currentFeedIsCache && !isInlinePlaying) {
+        currentFeedItems = [];
+        dbFeedPool = [];
+        resultsContainer.innerHTML = '';
+        updateScrollSentinelUI();
+      }
+
+      renderSavedTabsBar();
+      if (manageOverlay.style.display === 'flex') renderManageList();
+
+      if (fbReady && db) {
+        setWorkingState(true);
+        try {
+          await Promise.allSettled(
+            targetDocIds.map(docId => db.collection(FB_COLLECTION).doc(docId).delete())
+          );
+          await syncTabsIndexToCloud();
+          await saveUserProfileDocToCloud();
+        } catch (err) {
+          recordDbError(err);
+        } finally {
+          setWorkingState(false);
         }
       }
     }
