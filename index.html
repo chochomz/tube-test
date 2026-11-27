@@ -3658,6 +3658,107 @@
     body.tablet-mode .ly-icon-btn { height: 30px; padding: 0 9px; font-size: 12px; }
     body.tablet-mode .ly-body { max-height: 245px; padding: 12px 15px; line-height: 1.72; }
     body.tablet-mode .ly-foot-btn { padding: 5px 11px; font-size: 12px; }
+    /* ---------------- [v25] PiP 전용 비디오 · 우측 하단 미니 PiP · '<' 꺾기 숨김 탭 ---------------- */
+    .bookmark-tab.pip-active {
+      opacity: 1 !important;
+      box-shadow: 0 0 0 1.5px #38bdf8;
+    }
+    #pipVideoPlayer {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background: #000000;
+      object-fit: contain;
+      z-index: 14;
+      display: none;
+    }
+    #pipVideoPlayer.active { display: block; }
+    #floating-player-modal.app-mini-pip {
+      transition: left 0.24s cubic-bezier(0.22, 1, 0.36, 1), top 0.24s cubic-bezier(0.22, 1, 0.36, 1), transform 0.24s ease, opacity 0.22s ease;
+    }
+    #floating-player-modal.app-mini-pip.interacting {
+      transition: none !important;
+    }
+    #floating-player-modal.pip-edge-hidden {
+      transform: translateX(calc(100% + 48px)) !important;
+      opacity: 0.008 !important;
+      pointer-events: none !important;
+    }
+    #pip-edge-chevron {
+      position: fixed;
+      right: 0;
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 92px);
+      z-index: 9600;
+      width: 26px;
+      height: 64px;
+      border-radius: 14px 0 0 14px;
+      border: 1.5px solid var(--header-border-color);
+      border-right: none;
+      background: rgba(18, 18, 24, 0.84);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      color: var(--header-border-color);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      box-shadow: -4px 4px 16px rgba(0, 0, 0, 0.58);
+      cursor: pointer;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+      transform: translateX(100%);
+      opacity: 0;
+      transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.28s ease;
+    }
+    #pip-edge-chevron.visible {
+      display: flex;
+      transform: translateX(0);
+      opacity: 0.92;
+    }
+    #pip-edge-chevron svg {
+      animation: pipChevronPulse 2.1s ease-in-out infinite;
+    }
+    @keyframes pipChevronPulse {
+      0%, 100% { transform: translateX(0); opacity: 0.72; }
+      50% { transform: translateX(-2px); opacity: 1; }
+    }
+    body.tablet-mode #pip-edge-chevron {
+      width: 34px;
+      height: 78px;
+      border-radius: 16px 0 0 16px;
+    }
+    body.tablet-mode #pip-edge-chevron svg {
+      width: 18px;
+      height: 26px;
+    }
+    body.auth-locked #pip-edge-chevron,
+    body.blackout-active #pip-edge-chevron {
+      display: none !important;
+    }
+    .ly-cc-badge-btn {
+      height: 24px;
+      padding: 0 6px;
+      border-radius: 5px;
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      background: rgba(56, 189, 248, 0.16);
+      color: #7dd3fc;
+      font-size: 10px;
+      font-weight: 800;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .ly-cc-badge-btn.cc-on {
+      background: #38bdf8;
+      border-color: #38bdf8;
+      color: #082f49;
+    }
+    body.tablet-mode .ly-cc-badge-btn {
+      height: 30px;
+      padding: 0 9px;
+      font-size: 12px;
+    }
   </style>
 </head>
 <body>
@@ -3795,6 +3896,8 @@
         <div id="yt-iframe-holder"></div>
       </div>
 
+      <video id="pipVideoPlayer" playsinline webkit-playsinline preload="auto" controls></video>
+
       <div class="yt-pause-mask" id="ytPauseMask" onclick="resumeYtFromMask()">
         <div class="yt-pause-play-circle">▶</div>
       </div>
@@ -3815,6 +3918,9 @@
         <div class="bookmark-tab" id="lyricsToggleTab" onclick="toggleLyricsPanel()" title="가사 보기/닫기">
           <span>가사</span>
         </div>
+        <div class="bookmark-tab" id="pipToggleTab" onclick="togglePipMode()" title="PiP 미니창 (우측 하단 · 오른쪽 밀면 < 숨김)">
+          <span>PiP</span>
+        </div>
         <div class="bookmark-tab tablet-only-tab" id="tabletInfoToggleTab" onclick="toggleTabletInfoModal()" title="관련 쇼츠 창 열기/닫기">
           <span>쇼츠</span>
         </div>
@@ -3832,6 +3938,7 @@
         <div class="ly-search-row">
           <input type="text" id="lyQueryInput" class="ly-query-input" placeholder="곡명 · 가수 검색" autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault(); searchLyricsManual();}">
           <button type="button" class="ly-icon-btn" onclick="searchLyricsManual()" title="가사 재검색">🔍</button>
+          <button type="button" class="ly-cc-badge-btn" id="lyCcToggleBtn" onclick="toggleYoutubeCcManual()" title="재생창 CC 음성인식 자막 켜기/끄기">CC</button>
           <button type="button" class="ly-icon-btn" onclick="changeLyricsFontSize(-1)" title="글자 작게">가-</button>
           <button type="button" class="ly-icon-btn" onclick="changeLyricsFontSize(1)" title="글자 크게">가+</button>
         </div>
@@ -3846,7 +3953,7 @@
       </div>
       <div class="ly-footer">
         <button type="button" class="ly-foot-btn" onclick="openEditCustomLyrics()">✎ 직접입력</button>
-        <button type="button" class="ly-foot-btn" onclick="openNaverLyricsSearch()">네이버 가사 ↗</button>
+        <button type="button" class="ly-foot-btn" id="lyGeminiBtn" onclick="openGeminiLyricsSearch()">✦ 제미나이 가사</button>
         <button type="button" class="ly-foot-btn" onclick="closeLyricsPanel(true)">닫기</button>
       </div>
     </div>
@@ -3890,6 +3997,13 @@
 
   <!-- 3-2b. 배터리 절약 순수 검정(#000000) 절전 화면 오버레이 -->
   <div id="battery-blackout-overlay" onclick="onBlackoutOverlayTap()"></div>
+
+  <!-- 3-2c. PiP 오른쪽 밀기 숨김 시 나타나는 아이폰 스타일 '<' 꺾기 탭 -->
+  <div id="pip-edge-chevron" title="터치하거나 왼쪽으로 당겨 PiP 창 복귀">
+    <svg viewBox="0 0 18 28" width="14" height="22" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <polyline points="13,5 5,14 13,23"/>
+    </svg>
+  </div>
 
   <!-- 3-3. 브라우저 백그라운드 오디오 재생 유지용 네이티브 오디오 요소 -->
   <audio id="bgAudioPlayer" playsinline preload="auto" style="display:none;"></audio>
@@ -4132,6 +4246,14 @@
           </div>
         </div>
 
+        <div class="stream-api-box" id="geminiApiBox">
+          <div class="stream-api-head" id="geminiApiHead">제미나이 가사 API 키 (선택 · 관리자 저장 시 전 사용자 공용)</div>
+          <div class="auth-form-row" style="margin-bottom:0;">
+            <input type="password" id="geminiApiKeyInput" class="auth-form-input" placeholder="AIza... (비우면 제미나이 웹 바로열기)" autocomplete="off">
+            <button type="button" class="auth-form-btn" onclick="saveGeminiApiKey()">저장</button>
+          </div>
+        </div>
+
         <div class="admin-divider" id="adminOnlySection" style="display:none; flex-direction:column;">
           <div class="settings-sec-title" style="margin-top:2px;">관리자 코드 변경</div>
           <div class="auth-form-row">
@@ -4201,6 +4323,53 @@
     };
 
     const REMEMBER_NAME_KEY = 'mytube_remember_name_v12';
+    const REMEMBER_CRED_KEY = 'mytube_remember_cred_v25';
+    const GEMINI_API_LOCAL_KEY = 'mytube_gemini_api_v25';
+    let sharedGeminiApiKey = '';
+    let localGeminiApiKey = '';
+
+    function saveRememberedCred(name, code) {
+      const n = _normName(name);
+      const c = String(code || '').trim();
+      try {
+        if (n && c) {
+          localStorage.setItem(REMEMBER_NAME_KEY, n);
+          localStorage.setItem(REMEMBER_CRED_KEY, JSON.stringify({ name: n, code: _p4(c) }));
+        } else {
+          localStorage.removeItem(REMEMBER_NAME_KEY);
+          localStorage.removeItem(REMEMBER_CRED_KEY);
+        }
+      } catch (e) {}
+    }
+
+    function loadRememberedCred() {
+      try {
+        const raw = localStorage.getItem(REMEMBER_CRED_KEY);
+        if (raw) {
+          const p = JSON.parse(raw);
+          if (p && p.name && p.code) {
+            return { name: _normName(p.name), code: _u4(p.code) };
+          }
+        }
+      } catch (e) {}
+      return null;
+    }
+
+    function clearRememberedCred() {
+      try {
+        localStorage.removeItem(REMEMBER_NAME_KEY);
+        localStorage.removeItem(REMEMBER_CRED_KEY);
+      } catch (e) {}
+    }
+
+    function tryAutoLoginFromRemembered() {
+      const cred = loadRememberedCred();
+      if (!cred || !cred.name || !cred.code) return false;
+      const user = findUserByNameAndCode(cred.name, cred.code);
+      if (!user) return false;
+      enterAppWithUser(user);
+      return true;
+    }
     const PENDING_AUTH_SYNC_KEY = 'mytube_pending_auth_sync_v14';
     const VIEW_MODE_STORAGE_KEY = 'mytube_view_mode_v23';
     const AUTH_DOC_ID = 'sys_auth';
@@ -6062,6 +6231,232 @@
       return out.join('\n');
     }
 
+    function parseVttTimeToSec(ts) {
+      const clean = String(ts || '').trim().replace(',', '.');
+      const parts = clean.split(':').map(Number);
+      if (parts.some(n => isNaN(n))) return -1;
+      if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+      if (parts.length === 2) return parts[0] * 60 + parts[1];
+      return -1;
+    }
+
+    function parseVttToSynced(vtt) {
+      const blocks = String(vtt || '').replace(/\r/g, '').split(/\n\n+/);
+      const out = [];
+      let lastText = '';
+      for (const blk of blocks) {
+        const lines = blk.split('\n').map(l => l.trim()).filter(Boolean);
+        if (lines.length < 2) continue;
+        const timeIdx = lines.findIndex(l => l.includes('-->'));
+        if (timeIdx === -1) continue;
+        const startStr = lines[timeIdx].split('-->')[0].trim().split(' ')[0];
+        const sec = parseVttTimeToSec(startStr);
+        if (sec < 0) continue;
+        const rawText = lines.slice(timeIdx + 1)
+          .join(' ')
+          .replace(/<\d{2}:\d{2}:\d{2}\.\d{3}>/g, '')
+          .replace(/<[^>]+>/g, '')
+          .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+          .replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&nbsp;/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim();
+        if (!rawText) continue;
+        if (rawText === lastText) continue;
+        // YouTube 자동생성(ASR) 롤업 중복 문장 정리
+        if (lastText && rawText.startsWith(lastText) && rawText.length > lastText.length) {
+          const added = rawText.slice(lastText.length).trim();
+          lastText = rawText;
+          if (added) out.push({ time: sec, text: added });
+          continue;
+        }
+        lastText = rawText;
+        out.push({ time: sec, text: rawText });
+      }
+      return out;
+    }
+
+    let ytCcForceOn = false;
+
+    function enableYoutubeCaptions(enable = true, forceReloadIfNeeded = false) {
+      ytCcForceOn = !!enable;
+      const ccBtn = document.getElementById('lyCcToggleBtn');
+      if (ccBtn) ccBtn.classList.toggle('cc-on', ytCcForceOn);
+      if (!currentVideoId) return;
+      if (enable) {
+        sendYtCommand('loadModule', ['captions']);
+        sendYtCommand('setOption', ['captions', 'track', { languageCode: 'ko' }]);
+        sendYtCommand('setOption', ['captions', 'reload', true]);
+        if (forceReloadIfNeeded && !isInlinePlaying && !isPipActive && !isBgAudioPlaying) {
+          mountYoutubeEmbed(currentVideoId, false, lastKnownPlaySec);
+        }
+      } else {
+        sendYtCommand('unloadModule', ['captions']);
+        sendYtCommand('setOption', ['captions', 'track', {}]);
+      }
+    }
+
+    function toggleYoutubeCcManual() {
+      const next = !ytCcForceOn;
+      enableYoutubeCaptions(next, next);
+    }
+
+    async function fetchYoutubeCaptionsSynced(videoId) {
+      // 1단계: Piped 병렬 탐색 (수동 ko -> 자동음성인식 ko ASR -> en -> 기타 자막)
+      try {
+        const pipedTasks = STREAM_PIPED_SERVERS.map(srv => async () => {
+          const info = await fetchJsonWithTimeout(srv + '/streams/' + videoId, 5500);
+          if (!info) return [];
+          const subs = Array.isArray(info.subtitles) ? info.subtitles.filter(s => s && s.url) : [];
+          if (subs.length === 0 && !info.description) return [];
+          return [{ subs, description: info.description || '' }];
+        });
+        const raced = await raceFirstNonEmpty(pipedTasks);
+        const pack = raced && raced[0];
+        if (pack && Array.isArray(pack.subs) && pack.subs.length > 0) {
+          const subs = pack.subs;
+          const pick =
+            subs.find(s => /^ko/i.test(String(s.code || '')) && !s.autoGenerated) ||
+            subs.find(s => /^ko/i.test(String(s.code || ''))) ||
+            subs.find(s => /korean|한국어/i.test(String(s.name || ''))) ||
+            subs.find(s => /^en/i.test(String(s.code || ''))) ||
+            subs[0];
+          if (pick && pick.url) {
+            const r = await fetch(pick.url);
+            if (r.ok) {
+              const vtt = await r.text();
+              const synced = parseVttToSynced(vtt);
+              const plain = synced.length > 0 ? synced.map(x => x.text).join('\n') : parseVttToPlain(vtt);
+              if (synced.length > 0 || (plain && plain.length >= 15)) {
+                return {
+                  synced,
+                  plain,
+                  description: pack.description || '',
+                  sourceLabel: pick.autoGenerated ? '🎙 CC음성자막' : 'CC 자막'
+                };
+              }
+            }
+          }
+          if (pack.description) {
+            return { synced: [], plain: '', description: pack.description, sourceLabel: '' };
+          }
+        }
+      } catch (e) {}
+
+      // 2단계: Invidious 캡션 API 폴백
+      try {
+        const invTasks = STREAM_INVIDIOUS_SERVERS.map(inv => async () => {
+          const d = await fetchJsonWithTimeout(inv + '/api/v1/captions/' + videoId, 5500);
+          const caps = d && Array.isArray(d.captions) ? d.captions : [];
+          if (caps.length === 0) return [];
+          return [{ inv, caps }];
+        });
+        const invRaced = await raceFirstNonEmpty(invTasks);
+        const invPack = invRaced && invRaced[0];
+        if (invPack && invPack.caps.length > 0) {
+          const caps = invPack.caps;
+          const pick =
+            caps.find(c => /^ko/i.test(String(c.language_code || c.languageCode || ''))) ||
+            caps.find(c => /korean|한국어/i.test(String(c.label || ''))) ||
+            caps[0];
+          if (pick && pick.url) {
+            const fullUrl = pick.url.startsWith('http') ? pick.url : (invPack.inv + pick.url);
+            const r = await fetch(fullUrl);
+            if (r.ok) {
+              const vtt = await r.text();
+              const synced = parseVttToSynced(vtt);
+              const plain = synced.length > 0 ? synced.map(x => x.text).join('\n') : parseVttToPlain(vtt);
+              if (synced.length > 0 || (plain && plain.length >= 15)) {
+                return { synced, plain, description: '', sourceLabel: '🎙 CC음성자막' };
+              }
+            }
+          }
+        }
+      } catch (e) {}
+
+      return null;
+    }
+
+    function getEffectiveGeminiApiKey() {
+      return String(localGeminiApiKey || sharedGeminiApiKey || '').trim();
+    }
+
+    function initSavedGeminiApiKey() {
+      localGeminiApiKey = '';
+      try {
+        localGeminiApiKey = String(localStorage.getItem(GEMINI_API_LOCAL_KEY) || '').trim();
+      } catch (e) {}
+    }
+
+    async function saveGeminiApiKey() {
+      const inp = document.getElementById('geminiApiKeyInput');
+      if (inp) inp.blur();
+      const val = inp ? inp.value.trim() : '';
+      if (val && !val.startsWith('AIza')) {
+        alert('올바른 Google Gemini API 키(AIza...)를 입력해 주세요.');
+        return;
+      }
+      if (hasSettingsAdminAccess()) {
+        sharedGeminiApiKey = val;
+        localGeminiApiKey = val;
+        try {
+          if (val) localStorage.setItem(GEMINI_API_LOCAL_KEY, val);
+          else localStorage.removeItem(GEMINI_API_LOCAL_KEY);
+        } catch (e) {}
+        authData.updatedAt = Date.now();
+        setPendingAuthSync(true);
+        const res = await saveAuthConfigToCloud();
+        renderAuthSettingsPane();
+        alert(val
+          ? (res.ok ? '제미나이 API 키가 저장되어 모든 사용자에게 공용 적용되었습니다.' : '키가 로컬에 저장되었습니다. (DB 동기화 대기)')
+          : '공용 제미나이 API 키가 해제되었습니다.');
+      } else {
+        localGeminiApiKey = val;
+        try {
+          if (val) localStorage.setItem(GEMINI_API_LOCAL_KEY, val);
+          else localStorage.removeItem(GEMINI_API_LOCAL_KEY);
+        } catch (e) {}
+        renderAuthSettingsPane();
+        alert(val ? '개인 제미나이 API 키가 저장되었습니다.' : '개인 제미나이 API 키가 해제되었습니다.');
+      }
+    }
+
+    async function fetchLyricsFromGeminiApi(queryStr, apiKey) {
+      const models = ['gemini-2.5-flash', 'gemini-2.0-flash'];
+      const prompt = '노래 제목: "' + queryStr + '"\n이 노래의 전체 가사를 불필요한 인사말, 설명, 마크다운 기호 없이 가사 본문만 줄바꿈하여 깔끔하게 알려줘. 원문 언어 그대로 작성하고, 가사를 정확히 알 수 없으면 추측하지 말고 정확히 "NO_LYRICS" 라고만 답해줘.';
+      for (const model of models) {
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), 14000);
+        try {
+          const res = await fetch(
+            'https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent?key=' + encodeURIComponent(apiKey),
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              signal: ctrl.signal,
+              body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }] }],
+                generationConfig: { temperature: 0.2, maxOutputTokens: 2048 }
+              })
+            }
+          );
+          if (!res.ok) continue;
+          const data = await res.json();
+          const txt = data && data.candidates && data.candidates[0] &&
+            data.candidates[0].content && Array.isArray(data.candidates[0].content.parts)
+            ? data.candidates[0].content.parts.map(p => p.text || '').join('').trim()
+            : '';
+          if (txt && !/^NO_LYRICS$/i.test(txt)) {
+            return txt;
+          }
+          if (/^NO_LYRICS$/i.test(txt)) return '';
+        } catch (e) {
+        } finally {
+          clearTimeout(timer);
+        }
+      }
+      return null;
+    }
+
     function extractLyricsFromDescription(desc) {
       const clean = String(desc || '')
         .replace(/<br\s*\/?>/gi, '\n')
@@ -6158,7 +6553,7 @@
       const queryStr = (manualQuery || cleanLyricsSearchQuery(rawTitle)).trim();
       if (qInp && !manualQuery) qInp.value = queryStr;
 
-      // 0단계: 사용자가 직접 저장한 가사 우선 확인
+      // 0단계: 사용자가 직접 저장한 가사 최우선 확인
       if (!manualQuery) {
         try {
           const saved = localStorage.getItem(LYRICS_CUSTOM_PREFIX + videoId);
@@ -6173,13 +6568,44 @@
         }
       }
 
-      if (badgeEl) badgeEl.textContent = '🎵 검색중';
+      if (badgeEl) badgeEl.textContent = '🎙 자막검색';
       if (bodyEl) {
         bodyEl.style.display = 'block';
-        bodyEl.innerHTML = '<div class="ly-status-msg">가사를 찾는 중입니다...</div>';
+        bodyEl.innerHTML = '<div class="ly-status-msg">재생창 CC 음성인식 자막을 불러오는 중...</div>';
       }
 
-      // 1단계: LRCLIB 공개 가사 DB (싱크 가사 + 일반 가사)
+      // 1단계 (자동 로드): YouTube CC / 자동생성 음성인식(ASR) 싱크 자막 최우선
+      let fallbackDesc = '';
+      if (!manualQuery) {
+        const capRes = await fetchYoutubeCaptionsSynced(videoId);
+        if (mySeq !== lyricsFetchSeq) return;
+        if (capRes) {
+          fallbackDesc = capRes.description || '';
+          if ((capRes.synced && capRes.synced.length > 0) || (capRes.plain && capRes.plain.length >= 15)) {
+            const resObj = {
+              plain: capRes.plain || '',
+              synced: capRes.synced || [],
+              sourceLabel: capRes.sourceLabel || '🎙 CC음성자막'
+            };
+            lyricsMemoryCache.set(videoId, resObj);
+            renderLyricsResult(resObj);
+            return;
+          }
+        }
+      }
+
+      // 2단계: 영상 설명란에 가사가 포함된 경우
+      if (!manualQuery && fallbackDesc) {
+        const extracted = extractLyricsFromDescription(fallbackDesc);
+        if (extracted && mySeq === lyricsFetchSeq) {
+          const resObj = { plain: extracted, sourceLabel: '📄 영상설명' };
+          lyricsMemoryCache.set(videoId, resObj);
+          renderLyricsResult(resObj);
+          return;
+        }
+      }
+
+      // 3단계: LRCLIB 공개 가사 DB 폴백 (수동 재검색 포함)
       if (queryStr) {
         try {
           const data = await fetchJsonWithTimeout('https://lrclib.net/api/search?q=' + encodeURIComponent(queryStr), 5500);
@@ -6202,52 +6628,11 @@
       }
 
       if (mySeq !== lyricsFetchSeq) return;
-
-      // 2단계: Piped 서버에서 영상 자막(ko) 또는 설명란 가사 추출
-      if (!manualQuery) {
-        try {
-          const tasks = STREAM_PIPED_SERVERS.slice(0, 3).map(srv => async () => {
-            const d = await fetchJsonWithTimeout(srv + '/streams/' + videoId, 5000);
-            if (d && (d.description || (Array.isArray(d.subtitles) && d.subtitles.length > 0))) return [d];
-            return [];
-          });
-          const raced = await raceFirstNonEmpty(tasks);
-          if (mySeq !== lyricsFetchSeq) return;
-          const info = raced && raced[0];
-          if (info) {
-            if (Array.isArray(info.subtitles)) {
-              const koSub = info.subtitles.find(s => s && s.url && /^ko/i.test(String(s.code || '')));
-              if (koSub) {
-                try {
-                  const subRes = await fetch(koSub.url);
-                  if (subRes.ok) {
-                    const vtt = await subRes.text();
-                    const plain = parseVttToPlain(vtt);
-                    if (plain && plain.length >= 25 && mySeq === lyricsFetchSeq) {
-                      const resObj = { plain, sourceLabel: 'CC 자막' };
-                      lyricsMemoryCache.set(videoId, resObj);
-                      renderLyricsResult(resObj);
-                      return;
-                    }
-                  }
-                } catch (err) {}
-              }
-            }
-            if (info.description) {
-              const extracted = extractLyricsFromDescription(info.description);
-              if (extracted && mySeq === lyricsFetchSeq) {
-                const resObj = { plain: extracted, sourceLabel: '📄 영상설명' };
-                lyricsMemoryCache.set(videoId, resObj);
-                renderLyricsResult(resObj);
-                return;
-              }
-            }
-          }
-        } catch (e) {}
+      if (badgeEl) badgeEl.textContent = '🎙 CC/가사';
+      if (bodyEl) {
+        bodyEl.style.display = 'block';
+        bodyEl.innerHTML = '<div class="ly-status-msg">음성인식 자막(CC)을 찾지 못했습니다.<br>재생창의 <b>[CC]</b>를 확인하거나 아래 <b>[✦ 제미나이 가사]</b>를 눌러 가사를 바로 불러오세요.</div>';
       }
-
-      if (mySeq !== lyricsFetchSeq) return;
-      renderLyricsResult(null);
     }
 
     function toggleLyricsPanel() {
@@ -6259,8 +6644,11 @@
       dr.classList.toggle('open', lyricsPanelOpen);
       if (tab) tab.classList.toggle('lyrics-active', lyricsPanelOpen);
       if (lyricsPanelOpen) {
+        enableYoutubeCaptions(true, false);
         updateLyricsFontUI();
         fetchLyricsForVideo(currentVideoId, currentVideoTitle, '');
+      } else {
+        enableYoutubeCaptions(false, false);
       }
     }
 
@@ -6324,12 +6712,69 @@
       }
     }
 
-    function openNaverLyricsSearch() {
+    function copyTextFallback(text) {
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).catch(() => {});
+          return true;
+        }
+      } catch (e) {}
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        return true;
+      } catch (e) { return false; }
+    }
+
+    async function openGeminiLyricsSearch() {
       const inp = document.getElementById('lyQueryInput');
       const q = (inp && inp.value.trim()) || cleanLyricsSearchQuery(currentVideoTitle);
       if (!q) return;
-      window.open('https://search.naver.com/search.naver?query=' + encodeURIComponent(q + ' 가사'), '_blank', 'noopener,noreferrer');
+
+      const apiKey = getEffectiveGeminiApiKey();
+      const bodyEl = document.getElementById('lyBody');
+      const badgeEl = document.getElementById('lyStatusBadge');
+      const editBox = document.getElementById('lyEditBox');
+
+      // 2-A안: Gemini API 키가 있으면 앱 창 안에서 즉시 가사 불러오기
+      if (apiKey) {
+        const mySeq = ++lyricsFetchSeq;
+        if (editBox) editBox.style.display = 'none';
+        if (badgeEl) badgeEl.textContent = '✦ 제미나이...';
+        if (bodyEl) {
+          bodyEl.style.display = 'block';
+          bodyEl.innerHTML = '<div class="ly-status-msg">✦ 제미나이에서 "' + q.replace(/</g, '&lt;') + '" 가사를 불러오는 중...</div>';
+        }
+        const gemText = await fetchLyricsFromGeminiApi(q, apiKey);
+        if (mySeq !== lyricsFetchSeq) return;
+        if (gemText) {
+          const resObj = { plain: gemText, synced: [], sourceLabel: '✦ 제미나이' };
+          if (currentVideoId) lyricsMemoryCache.set(currentVideoId, resObj);
+          renderLyricsResult(resObj);
+          return;
+        }
+        // API 실패 또는 가사 없음 시 웹 제미나이 폴백 안내
+        if (badgeEl) badgeEl.textContent = '✦ 제미나이';
+        if (bodyEl) {
+          bodyEl.innerHTML = '<div class="ly-status-msg">API에서 가사를 찾지 못해 제미나이 웹으로 연결합니다.<br>질문이 복사되었으니 붙여넣기 하세요!</div>';
+        }
+      }
+
+      // 기본 모드(무키) 및 폴백: 질문 자동 복사 + 제미나이 바로 열기
+      const promptMsg = '「' + q + '」 노래의 전체 가사를 불필요한 설명 없이 가사 본문만 깔끔하게 알려줘';
+      copyTextFallback(promptMsg);
+      if (!apiKey && bodyEl) {
+        bodyEl.innerHTML = '<div class="ly-status-msg">✦ 제미나이 질문이 클립보드에 자동 복사되었습니다.<br>열린 제미나이 창에 <b>붙여넣기</b> 후 가사를 확인하세요!</div>';
+      }
+      window.open('https://gemini.google.com/app', '_blank', 'noopener,noreferrer');
     }
+    const openNaverLyricsSearch = openGeminiLyricsSearch;
 
     (function bindLyricsAndFaithBarGuards() {
       const dr = document.getElementById('player-lyrics-drawer');
@@ -7814,7 +8259,8 @@
         ytFrameReady = false;
         const originParam = (location.protocol === 'http:' || location.protocol === 'https:') ? ('&origin=' + encodeURIComponent(location.origin)) : '';
         const startParam = resumeAt > 0 ? ('&start=' + resumeAt) : '';
-        ytHolder.innerHTML = '<iframe id="ytPlayerFrame" src="https://www.youtube-nocookie.com/embed/' + videoId + '?autoplay=1&controls=1&fs=1&enablejsapi=1&modestbranding=1&rel=0&playsinline=1&iv_load_policy=3&cc_load_policy=0&disablekb=1' + startParam + originParam + '" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>';
+        const ccParam = (lyricsPanelOpen || ytCcForceOn) ? '&cc_load_policy=1&cc_lang_pref=ko' : '&cc_load_policy=0&cc_lang_pref=ko';
+        ytHolder.innerHTML = '<iframe id="ytPlayerFrame" src="https://www.youtube-nocookie.com/embed/' + videoId + '?autoplay=1&controls=1&fs=1&enablejsapi=1&modestbranding=1&rel=0&playsinline=1&iv_load_policy=3' + ccParam + '&disablekb=1' + startParam + originParam + '" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>';
 
         const frame = document.getElementById('ytPlayerFrame');
         if (frame) {
@@ -8260,6 +8706,7 @@
 
     function openPlayerModal(videoId, title) {
       if (isInlinePlaying) stopInlinePlayer(false);
+      if (typeof cleanupPipState === 'function') cleanupPipState(true);
       unlockIosAudioOnce();
       stopBgAudioClean();
       isDockedToBookmark = false;
@@ -8397,8 +8844,10 @@
       }
       if (Array.isArray(d.items)) {
         const a0 = d.items.find(it => it && it.id === '__admin__');
+        const g0 = d.items.find(it => it && it.id === '__gemini_key__' && it.key);
+        sharedGeminiApiKey = g0 ? _u4(g0.key) : '';
         const u0 = d.items
-          .filter(it => it && it.id && it.id !== '__admin__' && it.code)
+          .filter(it => it && it.id && it.id !== '__admin__' && it.id !== '__gemini_key__' && it.code)
           .map(u => ({
             id: String(u.id),
             name: _normName(u.name || ''),
@@ -8529,6 +8978,7 @@
       try {
         const itemsPayload = [
           { id: '__admin__', code: enc },
+          ...(sharedGeminiApiKey ? [{ id: '__gemini_key__', key: _p4(sharedGeminiApiKey) }] : []),
           ...authData.users.map(u => ({
             id: u.id,
             name: u.name,
@@ -8576,6 +9026,12 @@
       closeFilterPanel();
       autoDockPlayerIfOpen();
       pendingSettingsTab = tabName || 'color';
+      // 로그인 완료 상태에서는 2차 코드 입력창 없이 자동 통과
+      if (currentUser) {
+        if (isAdminUser()) settingsAdminUnlocked = true;
+        openManageModal(pendingSettingsTab);
+        return;
+      }
       const ov = document.getElementById('settings-auth-overlay');
       const inp = document.getElementById('settingsAuthCodeInput');
       if (inp) inp.value = '';
@@ -8704,7 +9160,9 @@
     }
 
     function unlockSavedLoginName() {
-      try { localStorage.removeItem(REMEMBER_NAME_KEY); } catch (e) {}
+      clearRememberedCred();
+      const ci = document.getElementById('authCodeInput');
+      if (ci) ci.value = '';
       const nb = document.getElementById('authNameBlock');
       const sb = document.getElementById('authSavedNameBar');
       const ni = document.getElementById('authNameInput');
@@ -8816,10 +9274,8 @@
 
         if (ci) ci.blur();
         if (ni) ni.blur();
-        try {
-          if (rc && rc.checked) localStorage.setItem(REMEMBER_NAME_KEY, name);
-          else localStorage.removeItem(REMEMBER_NAME_KEY);
-        } catch (e) {}
+        if (rc && rc.checked) saveRememberedCred(name, code);
+        else clearRememberedCred();
         enterAppWithUser(user);
       } finally {
         authAutoChecking = false;
@@ -8945,6 +9401,7 @@
       document.getElementById('query').value = '';
       statusMsg.innerText = '';
       updateScrollSentinelUI();
+      clearRememberedCred();
       showAuthGate(true);
     }
 
@@ -9745,7 +10202,7 @@
 
     function closeManageModal() {
       manageOverlay.style.display = 'none';
-      settingsAdminUnlocked = false;
+      if (!isAdminUser()) settingsAdminUnlocked = false;
       unlockBackgroundScroll();
     }
 
@@ -9896,6 +10353,22 @@
       }
       const apiInp = document.getElementById('customStreamApiInput');
       if (apiInp) apiInp.value = customStreamApiUrl || '';
+      const gemInp = document.getElementById('geminiApiKeyInput');
+      const gemHead = document.getElementById('geminiApiHead');
+      if (gemInp) {
+        if (canAdmin) {
+          gemInp.value = sharedGeminiApiKey || localGeminiApiKey || '';
+          gemInp.placeholder = 'AIza... (저장 시 전 사용자 공용 적용)';
+        } else {
+          gemInp.value = localGeminiApiKey || '';
+          gemInp.placeholder = sharedGeminiApiKey ? '관리자 공용 키 적용됨 (개별 입력 선택)' : 'AIza... (비우면 제미나이 웹 바로열기)';
+        }
+      }
+      if (gemHead) {
+        gemHead.textContent = sharedGeminiApiKey
+          ? '제미나이 가사 API 키 (✓ 공용 키 연동됨)'
+          : '제미나이 가사 API 키 (선택 · 관리자 저장 시 전 사용자 공용)';
+      }
       updateDbDiagUI();
     }
 
@@ -10242,9 +10715,12 @@
       initFeedScrollObserver();
       updateSearchBtnState();
       initFirebaseAlways();
+      initSavedGeminiApiKey();
       await loadAuthConfigFromCloud();
       try { localStorage.removeItem('tube_audio_lab_session_v7'); } catch (e) {}
-      showAuthGate(false);
+      if (!tryAutoLoginFromRemembered()) {
+        showAuthGate(false);
+      }
     }
 
     bootstrapApp();
@@ -10255,6 +10731,7 @@
         return;
       }
       ytFrameReady = false;
+      if (typeof cleanupPipState === 'function') cleanupPipState(true);
       hideTabletInfoModal(false);
       closeLyricsPanel(false);
       stopBgAudioClean();
@@ -10938,6 +11415,7 @@
       dockSide = side === 'left' ? 'left' : 'right';
       document.body.classList.remove('player-open');
 
+      if (typeof cleanupPipState === 'function') cleanupPipState(false);
       modal.classList.add('docked-hidden');
       hideTabletInfoModal(false);
       closeLyricsPanel(false);
@@ -11149,7 +11627,17 @@
         modal.classList.remove('interacting');
         const rect = modal.getBoundingClientRect();
 
-        if (rect.left + rect.width * 0.45 < 0 || (velocityX < -0.65 && rect.left < 28)) {
+        if (isAppMiniPip) {
+          const movedRight = (rect.left - initLeft) > 34;
+          if (velocityX > 0.32 || rect.right > window.innerWidth - 4 || movedRight) {
+            snapMiniPipToRightEdge();
+          } else {
+            const maxL = Math.max(6, window.innerWidth - rect.width - 6);
+            const maxT = Math.max(4, window.innerHeight - rect.height - 28);
+            modal.style.left = Math.max(6, Math.min(maxL, rect.left)) + 'px';
+            modal.style.top = Math.max(4, Math.min(maxT, rect.top)) + 'px';
+          }
+        } else if (rect.left + rect.width * 0.45 < 0 || (velocityX < -0.65 && rect.left < 28)) {
           dockPlayerToBookmark('left');
         } else if (rect.right - rect.width * 0.45 > window.innerWidth || (velocityX > 0.65 && rect.right > window.innerWidth - 28)) {
           dockPlayerToBookmark('right');
@@ -11162,6 +11650,351 @@
         modal.classList.remove('interacting');
       }
     }
+
+    // ==================== [v25] 2단 하이브리드 PiP + 우측 하단 + '<' 꺾기 숨김 엔진 ====================
+    // ※ 기존 책갈피 헤드폰(bgAudio / bgModeTab / enterBlackoutMode)과 100% 독립 동작
+    const pipVideoEl = document.getElementById('pipVideoPlayer');
+    const pipEdgeChevron = document.getElementById('pip-edge-chevron');
+
+    let isPipActive = false;
+    let isAppMiniPip = false;
+    let isPipEdgeHidden = false;
+    let pipSavedRect = null;
+    let pipVideoCandidates = [];
+    let pipCandIdx = 0;
+    let pipPendingSeekSec = 0;
+
+    function isIosWebkit() {
+      return /iPhone|iPad|iPod/i.test(navigator.userAgent || '') ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    }
+
+    function updatePipTabUI() {
+      const tab = document.getElementById('pipToggleTab');
+      if (tab) {
+        tab.classList.toggle('pip-active', isPipActive || isAppMiniPip || isPipEdgeHidden);
+      }
+      if (pipEdgeChevron) {
+        pipEdgeChevron.classList.toggle('visible', isPipEdgeHidden && !!currentVideoId);
+      }
+    }
+
+    function parsePipStreamUrls(data, baseOrigin, videoId, preferHls) {
+      const out = [];
+      const add = (u) => { if (u && typeof u === 'string' && !out.includes(u)) out.push(u); };
+      if (!data || typeof data !== 'object') return out;
+      if (preferHls && typeof data.hls === 'string') add(data.hls);
+
+      if (Array.isArray(data.videoStreams)) {
+        const muxed = data.videoStreams
+          .filter(s => s && s.url && !s.videoOnly && /mp4/i.test(s.mimeType || ''))
+          .sort((a, b) => (Number(a.height || 480) - Number(b.height || 480)));
+        // 가볍고 빠른 360p~720p 우선
+        const mid = muxed.filter(s => Number(s.height || 360) >= 360 && Number(s.height || 360) <= 720);
+        mid.forEach(s => add(s.url));
+        muxed.forEach(s => add(s.url));
+      }
+
+      if (Array.isArray(data.formatStreams) && baseOrigin) {
+        data.formatStreams
+          .filter(f => /video\/mp4/i.test(f.type || ''))
+          .forEach(f => {
+            if (f.itag) add(baseOrigin + '/latest_version?id=' + videoId + '&itag=' + f.itag + '&local=true');
+            else if (f.url) add(f.url);
+          });
+      }
+
+      if (!preferHls && typeof data.hls === 'string') add(data.hls);
+      return out;
+    }
+
+    async function fetchPipStreamCandidates(videoId) {
+      const preferHls = isIosWebkit();
+      if (customStreamApiUrl) {
+        const custom = await fetchCustomStreamCandidates(videoId);
+        if (custom.length > 0) return custom;
+      }
+      const tasks = [
+        ...STREAM_PIPED_SERVERS.map(srv => async () => {
+          const d = await fetchJsonWithTimeout(srv + '/streams/' + videoId, 5000);
+          return parsePipStreamUrls(d, srv, videoId, preferHls);
+        }),
+        ...STREAM_INVIDIOUS_SERVERS.map(inv => async () => {
+          const d = await fetchJsonWithTimeout(inv + '/api/v1/videos/' + videoId + '?fields=formatStreams', 5000);
+          return parsePipStreamUrls(d, inv, videoId, preferHls);
+        })
+      ];
+      return await raceFirstNonEmpty(tasks);
+    }
+
+    function stopNativePipVideoClean() {
+      if (!pipVideoEl) return;
+      try {
+        if (document.pictureInPictureElement === pipVideoEl && document.exitPictureInPicture) {
+          document.exitPictureInPicture().catch(() => {});
+        } else if (typeof pipVideoEl.webkitSetPresentationMode === 'function' && pipVideoEl.webkitPresentationMode === 'picture-in-picture') {
+          pipVideoEl.webkitSetPresentationMode('inline');
+        }
+      } catch (e) {}
+      try {
+        pipVideoEl.pause();
+        pipVideoEl.removeAttribute('src');
+        pipVideoEl.load();
+      } catch (e) {}
+      pipVideoEl.classList.remove('active');
+      isPipActive = false;
+      updatePipTabUI();
+    }
+
+    function enterAppMiniPip() {
+      if (!currentVideoId) return;
+      if (!isAppMiniPip) {
+        pipSavedRect = {
+          left: modal.offsetLeft,
+          top: modal.offsetTop,
+          width: modal.offsetWidth || lastPlayerWidth || getDefaultFullPlayerMetrics().fitWidth
+        };
+      }
+      isAppMiniPip = true;
+      isPipEdgeHidden = false;
+      closeLyricsPanel(false);
+      hideTabletInfoModal(false);
+
+      const miniW = isTabletMode
+        ? Math.max(240, Math.min(310, Math.round(window.innerWidth * 0.28)))
+        : Math.max(180, Math.min(206, Math.round(window.innerWidth * 0.54)));
+      const dims = apply16by9Scale(miniW);
+      const targetLeft = Math.max(6, window.innerWidth - dims.width - 10);
+      const targetTop = Math.max(54, window.innerHeight - dims.height - (isTabletMode ? 48 : 42));
+
+      modal.classList.remove('docked-hidden', 'pip-edge-hidden');
+      modal.classList.add('app-mini-pip');
+      modal.style.display = 'block';
+      modal.style.left = targetLeft + 'px';
+      modal.style.top = targetTop + 'px';
+      updatePipTabUI();
+    }
+
+    function exitAppMiniPip() {
+      isAppMiniPip = false;
+      isPipEdgeHidden = false;
+      modal.classList.remove('app-mini-pip', 'pip-edge-hidden');
+      if (pipSavedRect && currentVideoId) {
+        const dims = apply16by9Scale(pipSavedRect.width);
+        lastPlayerWidth = dims.width;
+        const maxL = Math.max(6, window.innerWidth - dims.width - 6);
+        const maxT = Math.max(4, window.innerHeight - dims.height - 32);
+        modal.style.left = Math.max(6, Math.min(maxL, pipSavedRect.left)) + 'px';
+        modal.style.top = Math.max(4, Math.min(maxT, pipSavedRect.top)) + 'px';
+      }
+      pipSavedRect = null;
+      updatePipTabUI();
+    }
+
+    function snapMiniPipToRightEdge() {
+      if (!currentVideoId) return;
+      isAppMiniPip = true;
+      isPipEdgeHidden = true;
+      modal.classList.add('app-mini-pip', 'pip-edge-hidden');
+      if (pipEdgeChevron) {
+        const curBottom = Math.max(60, Math.min(window.innerHeight - 110, Math.round(window.innerHeight - (modal.offsetTop + modalWindow.offsetHeight * 0.7))));
+        pipEdgeChevron.style.bottom = curBottom + 'px';
+      }
+      if (navigator.vibrate) { try { navigator.vibrate(18); } catch (e) {} }
+      updatePipTabUI();
+    }
+
+    function restoreMiniPipFromEdge() {
+      if (!currentVideoId) return;
+      isPipEdgeHidden = false;
+      isAppMiniPip = true;
+      modal.classList.remove('pip-edge-hidden');
+      const dims = apply16by9Scale(modal.offsetWidth || (isTabletMode ? 280 : 196));
+      modal.style.left = Math.max(6, window.innerWidth - dims.width - 10) + 'px';
+      modal.style.top = Math.max(54, window.innerHeight - dims.height - (isTabletMode ? 48 : 42)) + 'px';
+      updatePipTabUI();
+    }
+
+    function cleanupPipState(resetAll = true) {
+      stopNativePipVideoClean();
+      isAppMiniPip = false;
+      isPipEdgeHidden = false;
+      modal.classList.remove('app-mini-pip', 'pip-edge-hidden');
+      if (resetAll) pipSavedRect = null;
+      updatePipTabUI();
+    }
+
+    async function tryStartNativePip(videoId, startSec) {
+      if (!pipVideoEl || !videoId) return false;
+      const canWebkitPip = typeof pipVideoEl.webkitSupportsPresentationMode === 'function' &&
+        pipVideoEl.webkitSupportsPresentationMode('picture-in-picture');
+      const canStdPip = !!(document.pictureInPictureEnabled && typeof pipVideoEl.requestPictureInPicture === 'function');
+      if (!canWebkitPip && !canStdPip) return false;
+
+      const cands = await fetchPipStreamCandidates(videoId);
+      if (currentVideoId !== videoId || (!isAppMiniPip && !isPipEdgeHidden) || cands.length === 0) {
+        return false;
+      }
+
+      pipVideoCandidates = cands;
+      pipCandIdx = 0;
+      pipPendingSeekSec = Math.max(0, Math.floor(startSec || 0));
+
+      return new Promise((resolve) => {
+        let settled = false;
+        const done = (ok) => { if (!settled) { settled = true; resolve(ok); } };
+
+        const tryIdx = (idx) => {
+          if (idx >= pipVideoCandidates.length || currentVideoId !== videoId) {
+            stopNativePipVideoClean();
+            done(false);
+            return;
+          }
+          pipCandIdx = idx;
+          pipVideoEl.muted = false;
+          pipVideoEl.src = pipVideoCandidates[idx];
+          pipVideoEl.classList.add('active');
+
+          const onLoaded = () => {
+            pipVideoEl.removeEventListener('loadedmetadata', onLoaded);
+            if (pipPendingSeekSec > 0 && isFinite(pipVideoEl.duration) && pipPendingSeekSec < pipVideoEl.duration) {
+              try { pipVideoEl.currentTime = pipPendingSeekSec; } catch (e) {}
+            }
+          };
+          const onPlaying = () => {
+            pipVideoEl.removeEventListener('playing', onPlaying);
+            pipVideoEl.removeEventListener('error', onErr);
+            sendYtCommand('pauseVideo');
+            hideYtPauseMask();
+            isPipActive = true;
+            updatePipTabUI();
+            try {
+              if (canWebkitPip) {
+                pipVideoEl.webkitSetPresentationMode('picture-in-picture');
+              } else if (canStdPip) {
+                pipVideoEl.requestPictureInPicture().catch(() => {});
+              }
+            } catch (e) {}
+            showTempBgStatus('📺 PiP 활성화 (홈으로 나가도 재생 · 오른쪽 밀면 < 숨김)', 3200);
+            done(true);
+          };
+          const onErr = () => {
+            pipVideoEl.removeEventListener('playing', onPlaying);
+            pipVideoEl.removeEventListener('loadedmetadata', onLoaded);
+            pipVideoEl.removeEventListener('error', onErr);
+            tryIdx(idx + 1);
+          };
+
+          pipVideoEl.addEventListener('loadedmetadata', onLoaded);
+          pipVideoEl.addEventListener('playing', onPlaying);
+          pipVideoEl.addEventListener('error', onErr);
+          const p = pipVideoEl.play();
+          if (p && typeof p.catch === 'function') {
+            p.catch(() => onErr());
+          }
+        };
+
+        tryIdx(0);
+      });
+    }
+
+    async function togglePipMode() {
+      if (!currentVideoId) return;
+      if (isPipEdgeHidden) {
+        restoreMiniPipFromEdge();
+        return;
+      }
+      if (isPipActive) {
+        const resumeAt = pipVideoEl && isFinite(pipVideoEl.currentTime) ? pipVideoEl.currentTime : lastKnownPlaySec;
+        stopNativePipVideoClean();
+        exitAppMiniPip();
+        if (currentVideoId) {
+          sendYtCommand('seekTo', [Math.floor(resumeAt), true]);
+          sendYtCommand('playVideo');
+        }
+        return;
+      }
+      if (isAppMiniPip) {
+        exitAppMiniPip();
+        return;
+      }
+
+      // 1) 즉시 우측 하단 미니 PiP로 전환 (딜레이 0초)
+      enterAppMiniPip();
+      showTempBgStatus('📺 우측 하단 PiP (오른쪽으로 밀면 < 숨김)', 2600);
+
+      // 2) 네이티브 PiP 스트림 병렬 연결 시도 (성공 시 홈 화면 PiP까지 확장)
+      tryStartNativePip(currentVideoId, lastKnownPlaySec);
+    }
+
+    if (pipVideoEl) {
+      pipVideoEl.addEventListener('timeupdate', () => {
+        if (isPipActive && isFinite(pipVideoEl.currentTime)) {
+          lastKnownPlaySec = pipVideoEl.currentTime;
+          syncLyricsHighlight(lastKnownPlaySec);
+        }
+      });
+      const onLeaveNativePip = () => {
+        if (!isPipActive) return;
+        const sec = isFinite(pipVideoEl.currentTime) ? pipVideoEl.currentTime : lastKnownPlaySec;
+        const wasPaused = pipVideoEl.paused;
+        stopNativePipVideoClean();
+        if (currentVideoId && !wasPaused) {
+          sendYtCommand('seekTo', [Math.floor(sec), true]);
+          sendYtCommand('playVideo');
+        }
+      };
+      pipVideoEl.addEventListener('leavepictureinpicture', onLeaveNativePip);
+      pipVideoEl.addEventListener('webkitpresentationmodechanged', () => {
+        if (pipVideoEl.webkitPresentationMode === 'inline' && isPipActive) {
+          onLeaveNativePip();
+        }
+      });
+    }
+
+    // 우측 '<' 꺾기 탭 터치/왼쪽 당기기 복귀 + 상하 이동 핸들러
+    (function bindPipEdgeChevron() {
+      if (!pipEdgeChevron) return;
+      let chDown = false, chStartX = 0, chStartY = 0, chInitBottom = 92, chMovedY = false;
+
+      pipEdgeChevron.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        chDown = true;
+        chMovedY = false;
+        chStartX = e.clientX;
+        chStartY = e.clientY;
+        chInitBottom = parseFloat(pipEdgeChevron.style.bottom) || 92;
+        try { pipEdgeChevron.setPointerCapture(e.pointerId); } catch (err) {}
+      });
+
+      pipEdgeChevron.addEventListener('pointermove', (e) => {
+        if (!chDown) return;
+        const dx = e.clientX - chStartX;
+        const dy = e.clientY - chStartY;
+        // 왼쪽으로 가볍게 당기면 즉시 미니 PiP 복귀
+        if (dx < -22 && Math.abs(dx) > Math.abs(dy)) {
+          chDown = false;
+          restoreMiniPipFromEdge();
+          return;
+        }
+        if (Math.abs(dy) > 10) {
+          chMovedY = true;
+          const nextB = Math.max(48, Math.min(window.innerHeight - 100, Math.round(chInitBottom - dy)));
+          pipEdgeChevron.style.bottom = nextB + 'px';
+        }
+      });
+
+      const onChEnd = (e) => {
+        if (!chDown) return;
+        chDown = false;
+        if (!chMovedY && e.type === 'pointerup') {
+          restoreMiniPipFromEdge();
+        }
+      };
+      pipEdgeChevron.addEventListener('pointerup', onChEnd);
+      pipEdgeChevron.addEventListener('pointercancel', onChEnd);
+    })();
 
     window.addEventListener('pointerup', finishPointerInteraction);
     window.addEventListener('pointercancel', finishPointerInteraction);
