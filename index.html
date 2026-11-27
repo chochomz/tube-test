@@ -2811,13 +2811,14 @@
     .skin-eq-bars span:nth-child(4) { animation-delay: 0.12s; background: #ff4757; }
     @keyframes skinEqAnim { from { height: 3px; } to { height: 11px; } }
 
-    /* 성경말씀 무한 슬라이드 바 (모든 테마 지원 · 터치/호버 일시정지) */
+    /* 성경말씀 무한 슬라이드 바 (모든 테마 지원 · 초저속 정속 무한루프 · 가변 폰트 크기) */
     .faith-verse-bar {
       display: none;
       align-items: center;
       gap: 6px;
-      height: 22px;
-      padding: 0 7px;
+      min-height: 22px;
+      height: auto;
+      padding: 3px 7px;
       margin-bottom: 5px;
       border-radius: 6px;
       overflow: hidden;
@@ -2826,8 +2827,8 @@
     }
     body.faith-bar-on .faith-verse-bar { display: flex; }
     body.tablet-mode .faith-verse-bar {
-      height: 28px;
-      padding: 0 10px;
+      min-height: 28px;
+      padding: 4px 10px;
       margin-bottom: 8px;
       gap: 9px;
       border-radius: 8px;
@@ -2838,7 +2839,7 @@
       gap: 3px;
       font-size: 10px;
       font-weight: 800;
-      padding: 1px 6px;
+      padding: 1.5px 6px;
       border-radius: 4px;
       white-space: nowrap;
       flex-shrink: 0;
@@ -2851,30 +2852,36 @@
       min-width: 0;
       overflow: hidden;
       position: relative;
-      -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 5%, #000 95%, transparent 100%);
-      mask-image: linear-gradient(to right, transparent 0%, #000 5%, #000 95%, transparent 100%);
+      -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 4%, #000 96%, transparent 100%);
+      mask-image: linear-gradient(to right, transparent 0%, #000 4%, #000 96%, transparent 100%);
     }
     .fv-track {
       display: inline-flex;
+      align-items: center;
       white-space: nowrap;
       will-change: transform;
       color: var(--faith-verse-fg, var(--search-fg));
-      animation: faithVerseMarquee var(--faith-verse-dur, 18s) linear infinite;
+      animation: faithVerseMarquee var(--faith-verse-dur, 40s) linear infinite;
+    }
+    .fv-half {
+      display: inline-flex;
+      align-items: center;
+      flex-shrink: 0;
     }
     .faith-verse-bar:hover .fv-track,
     .faith-verse-bar.fv-paused .fv-track {
       animation-play-state: paused;
     }
     .fv-text {
-      font-size: 11px;
+      font-size: var(--faith-verse-size, 12px);
       font-weight: 600;
-      padding-right: 46px;
+      line-height: 1.32;
+      padding-right: 48px;
       letter-spacing: 0.15px;
     }
-    body.tablet-mode .fv-text { font-size: 13px; }
     @keyframes faithVerseMarquee {
-      0% { transform: translateX(0); }
-      100% { transform: translateX(-50%); }
+      0% { transform: translate3d(0, 0, 0); }
+      100% { transform: translate3d(-50%, 0, 0); }
     }
 
     /* 설정 > 테마변경 탭 & 말씀·절기 설정 서랍 */
@@ -2941,34 +2948,42 @@
     .faith-cfg-drawer {
       display: none;
       flex-direction: column;
-      gap: 6px;
-      padding: 8px;
+      gap: 5px;
+      padding: 7px 7px 10px 7px;
       margin-top: 2px;
       border-radius: 8px;
       background: rgba(0, 0, 0, 0.34);
       border: 1px solid rgba(245, 197, 66, 0.35);
-      max-height: 245px;
+      max-height: min(42dvh, 245px);
       overflow-y: auto;
+      overflow-x: hidden;
+      overscroll-behavior: contain;
       -webkit-overflow-scrolling: touch;
       touch-action: pan-y;
+    }
+    .faith-cfg-drawer::-webkit-scrollbar { width: 5px; }
+    .faith-cfg-drawer::-webkit-scrollbar-thumb {
+      background: rgba(245, 197, 66, 0.45);
+      border-radius: 4px;
     }
     .faith-cfg-drawer.open { display: flex; }
     .fc-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 6px;
+      gap: 5px;
       flex-wrap: wrap;
+      flex-shrink: 0;
     }
-    .fc-lbl { font-size: 10px; font-weight: 700; color: #d4d4d8; white-space: nowrap; }
-    .fc-btns { display: inline-flex; gap: 3px; flex-wrap: wrap; }
+    .fc-lbl { font-size: 9.5px; font-weight: 700; color: #d4d4d8; white-space: nowrap; }
+    .fc-btns { display: inline-flex; gap: 3px; flex-wrap: wrap; align-items: center; }
     .fc-btn {
-      padding: 3px 7px;
+      padding: 2.5px 6px;
       border-radius: 5px;
       border: 1px solid #3f3f46;
       background: #222228;
       color: #cfcfd6;
-      font-size: 10px;
+      font-size: 9.5px;
       font-weight: 700;
       cursor: pointer;
       white-space: nowrap;
@@ -2978,70 +2993,77 @@
       border-color: #f5c542;
       color: #111111;
     }
-    .fc-input-row { display: flex; gap: 4px; width: 100%; }
+    .fc-input-row { display: flex; gap: 4px; width: 100%; flex-shrink: 0; }
     .fc-input {
       flex: 1;
       min-width: 0;
-      height: 28px;
-      padding: 0 8px;
+      height: 26px;
+      padding: 0 7px;
       border-radius: 6px;
       border: 1px solid #3f3f46;
       background: #111116;
       color: #ffffff;
-      font-size: 11px;
+      font-size: 10px;
       outline: none;
     }
     .fc-input:focus { border-color: #f5c542; }
     .fc-act-btn {
-      height: 28px;
-      padding: 0 9px;
+      height: 26px;
+      padding: 0 8px;
       border: none;
       border-radius: 6px;
       background: #f5c542;
       color: #111111;
-      font-size: 10.5px;
+      font-size: 9.5px;
       font-weight: 800;
       cursor: pointer;
       white-space: nowrap;
+      flex-shrink: 0;
     }
     .fc-act-btn.sub { background: #32323c; color: #e4e4e7; }
     .fc-verses-list {
       display: flex;
       flex-direction: column;
       gap: 3px;
-      max-height: 76px;
-      overflow-y: auto;
+      flex-shrink: 0;
+      max-height: none;
+      overflow: visible;
     }
     .fc-verse-item {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: space-between;
-      gap: 6px;
-      padding: 3px 6px;
+      gap: 5px;
+      padding: 4px 6px;
       border-radius: 5px;
       background: rgba(255, 255, 255, 0.06);
-      font-size: 10.5px;
+      font-size: 9.5px;
+      line-height: 1.38;
       color: #fde68a;
+      flex-shrink: 0;
     }
     .fc-verse-txt {
       flex: 1;
       min-width: 0;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      white-space: normal;
+      word-break: keep-all;
+      overflow-wrap: anywhere;
     }
     .fc-verse-del {
       border: none;
       background: transparent;
       color: #fca5a5;
+      font-size: 11px;
       font-weight: 800;
       cursor: pointer;
       padding: 0 3px;
+      flex-shrink: 0;
     }
     .fc-presets {
       display: flex;
       gap: 4px;
       flex-wrap: wrap;
+      flex-shrink: 0;
     }
     .fc-preset-btn {
       padding: 2px 6px;
@@ -3049,7 +3071,7 @@
       border: 1px dashed rgba(245, 197, 66, 0.5);
       background: rgba(245, 197, 66, 0.1);
       color: #fde68a;
-      font-size: 9.5px;
+      font-size: 9px;
       font-weight: 700;
       cursor: pointer;
     }
@@ -3172,11 +3194,12 @@
     body.tablet-mode .theme-pane-status { font-size: 13px; }
     body.tablet-mode .theme-device-badge { font-size: 11.5px; padding: 3px 9px; }
     body.tablet-mode .faith-cfg-toggle-btn { font-size: 12px; padding: 4px 10px; }
-    body.tablet-mode .faith-cfg-drawer { max-height: 290px; padding: 10px; gap: 8px; }
-    body.tablet-mode .fc-lbl, body.tablet-mode .fc-btn { font-size: 12px; }
-    body.tablet-mode .fc-input { height: 34px; font-size: 13px; }
+    body.tablet-mode .faith-cfg-drawer { max-height: min(46dvh, 330px); padding: 10px 10px 12px 10px; gap: 8px; }
+    body.tablet-mode .fc-lbl, body.tablet-mode .fc-btn { font-size: 12px; padding: 3px 8px; }
+    body.tablet-mode .fc-lbl { padding: 0; }
+    body.tablet-mode .fc-input { height: 34px; font-size: 13px; padding: 0 10px; }
     body.tablet-mode .fc-act-btn { height: 34px; font-size: 12.5px; padding: 0 12px; }
-    body.tablet-mode .fc-verse-item { font-size: 12.5px; padding: 4px 8px; }
+    body.tablet-mode .fc-verse-item { font-size: 12px; line-height: 1.42; padding: 5px 8px; }
     body.tablet-mode .fc-preset-btn { font-size: 11.5px; padding: 3px 8px; }
     body.tablet-mode .theme-cat-btn { font-size: 12.5px; padding: 5px 12px; }
     body.tablet-mode .theme-cards-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
@@ -3947,6 +3970,14 @@
                 <button type="button" class="fc-btn" data-fspeed="fast" onclick="setFaithSpeed('fast')">빠름</button>
               </div>
             </div>
+            <div class="fc-row">
+              <span class="fc-lbl">슬라이드 글자</span>
+              <div class="fc-btns">
+                <button type="button" class="fc-btn" data-ffsize="small" onclick="setFaithFontSize('small')">작게</button>
+                <button type="button" class="fc-btn" data-ffsize="normal" onclick="setFaithFontSize('normal')">보통</button>
+                <button type="button" class="fc-btn" data-ffsize="large" onclick="setFaithFontSize('large')">크게</button>
+              </div>
+            </div>
             <div class="fc-row" style="flex-direction:column; align-items:stretch; gap:4px;">
               <span class="fc-lbl">🏷 현재 테마 절기(배지) 이름 변경</span>
               <div class="fc-input-row">
@@ -4375,7 +4406,7 @@
     let currentSkinId = 'default';
     let currentSkinCategory = 'all';
     let customThemeBackup = null;
-    let faithConfig = { showMode: 'faith', verseMode: 'default', speed: 'normal', verses: [], badgeOverrides: {} };
+    let faithConfig = { showMode: 'faith', verseMode: 'default', speed: 'normal', fontSize: 'normal', verses: [], badgeOverrides: {} };
     const relatedShortsCache = new Map();
     let currentShortsList = [];
     let currentShortsIdx = -1;
@@ -5497,11 +5528,12 @@
 
     function getDefaultFaithConfig() {
       return {
-        showMode: 'faith',   // 'faith' (신앙테마만) | 'all' (모든테마 ON) | 'off' (끄기)
-        verseMode: 'default',// 'default' (절기 기본) | 'custom' (내 저장 말씀)
-        speed: 'normal',     // 'slow' | 'normal' | 'fast'
+        showMode: 'faith',
+        verseMode: 'default',
+        speed: 'normal',
+        fontSize: 'normal',
         verses: [],
-        badgeOverrides: {}   // { [skinId]: '사용자 지정 절기/배지 이름' }
+        badgeOverrides: {}
       };
     }
 
@@ -5527,8 +5559,11 @@
 
       document.body.classList.toggle('faith-bar-on', shouldShow);
 
-      const speedMap = { slow: '28s', normal: '18s', fast: '10.5s' };
-      document.documentElement.style.setProperty('--faith-verse-dur', speedMap[faithConfig.speed] || '18s');
+      const szKey = ['small', 'normal', 'large'].includes(faithConfig.fontSize) ? faithConfig.fontSize : 'normal';
+      const sizePxMap = isTabletMode
+        ? { small: '12px', normal: '14px', large: '17px' }
+        : { small: '10px', normal: '12px', large: '14.5px' };
+      document.documentElement.style.setProperty('--faith-verse-size', sizePxMap[szKey] || '12px');
 
       const badgeLbl = document.getElementById('faithBadgeLabel');
       const trackEl = document.getElementById('faithVerseTrack');
@@ -5547,7 +5582,33 @@
           verseStr = FAITH_PRESET_VERSES[0].text;
         }
         const safeEsc = verseStr.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        trackEl.innerHTML = '<span class="fv-text">' + safeEsc + '</span><span class="fv-text">' + safeEsc + '</span>';
+        const pxPerSecMap = { slow: 14, normal: 34, fast: 62 };
+        const pxPerSec = pxPerSecMap[faithConfig.speed] || 34;
+
+        // 1단계: 단일 문구 실제 폭 측정 -> 화면 너비보다 넓어지도록 자동 복제(빈틈 0% 무한 루프)
+        trackEl.innerHTML = '<span class="fv-half"><span class="fv-text">' + safeEsc + '</span></span>';
+        requestAnimationFrame(() => {
+          const marqueeEl = trackEl.parentElement;
+          const viewW = (marqueeEl && marqueeEl.clientWidth) ? marqueeEl.clientWidth : (isTabletMode ? 580 : 260);
+          const firstSpan = trackEl.querySelector('.fv-text');
+          const unitW = firstSpan ? Math.max(40, firstSpan.getBoundingClientRect().width) : 240;
+          const repeatCnt = Math.min(10, Math.max(1, Math.ceil((viewW + 80) / unitW)));
+
+          let oneHalf = '';
+          for (let i = 0; i < repeatCnt; i++) {
+            oneHalf += '<span class="fv-text">' + safeEsc + '</span>';
+          }
+          trackEl.innerHTML = '<span class="fv-half">' + oneHalf + '</span><span class="fv-half">' + oneHalf + '</span>';
+
+          const halfEl = trackEl.firstElementChild;
+          const halfW = halfEl ? Math.max(160, halfEl.getBoundingClientRect().width) : (unitW * repeatCnt);
+          const durSec = Math.max(8, halfW / pxPerSec);
+
+          document.documentElement.style.setProperty('--faith-verse-dur', durSec.toFixed(2) + 's');
+          trackEl.style.animation = 'none';
+          void trackEl.offsetWidth;
+          trackEl.style.animation = '';
+        });
       }
     }
 
@@ -5637,6 +5698,7 @@
               if (['faith', 'all', 'off'].includes(p.showMode)) faithConfig.showMode = p.showMode;
               if (['default', 'custom'].includes(p.verseMode)) faithConfig.verseMode = p.verseMode;
               if (['slow', 'normal', 'fast'].includes(p.speed)) faithConfig.speed = p.speed;
+              if (['small', 'normal', 'large'].includes(p.fontSize)) faithConfig.fontSize = p.fontSize;
               if (Array.isArray(p.verses)) faithConfig.verses = p.verses.map(v => String(v || '').trim()).filter(Boolean).slice(0, 15);
               if (p.badgeOverrides && typeof p.badgeOverrides === 'object') faithConfig.badgeOverrides = { ...p.badgeOverrides };
             }
@@ -5717,9 +5779,18 @@
       renderFaithConfigUI();
     }
 
+    function setFaithFontSize(sz) {
+      if (!['small', 'normal', 'large'].includes(sz)) return;
+      faithConfig.fontSize = sz;
+      applyFaithVerseBarToDOM();
+      persistFaithConfig(true);
+      renderFaithConfigUI();
+    }
+
     function saveCustomBadgeName() {
       const inp = document.getElementById('faithBadgeNameInput');
       if (!inp) return;
+      inp.blur();
       const val = inp.value.trim().slice(0, 14);
       if (!faithConfig.badgeOverrides) faithConfig.badgeOverrides = {};
       if (val) {
@@ -5754,7 +5825,10 @@
         faithConfig.verses = faithConfig.verses.slice(0, 15);
       }
       faithConfig.verseMode = 'custom';
-      if (inp && typeof presetText !== 'string') inp.value = '';
+      if (inp && typeof presetText !== 'string') {
+        inp.value = '';
+        inp.blur();
+      }
       applyFaithVerseBarToDOM();
       persistFaithConfig(true);
       renderFaithConfigUI();
@@ -5777,6 +5851,9 @@
       });
       document.querySelectorAll('.fc-btn[data-fspeed]').forEach(b => {
         b.classList.toggle('active', b.getAttribute('data-fspeed') === faithConfig.speed);
+      });
+      document.querySelectorAll('.fc-btn[data-ffsize]').forEach(b => {
+        b.classList.toggle('active', b.getAttribute('data-ffsize') === (faithConfig.fontSize || 'normal'));
       });
 
       const badgeInp = document.getElementById('faithBadgeNameInput');
@@ -8992,6 +9069,7 @@
             if (['faith', 'all', 'off'].includes(fc.showMode)) faithConfig.showMode = fc.showMode;
             if (['default', 'custom'].includes(fc.verseMode)) faithConfig.verseMode = fc.verseMode;
             if (['slow', 'normal', 'fast'].includes(fc.speed)) faithConfig.speed = fc.speed;
+            if (['small', 'normal', 'large'].includes(fc.fontSize)) faithConfig.fontSize = fc.fontSize;
             if (Array.isArray(fc.verses)) faithConfig.verses = fc.verses.map(v => String(v || '').trim()).filter(Boolean).slice(0, 15);
             if (fc.badgeOverrides && typeof fc.badgeOverrides === 'object') faithConfig.badgeOverrides = { ...fc.badgeOverrides };
             persistFaithConfig(false);
