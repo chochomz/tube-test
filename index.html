@@ -1497,49 +1497,7 @@
     .tablet-only-tab { display: none; }
     body.tablet-mode .tablet-only-tab { display: inline-flex; align-items: center; }
 
-    /* 태블릿 광고 최소화 Direct <video> 플레이어 & 로딩 마스크 */
-    #directVideoPlayer {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      background: #000;
-      object-fit: contain;
-      display: none;
-      z-index: 5;
-    }
-    #directVideoPlayer.active { display: block; }
-    .direct-loading-mask {
-      position: absolute;
-      inset: 0;
-      z-index: 6;
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      background-color: #0b0b0e;
-      background-size: cover;
-      background-position: center;
-    }
-    .direct-loading-mask::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.68);
-    }
-    .direct-loading-mask.active { display: flex; }
-    .direct-loading-badge {
-      position: relative;
-      z-index: 2;
-      padding: 7px 14px;
-      border-radius: 999px;
-      background: rgba(16, 16, 22, 0.85);
-      border: 1.5px solid var(--header-border-color);
-      color: #ffffff;
-      font-size: 13px;
-      font-weight: 700;
-    }
+
 
     /* 태블릿 전용 독립 우측 '더보기 · 내용' 자유 이동/리사이즈/비례 스케일 창 */
     #tablet-info-modal {
@@ -2807,6 +2765,669 @@
     body.tablet-mode .mp3-direct-link,
     body.tablet-mode .mp3-sub-btn,
     body.tablet-mode .mp3-close-btn { padding: 14px; font-size: 15px; border-radius: 10px; }
+
+    /* =====================================================================
+       8. 스킨 테마 변경 탭 & 10종 스킨 (20+ 확장형 · 모바일/태블릿 분리)
+       ===================================================================== */
+    .skin-deco-bar {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.6px;
+      padding: 3px 8px;
+      margin-bottom: 6px;
+      border-radius: 5px;
+      user-select: none;
+    }
+    body.tablet-mode[data-skin]:not([data-skin="default"]) .skin-deco-bar {
+      display: flex;
+    }
+    .skin-deco-l, .skin-deco-r {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .skin-eq-bars {
+      display: inline-flex;
+      align-items: flex-end;
+      gap: 2px;
+      height: 11px;
+    }
+    .skin-eq-bars span {
+      width: 3px;
+      height: 6px;
+      background: #00ff41;
+      display: inline-block;
+      animation: skinEqAnim 0.75s ease-in-out infinite alternate;
+    }
+    .skin-eq-bars span:nth-child(2) { animation-delay: 0.18s; background: #ffe600; }
+    .skin-eq-bars span:nth-child(3) { animation-delay: 0.36s; background: #00ff41; }
+    .skin-eq-bars span:nth-child(4) { animation-delay: 0.12s; background: #ff4757; }
+    @keyframes skinEqAnim { from { height: 3px; } to { height: 11px; } }
+
+    /* 설정 > 테마변경 패널 (20개+ 확장 대응 스크롤 그리드) */
+    #settings-pane-theme {
+      overflow: hidden;
+    }
+    .theme-pane-top {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 6px 8px;
+      margin-bottom: 7px;
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.24);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      flex-shrink: 0;
+    }
+    .theme-pane-status {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      font-size: 11px;
+    }
+    .theme-device-badge {
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: rgba(244, 114, 182, 0.22);
+      border: 1px solid rgba(244, 114, 182, 0.55);
+      color: #f9a8d4;
+      font-weight: 800;
+      font-size: 10px;
+      white-space: nowrap;
+    }
+    .theme-active-name {
+      font-weight: 800;
+      color: var(--settings-modal-fg);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .theme-cat-filters {
+      display: flex;
+      gap: 5px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .theme-cat-filters::-webkit-scrollbar { display: none; }
+    .theme-cat-btn {
+      padding: 3px 9px;
+      border-radius: 999px;
+      border: 1px solid #3f3f46;
+      background: #222228;
+      color: #cfcfd6;
+      font-size: 10.5px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .theme-cat-btn.active {
+      background: #ffffff;
+      border-color: #ffffff;
+      color: #111111;
+    }
+    .theme-cards-grid {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+      touch-action: pan-y;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 7px;
+      padding: 2px 3px 8px 1px;
+      align-content: start;
+    }
+    .theme-cards-grid::-webkit-scrollbar { width: 5px; }
+    .theme-cards-grid::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.28);
+      border-radius: 4px;
+    }
+    .theme-card {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      padding: 6px;
+      border-radius: 9px;
+      border: 1.5px solid rgba(255, 255, 255, 0.16);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--settings-modal-fg);
+      cursor: pointer;
+      text-align: left;
+      transition: transform 0.12s, border-color 0.15s, box-shadow 0.15s;
+    }
+    .theme-card:active { transform: scale(0.97); }
+    .theme-card.active {
+      border-color: #f472b6;
+      box-shadow: 0 0 0 1.5px #f472b6, 0 4px 12px rgba(244, 114, 182, 0.25);
+    }
+    .theme-card-thumb {
+      width: 100%;
+      height: 44px;
+      border-radius: 6px;
+      padding: 5px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border: 1.5px solid transparent;
+      overflow: hidden;
+    }
+    .tct-row1 { display: flex; gap: 3px; align-items: center; }
+    .tct-inp { flex: 1; height: 11px; border-radius: 3px; }
+    .tct-btn { width: 15px; height: 11px; border-radius: 3px; }
+    .tct-row2 {
+      height: 13px;
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 0 4px;
+    }
+    .tct-pill { width: 24px; height: 7px; border-radius: 99px; }
+    .tct-pill.dim { width: 16px; opacity: 0.45; }
+    .theme-card-info {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+    }
+    .theme-card-title {
+      font-size: 11px;
+      font-weight: 800;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .theme-card-tag {
+      font-size: 9px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.12);
+      opacity: 0.85;
+      flex-shrink: 0;
+    }
+    .theme-card-desc {
+      font-size: 9.5px;
+      opacity: 0.72;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    body.tablet-mode .theme-pane-top { padding: 9px 12px; gap: 8px; margin-bottom: 10px; }
+    body.tablet-mode .theme-pane-status { font-size: 13.5px; }
+    body.tablet-mode .theme-device-badge { font-size: 12px; padding: 3px 10px; }
+    body.tablet-mode .theme-cat-btn { font-size: 13px; padding: 5px 13px; }
+    body.tablet-mode .theme-cards-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+    body.tablet-mode .theme-card { padding: 8px; gap: 6px; border-radius: 11px; }
+    body.tablet-mode .theme-card-thumb { height: 54px; padding: 6px; }
+    body.tablet-mode .theme-card-title { font-size: 13px; }
+    body.tablet-mode .theme-card-tag { font-size: 10.5px; }
+    body.tablet-mode .theme-card-desc { font-size: 11px; }
+
+    /* 스킨 활성 시 기존 SVG 점선 테두리 숨김 (기본 모드에서는 100% 원형 유지) */
+    body[data-skin]:not([data-skin="default"]) .header-dash-svg {
+      display: none !important;
+    }
+
+    /* 밝은 계열 스킨에서 설정 모달 가독성 보강 */
+    body[data-skin="win95"] .ui-opt-panel,
+    body[data-skin="neu"] .ui-opt-panel,
+    body[data-skin="brutal"] .ui-opt-panel,
+    body[data-skin="paper"] .ui-opt-panel,
+    body[data-skin="win95"] .theme-pane-top,
+    body[data-skin="neu"] .theme-pane-top,
+    body[data-skin="brutal"] .theme-pane-top,
+    body[data-skin="paper"] .theme-pane-top,
+    body[data-skin="win95"] .color-preview-bar,
+    body[data-skin="neu"] .color-preview-bar,
+    body[data-skin="brutal"] .color-preview-bar,
+    body[data-skin="paper"] .color-preview-bar {
+      background: rgba(0, 0, 0, 0.06);
+      border-color: rgba(0, 0, 0, 0.16);
+    }
+    body[data-skin="win95"] .ui-opt-lbl,
+    body[data-skin="neu"] .ui-opt-lbl,
+    body[data-skin="brutal"] .ui-opt-lbl,
+    body[data-skin="paper"] .ui-opt-lbl,
+    body[data-skin="win95"] .manage-search-count,
+    body[data-skin="neu"] .manage-search-count,
+    body[data-skin="brutal"] .manage-search-count,
+    body[data-skin="paper"] .manage-search-count {
+      color: #27272a;
+    }
+    body[data-skin="win95"] .theme-card,
+    body[data-skin="neu"] .theme-card,
+    body[data-skin="brutal"] .theme-card,
+    body[data-skin="paper"] .theme-card {
+      background: rgba(255, 255, 255, 0.65);
+      border-color: rgba(0, 0, 0, 0.18);
+      color: #18181b;
+    }
+    body[data-skin="win95"] .theme-device-badge,
+    body[data-skin="neu"] .theme-device-badge,
+    body[data-skin="brutal"] .theme-device-badge,
+    body[data-skin="paper"] .theme-device-badge {
+      background: #18181b;
+      color: #ffffff;
+      border-color: #18181b;
+    }
+    body[data-skin="win95"] .settings-tabs-header,
+    body[data-skin="neu"] .settings-tabs-header,
+    body[data-skin="brutal"] .settings-tabs-header,
+    body[data-skin="paper"] .settings-tabs-header {
+      border-bottom-color: rgba(0, 0, 0, 0.15);
+    }
+    body[data-skin="win95"] .manage-close-btn,
+    body[data-skin="neu"] .manage-close-btn,
+    body[data-skin="brutal"] .manage-close-btn,
+    body[data-skin="paper"] .manage-close-btn {
+      background: #18181b;
+      color: #ffffff;
+    }
+
+    /* ---------------- [1] 클래식 MP3 (Winamp) ---------------- */
+    body[data-skin="winamp"] .header-unified-box {
+      background: linear-gradient(180deg, #4b5060 0%, #2a2d36 48%, #1b1d24 100%);
+      border: 2px outset #72798f;
+      border-radius: 4px;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.65);
+    }
+    body[data-skin="winamp"] .skin-deco-bar {
+      background: linear-gradient(90deg, #161f33, #374a73, #161f33);
+      color: #d6e4ff;
+      border: 1px inset #56607a;
+      font-family: ui-monospace, Consolas, monospace;
+    }
+    body[data-skin="winamp"] .search-box input {
+      background: var(--search-bg);
+      color: #00ff41;
+      font-family: ui-monospace, Consolas, monospace;
+      font-weight: 700;
+      border: 2px inset #4d5466;
+      border-radius: 2px;
+      text-shadow: 0 0 6px rgba(0, 255, 65, 0.55);
+    }
+    body[data-skin="winamp"] .search-box input::placeholder { color: #0f7a2a; text-shadow: none; }
+    body[data-skin="winamp"] button.search-btn {
+      background: linear-gradient(180deg, #323745, #181b22);
+      border: 2px outset #6d7488;
+      border-radius: 2px;
+    }
+    body[data-skin="winamp"] .filter-toggle-btn,
+    body[data-skin="winamp"] .header-gear-btn {
+      background: linear-gradient(180deg, #4a5060, #282c36);
+      color: #e2e8f0;
+      border: 2px outset #6d7488;
+      border-radius: 2px;
+    }
+    body[data-skin="winamp"] .header-mid-divider { border-top: 1px solid #101218; box-shadow: 0 1px 0 #4d5366; }
+    body[data-skin="winamp"] .saved-tabs-row {
+      border: 2px inset #444a5c;
+      border-radius: 3px;
+    }
+    body[data-skin="winamp"] .history-tab .tab-kw-text { font-family: ui-monospace, Consolas, monospace; }
+
+    /* ---------------- [2] 레트로 윈도우 95 ---------------- */
+    body[data-skin="win95"] .header-unified-box {
+      background: var(--header-box-rgba);
+      border-top: 2px solid #ffffff;
+      border-left: 2px solid #ffffff;
+      border-right: 2px solid #404040;
+      border-bottom: 2px solid #404040;
+      box-shadow: inset -1px -1px #808080, inset 1px 1px #dfdfdf, 3px 3px 0 rgba(0, 0, 0, 0.35);
+      border-radius: 0;
+    }
+    body[data-skin="win95"] .skin-deco-bar {
+      background: linear-gradient(90deg, #000080, #1084d0);
+      color: #ffffff;
+      border-radius: 0;
+    }
+    body[data-skin="win95"] .search-box input {
+      border-radius: 0;
+      border-top: 2px solid #808080;
+      border-left: 2px solid #808080;
+      border-right: 2px solid #ffffff;
+      border-bottom: 2px solid #ffffff;
+      box-shadow: inset 1px 1px #000000;
+    }
+    body[data-skin="win95"] button.search-btn {
+      background: #000080;
+      border-radius: 0;
+      border-top: 2px solid #ffffff;
+      border-left: 2px solid #ffffff;
+      border-right: 2px solid #000000;
+      border-bottom: 2px solid #000000;
+    }
+    body[data-skin="win95"] .filter-toggle-btn,
+    body[data-skin="win95"] .header-gear-btn {
+      border-radius: 0;
+      border-top: 2px solid #ffffff;
+      border-left: 2px solid #ffffff;
+      border-right: 2px solid #000000;
+      border-bottom: 2px solid #000000;
+      box-shadow: inset -1px -1px #808080;
+    }
+    body[data-skin="win95"] .header-mid-divider { border-top: 1px solid #808080; box-shadow: 0 1px 0 #ffffff; }
+    body[data-skin="win95"] .saved-tabs-row {
+      border-radius: 0;
+      border-top: 2px solid #808080;
+      border-left: 2px solid #808080;
+      border-right: 2px solid #ffffff;
+      border-bottom: 2px solid #ffffff;
+    }
+    body[data-skin="win95"] .history-tab.tab-selected { border-radius: 0; }
+
+    /* ---------------- [3] 모던 글래스모피즘 ---------------- */
+    body[data-skin="glass"] {
+      background-image: radial-gradient(circle at 12% 10%, rgba(139, 92, 246, 0.35), transparent 45%),
+                        radial-gradient(circle at 88% 20%, rgba(236, 72, 153, 0.28), transparent 48%);
+      background-attachment: fixed;
+    }
+    body[data-skin="glass"] .top-header { background: transparent; }
+    body[data-skin="glass"] .header-unified-box {
+      background: rgba(255, 255, 255, 0.14);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      border-radius: 18px;
+      box-shadow: 0 10px 28px rgba(15, 23, 42, 0.4);
+    }
+    body[data-skin="glass"] .skin-deco-bar {
+      background: rgba(255, 255, 255, 0.14);
+      color: #f5f3ff;
+      border-radius: 999px;
+      padding: 3px 12px;
+    }
+    body[data-skin="glass"] .search-box input {
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.32);
+      padding-left: 12px;
+    }
+    body[data-skin="glass"] button.search-btn {
+      background: linear-gradient(135deg, #7c3aed, #db2777);
+      border-radius: 999px;
+      box-shadow: 0 3px 10px rgba(124, 58, 237, 0.45);
+    }
+    body[data-skin="glass"] .filter-toggle-btn,
+    body[data-skin="glass"] .header-gear-btn {
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.28);
+    }
+    body[data-skin="glass"] .header-mid-divider { border-top: 1px solid rgba(255, 255, 255, 0.22); }
+    body[data-skin="glass"] .saved-tabs-row {
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+    }
+
+    /* ---------------- [4] 사이버펑크 네온 ---------------- */
+    body[data-skin="cyber"] .header-unified-box {
+      background: linear-gradient(135deg, rgba(16, 8, 36, 0.96), rgba(9, 5, 22, 0.98));
+      border: 1.5px solid var(--header-border-color);
+      border-radius: 3px;
+      box-shadow: 0 0 16px rgba(0, 243, 255, 0.28), inset 0 0 12px rgba(255, 0, 127, 0.16);
+      clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+    }
+    body[data-skin="cyber"] .skin-deco-bar {
+      background: rgba(0, 243, 255, 0.08);
+      color: #00f3ff;
+      border-left: 3px solid #ff007f;
+      font-family: ui-monospace, Consolas, monospace;
+      text-shadow: 0 0 8px rgba(0, 243, 255, 0.7);
+    }
+    body[data-skin="cyber"] .search-box input {
+      border: 1px solid rgba(0, 243, 255, 0.5);
+      border-radius: 2px;
+    }
+    body[data-skin="cyber"] .search-box input:focus {
+      border-color: #ff007f;
+      box-shadow: 0 0 10px rgba(255, 0, 127, 0.55);
+    }
+    body[data-skin="cyber"] button.search-btn {
+      background: #ff007f;
+      border-radius: 2px;
+      box-shadow: 0 0 12px rgba(255, 0, 127, 0.65);
+    }
+    body[data-skin="cyber"] .filter-toggle-btn,
+    body[data-skin="cyber"] .header-gear-btn {
+      border: 1px solid rgba(0, 243, 255, 0.45);
+      border-radius: 2px;
+    }
+    body[data-skin="cyber"] .header-mid-divider {
+      border-top: 1px dashed #ff007f;
+      opacity: 0.75;
+    }
+    body[data-skin="cyber"] .saved-tabs-row {
+      border: 1px solid rgba(0, 243, 255, 0.35);
+      border-radius: 3px;
+    }
+
+    /* ---------------- [5] 소프트 뉴모피즘 ---------------- */
+    body[data-skin="neu"] .header-unified-box {
+      background: var(--header-box-rgba);
+      border: none;
+      border-radius: 18px;
+      box-shadow: 7px 7px 14px #c5ccd8, -6px -6px 14px #ffffff;
+    }
+    body[data-skin="neu"] .skin-deco-bar {
+      color: #475569;
+      background: transparent;
+      padding: 2px 6px;
+    }
+    body[data-skin="neu"] .search-box input {
+      border: none;
+      border-radius: 12px;
+      box-shadow: inset 4px 4px 8px #c5ccd8, inset -4px -4px 8px #ffffff;
+    }
+    body[data-skin="neu"] button.search-btn {
+      background: linear-gradient(135deg, #2563eb, #3b82f6);
+      border-radius: 12px;
+      box-shadow: 4px 4px 8px #c5ccd8, -3px -3px 8px #ffffff;
+    }
+    body[data-skin="neu"] .filter-toggle-btn,
+    body[data-skin="neu"] .header-gear-btn {
+      border: none;
+      border-radius: 11px;
+      box-shadow: 4px 4px 8px #c5ccd8, -3px -3px 8px #ffffff;
+    }
+    body[data-skin="neu"] .header-mid-divider { border-top: 1px solid rgba(100, 116, 139, 0.2); }
+    body[data-skin="neu"] .saved-tabs-row {
+      border-radius: 13px;
+      box-shadow: inset 3px 3px 6px #c5ccd8, inset -3px -3px 6px #ffffff;
+    }
+
+    /* ---------------- [6] 빈티지 원목 라디오 ---------------- */
+    body[data-skin="wood"] .header-unified-box {
+      background: repeating-linear-gradient(90deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 2px, transparent 2px, transparent 10px),
+                  linear-gradient(180deg, #6e4526 0%, #4b2d16 55%, #38200e 100%);
+      border: 2.5px solid #2b180b;
+      border-radius: 12px;
+      box-shadow: inset 0 1.5px 2px rgba(255, 220, 165, 0.32), 0 8px 20px rgba(0, 0, 0, 0.55);
+    }
+    body[data-skin="wood"] .skin-deco-bar {
+      background: rgba(34, 18, 8, 0.55);
+      color: #f3d082;
+      border: 1px solid rgba(212, 175, 55, 0.45);
+      font-family: Georgia, serif;
+    }
+    body[data-skin="wood"] .search-box input {
+      border: 1.5px solid #b58d46;
+      border-radius: 6px;
+      box-shadow: inset 0 2px 5px rgba(102, 65, 20, 0.32);
+      font-weight: 600;
+    }
+    body[data-skin="wood"] button.search-btn {
+      background: linear-gradient(180deg, #99321c, #691f10);
+      border: 1.5px solid #d4af37;
+      border-radius: 7px;
+    }
+    body[data-skin="wood"] .filter-toggle-btn,
+    body[data-skin="wood"] .header-gear-btn {
+      background: linear-gradient(180deg, #5c381d, #3a210f);
+      color: #f5d892;
+      border: 1px solid rgba(212, 175, 55, 0.55);
+    }
+    body[data-skin="wood"] .header-mid-divider { border-top: 1px solid rgba(212, 175, 55, 0.35); }
+    body[data-skin="wood"] .saved-tabs-row {
+      border: 1px solid rgba(212, 175, 55, 0.38);
+      border-radius: 7px;
+    }
+
+    /* ---------------- [7] 팝아트 브루탈리즘 ---------------- */
+    body[data-skin="brutal"] .header-unified-box {
+      background: var(--header-box-rgba);
+      border: 3px solid #111111;
+      border-radius: 10px;
+      box-shadow: 5px 5px 0 #111111;
+    }
+    body[data-skin="brutal"] .skin-deco-bar {
+      background: #111111;
+      color: #ffd93d;
+      border-radius: 5px;
+      font-weight: 900;
+    }
+    body[data-skin="brutal"] .search-box input {
+      border: 2.5px solid #111111;
+      border-radius: 7px;
+      font-weight: 700;
+      box-shadow: 2px 2px 0 #111111;
+    }
+    body[data-skin="brutal"] button.search-btn {
+      background: #111111;
+      border: 2.5px solid #111111;
+      border-radius: 7px;
+      box-shadow: 2px 2px 0 #ff6b6b;
+    }
+    body[data-skin="brutal"] .filter-toggle-btn,
+    body[data-skin="brutal"] .header-gear-btn {
+      border: 2.5px solid #111111;
+      border-radius: 7px;
+      box-shadow: 2px 2px 0 #111111;
+    }
+    body[data-skin="brutal"] .header-mid-divider { border-top: 2px solid #111111; }
+    body[data-skin="brutal"] .saved-tabs-row {
+      border: 2.5px solid #111111;
+      border-radius: 7px;
+    }
+    body[data-skin="brutal"] .history-tab.tab-selected {
+      border: 2px solid #111111;
+      box-shadow: 2px 2px 0 #111111;
+    }
+
+    /* ---------------- [8] 미니멀 다크 프로 ---------------- */
+    body[data-skin="dark"] .header-unified-box {
+      background: var(--header-box-rgba);
+      border: 1px solid #2b2b36;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
+      transition: border-color 0.25s, box-shadow 0.25s;
+    }
+    body[data-skin="dark"] .header-unified-box:focus-within {
+      border-color: var(--header-border-color);
+      box-shadow: 0 0 22px rgba(129, 140, 248, 0.3);
+    }
+    body[data-skin="dark"] .skin-deco-bar {
+      background: rgba(99, 102, 241, 0.12);
+      color: #a5b4fc;
+      border-radius: 8px;
+    }
+    body[data-skin="dark"] .search-box input {
+      border: 1px solid #30303d;
+      border-radius: 10px;
+    }
+    body[data-skin="dark"] button.search-btn {
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      border-radius: 10px;
+    }
+    body[data-skin="dark"] .filter-toggle-btn,
+    body[data-skin="dark"] .header-gear-btn {
+      border: 1px solid #2f2f3b;
+      border-radius: 10px;
+    }
+    body[data-skin="dark"] .header-mid-divider { border-top: 1px solid #272730; }
+    body[data-skin="dark"] .saved-tabs-row { border-radius: 10px; }
+
+    /* ---------------- [9] 따뜻한 노트 페이퍼 ---------------- */
+    body[data-skin="paper"] .header-unified-box {
+      background: repeating-linear-gradient(0deg, #fdfbf7 0px, #fdfbf7 21px, #ebe3d3 22px);
+      border: 2px dashed var(--header-border-color);
+      border-radius: 12px;
+      box-shadow: 0 5px 14px rgba(100, 82, 58, 0.15);
+    }
+    body[data-skin="paper"] .skin-deco-bar {
+      background: rgba(122, 99, 72, 0.1);
+      color: #6b533b;
+      font-family: Georgia, serif;
+    }
+    body[data-skin="paper"] .search-box input {
+      border: 1px solid #d5c7b2;
+      border-bottom: 2px solid #8c7356;
+      border-radius: 6px;
+    }
+    body[data-skin="paper"] button.search-btn {
+      background: #6b533b;
+      border-radius: 999px;
+    }
+    body[data-skin="paper"] .filter-toggle-btn,
+    body[data-skin="paper"] .header-gear-btn {
+      border: 1px solid #cbbba0;
+      border-radius: 10px;
+    }
+    body[data-skin="paper"] .header-mid-divider { border-top: 1.5px dashed #b5a48b; }
+    body[data-skin="paper"] .saved-tabs-row {
+      border: 1px solid #ddd1be;
+      border-radius: 8px;
+    }
+
+    /* ---------------- [10] 8비트 레트로 게임보이 ---------------- */
+    body[data-skin="gameboy"] .header-unified-box {
+      background: #d2d1c8;
+      border: 3px solid #7d7d74;
+      border-radius: 10px 10px 22px 10px;
+      box-shadow: inset 2px 2px 0 #f2f2ec, 0 5px 0 #4f4f4a;
+    }
+    body[data-skin="gameboy"] .skin-deco-bar {
+      background: #4f545c;
+      color: #9bbc0f;
+      font-family: ui-monospace, Consolas, monospace;
+      border-radius: 4px;
+    }
+    body[data-skin="gameboy"] .search-box input {
+      border: 2px solid #0f380f;
+      border-radius: 3px;
+      font-family: ui-monospace, Consolas, monospace;
+      font-weight: 800;
+    }
+    body[data-skin="gameboy"] button.search-btn {
+      background: #8b1d41;
+      border-radius: 999px;
+      box-shadow: 0 2px 0 #520e24;
+    }
+    body[data-skin="gameboy"] .filter-toggle-btn,
+    body[data-skin="gameboy"] .header-gear-btn {
+      background: #373a40;
+      color: #e5e7eb;
+      border: 2px solid #1f2126;
+      border-radius: 6px;
+      font-family: ui-monospace, Consolas, monospace;
+    }
+    body[data-skin="gameboy"] .header-mid-divider { border-top: 2px solid #8a8a80; }
+    body[data-skin="gameboy"] .saved-tabs-row {
+      border: 3px solid #4f545c;
+      border-radius: 5px;
+      box-shadow: inset 2px 2px 0 #7a960b;
+    }
+    body[data-skin="gameboy"] .history-tab .tab-kw-text { font-family: ui-monospace, Consolas, monospace; }
   </style>
 </head>
 <body>
@@ -2839,6 +3460,7 @@
   <div class="top-header">
     <div class="header-unified-box">
       <svg class="header-dash-svg" preserveAspectRatio="none"><rect id="headerDashRect" x="1.2" y="1.2" width="calc(100% - 2.4px)" height="calc(100% - 2.4px)" rx="9" ry="9" fill="none" stroke="var(--header-border-color)" stroke-width="2.2" stroke-dasharray="4 3" vector-effect="non-scaling-stroke"/></svg>
+      <div class="skin-deco-bar" id="skinDecoBar"><span class="skin-deco-l" id="skinDecoL"></span><span class="skin-deco-r" id="skinDecoR"></span></div>
       <div class="header-top-row">
         <div class="header-left-slot">
           <form class="search-box" action="javascript:void(0)" onsubmit="event.preventDefault(); startSearch(); return false;">
@@ -2937,10 +3559,6 @@
 
       <div class="scale-stage" id="scaleStage">
         <div id="yt-iframe-holder"></div>
-        <video id="directVideoPlayer" playsinline controls controlsList="nodownload"></video>
-        <div class="direct-loading-mask" id="directLoadingMask">
-          <div class="direct-loading-badge" id="directLoadingBadge">광고 없는 스트림 연결 중...</div>
-        </div>
       </div>
 
       <div class="yt-pause-mask" id="ytPauseMask" onclick="resumeYtFromMask()">
@@ -3043,6 +3661,7 @@
       <div class="settings-tabs-header">
         <div class="settings-tabs-nav">
           <button type="button" class="settings-tab-btn" data-stab="search" onclick="switchSettingsTab('search')">검색</button>
+          <button type="button" class="settings-tab-btn" data-stab="theme" onclick="switchSettingsTab('theme')">테마변경</button>
           <button type="button" class="settings-tab-btn active" data-stab="color" onclick="switchSettingsTab('color')">색상변경</button>
           <button type="button" class="settings-tab-btn" data-stab="auth" onclick="switchSettingsTab('auth')">로그인</button>
         </div>
@@ -3056,6 +3675,18 @@
           <button type="button" class="mini-btn danger" id="deleteAllTabsBtn" onclick="deleteAllTabDocs()" disabled>전체삭제</button>
         </div>
         <div class="manage-list" id="manageTabList"></div>
+      </div>
+
+      <!-- 탭 1-1: 스킨 테마 변경 (20+ 확장형 레지스트리 · 모바일/태블릿 분리 저장) -->
+      <div class="settings-pane" id="settings-pane-theme">
+        <div class="theme-pane-top">
+          <div class="theme-pane-status">
+            <span class="theme-device-badge" id="themeDeviceBadge">📱 모바일 전용</span>
+            <span class="theme-active-name" id="themeActiveName">0. 기본 (내 색상)</span>
+          </div>
+          <div class="theme-cat-filters" id="themeCatFilters"></div>
+        </div>
+        <div class="theme-cards-grid" id="themeCardsGrid"></div>
       </div>
 
       <!-- 탭 1-2: 디테일 14모듈 미니 레이아웃 + 256 색상표 -->
@@ -3266,6 +3897,8 @@
     const AUTH_CACHE_KEY = 'tube_audio_lab_auth_cache_v7';
     const LAYOUT_STORAGE_KEY = 'tube_audio_lab_layout_v8';
     const THEME_STORAGE_KEY = 'mytube_theme_modules_v11';
+    const SKIN_STORAGE_KEY = 'mytube_skin_v1';
+    const THEME_BACKUP_STORAGE_KEY = 'mytube_theme_custom_backup_v1';
     const UI_OPTS_STORAGE_KEY = 'mytube_ui_opts_v17';
     const FILTERS_STORAGE_PREFIX = 'mytube_filters_v18_';
     const BM_POS_STORAGE_PREFIX = 'mytube_bm_pos_v18_';
@@ -3307,12 +3940,14 @@
 
       if (changed && reloadDeviceSettings && currentUser) {
         lastPlayerWidth = 0;
-        initSavedUiOpts();
+        initSavedBgColor();
         initFeedLayoutMode();
         initSavedBookmarkPos();
         if (slideBookmarkVisible) applyBookmarkPosition(dockSide);
+        if (manageOverlay && manageOverlay.style.display === 'flex') renderThemeCardsGrid();
       } else {
         applyUiOptsToDOM();
+        applySkinToDOM();
         if (slideBookmarkVisible) applyBookmarkPosition(dockSide);
       }
       if (changed) {
@@ -3453,11 +4088,9 @@
     let selectedTabDocId = '';
     let tabArmedDocId = '';
     let settingsAdminUnlocked = false;
-    let isDirectVideoActive = false;
-    let tabletAdFreeMode = false;
-    let directVideoCandidates = [];
-    let directVideoCandIdx = 0;
-    let directVideoAttemptSeq = 0;
+    let currentSkinId = 'default';
+    let currentSkinCategory = 'all';
+    let customThemeBackup = null;
     const relatedShortsCache = new Map();
     let currentShortsList = [];
     let currentShortsIdx = -1;
@@ -3585,19 +4218,13 @@
       modal.style.width = `${clampedW}px`;
       modalWindow.style.height = `${exactH}px`;
 
-      if (isDirectVideoActive) {
-        scaleStage.style.width = `${clampedW}px`;
-        scaleStage.style.height = `${exactH}px`;
-        scaleStage.style.transform = 'scale(1)';
-      } else {
-        // 태블릿 YouTube 임베드 광고 최소화를 위해 모바일 소형 뷰포트(480x270) 기준 스케일링 적용
-        const stageBaseW = isTabletMode ? 480 : BASE_STAGE_WIDTH;
-        const stageBaseH = Math.round(stageBaseW * (9 / 16));
-        scaleStage.style.width = `${stageBaseW}px`;
-        scaleStage.style.height = `${stageBaseH}px`;
-        const scaleRatio = clampedW / stageBaseW;
-        scaleStage.style.transform = `scale(${scaleRatio})`;
-      }
+      // 태블릿 YouTube 임베드 광고 최소화를 위해 모바일 소형 뷰포트(480x270) 기준 스케일링 적용
+      const stageBaseW = isTabletMode ? 480 : BASE_STAGE_WIDTH;
+      const stageBaseH = Math.round(stageBaseW * (9 / 16));
+      scaleStage.style.width = `${stageBaseW}px`;
+      scaleStage.style.height = `${stageBaseH}px`;
+      const scaleRatio = clampedW / stageBaseW;
+      scaleStage.style.transform = `scale(${scaleRatio})`;
       return { width: clampedW, height: exactH };
     }
 
@@ -4229,20 +4856,361 @@
       persistUiOpts(true);
     }
 
+
+    // =========================================================================
+    // 확장형 스킨 레지스트리 (추후 11~30번+ 테마 추가 시 객체 1개 + CSS만 추가!)
+    // =========================================================================
+    const SKIN_CATEGORIES = [
+      { id: 'all',    label: '전체' },
+      { id: 'retro',  label: '레트로' },
+      { id: 'modern', label: '모던' },
+      { id: 'cozy',   label: '감성' }
+    ];
+
+    const SKIN_REGISTRY = [
+      {
+        id: 'winamp', num: 1, name: '클래식 MP3', cat: 'retro', catLabel: '레트로',
+        desc: '메탈릭 바디 + 형광 연두 LCD',
+        tabletL: 'MYTUBE PLAYER v2.95',
+        tabletR: '<span class="skin-eq-bars"><span></span><span></span><span></span><span></span></span> 128kbps',
+        preview: { bg: '#2b2e38', border: '#72798f', inp: '#000000', btn: '#222630', tabBg: '#1b1f29', tabSel: '#00a832' },
+        colors: {
+          appBg: '#141519', headerBoxBg: '#2a2d36', headerBorder: '#00ff41', headerDivider: '#4d5366',
+          searchBg: '#000000', tabsAreaBg: '#1b1f29', tabTextColor: '#00ff41', tabSelectedBg: '#006622',
+          starPinColor: '#00ff41', layoutIconCol: '#9aa4bd', settingsBtnBg: '#323745', settingsModalBg: '#1a1d24',
+          cardTitleBg: '#1c1f26', filterBtnBg: '#323745', filterPanelBg: '#1a1d24', historyPanelBg: '#181b22',
+          bookmarkBg: '#383e4d', bookmarkBorder: '#00ff41'
+        }
+      },
+      {
+        id: 'win95', num: 2, name: '윈도우 95', cat: 'retro', catLabel: '레트로',
+        desc: '정겨운 회색 3D 입체 테두리',
+        tabletL: '📁 MYTUBE_SEARCH.EXE',
+        tabletR: '[_] [□] [X]',
+        preview: { bg: '#c0c0c0', border: '#000080', inp: '#ffffff', btn: '#000080', tabBg: '#dfdfdf', tabSel: '#000080' },
+        colors: {
+          appBg: '#008080', headerBoxBg: '#c0c0c0', headerBorder: '#000080', headerDivider: '#808080',
+          searchBg: '#ffffff', tabsAreaBg: '#dfdfdf', tabTextColor: '#000000', tabSelectedBg: '#000080',
+          starPinColor: '#ffff00', layoutIconCol: '#111111', settingsBtnBg: '#c0c0c0', settingsModalBg: '#c0c0c0',
+          cardTitleBg: '#d4d0c8', filterBtnBg: '#c0c0c0', filterPanelBg: '#c0c0c0', historyPanelBg: '#c0c0c0',
+          bookmarkBg: '#c0c0c0', bookmarkBorder: '#000080'
+        }
+      },
+      {
+        id: 'glass', num: 3, name: '모던 글래스', cat: 'modern', catLabel: '모던',
+        desc: '반투명 유리 질감 + 캡슐 디자인',
+        tabletL: '✨ MyTube Glass',
+        tabletR: 'HD Streaming Ready',
+        preview: { bg: 'linear-gradient(135deg,#667eea,#764ba2)', border: '#ddd6fe', inp: 'rgba(255,255,255,0.3)', btn: '#7c3aed', tabBg: 'rgba(255,255,255,0.22)', tabSel: '#ffffff' },
+        colors: {
+          appBg: '#1e1b4b', headerBoxBg: '#312e81', headerBorder: '#c4b5fd', headerDivider: '#8b5cf6',
+          searchBg: '#2e2a66', tabsAreaBg: '#312e81', tabTextColor: '#ede9fe', tabSelectedBg: '#a855f7',
+          starPinColor: '#f0abfc', layoutIconCol: '#ddd6fe', settingsBtnBg: '#3b3582', settingsModalBg: '#1e1b4b',
+          cardTitleBg: '#262259', filterBtnBg: '#3b3582', filterPanelBg: '#252157', historyPanelBg: '#252157',
+          bookmarkBg: '#8b5cf6', bookmarkBorder: '#e9d5ff'
+        }
+      },
+      {
+        id: 'cyber', num: 4, name: '사이버펑크 네온', cat: 'modern', catLabel: '모던',
+        desc: '미래형 컷팅 + 시안/핑크 네온',
+        tabletL: '// NET_SEARCH_2077',
+        tabletR: 'STATUS: ONLINE',
+        preview: { bg: '#0d0620', border: '#00f3ff', inp: '#180d36', btn: '#ff007f', tabBg: '#180d36', tabSel: '#00f3ff' },
+        colors: {
+          appBg: '#090514', headerBoxBg: '#110826', headerBorder: '#00f3ff', headerDivider: '#ff007f',
+          searchBg: '#160b30', tabsAreaBg: '#180c33', tabTextColor: '#00f3ff', tabSelectedBg: '#ff007f',
+          starPinColor: '#00f3ff', layoutIconCol: '#00f3ff', settingsBtnBg: '#1a0e36', settingsModalBg: '#110826',
+          cardTitleBg: '#150b2b', filterBtnBg: '#1a0e36', filterPanelBg: '#140a29', historyPanelBg: '#140a29',
+          bookmarkBg: '#ff007f', bookmarkBorder: '#00f3ff'
+        }
+      },
+      {
+        id: 'neu', num: 5, name: '소프트 뉴모피즘', cat: 'modern', catLabel: '모던',
+        desc: '부드러운 엠보싱 화이트 그레이',
+        tabletL: 'MyTube Soft UI',
+        tabletR: 'Tactile Mode',
+        preview: { bg: '#e6ebf2', border: '#cbd5e1', inp: '#dde3ec', btn: '#2563eb', tabBg: '#dfe5ef', tabSel: '#3b82f6' },
+        colors: {
+          appBg: '#e6ebf2', headerBoxBg: '#e6ebf2', headerBorder: '#3b82f6', headerDivider: '#94a3b8',
+          searchBg: '#e6ebf2', tabsAreaBg: '#e6ebf2', tabTextColor: '#334155', tabSelectedBg: '#3b82f6',
+          starPinColor: '#f59e0b', layoutIconCol: '#475569', settingsBtnBg: '#e6ebf2', settingsModalBg: '#e6ebf2',
+          cardTitleBg: '#edf1f7', filterBtnBg: '#e6ebf2', filterPanelBg: '#edf1f7', historyPanelBg: '#edf1f7',
+          bookmarkBg: '#60a5fa', bookmarkBorder: '#ffffff'
+        }
+      },
+      {
+        id: 'wood', num: 6, name: '빈티지 원목 라디오', cat: 'cozy', catLabel: '감성',
+        desc: '따뜻한 월넛 우드 + 황동 포인트',
+        tabletL: '📻 MYTUBE ANALOG HI-FI',
+        tabletR: 'FM 104.5 MHz',
+        preview: { bg: '#5a371c', border: '#d4af37', inp: '#fcf4df', btn: '#8c2d19', tabBg: '#3a210f', tabSel: '#d4af37' },
+        colors: {
+          appBg: '#241912', headerBoxBg: '#4b2d16', headerBorder: '#d4af37', headerDivider: '#b58d46',
+          searchBg: '#fcf4df', tabsAreaBg: '#38200e', tabTextColor: '#f3d082', tabSelectedBg: '#b58835',
+          starPinColor: '#f7d774', layoutIconCol: '#ebd08c', settingsBtnBg: '#4b2d16', settingsModalBg: '#2b1b11',
+          cardTitleBg: '#332116', filterBtnBg: '#4b2d16', filterPanelBg: '#2e1d13', historyPanelBg: '#2e1d13',
+          bookmarkBg: '#b58835', bookmarkBorder: '#f7e3ad'
+        }
+      },
+      {
+        id: 'brutal', num: 7, name: '팝아트 브루탈', cat: 'modern', catLabel: '모던',
+        desc: '굵은 외곽선 + 쨍한 노랑 원색',
+        tabletL: '⚡ MYTUBE POP!',
+        tabletR: 'BOLD EDITION',
+        preview: { bg: '#ffd93d', border: '#111111', inp: '#ffffff', btn: '#111111', tabBg: '#ffe885', tabSel: '#ff6b6b' },
+        colors: {
+          appBg: '#fff5d6', headerBoxBg: '#ffd93d', headerBorder: '#111111', headerDivider: '#111111',
+          searchBg: '#ffffff', tabsAreaBg: '#ffe885', tabTextColor: '#111111', tabSelectedBg: '#ff6b6b',
+          starPinColor: '#ff3b30', layoutIconCol: '#111111', settingsBtnBg: '#ffffff', settingsModalBg: '#fff9e6',
+          cardTitleBg: '#ffffff', filterBtnBg: '#6bcb77', filterPanelBg: '#fff9e6', historyPanelBg: '#fff9e6',
+          bookmarkBg: '#ff6b6b', bookmarkBorder: '#111111'
+        }
+      },
+      {
+        id: 'dark', num: 8, name: '미니멀 다크 프로', cat: 'modern', catLabel: '모던',
+        desc: '시크한 딥블랙 + 오로라 포커스',
+        tabletL: 'MyTube Pro',
+        tabletR: 'Focus Mode',
+        preview: { bg: '#141418', border: '#818cf8', inp: '#1e1e24', btn: '#6366f1', tabBg: '#1e1e24', tabSel: '#6366f1' },
+        colors: {
+          appBg: '#09090b', headerBoxBg: '#141418', headerBorder: '#818cf8', headerDivider: '#3f3f46',
+          searchBg: '#1e1e24', tabsAreaBg: '#18181f', tabTextColor: '#d4d4d8', tabSelectedBg: '#6366f1',
+          starPinColor: '#a5b4fc', layoutIconCol: '#a1a1aa', settingsBtnBg: '#1e1e24', settingsModalBg: '#141418',
+          cardTitleBg: '#141418', filterBtnBg: '#1e1e24', filterPanelBg: '#16161c', historyPanelBg: '#16161c',
+          bookmarkBg: '#6366f1', bookmarkBorder: '#a5b4fc'
+        }
+      },
+      {
+        id: 'paper', num: 9, name: '따뜻한 노트 페이퍼', cat: 'cozy', catLabel: '감성',
+        desc: '눈이 편안한 줄노트 종이 감성',
+        tabletL: '✎ 오늘의 영상 기록장',
+        tabletR: 'MyTube Note',
+        preview: { bg: '#fdfbf7', border: '#8c7356', inp: '#ffffff', btn: '#6b533b', tabBg: '#f5efe2', tabSel: '#7a6348' },
+        colors: {
+          appBg: '#efe9dc', headerBoxBg: '#fdfbf7', headerBorder: '#7a6348', headerDivider: '#b5a48b',
+          searchBg: '#ffffff', tabsAreaBg: '#f5efe2', tabTextColor: '#4a3b2c', tabSelectedBg: '#7a6348',
+          starPinColor: '#d97706', layoutIconCol: '#6b533b', settingsBtnBg: '#f5efe2', settingsModalBg: '#fdfbf7',
+          cardTitleBg: '#faf6ee', filterBtnBg: '#f5efe2', filterPanelBg: '#fdfbf7', historyPanelBg: '#fdfbf7',
+          bookmarkBg: '#a68e6e', bookmarkBorder: '#6b533b'
+        }
+      },
+      {
+        id: 'gameboy', num: 10, name: '8비트 게임보이', cat: 'retro', catLabel: '레트로',
+        desc: '휴대용 게임기 본체 + 올리브 액정',
+        tabletL: '★ MYTUBE-BOY',
+        tabletR: 'BATT ● 8-BIT',
+        preview: { bg: '#d2d1c8', border: '#4f545c', inp: '#9bbc0f', btn: '#8b1d41', tabBg: '#9bbc0f', tabSel: '#0f380f' },
+        colors: {
+          appBg: '#232629', headerBoxBg: '#d2d1c8', headerBorder: '#0f380f', headerDivider: '#8a8a80',
+          searchBg: '#9bbc0f', tabsAreaBg: '#9bbc0f', tabTextColor: '#0f380f', tabSelectedBg: '#0f380f',
+          starPinColor: '#9bbc0f', layoutIconCol: '#0f380f', settingsBtnBg: '#373a40', settingsModalBg: '#2b2e33',
+          cardTitleBg: '#2e3326', filterBtnBg: '#373a40', filterPanelBg: '#2b2e33', historyPanelBg: '#2b2e33',
+          bookmarkBg: '#8b1d41', bookmarkBorder: '#d2d1c8'
+        }
+      }
+    ];
+
+    function getSkinEntryById(skinId) {
+      return SKIN_REGISTRY.find(s => s.id === skinId) || null;
+    }
+
+    function applySkinToDOM() {
+      const entry = getSkinEntryById(currentSkinId);
+      const safeId = entry ? entry.id : 'default';
+      currentSkinId = safeId;
+      document.body.setAttribute('data-skin', safeId);
+
+      const decoL = document.getElementById('skinDecoL');
+      const decoR = document.getElementById('skinDecoR');
+      if (entry) {
+        if (decoL) decoL.textContent = entry.tabletL || ('myTube · ' + entry.name);
+        if (decoR) decoR.innerHTML = entry.tabletR || '';
+      } else {
+        if (decoL) decoL.textContent = '';
+        if (decoR) decoR.innerHTML = '';
+      }
+
+      const devBadge = document.getElementById('themeDeviceBadge');
+      const actName = document.getElementById('themeActiveName');
+      if (devBadge) devBadge.textContent = isTabletMode ? '📟 태블릿 전용' : '📱 모바일 전용';
+      if (actName) actName.textContent = entry ? (entry.num + '. ' + entry.name) : '0. 기본 (내 색상)';
+    }
+
+    function persistSkinId(saveToCloud = true) {
+      if (!currentUser) return;
+      try {
+        localStorage.setItem(SKIN_STORAGE_KEY + '_' + getUid() + getDeviceStorageSuffix(), currentSkinId || 'default');
+      } catch (e) {}
+      if (saveToCloud) saveUserProfileDocToCloud();
+    }
+
+    function persistThemeBackup(saveToCloud = false) {
+      if (!currentUser) return;
+      try {
+        const key = THEME_BACKUP_STORAGE_KEY + '_' + getUid() + getDeviceStorageSuffix();
+        if (customThemeBackup) localStorage.setItem(key, JSON.stringify(customThemeBackup));
+        else localStorage.removeItem(key);
+      } catch (e) {}
+      if (saveToCloud) saveUserProfileDocToCloud();
+    }
+
+    function selectAppSkin(skinId, saveToCloud = true) {
+      const entry = getSkinEntryById(skinId);
+      const nextId = entry ? entry.id : 'default';
+
+      if (nextId !== 'default') {
+        if (currentSkinId === 'default' && !customThemeBackup) {
+          customThemeBackup = { ...currentThemeColors };
+          persistThemeBackup(false);
+        }
+        currentSkinId = nextId;
+        const nextColors = getDefaultThemeColors();
+        Object.keys(THEME_MODULES).forEach(k => {
+          if (entry.colors && entry.colors[k]) nextColors[k] = entry.colors[k].toLowerCase();
+        });
+        currentThemeColors = nextColors;
+      } else {
+        currentSkinId = 'default';
+        if (customThemeBackup && typeof customThemeBackup === 'object') {
+          const restored = getDefaultThemeColors();
+          Object.keys(THEME_MODULES).forEach(k => {
+            if (customThemeBackup[k] && /^#[0-9a-fA-F]{6}$/.test(customThemeBackup[k])) {
+              restored[k] = customThemeBackup[k].toLowerCase();
+            }
+          });
+          currentThemeColors = restored;
+        } else {
+          currentThemeColors = getDefaultThemeColors();
+        }
+      }
+
+      applyThemeColorsToDOM();
+      applySkinToDOM();
+      persistThemeColors(false);
+      persistSkinId(saveToCloud);
+      renderThemeCardsGrid();
+    }
+
+    function setSkinCategoryFilter(catId) {
+      currentSkinCategory = catId || 'all';
+      renderThemeCardsGrid();
+    }
+
+    function renderThemeCardsGrid() {
+      applySkinToDOM();
+      const catBox = document.getElementById('themeCatFilters');
+      const grid = document.getElementById('themeCardsGrid');
+      if (!grid) return;
+
+      if (catBox) {
+        catBox.innerHTML = '';
+        SKIN_CATEGORIES.forEach(cat => {
+          const count = cat.id === 'all'
+            ? (SKIN_REGISTRY.length + 1)
+            : SKIN_REGISTRY.filter(s => s.cat === cat.id).length;
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'theme-cat-btn' + (currentSkinCategory === cat.id ? ' active' : '');
+          btn.textContent = cat.label + '(' + count + ')';
+          btn.onclick = () => setSkinCategoryFilter(cat.id);
+          catBox.appendChild(btn);
+        });
+      }
+
+      const frag = document.createDocumentFragment();
+      const makeCard = (item, isDefault) => {
+        const card = document.createElement('button');
+        card.type = 'button';
+        const isAct = currentSkinId === item.id;
+        card.className = 'theme-card' + (isAct ? ' active' : '');
+        card.onclick = () => selectAppSkin(item.id, true);
+
+        const p = item.preview;
+        const thumb = document.createElement('div');
+        thumb.className = 'theme-card-thumb';
+        thumb.style.background = p.bg;
+        thumb.style.borderColor = p.border;
+        if (isDefault) thumb.style.borderStyle = 'dashed';
+
+        thumb.innerHTML =
+          '<div class="tct-row1">' +
+            '<span class="tct-inp" style="background:' + p.inp + '"></span>' +
+            '<span class="tct-btn" style="background:' + p.btn + '"></span>' +
+          '</div>' +
+          '<div class="tct-row2" style="background:' + p.tabBg + '">' +
+            '<span class="tct-pill" style="background:' + p.tabSel + '"></span>' +
+            '<span class="tct-pill dim" style="background:' + p.tabSel + '"></span>' +
+          '</div>';
+
+        const info = document.createElement('div');
+        info.className = 'theme-card-info';
+        const title = document.createElement('span');
+        title.className = 'theme-card-title';
+        title.textContent = isDefault ? '0. 기본 모드' : (item.num + '. ' + item.name);
+        const tag = document.createElement('span');
+        tag.className = 'theme-card-tag';
+        tag.textContent = item.catLabel;
+        info.appendChild(title);
+        info.appendChild(tag);
+
+        const desc = document.createElement('div');
+        desc.className = 'theme-card-desc';
+        desc.textContent = item.desc;
+
+        card.appendChild(thumb);
+        card.appendChild(info);
+        card.appendChild(desc);
+        return card;
+      };
+
+      if (currentSkinCategory === 'all') {
+        frag.appendChild(makeCard({
+          id: 'default', num: 0, name: '기본 모드', catLabel: '내 색상',
+          desc: '기존 점선 테두리 + 내 색상 복원',
+          preview: {
+            bg: (customThemeBackup && customThemeBackup.headerBoxBg) || '#0d0d0d',
+            border: (customThemeBackup && customThemeBackup.headerBorder) || '#ffffff',
+            inp: (customThemeBackup && customThemeBackup.searchBg) || '#1c1c1c',
+            btn: '#ff0000',
+            tabBg: (customThemeBackup && customThemeBackup.tabsAreaBg) || '#f9d5e5',
+            tabSel: (customThemeBackup && customThemeBackup.tabSelectedBg) || '#d9386a'
+          }
+        }, true));
+      }
+
+      SKIN_REGISTRY.forEach(skin => {
+        if (currentSkinCategory !== 'all' && skin.cat !== currentSkinCategory) return;
+        frag.appendChild(makeCard(skin, false));
+      });
+
+      grid.innerHTML = '';
+      grid.appendChild(frag);
+    }
+
     function resetAllThemeColors() {
+      currentSkinId = 'default';
+      customThemeBackup = null;
       currentThemeColors = getDefaultThemeColors();
       currentUiOpts = getDefaultUiOpts();
       applyThemeColorsToDOM();
+      applySkinToDOM();
       applyUiOptsToDOM();
+      persistThemeBackup(false);
+      persistSkinId(false);
       persistUiOpts(false);
       persistThemeColors(true);
+      if (manageOverlay && manageOverlay.style.display === 'flex') renderThemeCardsGrid();
     }
 
     function persistThemeColors(saveToCloud = true) {
       if (!currentUser) return;
       try {
-        localStorage.setItem(`${THEME_STORAGE_KEY}_${getUid()}`, JSON.stringify(currentThemeColors));
+        localStorage.setItem(`${THEME_STORAGE_KEY}_${getUid()}${getDeviceStorageSuffix()}`, JSON.stringify(currentThemeColors));
       } catch (e) {}
+      if (currentSkinId === 'default') {
+        customThemeBackup = { ...currentThemeColors };
+        persistThemeBackup(false);
+      }
       if (saveToCloud) saveUserProfileDocToCloud();
     }
 
@@ -4271,9 +5239,24 @@
 
     function initSavedBgColor() {
       currentThemeColors = getDefaultThemeColors();
+      currentSkinId = 'default';
+      customThemeBackup = null;
       if (currentUser) {
+        const suffix = getDeviceStorageSuffix();
         try {
-          const raw = localStorage.getItem(`${THEME_STORAGE_KEY}_${getUid()}`);
+          const rawSkin = localStorage.getItem(SKIN_STORAGE_KEY + '_' + getUid() + suffix);
+          if (rawSkin && getSkinEntryById(rawSkin)) currentSkinId = rawSkin;
+        } catch (e) {}
+        try {
+          const rawBak = localStorage.getItem(THEME_BACKUP_STORAGE_KEY + '_' + getUid() + suffix);
+          if (rawBak) {
+            const bp = JSON.parse(rawBak);
+            if (bp && typeof bp === 'object') customThemeBackup = bp;
+          }
+        } catch (e) {}
+        try {
+          const raw = localStorage.getItem(`${THEME_STORAGE_KEY}_${getUid()}${suffix}`)
+            || (isTabletMode ? localStorage.getItem(`${THEME_STORAGE_KEY}_${getUid()}`) : null);
           if (raw) {
             const parsed = JSON.parse(raw);
             if (parsed && typeof parsed === 'object') {
@@ -4287,6 +5270,7 @@
         } catch (e) {}
       }
       applyThemeColorsToDOM();
+      applySkinToDOM();
       initSavedUiOpts();
     }
 
@@ -5272,10 +6256,7 @@
         });
         navigator.mediaSession.setActionHandler('play', () => {
           userPausedBg = false;
-          const dv = document.getElementById('directVideoPlayer');
-          if (isDirectVideoActive && dv && dv.src) {
-            dv.play().catch(() => {});
-          } else if (bgAudio.src && (isBgAudioPlaying || isDockedToBookmark)) {
+          if (bgAudio.src && (isBgAudioPlaying || isDockedToBookmark)) {
             bgAudio.play().catch(() => {});
           } else {
             sendYtCommand('playVideo');
@@ -5283,21 +6264,14 @@
         });
         navigator.mediaSession.setActionHandler('pause', () => {
           userPausedBg = true;
-          const dv = document.getElementById('directVideoPlayer');
-          if (isDirectVideoActive && dv && dv.src) dv.pause();
-          else if (isBgAudioPlaying) bgAudio.pause();
+          if (isBgAudioPlaying) bgAudio.pause();
           else sendYtCommand('pauseVideo');
         });
         navigator.mediaSession.setActionHandler('seekbackward', () => {
-          const dv = document.getElementById('directVideoPlayer');
-          if (isDirectVideoActive && dv && dv.src) dv.currentTime = Math.max(0, dv.currentTime - 10);
-          else if (isBgAudioPlaying) bgAudio.currentTime = Math.max(0, bgAudio.currentTime - 10);
+          if (isBgAudioPlaying) bgAudio.currentTime = Math.max(0, bgAudio.currentTime - 10);
         });
         navigator.mediaSession.setActionHandler('seekforward', () => {
-          const dv = document.getElementById('directVideoPlayer');
-          if (isDirectVideoActive && dv && dv.src && isFinite(dv.duration)) {
-            dv.currentTime = Math.min(dv.duration, dv.currentTime + 10);
-          } else if (isBgAudioPlaying && isFinite(bgAudio.duration)) {
+          if (isBgAudioPlaying && isFinite(bgAudio.duration)) {
             bgAudio.currentTime = Math.min(bgAudio.duration, bgAudio.currentTime + 10);
           }
         });
@@ -5434,8 +6408,6 @@
     }
 
     let ytFrameReady = false;
-
-    const TI_BASE_WIDTH = 300;
 
     function getRelatedShortsKeyword(title) {
       const cleaned = simplifyTitle(title || currentVideoTitle || '')
@@ -5673,32 +6645,7 @@
       }
     }
 
-    function updateTabletStreamTabUI() {
-      const lbl = document.getElementById('tabletStreamToggleLabel');
-      if (!lbl) return;
-      lbl.textContent = isDirectVideoActive ? '직접·무광고' : 'YT';
-    }
-
-    function stopDirectVideoClean() {
-      const dv = document.getElementById('directVideoPlayer');
-      const mask = document.getElementById('directLoadingMask');
-      if (mask) mask.classList.remove('active');
-      if (dv) {
-        try {
-          dv.pause();
-          dv.removeAttribute('src');
-          dv.load();
-        } catch (e) {}
-        dv.classList.remove('active');
-      }
-      isDirectVideoActive = false;
-      directVideoCandidates = [];
-      directVideoCandIdx = 0;
-      updateTabletStreamTabUI();
-    }
-
     function mountYoutubeEmbed(videoId, reuseExisting = true, startSec = 0) {
-      stopDirectVideoClean();
       apply16by9Scale(modal.offsetWidth || lastPlayerWidth || getDefaultFullPlayerMetrics().fitWidth);
 
       const resumeAt = Math.max(0, Math.floor(Number(startSec || 0)));
@@ -5724,65 +6671,6 @@
             } catch (e) {}
           });
         }
-      }
-      updateTabletStreamTabUI();
-    }
-
-    function tryPlayDirectCandidateAt(idx, videoId, seq) {
-      if (seq !== directVideoAttemptSeq || currentVideoId !== videoId) return;
-      const dv = document.getElementById('directVideoPlayer');
-      const mask = document.getElementById('directLoadingMask');
-      if (!dv || idx >= directVideoCandidates.length) {
-        if (mask) mask.classList.remove('active');
-        mountYoutubeEmbed(videoId, false, lastKnownPlaySec);
-        return;
-      }
-      directVideoCandIdx = idx;
-      isDirectVideoActive = true;
-      apply16by9Scale(modal.offsetWidth || lastPlayerWidth || getDefaultFullPlayerMetrics().fitWidth);
-      dv.classList.add('active');
-      dv.src = directVideoCandidates[idx];
-      const p = dv.play();
-      if (p && typeof p.catch === 'function') {
-        p.catch(() => {
-          if (seq === directVideoAttemptSeq && currentVideoId === videoId) {
-            tryPlayDirectCandidateAt(idx + 1, videoId, seq);
-          }
-        });
-      }
-    }
-
-    async function tryPlayDirectVideo(videoId, detailPromise) {
-      const seq = ++directVideoAttemptSeq;
-      const mask = document.getElementById('directLoadingMask');
-      const badge = document.getElementById('directLoadingBadge');
-      ytHolder.innerHTML = '';
-      ytFrameReady = false;
-      if (mask) {
-        mask.style.backgroundImage = 'url("' + getFastThumbUrl(videoId) + '")';
-        mask.classList.add('active');
-      }
-      if (badge) badge.textContent = '광고 없는 스트림 연결 중...';
-
-      const detail = await Promise.race([
-        detailPromise,
-        new Promise(res => setTimeout(() => res(null), 2800))
-      ]);
-
-      if (seq !== directVideoAttemptSeq || currentVideoId !== videoId) return;
-
-      if (detail && Array.isArray(detail.videoUrls) && detail.videoUrls.length > 0) {
-        directVideoCandidates = detail.videoUrls;
-        directVideoCandIdx = 0;
-        if (detail.audioUrls && detail.audioUrls.length > 0) {
-          prefetchedAudioCandidates = detail.audioUrls;
-          prefetchedVideoId = videoId;
-          updateBgModeUI();
-        }
-        tryPlayDirectCandidateAt(0, videoId, seq);
-      } else {
-        if (mask) mask.classList.remove('active');
-        mountYoutubeEmbed(videoId, false, lastKnownPlaySec);
       }
     }
 
@@ -5949,8 +6837,6 @@
       if (qEl && document.activeElement !== qEl) qEl.value = '';
       unlockIosAudioOnce();
       stopBgAudioClean();
-      stopDirectVideoClean();
-      directVideoAttemptSeq++;
 
       currentVideoId = item.id;
       currentVideoTitle = item.t;
@@ -6218,8 +7104,6 @@
       if (isInlinePlaying) stopInlinePlayer(false);
       unlockIosAudioOnce();
       stopBgAudioClean();
-      stopDirectVideoClean();
-      directVideoAttemptSeq++;
       isDockedToBookmark = false;
       isYtVideoPlaying = false;
       lastKnownPlaySec = 0;
@@ -6685,7 +7569,8 @@
         }
         if (uid) {
           try {
-            const raw = localStorage.getItem(THEME_STORAGE_KEY + '_' + uid);
+            const raw = localStorage.getItem(THEME_STORAGE_KEY + '_' + uid + getDeviceStorageSuffix())
+              || localStorage.getItem(THEME_STORAGE_KEY + '_' + uid);
             if (raw) {
               const p = JSON.parse(raw);
               if (p && p.headerBorder && /^#[0-9a-fA-F]{6}$/.test(p.headerBorder)) {
@@ -6828,7 +7713,6 @@
       shortsPanelOpen = false;
       tiUserCustomized = false;
       activePlayingShortId = '';
-      tabArmedDocId = '';
       currentFeedItems = [];
       dbFeedPool = [];
       activeSearchSession = null;
@@ -6886,9 +7770,12 @@
       lastPlayerWidth = 0;
       currentFeedMode = 'grid';
       currentGridCols = isTabletMode ? 3 : 2;
+      currentSkinId = 'default';
+      customThemeBackup = null;
       currentThemeColors = getDefaultThemeColors();
       currentUiOpts = getDefaultUiOpts();
       applyThemeColorsToDOM();
+      applySkinToDOM();
       applyUiOptsToDOM();
       applyFeedLayoutUI(false);
       updateFilterUI();
@@ -6906,25 +7793,38 @@
       cloudDeviceProfiles[curKey] = {
         uiOpts: { ...currentUiOpts },
         layout: { mode: currentFeedMode, cols: currentGridCols },
-        bookmark: { side: dockSide, pos: savedBookmarkPos }
+        bookmark: { side: dockSide, pos: savedBookmarkPos },
+        skin: currentSkinId || 'default',
+        theme: { ...currentThemeColors },
+        themeBackup: customThemeBackup ? { ...customThemeBackup } : null
       };
 
       const packedItems = [];
-      packedItems.push({ id: '__theme__', data: currentThemeColors });
 
       const mob = cloudDeviceProfiles.mobile;
       if (mob) {
+        packedItems.push({ id: '__theme__', data: mob.theme || currentThemeColors });
+        packedItems.push({ id: '__skin__', skin: mob.skin || 'default' });
+        if (mob.themeBackup) packedItems.push({ id: '__theme_backup__', data: mob.themeBackup });
         if (mob.uiOpts) packedItems.push({ id: '__ui_opts__', data: mob.uiOpts });
         if (mob.layout) packedItems.push({ id: '__layout__', mode: mob.layout.mode, cols: mob.layout.cols });
         if (mob.bookmark) packedItems.push({ id: '__bookmark__', side: mob.bookmark.side, pos: mob.bookmark.pos });
       } else if (!isTabletMode) {
+        packedItems.push({ id: '__theme__', data: currentThemeColors });
+        packedItems.push({ id: '__skin__', skin: currentSkinId || 'default' });
+        if (customThemeBackup) packedItems.push({ id: '__theme_backup__', data: customThemeBackup });
         packedItems.push({ id: '__ui_opts__', data: currentUiOpts });
         packedItems.push({ id: '__layout__', mode: currentFeedMode, cols: currentGridCols });
         packedItems.push({ id: '__bookmark__', side: dockSide, pos: savedBookmarkPos });
+      } else {
+        packedItems.push({ id: '__theme__', data: currentThemeColors });
       }
 
       const tab = cloudDeviceProfiles.tablet;
       if (tab) {
+        if (tab.theme) packedItems.push({ id: '__theme_tablet__', data: tab.theme });
+        packedItems.push({ id: '__skin_tablet__', skin: tab.skin || 'default' });
+        if (tab.themeBackup) packedItems.push({ id: '__theme_backup_tablet__', data: tab.themeBackup });
         if (tab.uiOpts) packedItems.push({ id: '__ui_opts_tablet__', data: tab.uiOpts });
         if (tab.layout) packedItems.push({ id: '__layout_tablet__', mode: tab.layout.mode, cols: tab.layout.cols });
         if (tab.bookmark) packedItems.push({ id: '__bookmark_tablet__', side: tab.bookmark.side, pos: tab.bookmark.pos });
@@ -6963,7 +7863,12 @@
         if (snap.exists) {
           const d = snap.data();
           const list = Array.isArray(d.items) ? d.items : [];
-          const themeEntry = list.find(it => it && it.id === '__theme__' && it.data);
+          const mobTheme = list.find(it => it && it.id === '__theme__' && it.data);
+          const tabTheme = list.find(it => it && it.id === '__theme_tablet__' && it.data);
+          const mobSkin = list.find(it => it && it.id === '__skin__' && typeof it.skin === 'string');
+          const tabSkin = list.find(it => it && it.id === '__skin_tablet__' && typeof it.skin === 'string');
+          const mobBackup = list.find(it => it && it.id === '__theme_backup__' && it.data);
+          const tabBackup = list.find(it => it && it.id === '__theme_backup_tablet__' && it.data);
           const mobUiOpts = list.find(it => it && it.id === '__ui_opts__' && it.data);
           const tabUiOpts = list.find(it => it && it.id === '__ui_opts_tablet__' && it.data);
           const mobLayout = list.find(it => it && it.id === '__layout__');
@@ -6974,24 +7879,33 @@
           const streamApiEntry = list.find(it => it && it.id === '__stream_api__' && typeof it.url === 'string');
           const lastFeedEntry = list.find(it => it && it.id === '__last_feed__' && it.docId);
 
-          if (mobUiOpts || mobLayout || mobBm) {
+          if (mobUiOpts || mobLayout || mobBm || mobTheme || mobSkin || mobBackup) {
             cloudDeviceProfiles.mobile = {
               uiOpts: mobUiOpts ? mobUiOpts.data : null,
               layout: mobLayout ? { mode: mobLayout.mode, cols: mobLayout.cols } : null,
-              bookmark: mobBm ? { side: mobBm.side, pos: mobBm.pos } : null
+              bookmark: mobBm ? { side: mobBm.side, pos: mobBm.pos } : null,
+              skin: mobSkin ? mobSkin.skin : 'default',
+              theme: mobTheme ? mobTheme.data : null,
+              themeBackup: mobBackup ? mobBackup.data : null
             };
           }
-          if (tabUiOpts || tabLayout || tabBm) {
+          if (tabUiOpts || tabLayout || tabBm || tabTheme || tabSkin || tabBackup) {
             cloudDeviceProfiles.tablet = {
               uiOpts: tabUiOpts ? tabUiOpts.data : null,
               layout: tabLayout ? { mode: tabLayout.mode, cols: tabLayout.cols } : null,
-              bookmark: tabBm ? { side: tabBm.side, pos: tabBm.pos } : null
+              bookmark: tabBm ? { side: tabBm.side, pos: tabBm.pos } : null,
+              skin: tabSkin ? tabSkin.skin : 'default',
+              theme: tabTheme ? tabTheme.data : null,
+              themeBackup: tabBackup ? tabBackup.data : null
             };
           }
 
           const activeUiOptsEntry = isTabletMode ? (tabUiOpts || mobUiOpts) : mobUiOpts;
           const activeLayoutEntry = isTabletMode ? tabLayout : mobLayout;
           const activeBmEntry = isTabletMode ? tabBm : mobBm;
+          const activeThemeEntry = isTabletMode ? (tabTheme || mobTheme) : mobTheme;
+          const activeSkinEntry = isTabletMode ? tabSkin : mobSkin;
+          const activeBackupEntry = isTabletMode ? tabBackup : mobBackup;
           const validCols = isTabletMode ? [1, 2, 3, 4, 5] : [1, 2, 3, 4];
 
           if (activeUiOptsEntry && activeUiOptsEntry.data) {
@@ -7005,10 +7919,21 @@
             persistUiOpts(false);
           }
 
-          if (themeEntry && themeEntry.data) {
+          if (activeBackupEntry && activeBackupEntry.data) {
+            customThemeBackup = { ...activeBackupEntry.data };
+            persistThemeBackup(false);
+          }
+
+          if (activeSkinEntry && typeof activeSkinEntry.skin === 'string') {
+            currentSkinId = getSkinEntryById(activeSkinEntry.skin) ? activeSkinEntry.skin : 'default';
+            applySkinToDOM();
+            persistSkinId(false);
+          }
+
+          if (activeThemeEntry && activeThemeEntry.data) {
             Object.keys(THEME_MODULES).forEach(k => {
-              if (themeEntry.data[k] && /^#[0-9a-fA-F]{6}$/.test(themeEntry.data[k])) {
-                currentThemeColors[k] = themeEntry.data[k].toLowerCase();
+              if (activeThemeEntry.data[k] && /^#[0-9a-fA-F]{6}$/.test(activeThemeEntry.data[k])) {
+                currentThemeColors[k] = activeThemeEntry.data[k].toLowerCase();
               }
             });
             applyThemeColorsToDOM();
@@ -7659,6 +8584,8 @@
 
       if (tabName === 'search') {
         renderManageList();
+      } else if (tabName === 'theme') {
+        renderThemeCardsGrid();
       } else if (tabName === 'color') {
         build256Palette();
       } else if (tabName === 'auth') {
@@ -8153,8 +9080,6 @@
         return;
       }
       ytFrameReady = false;
-      directVideoAttemptSeq++;
-      stopDirectVideoClean();
       hideTabletInfoModal(false);
       stopBgAudioClean();
       isYtVideoPlaying = false;
@@ -8332,7 +9257,6 @@
       try {
         const msg = JSON.parse(e.data);
         if (msg.event === 'onError' && currentVideoId) {
-          if (isDirectVideoActive) return;
           const errNum = Number(msg.info);
           if (errNum === 100 || errNum === 2) {
             handleUnplayableVideo(currentVideoId);
@@ -8341,7 +9265,6 @@
         }
         if (msg.event === 'infoDelivery' && msg.info) {
           if (typeof msg.info.errorCode === 'number' && currentVideoId) {
-            if (isDirectVideoActive) return;
             const ec = msg.info.errorCode;
             if (ec === 100 || ec === 2) {
               handleUnplayableVideo(currentVideoId);
@@ -8376,7 +9299,7 @@
                   return;
                 }
               }
-              if (msg.info.playerState === 2 && document.body.classList.contains('blackout-active') && blackoutWantPlaying && !userPausedBg && !isBgAudioPlaying && !isDirectVideoActive && currentVideoId) {
+              if (msg.info.playerState === 2 && document.body.classList.contains('blackout-active') && blackoutWantPlaying && !userPausedBg && !isBgAudioPlaying && currentVideoId) {
                 setTimeout(() => {
                   if (document.body.classList.contains('blackout-active') && blackoutWantPlaying && !userPausedBg && !isYtVideoPlaying && !isBgAudioPlaying) {
                     sendYtCommand('playVideo');
@@ -8410,8 +9333,6 @@
       if (bgAudio.src === SILENT_WAV_URI) return;
       isBgAudioPlaying = true;
       hideYtPauseMask();
-      const dv = document.getElementById('directVideoPlayer');
-      if (dv && !dv.paused) { try { dv.pause(); } catch (e) {} }
       sendYtCommand('pauseVideo');
       setupMediaSession(currentVideoTitle, currentVideoId);
       if ('mediaSession' in navigator) {
@@ -8474,10 +9395,8 @@
         if (document.body.classList.contains('blackout-active')) {
           requestBlackoutWakeLock();
           if (blackoutWantPlaying && !userPausedBg && currentVideoId) {
-            const dv = document.getElementById('directVideoPlayer');
-            if (isDirectVideoActive && dv && dv.paused && !dv.ended) dv.play().catch(() => {});
-            else if (isBgAudioPlaying && bgAudio.paused && !bgAudio.ended) bgAudio.play().catch(() => {});
-            else if (!isBgAudioPlaying && !isDirectVideoActive && !isYtVideoPlaying) sendYtCommand('playVideo');
+            if (isBgAudioPlaying && bgAudio.paused && !bgAudio.ended) bgAudio.play().catch(() => {});
+            else if (!isBgAudioPlaying && !isYtVideoPlaying) sendYtCommand('playVideo');
           }
         }
       } else if (document.visibilityState === 'hidden' && currentVideoId) {
@@ -8521,8 +9440,7 @@
     }
 
     function updateSlideBookmarkPlayUI() {
-      const dv = document.getElementById('directVideoPlayer');
-      const playingNow = isYtVideoPlaying || (isBgAudioPlaying && !bgAudio.paused) || (isDirectVideoActive && dv && !dv.paused);
+      const playingNow = isYtVideoPlaying || (isBgAudioPlaying && !bgAudio.paused);
       slideBookmark.classList.toggle('sb-playing', playingNow);
       const icon = document.getElementById('sbPlayIcon');
       if (icon) icon.textContent = playingNow ? '▶' : '■';
@@ -8688,11 +9606,6 @@
         requestBlackoutWakeLock();
         if (!blackoutWantPlaying || !currentVideoId || userPausedBg) return;
 
-        const dv = document.getElementById('directVideoPlayer');
-        if (isDirectVideoActive && dv && dv.src) {
-          if (dv.paused && !dv.ended) dv.play().catch(() => {});
-          return;
-        }
         if (isBgAudioPlaying) {
           if (bgAudio.paused && !bgAudio.ended) bgAudio.play().catch(() => {});
           return;
@@ -8716,8 +9629,7 @@
       const ov = document.getElementById('battery-blackout-overlay');
       if (!ov) return;
       lastBlackoutTapTime = 0;
-      const dv = document.getElementById('directVideoPlayer');
-      blackoutWantPlaying = !!(currentVideoId && (isYtVideoPlaying || (isBgAudioPlaying && !bgAudio.paused) || (isDirectVideoActive && dv && !dv.paused)));
+      blackoutWantPlaying = !!(currentVideoId && (isYtVideoPlaying || (isBgAudioPlaying && !bgAudio.paused)));
       document.documentElement.classList.add('blackout-active');
       document.body.classList.add('blackout-active');
       if (isInlinePlaying) document.body.classList.add('inline-keep-alive');
@@ -8789,13 +9701,10 @@
 
     function togglePlayFromBookmark() {
       if (!currentVideoId) return;
-      const dv = document.getElementById('directVideoPlayer');
-      const playingNow = isYtVideoPlaying || (isBgAudioPlaying && !bgAudio.paused) || (isDirectVideoActive && dv && !dv.paused);
+      const playingNow = isYtVideoPlaying || (isBgAudioPlaying && !bgAudio.paused);
       if (playingNow) {
         userPausedBg = true;
-        if (isDirectVideoActive && dv && dv.src) {
-          dv.pause();
-        } else if (isBgAudioPlaying) {
+        if (isBgAudioPlaying) {
           bgAudio.pause();
         } else {
           sendYtCommand('pauseVideo');
@@ -8803,9 +9712,7 @@
         }
       } else {
         userPausedBg = false;
-        if (isDirectVideoActive && dv && dv.src) {
-          dv.play().catch(() => {});
-        } else if (isBgAudioPlaying) {
+        if (isBgAudioPlaying) {
           bgAudio.play().catch(() => {});
         } else {
           hideYtPauseMask();
