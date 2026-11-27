@@ -2767,7 +2767,7 @@
     body.tablet-mode .mp3-close-btn { padding: 14px; font-size: 15px; border-radius: 10px; }
 
     /* =====================================================================
-       8. 스킨 테마 변경 탭 & 10종 스킨 (20+ 확장형 · 모바일/태블릿 분리)
+       8. 30종 스킨 테마 · 성경말씀 슬라이드 · 재생창 하단 가사 시스템
        ===================================================================== */
     .skin-deco-bar {
       display: none;
@@ -2776,13 +2776,13 @@
       gap: 8px;
       font-size: 11px;
       font-weight: 800;
-      letter-spacing: 0.6px;
+      letter-spacing: 0.5px;
       padding: 3px 8px;
       margin-bottom: 6px;
       border-radius: 5px;
       user-select: none;
     }
-    body.tablet-mode[data-skin]:not([data-skin="default"]) .skin-deco-bar {
+    body.tablet-mode[data-skin]:not([data-skin="default"]):not(.faith-bar-on) .skin-deco-bar {
       display: flex;
     }
     .skin-deco-l, .skin-deco-r {
@@ -2811,16 +2811,80 @@
     .skin-eq-bars span:nth-child(4) { animation-delay: 0.12s; background: #ff4757; }
     @keyframes skinEqAnim { from { height: 3px; } to { height: 11px; } }
 
-    /* 설정 > 테마변경 패널 (20개+ 확장 대응 스크롤 그리드) */
-    #settings-pane-theme {
+    /* 성경말씀 무한 슬라이드 바 (모든 테마 지원 · 터치/호버 일시정지) */
+    .faith-verse-bar {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      height: 22px;
+      padding: 0 7px;
+      margin-bottom: 5px;
+      border-radius: 6px;
       overflow: hidden;
+      background: var(--faith-bar-bg, rgba(255, 255, 255, 0.08));
+      border: 1px solid rgba(255, 255, 255, 0.12);
     }
+    body.faith-bar-on .faith-verse-bar { display: flex; }
+    body.tablet-mode .faith-verse-bar {
+      height: 28px;
+      padding: 0 10px;
+      margin-bottom: 8px;
+      gap: 9px;
+      border-radius: 8px;
+    }
+    .fv-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 1px 6px;
+      border-radius: 4px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      background: var(--faith-badge-bg, var(--header-border-color));
+      color: var(--faith-badge-fg, var(--header-border-fg));
+    }
+    body.tablet-mode .fv-badge { font-size: 11.5px; padding: 2px 8px; }
+    .fv-marquee {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      position: relative;
+      -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 5%, #000 95%, transparent 100%);
+      mask-image: linear-gradient(to right, transparent 0%, #000 5%, #000 95%, transparent 100%);
+    }
+    .fv-track {
+      display: inline-flex;
+      white-space: nowrap;
+      will-change: transform;
+      color: var(--faith-verse-fg, var(--search-fg));
+      animation: faithVerseMarquee var(--faith-verse-dur, 18s) linear infinite;
+    }
+    .faith-verse-bar:hover .fv-track,
+    .faith-verse-bar.fv-paused .fv-track {
+      animation-play-state: paused;
+    }
+    .fv-text {
+      font-size: 11px;
+      font-weight: 600;
+      padding-right: 46px;
+      letter-spacing: 0.15px;
+    }
+    body.tablet-mode .fv-text { font-size: 13px; }
+    @keyframes faithVerseMarquee {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    /* 설정 > 테마변경 탭 & 말씀·절기 설정 서랍 */
+    #settings-pane-theme { overflow: hidden; }
     .theme-pane-top {
       display: flex;
       flex-direction: column;
       gap: 6px;
       padding: 6px 8px;
-      margin-bottom: 7px;
+      margin-bottom: 6px;
       border-radius: 8px;
       background: rgba(0, 0, 0, 0.24);
       border: 1px solid rgba(255, 255, 255, 0.14);
@@ -2830,8 +2894,15 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 6px;
+      gap: 5px;
       font-size: 11px;
+    }
+    .theme-status-left {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      min-width: 0;
+      flex: 1;
     }
     .theme-device-badge {
       padding: 2px 7px;
@@ -2840,8 +2911,9 @@
       border: 1px solid rgba(244, 114, 182, 0.55);
       color: #f9a8d4;
       font-weight: 800;
-      font-size: 10px;
+      font-size: 9.5px;
       white-space: nowrap;
+      flex-shrink: 0;
     }
     .theme-active-name {
       font-weight: 800;
@@ -2850,20 +2922,152 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
+    .faith-cfg-toggle-btn {
+      padding: 3px 8px;
+      border-radius: 6px;
+      border: 1px solid rgba(245, 197, 66, 0.65);
+      background: rgba(245, 197, 66, 0.16);
+      color: #fde68a;
+      font-size: 10px;
+      font-weight: 800;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .faith-cfg-toggle-btn.open {
+      background: #f5c542;
+      color: #111111;
+    }
+    .faith-cfg-drawer {
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+      padding: 8px;
+      margin-top: 2px;
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.34);
+      border: 1px solid rgba(245, 197, 66, 0.35);
+      max-height: 245px;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
+    }
+    .faith-cfg-drawer.open { display: flex; }
+    .fc-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .fc-lbl { font-size: 10px; font-weight: 700; color: #d4d4d8; white-space: nowrap; }
+    .fc-btns { display: inline-flex; gap: 3px; flex-wrap: wrap; }
+    .fc-btn {
+      padding: 3px 7px;
+      border-radius: 5px;
+      border: 1px solid #3f3f46;
+      background: #222228;
+      color: #cfcfd6;
+      font-size: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .fc-btn.active {
+      background: #f5c542;
+      border-color: #f5c542;
+      color: #111111;
+    }
+    .fc-input-row { display: flex; gap: 4px; width: 100%; }
+    .fc-input {
+      flex: 1;
+      min-width: 0;
+      height: 28px;
+      padding: 0 8px;
+      border-radius: 6px;
+      border: 1px solid #3f3f46;
+      background: #111116;
+      color: #ffffff;
+      font-size: 11px;
+      outline: none;
+    }
+    .fc-input:focus { border-color: #f5c542; }
+    .fc-act-btn {
+      height: 28px;
+      padding: 0 9px;
+      border: none;
+      border-radius: 6px;
+      background: #f5c542;
+      color: #111111;
+      font-size: 10.5px;
+      font-weight: 800;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .fc-act-btn.sub { background: #32323c; color: #e4e4e7; }
+    .fc-verses-list {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      max-height: 76px;
+      overflow-y: auto;
+    }
+    .fc-verse-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      padding: 3px 6px;
+      border-radius: 5px;
+      background: rgba(255, 255, 255, 0.06);
+      font-size: 10.5px;
+      color: #fde68a;
+    }
+    .fc-verse-txt {
+      flex: 1;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .fc-verse-del {
+      border: none;
+      background: transparent;
+      color: #fca5a5;
+      font-weight: 800;
+      cursor: pointer;
+      padding: 0 3px;
+    }
+    .fc-presets {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+    .fc-preset-btn {
+      padding: 2px 6px;
+      border-radius: 999px;
+      border: 1px dashed rgba(245, 197, 66, 0.5);
+      background: rgba(245, 197, 66, 0.1);
+      color: #fde68a;
+      font-size: 9.5px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
     .theme-cat-filters {
       display: flex;
-      gap: 5px;
+      gap: 4px;
       overflow-x: auto;
       scrollbar-width: none;
     }
     .theme-cat-filters::-webkit-scrollbar { display: none; }
     .theme-cat-btn {
-      padding: 3px 9px;
+      padding: 3px 8px;
       border-radius: 999px;
       border: 1px solid #3f3f46;
       background: #222228;
       color: #cfcfd6;
-      font-size: 10.5px;
+      font-size: 10px;
       font-weight: 700;
       cursor: pointer;
       white-space: nowrap;
@@ -2895,7 +3099,7 @@
     .theme-card {
       display: flex;
       flex-direction: column;
-      gap: 5px;
+      gap: 4px;
       padding: 6px;
       border-radius: 9px;
       border: 1.5px solid rgba(255, 255, 255, 0.16);
@@ -2948,12 +3152,12 @@
       text-overflow: ellipsis;
     }
     .theme-card-tag {
-      font-size: 9px;
+      font-size: 8.5px;
       font-weight: 700;
       padding: 1px 5px;
       border-radius: 4px;
       background: rgba(255, 255, 255, 0.12);
-      opacity: 0.85;
+      opacity: 0.88;
       flex-shrink: 0;
     }
     .theme-card-desc {
@@ -2964,10 +3168,17 @@
       text-overflow: ellipsis;
     }
 
-    body.tablet-mode .theme-pane-top { padding: 9px 12px; gap: 8px; margin-bottom: 10px; }
-    body.tablet-mode .theme-pane-status { font-size: 13.5px; }
-    body.tablet-mode .theme-device-badge { font-size: 12px; padding: 3px 10px; }
-    body.tablet-mode .theme-cat-btn { font-size: 13px; padding: 5px 13px; }
+    body.tablet-mode .theme-pane-top { padding: 9px 12px; gap: 8px; margin-bottom: 9px; }
+    body.tablet-mode .theme-pane-status { font-size: 13px; }
+    body.tablet-mode .theme-device-badge { font-size: 11.5px; padding: 3px 9px; }
+    body.tablet-mode .faith-cfg-toggle-btn { font-size: 12px; padding: 4px 10px; }
+    body.tablet-mode .faith-cfg-drawer { max-height: 290px; padding: 10px; gap: 8px; }
+    body.tablet-mode .fc-lbl, body.tablet-mode .fc-btn { font-size: 12px; }
+    body.tablet-mode .fc-input { height: 34px; font-size: 13px; }
+    body.tablet-mode .fc-act-btn { height: 34px; font-size: 12.5px; padding: 0 12px; }
+    body.tablet-mode .fc-verse-item { font-size: 12.5px; padding: 4px 8px; }
+    body.tablet-mode .fc-preset-btn { font-size: 11.5px; padding: 3px 8px; }
+    body.tablet-mode .theme-cat-btn { font-size: 12.5px; padding: 5px 12px; }
     body.tablet-mode .theme-cards-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
     body.tablet-mode .theme-card { padding: 8px; gap: 6px; border-radius: 11px; }
     body.tablet-mode .theme-card-thumb { height: 54px; padding: 6px; }
@@ -2975,160 +3186,114 @@
     body.tablet-mode .theme-card-tag { font-size: 10.5px; }
     body.tablet-mode .theme-card-desc { font-size: 11px; }
 
-    /* 스킨 활성 시 기존 SVG 점선 테두리 숨김 (기본 모드에서는 100% 원형 유지) */
-    body[data-skin]:not([data-skin="default"]) .header-dash-svg {
-      display: none !important;
-    }
+    /* 스킨 활성 시 SVG 점선 테두리 숨김 */
+    body[data-skin]:not([data-skin="default"]) .header-dash-svg { display: none !important; }
 
-    /* 밝은 계열 스킨에서 설정 모달 가독성 보강 */
-    body[data-skin="win95"] .ui-opt-panel,
-    body[data-skin="neu"] .ui-opt-panel,
-    body[data-skin="brutal"] .ui-opt-panel,
-    body[data-skin="paper"] .ui-opt-panel,
-    body[data-skin="win95"] .theme-pane-top,
-    body[data-skin="neu"] .theme-pane-top,
-    body[data-skin="brutal"] .theme-pane-top,
-    body[data-skin="paper"] .theme-pane-top,
-    body[data-skin="win95"] .color-preview-bar,
-    body[data-skin="neu"] .color-preview-bar,
-    body[data-skin="brutal"] .color-preview-bar,
-    body[data-skin="paper"] .color-preview-bar {
+    /* 밝은 계열 스킨 공통 가독성 보강 (body.light-skin 자동 적용) */
+    body.light-skin .ui-opt-panel,
+    body.light-skin .theme-pane-top,
+    body.light-skin .color-preview-bar {
       background: rgba(0, 0, 0, 0.06);
       border-color: rgba(0, 0, 0, 0.16);
     }
-    body[data-skin="win95"] .ui-opt-lbl,
-    body[data-skin="neu"] .ui-opt-lbl,
-    body[data-skin="brutal"] .ui-opt-lbl,
-    body[data-skin="paper"] .ui-opt-lbl,
-    body[data-skin="win95"] .manage-search-count,
-    body[data-skin="neu"] .manage-search-count,
-    body[data-skin="brutal"] .manage-search-count,
-    body[data-skin="paper"] .manage-search-count {
+    body.light-skin .ui-opt-lbl,
+    body.light-skin .manage-search-count,
+    body.light-skin .fc-lbl {
       color: #27272a;
     }
-    body[data-skin="win95"] .theme-card,
-    body[data-skin="neu"] .theme-card,
-    body[data-skin="brutal"] .theme-card,
-    body[data-skin="paper"] .theme-card {
-      background: rgba(255, 255, 255, 0.65);
+    body.light-skin .faith-cfg-drawer {
+      background: rgba(0, 0, 0, 0.06);
+      border-color: rgba(140, 98, 25, 0.35);
+    }
+    body.light-skin .faith-cfg-toggle-btn {
+      background: #78350f;
+      color: #fef3c7;
+      border-color: #78350f;
+    }
+    body.light-skin .fc-input {
+      background: #ffffff;
+      color: #18181b;
+      border-color: rgba(0, 0, 0, 0.25);
+    }
+    body.light-skin .fc-verse-item {
+      background: rgba(255, 255, 255, 0.8);
+      color: #3f2d14;
+    }
+    body.light-skin .fc-preset-btn {
+      background: rgba(180, 115, 20, 0.14);
+      color: #5c3a0d;
+      border-color: rgba(140, 90, 20, 0.45);
+    }
+    body.light-skin .theme-card {
+      background: rgba(255, 255, 255, 0.68);
       border-color: rgba(0, 0, 0, 0.18);
       color: #18181b;
     }
-    body[data-skin="win95"] .theme-device-badge,
-    body[data-skin="neu"] .theme-device-badge,
-    body[data-skin="brutal"] .theme-device-badge,
-    body[data-skin="paper"] .theme-device-badge {
+    body.light-skin .theme-card-tag { background: rgba(0, 0, 0, 0.09); }
+    body.light-skin .theme-device-badge {
       background: #18181b;
       color: #ffffff;
       border-color: #18181b;
     }
-    body[data-skin="win95"] .settings-tabs-header,
-    body[data-skin="neu"] .settings-tabs-header,
-    body[data-skin="brutal"] .settings-tabs-header,
-    body[data-skin="paper"] .settings-tabs-header {
-      border-bottom-color: rgba(0, 0, 0, 0.15);
-    }
-    body[data-skin="win95"] .manage-close-btn,
-    body[data-skin="neu"] .manage-close-btn,
-    body[data-skin="brutal"] .manage-close-btn,
-    body[data-skin="paper"] .manage-close-btn {
-      background: #18181b;
-      color: #ffffff;
-    }
+    body.light-skin .settings-tabs-header { border-bottom-color: rgba(0, 0, 0, 0.15); }
+    body.light-skin .manage-close-btn { background: #18181b; color: #ffffff; }
 
-    /* ---------------- [1] 클래식 MP3 (Winamp) ---------------- */
+    /* ---------------- [1~10] 기존 일반 스킨 ---------------- */
     body[data-skin="winamp"] .header-unified-box {
       background: linear-gradient(180deg, #4b5060 0%, #2a2d36 48%, #1b1d24 100%);
-      border: 2px outset #72798f;
-      border-radius: 4px;
+      border: 2px outset #72798f; border-radius: 4px;
       box-shadow: 0 6px 16px rgba(0, 0, 0, 0.65);
     }
     body[data-skin="winamp"] .skin-deco-bar {
       background: linear-gradient(90deg, #161f33, #374a73, #161f33);
-      color: #d6e4ff;
-      border: 1px inset #56607a;
-      font-family: ui-monospace, Consolas, monospace;
+      color: #d6e4ff; border: 1px inset #56607a; font-family: ui-monospace, Consolas, monospace;
     }
     body[data-skin="winamp"] .search-box input {
-      background: var(--search-bg);
-      color: #00ff41;
-      font-family: ui-monospace, Consolas, monospace;
-      font-weight: 700;
-      border: 2px inset #4d5466;
-      border-radius: 2px;
+      background: var(--search-bg); color: #00ff41;
+      font-family: ui-monospace, Consolas, monospace; font-weight: 700;
+      border: 2px inset #4d5466; border-radius: 2px;
       text-shadow: 0 0 6px rgba(0, 255, 65, 0.55);
     }
     body[data-skin="winamp"] .search-box input::placeholder { color: #0f7a2a; text-shadow: none; }
     body[data-skin="winamp"] button.search-btn {
-      background: linear-gradient(180deg, #323745, #181b22);
-      border: 2px outset #6d7488;
-      border-radius: 2px;
+      background: linear-gradient(180deg, #323745, #181b22); border: 2px outset #6d7488; border-radius: 2px;
     }
     body[data-skin="winamp"] .filter-toggle-btn,
     body[data-skin="winamp"] .header-gear-btn {
-      background: linear-gradient(180deg, #4a5060, #282c36);
-      color: #e2e8f0;
-      border: 2px outset #6d7488;
-      border-radius: 2px;
+      background: linear-gradient(180deg, #4a5060, #282c36); color: #e2e8f0; border: 2px outset #6d7488; border-radius: 2px;
     }
     body[data-skin="winamp"] .header-mid-divider { border-top: 1px solid #101218; box-shadow: 0 1px 0 #4d5366; }
-    body[data-skin="winamp"] .saved-tabs-row {
-      border: 2px inset #444a5c;
-      border-radius: 3px;
-    }
+    body[data-skin="winamp"] .saved-tabs-row { border: 2px inset #444a5c; border-radius: 3px; }
     body[data-skin="winamp"] .history-tab .tab-kw-text { font-family: ui-monospace, Consolas, monospace; }
 
-    /* ---------------- [2] 레트로 윈도우 95 ---------------- */
     body[data-skin="win95"] .header-unified-box {
       background: var(--header-box-rgba);
-      border-top: 2px solid #ffffff;
-      border-left: 2px solid #ffffff;
-      border-right: 2px solid #404040;
-      border-bottom: 2px solid #404040;
-      box-shadow: inset -1px -1px #808080, inset 1px 1px #dfdfdf, 3px 3px 0 rgba(0, 0, 0, 0.35);
+      border-top: 2px solid #fff; border-left: 2px solid #fff;
+      border-right: 2px solid #404040; border-bottom: 2px solid #404040;
+      box-shadow: inset -1px -1px #808080, inset 1px 1px #dfdfdf, 3px 3px 0 rgba(0,0,0,0.35);
       border-radius: 0;
     }
-    body[data-skin="win95"] .skin-deco-bar {
-      background: linear-gradient(90deg, #000080, #1084d0);
-      color: #ffffff;
-      border-radius: 0;
-    }
+    body[data-skin="win95"] .skin-deco-bar { background: linear-gradient(90deg, #000080, #1084d0); color: #fff; border-radius: 0; }
     body[data-skin="win95"] .search-box input {
-      border-radius: 0;
-      border-top: 2px solid #808080;
-      border-left: 2px solid #808080;
-      border-right: 2px solid #ffffff;
-      border-bottom: 2px solid #ffffff;
-      box-shadow: inset 1px 1px #000000;
+      border-radius: 0; border-top: 2px solid #808080; border-left: 2px solid #808080;
+      border-right: 2px solid #fff; border-bottom: 2px solid #fff; box-shadow: inset 1px 1px #000;
     }
     body[data-skin="win95"] button.search-btn {
-      background: #000080;
-      border-radius: 0;
-      border-top: 2px solid #ffffff;
-      border-left: 2px solid #ffffff;
-      border-right: 2px solid #000000;
-      border-bottom: 2px solid #000000;
+      background: #000080; border-radius: 0; border-top: 2px solid #fff; border-left: 2px solid #fff;
+      border-right: 2px solid #000; border-bottom: 2px solid #000;
     }
     body[data-skin="win95"] .filter-toggle-btn,
     body[data-skin="win95"] .header-gear-btn {
-      border-radius: 0;
-      border-top: 2px solid #ffffff;
-      border-left: 2px solid #ffffff;
-      border-right: 2px solid #000000;
-      border-bottom: 2px solid #000000;
-      box-shadow: inset -1px -1px #808080;
+      border-radius: 0; border-top: 2px solid #fff; border-left: 2px solid #fff;
+      border-right: 2px solid #000; border-bottom: 2px solid #000; box-shadow: inset -1px -1px #808080;
     }
-    body[data-skin="win95"] .header-mid-divider { border-top: 1px solid #808080; box-shadow: 0 1px 0 #ffffff; }
+    body[data-skin="win95"] .header-mid-divider { border-top: 1px solid #808080; box-shadow: 0 1px 0 #fff; }
     body[data-skin="win95"] .saved-tabs-row {
-      border-radius: 0;
-      border-top: 2px solid #808080;
-      border-left: 2px solid #808080;
-      border-right: 2px solid #ffffff;
-      border-bottom: 2px solid #ffffff;
+      border-radius: 0; border-top: 2px solid #808080; border-left: 2px solid #808080;
+      border-right: 2px solid #fff; border-bottom: 2px solid #fff;
     }
     body[data-skin="win95"] .history-tab.tab-selected { border-radius: 0; }
 
-    /* ---------------- [3] 모던 글래스모피즘 ---------------- */
     body[data-skin="glass"] {
       background-image: radial-gradient(circle at 12% 10%, rgba(139, 92, 246, 0.35), transparent 45%),
                         radial-gradient(circle at 88% 20%, rgba(236, 72, 153, 0.28), transparent 48%);
@@ -3136,298 +3301,340 @@
     }
     body[data-skin="glass"] .top-header { background: transparent; }
     body[data-skin="glass"] .header-unified-box {
-      background: rgba(255, 255, 255, 0.14);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      border: 1px solid rgba(255, 255, 255, 0.35);
-      border-radius: 18px;
-      box-shadow: 0 10px 28px rgba(15, 23, 42, 0.4);
+      background: rgba(255, 255, 255, 0.14); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+      border: 1px solid rgba(255, 255, 255, 0.35); border-radius: 18px; box-shadow: 0 10px 28px rgba(15, 23, 42, 0.4);
     }
-    body[data-skin="glass"] .skin-deco-bar {
-      background: rgba(255, 255, 255, 0.14);
-      color: #f5f3ff;
-      border-radius: 999px;
-      padding: 3px 12px;
-    }
-    body[data-skin="glass"] .search-box input {
-      border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.32);
-      padding-left: 12px;
-    }
-    body[data-skin="glass"] button.search-btn {
-      background: linear-gradient(135deg, #7c3aed, #db2777);
-      border-radius: 999px;
-      box-shadow: 0 3px 10px rgba(124, 58, 237, 0.45);
-    }
+    body[data-skin="glass"] .skin-deco-bar { background: rgba(255,255,255,0.14); color: #f5f3ff; border-radius: 999px; padding: 3px 12px; }
+    body[data-skin="glass"] .search-box input { border-radius: 999px; border: 1px solid rgba(255,255,255,0.32); padding-left: 12px; }
+    body[data-skin="glass"] button.search-btn { background: linear-gradient(135deg, #7c3aed, #db2777); border-radius: 999px; }
     body[data-skin="glass"] .filter-toggle-btn,
-    body[data-skin="glass"] .header-gear-btn {
-      border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.28);
-    }
-    body[data-skin="glass"] .header-mid-divider { border-top: 1px solid rgba(255, 255, 255, 0.22); }
-    body[data-skin="glass"] .saved-tabs-row {
-      border-radius: 14px;
-      border: 1px solid rgba(255, 255, 255, 0.22);
-    }
+    body[data-skin="glass"] .header-gear-btn { border-radius: 999px; border: 1px solid rgba(255,255,255,0.28); }
+    body[data-skin="glass"] .header-mid-divider { border-top: 1px solid rgba(255,255,255,0.22); }
+    body[data-skin="glass"] .saved-tabs-row { border-radius: 14px; border: 1px solid rgba(255,255,255,0.22); }
 
-    /* ---------------- [4] 사이버펑크 네온 ---------------- */
     body[data-skin="cyber"] .header-unified-box {
-      background: linear-gradient(135deg, rgba(16, 8, 36, 0.96), rgba(9, 5, 22, 0.98));
-      border: 1.5px solid var(--header-border-color);
-      border-radius: 3px;
-      box-shadow: 0 0 16px rgba(0, 243, 255, 0.28), inset 0 0 12px rgba(255, 0, 127, 0.16);
+      background: linear-gradient(135deg, rgba(16,8,36,0.96), rgba(9,5,22,0.98));
+      border: 1.5px solid var(--header-border-color); border-radius: 3px;
+      box-shadow: 0 0 16px rgba(0,243,255,0.28), inset 0 0 12px rgba(255,0,127,0.16);
       clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
     }
     body[data-skin="cyber"] .skin-deco-bar {
-      background: rgba(0, 243, 255, 0.08);
-      color: #00f3ff;
-      border-left: 3px solid #ff007f;
-      font-family: ui-monospace, Consolas, monospace;
-      text-shadow: 0 0 8px rgba(0, 243, 255, 0.7);
+      background: rgba(0,243,255,0.08); color: #00f3ff; border-left: 3px solid #ff007f;
+      font-family: ui-monospace, Consolas, monospace; text-shadow: 0 0 8px rgba(0,243,255,0.7);
     }
-    body[data-skin="cyber"] .search-box input {
-      border: 1px solid rgba(0, 243, 255, 0.5);
-      border-radius: 2px;
-    }
-    body[data-skin="cyber"] .search-box input:focus {
-      border-color: #ff007f;
-      box-shadow: 0 0 10px rgba(255, 0, 127, 0.55);
-    }
-    body[data-skin="cyber"] button.search-btn {
-      background: #ff007f;
-      border-radius: 2px;
-      box-shadow: 0 0 12px rgba(255, 0, 127, 0.65);
-    }
+    body[data-skin="cyber"] .search-box input { border: 1px solid rgba(0,243,255,0.5); border-radius: 2px; }
+    body[data-skin="cyber"] .search-box input:focus { border-color: #ff007f; box-shadow: 0 0 10px rgba(255,0,127,0.55); }
+    body[data-skin="cyber"] button.search-btn { background: #ff007f; border-radius: 2px; box-shadow: 0 0 12px rgba(255,0,127,0.65); }
     body[data-skin="cyber"] .filter-toggle-btn,
-    body[data-skin="cyber"] .header-gear-btn {
-      border: 1px solid rgba(0, 243, 255, 0.45);
-      border-radius: 2px;
-    }
-    body[data-skin="cyber"] .header-mid-divider {
-      border-top: 1px dashed #ff007f;
-      opacity: 0.75;
-    }
-    body[data-skin="cyber"] .saved-tabs-row {
-      border: 1px solid rgba(0, 243, 255, 0.35);
-      border-radius: 3px;
-    }
+    body[data-skin="cyber"] .header-gear-btn { border: 1px solid rgba(0,243,255,0.45); border-radius: 2px; }
+    body[data-skin="cyber"] .header-mid-divider { border-top: 1px dashed #ff007f; opacity: 0.75; }
+    body[data-skin="cyber"] .saved-tabs-row { border: 1px solid rgba(0,243,255,0.35); border-radius: 3px; }
 
-    /* ---------------- [5] 소프트 뉴모피즘 ---------------- */
     body[data-skin="neu"] .header-unified-box {
-      background: var(--header-box-rgba);
-      border: none;
-      border-radius: 18px;
+      background: var(--header-box-rgba); border: none; border-radius: 18px;
       box-shadow: 7px 7px 14px #c5ccd8, -6px -6px 14px #ffffff;
     }
-    body[data-skin="neu"] .skin-deco-bar {
-      color: #475569;
-      background: transparent;
-      padding: 2px 6px;
-    }
-    body[data-skin="neu"] .search-box input {
-      border: none;
-      border-radius: 12px;
-      box-shadow: inset 4px 4px 8px #c5ccd8, inset -4px -4px 8px #ffffff;
-    }
-    body[data-skin="neu"] button.search-btn {
-      background: linear-gradient(135deg, #2563eb, #3b82f6);
-      border-radius: 12px;
-      box-shadow: 4px 4px 8px #c5ccd8, -3px -3px 8px #ffffff;
-    }
+    body[data-skin="neu"] .skin-deco-bar { color: #475569; background: transparent; padding: 2px 6px; }
+    body[data-skin="neu"] .search-box input { border: none; border-radius: 12px; box-shadow: inset 4px 4px 8px #c5ccd8, inset -4px -4px 8px #ffffff; }
+    body[data-skin="neu"] button.search-btn { background: linear-gradient(135deg, #2563eb, #3b82f6); border-radius: 12px; box-shadow: 4px 4px 8px #c5ccd8, -3px -3px 8px #ffffff; }
     body[data-skin="neu"] .filter-toggle-btn,
-    body[data-skin="neu"] .header-gear-btn {
-      border: none;
-      border-radius: 11px;
-      box-shadow: 4px 4px 8px #c5ccd8, -3px -3px 8px #ffffff;
-    }
-    body[data-skin="neu"] .header-mid-divider { border-top: 1px solid rgba(100, 116, 139, 0.2); }
-    body[data-skin="neu"] .saved-tabs-row {
-      border-radius: 13px;
-      box-shadow: inset 3px 3px 6px #c5ccd8, inset -3px -3px 6px #ffffff;
-    }
+    body[data-skin="neu"] .header-gear-btn { border: none; border-radius: 11px; box-shadow: 4px 4px 8px #c5ccd8, -3px -3px 8px #ffffff; }
+    body[data-skin="neu"] .header-mid-divider { border-top: 1px solid rgba(100,116,139,0.2); }
+    body[data-skin="neu"] .saved-tabs-row { border-radius: 13px; box-shadow: inset 3px 3px 6px #c5ccd8, inset -3px -3px 6px #ffffff; }
 
-    /* ---------------- [6] 빈티지 원목 라디오 ---------------- */
     body[data-skin="wood"] .header-unified-box {
       background: repeating-linear-gradient(90deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 2px, transparent 2px, transparent 10px),
                   linear-gradient(180deg, #6e4526 0%, #4b2d16 55%, #38200e 100%);
-      border: 2.5px solid #2b180b;
-      border-radius: 12px;
-      box-shadow: inset 0 1.5px 2px rgba(255, 220, 165, 0.32), 0 8px 20px rgba(0, 0, 0, 0.55);
+      border: 2.5px solid #2b180b; border-radius: 12px;
+      box-shadow: inset 0 1.5px 2px rgba(255,220,165,0.32), 0 8px 20px rgba(0,0,0,0.55);
     }
-    body[data-skin="wood"] .skin-deco-bar {
-      background: rgba(34, 18, 8, 0.55);
-      color: #f3d082;
-      border: 1px solid rgba(212, 175, 55, 0.45);
-      font-family: Georgia, serif;
-    }
-    body[data-skin="wood"] .search-box input {
-      border: 1.5px solid #b58d46;
-      border-radius: 6px;
-      box-shadow: inset 0 2px 5px rgba(102, 65, 20, 0.32);
-      font-weight: 600;
-    }
-    body[data-skin="wood"] button.search-btn {
-      background: linear-gradient(180deg, #99321c, #691f10);
-      border: 1.5px solid #d4af37;
-      border-radius: 7px;
-    }
+    body[data-skin="wood"] .skin-deco-bar { background: rgba(34,18,8,0.55); color: #f3d082; border: 1px solid rgba(212,175,55,0.45); font-family: Georgia, serif; }
+    body[data-skin="wood"] .search-box input { border: 1.5px solid #b58d46; border-radius: 6px; box-shadow: inset 0 2px 5px rgba(102,65,20,0.32); font-weight: 600; }
+    body[data-skin="wood"] button.search-btn { background: linear-gradient(180deg, #99321c, #691f10); border: 1.5px solid #d4af37; border-radius: 7px; }
     body[data-skin="wood"] .filter-toggle-btn,
-    body[data-skin="wood"] .header-gear-btn {
-      background: linear-gradient(180deg, #5c381d, #3a210f);
-      color: #f5d892;
-      border: 1px solid rgba(212, 175, 55, 0.55);
-    }
-    body[data-skin="wood"] .header-mid-divider { border-top: 1px solid rgba(212, 175, 55, 0.35); }
-    body[data-skin="wood"] .saved-tabs-row {
-      border: 1px solid rgba(212, 175, 55, 0.38);
-      border-radius: 7px;
-    }
+    body[data-skin="wood"] .header-gear-btn { background: linear-gradient(180deg, #5c381d, #3a210f); color: #f5d892; border: 1px solid rgba(212,175,55,0.55); }
+    body[data-skin="wood"] .header-mid-divider { border-top: 1px solid rgba(212,175,55,0.35); }
+    body[data-skin="wood"] .saved-tabs-row { border: 1px solid rgba(212,175,55,0.38); border-radius: 7px; }
 
-    /* ---------------- [7] 팝아트 브루탈리즘 ---------------- */
-    body[data-skin="brutal"] .header-unified-box {
-      background: var(--header-box-rgba);
-      border: 3px solid #111111;
-      border-radius: 10px;
-      box-shadow: 5px 5px 0 #111111;
-    }
-    body[data-skin="brutal"] .skin-deco-bar {
-      background: #111111;
-      color: #ffd93d;
-      border-radius: 5px;
-      font-weight: 900;
-    }
-    body[data-skin="brutal"] .search-box input {
-      border: 2.5px solid #111111;
-      border-radius: 7px;
-      font-weight: 700;
-      box-shadow: 2px 2px 0 #111111;
-    }
-    body[data-skin="brutal"] button.search-btn {
-      background: #111111;
-      border: 2.5px solid #111111;
-      border-radius: 7px;
-      box-shadow: 2px 2px 0 #ff6b6b;
-    }
+    body[data-skin="brutal"] .header-unified-box { background: var(--header-box-rgba); border: 3px solid #111; border-radius: 10px; box-shadow: 5px 5px 0 #111; }
+    body[data-skin="brutal"] .skin-deco-bar { background: #111; color: #ffd93d; border-radius: 5px; font-weight: 900; }
+    body[data-skin="brutal"] .search-box input { border: 2.5px solid #111; border-radius: 7px; font-weight: 700; box-shadow: 2px 2px 0 #111; }
+    body[data-skin="brutal"] button.search-btn { background: #111; border: 2.5px solid #111; border-radius: 7px; box-shadow: 2px 2px 0 #ff6b6b; }
     body[data-skin="brutal"] .filter-toggle-btn,
-    body[data-skin="brutal"] .header-gear-btn {
-      border: 2.5px solid #111111;
-      border-radius: 7px;
-      box-shadow: 2px 2px 0 #111111;
-    }
-    body[data-skin="brutal"] .header-mid-divider { border-top: 2px solid #111111; }
-    body[data-skin="brutal"] .saved-tabs-row {
-      border: 2.5px solid #111111;
-      border-radius: 7px;
-    }
-    body[data-skin="brutal"] .history-tab.tab-selected {
-      border: 2px solid #111111;
-      box-shadow: 2px 2px 0 #111111;
-    }
+    body[data-skin="brutal"] .header-gear-btn { border: 2.5px solid #111; border-radius: 7px; box-shadow: 2px 2px 0 #111; }
+    body[data-skin="brutal"] .header-mid-divider { border-top: 2px solid #111; }
+    body[data-skin="brutal"] .saved-tabs-row { border: 2.5px solid #111; border-radius: 7px; }
+    body[data-skin="brutal"] .history-tab.tab-selected { border: 2px solid #111; box-shadow: 2px 2px 0 #111; }
 
-    /* ---------------- [8] 미니멀 다크 프로 ---------------- */
     body[data-skin="dark"] .header-unified-box {
-      background: var(--header-box-rgba);
-      border: 1px solid #2b2b36;
-      border-radius: 16px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
-      transition: border-color 0.25s, box-shadow 0.25s;
+      background: var(--header-box-rgba); border: 1px solid #2b2b36; border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.55); transition: border-color 0.25s, box-shadow 0.25s;
     }
-    body[data-skin="dark"] .header-unified-box:focus-within {
-      border-color: var(--header-border-color);
-      box-shadow: 0 0 22px rgba(129, 140, 248, 0.3);
-    }
-    body[data-skin="dark"] .skin-deco-bar {
-      background: rgba(99, 102, 241, 0.12);
-      color: #a5b4fc;
-      border-radius: 8px;
-    }
-    body[data-skin="dark"] .search-box input {
-      border: 1px solid #30303d;
-      border-radius: 10px;
-    }
-    body[data-skin="dark"] button.search-btn {
-      background: linear-gradient(135deg, #4f46e5, #7c3aed);
-      border-radius: 10px;
-    }
+    body[data-skin="dark"] .header-unified-box:focus-within { border-color: var(--header-border-color); box-shadow: 0 0 22px rgba(129,140,248,0.3); }
+    body[data-skin="dark"] .skin-deco-bar { background: rgba(99,102,241,0.12); color: #a5b4fc; border-radius: 8px; }
+    body[data-skin="dark"] .search-box input { border: 1px solid #30303d; border-radius: 10px; }
+    body[data-skin="dark"] button.search-btn { background: linear-gradient(135deg, #4f46e5, #7c3aed); border-radius: 10px; }
     body[data-skin="dark"] .filter-toggle-btn,
-    body[data-skin="dark"] .header-gear-btn {
-      border: 1px solid #2f2f3b;
-      border-radius: 10px;
-    }
+    body[data-skin="dark"] .header-gear-btn { border: 1px solid #2f2f3b; border-radius: 10px; }
     body[data-skin="dark"] .header-mid-divider { border-top: 1px solid #272730; }
     body[data-skin="dark"] .saved-tabs-row { border-radius: 10px; }
 
-    /* ---------------- [9] 따뜻한 노트 페이퍼 ---------------- */
     body[data-skin="paper"] .header-unified-box {
       background: repeating-linear-gradient(0deg, #fdfbf7 0px, #fdfbf7 21px, #ebe3d3 22px);
-      border: 2px dashed var(--header-border-color);
-      border-radius: 12px;
-      box-shadow: 0 5px 14px rgba(100, 82, 58, 0.15);
+      border: 2px dashed var(--header-border-color); border-radius: 12px;
+      box-shadow: 0 5px 14px rgba(100,82,58,0.15);
     }
-    body[data-skin="paper"] .skin-deco-bar {
-      background: rgba(122, 99, 72, 0.1);
-      color: #6b533b;
-      font-family: Georgia, serif;
-    }
-    body[data-skin="paper"] .search-box input {
-      border: 1px solid #d5c7b2;
-      border-bottom: 2px solid #8c7356;
-      border-radius: 6px;
-    }
-    body[data-skin="paper"] button.search-btn {
-      background: #6b533b;
-      border-radius: 999px;
-    }
+    body[data-skin="paper"] .skin-deco-bar { background: rgba(122,99,72,0.1); color: #6b533b; font-family: Georgia, serif; }
+    body[data-skin="paper"] .search-box input { border: 1px solid #d5c7b2; border-bottom: 2px solid #8c7356; border-radius: 6px; }
+    body[data-skin="paper"] button.search-btn { background: #6b533b; border-radius: 999px; }
     body[data-skin="paper"] .filter-toggle-btn,
-    body[data-skin="paper"] .header-gear-btn {
-      border: 1px solid #cbbba0;
-      border-radius: 10px;
-    }
+    body[data-skin="paper"] .header-gear-btn { border: 1px solid #cbbba0; border-radius: 10px; }
     body[data-skin="paper"] .header-mid-divider { border-top: 1.5px dashed #b5a48b; }
-    body[data-skin="paper"] .saved-tabs-row {
-      border: 1px solid #ddd1be;
-      border-radius: 8px;
-    }
+    body[data-skin="paper"] .saved-tabs-row { border: 1px solid #ddd1be; border-radius: 8px; }
 
-    /* ---------------- [10] 8비트 레트로 게임보이 ---------------- */
     body[data-skin="gameboy"] .header-unified-box {
-      background: #d2d1c8;
-      border: 3px solid #7d7d74;
-      border-radius: 10px 10px 22px 10px;
+      background: #d2d1c8; border: 3px solid #7d7d74; border-radius: 10px 10px 22px 10px;
       box-shadow: inset 2px 2px 0 #f2f2ec, 0 5px 0 #4f4f4a;
     }
-    body[data-skin="gameboy"] .skin-deco-bar {
-      background: #4f545c;
-      color: #9bbc0f;
-      font-family: ui-monospace, Consolas, monospace;
-      border-radius: 4px;
-    }
-    body[data-skin="gameboy"] .search-box input {
-      border: 2px solid #0f380f;
-      border-radius: 3px;
-      font-family: ui-monospace, Consolas, monospace;
-      font-weight: 800;
-    }
-    body[data-skin="gameboy"] button.search-btn {
-      background: #8b1d41;
-      border-radius: 999px;
-      box-shadow: 0 2px 0 #520e24;
-    }
+    body[data-skin="gameboy"] .skin-deco-bar { background: #4f545c; color: #9bbc0f; font-family: ui-monospace, Consolas, monospace; border-radius: 4px; }
+    body[data-skin="gameboy"] .search-box input { border: 2px solid #0f380f; border-radius: 3px; font-family: ui-monospace, Consolas, monospace; font-weight: 800; }
+    body[data-skin="gameboy"] button.search-btn { background: #8b1d41; border-radius: 999px; box-shadow: 0 2px 0 #520e24; }
     body[data-skin="gameboy"] .filter-toggle-btn,
-    body[data-skin="gameboy"] .header-gear-btn {
-      background: #373a40;
-      color: #e5e7eb;
-      border: 2px solid #1f2126;
-      border-radius: 6px;
-      font-family: ui-monospace, Consolas, monospace;
-    }
+    body[data-skin="gameboy"] .header-gear-btn { background: #373a40; color: #e5e7eb; border: 2px solid #1f2126; border-radius: 6px; font-family: ui-monospace, Consolas, monospace; }
     body[data-skin="gameboy"] .header-mid-divider { border-top: 2px solid #8a8a80; }
-    body[data-skin="gameboy"] .saved-tabs-row {
-      border: 3px solid #4f545c;
-      border-radius: 5px;
-      box-shadow: inset 2px 2px 0 #7a960b;
-    }
+    body[data-skin="gameboy"] .saved-tabs-row { border: 3px solid #4f545c; border-radius: 5px; box-shadow: inset 2px 2px 0 #7a960b; }
     body[data-skin="gameboy"] .history-tab .tab-kw-text { font-family: ui-monospace, Consolas, monospace; }
+
+    /* ---------------- [11~30] 기독교 신앙 테마 20종 공통 + 변수 기반 스타일 ---------------- */
+    body.faith-skin .header-unified-box {
+      background: var(--faith-box-bg, var(--header-box-rgba));
+      border: var(--faith-box-border, 2px solid var(--header-border-color));
+      border-radius: 12px;
+      box-shadow: var(--faith-box-shadow, 0 8px 22px rgba(0, 0, 0, 0.38));
+    }
+    body.faith-skin .search-box input {
+      border: 1px solid var(--faith-inp-bd, rgba(255, 255, 255, 0.25));
+      border-radius: 8px;
+    }
+    body.faith-skin button.search-btn {
+      background: var(--faith-btn-bg, #b45309);
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    body.faith-skin .filter-toggle-btn,
+    body.faith-skin .header-gear-btn {
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 8px;
+    }
+    body.faith-skin.light-skin .filter-toggle-btn,
+    body.faith-skin.light-skin .header-gear-btn {
+      border-color: rgba(0, 0, 0, 0.14);
+    }
+    body.faith-skin .header-mid-divider {
+      border-top: 1px dashed var(--header-divider-color);
+      opacity: 0.78;
+    }
+    body.faith-skin .saved-tabs-row {
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 8px;
+    }
+    body.faith-skin.light-skin .saved-tabs-row {
+      border-color: rgba(0, 0, 0, 0.1);
+    }
+
+    /* ---------------- 재생창 하단 [가사] 패널 (모바일/태블릿 공용) ---------------- */
+    .bookmark-tab.lyrics-active {
+      opacity: 1 !important;
+      box-shadow: 0 0 0 1.5px #f472b6;
+    }
+    #player-lyrics-drawer {
+      display: none;
+      flex-direction: column;
+      width: 100%;
+      margin-top: 4px;
+      border-radius: 9px;
+      background: var(--settings-modal-bg);
+      color: var(--settings-modal-fg);
+      border: 1.5px solid var(--header-border-color);
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.78);
+      overflow: hidden;
+      pointer-events: auto;
+      touch-action: pan-y;
+      --ly-font: 12.5px;
+    }
+    #player-lyrics-drawer.open { display: flex; }
+    .ly-header {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 7px;
+      background: rgba(255, 255, 255, 0.06);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+      flex-shrink: 0;
+    }
+    body.light-skin .ly-header {
+      background: rgba(0, 0, 0, 0.05);
+      border-bottom-color: rgba(0, 0, 0, 0.12);
+    }
+    .ly-title-badge {
+      font-size: 10px;
+      font-weight: 800;
+      white-space: nowrap;
+      opacity: 0.9;
+      flex-shrink: 0;
+    }
+    .ly-search-row {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .ly-query-input {
+      flex: 1;
+      min-width: 0;
+      height: 24px;
+      padding: 0 7px;
+      border-radius: 5px;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      background: rgba(0, 0, 0, 0.35);
+      color: inherit;
+      font-size: 11px;
+      outline: none;
+    }
+    body.light-skin .ly-query-input {
+      background: #ffffff;
+      border-color: rgba(0, 0, 0, 0.22);
+    }
+    .ly-icon-btn {
+      height: 24px;
+      padding: 0 6px;
+      border-radius: 5px;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      background: rgba(255, 255, 255, 0.1);
+      color: inherit;
+      font-size: 10px;
+      font-weight: 800;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    body.light-skin .ly-icon-btn {
+      background: rgba(0, 0, 0, 0.08);
+      border-color: rgba(0, 0, 0, 0.18);
+    }
+    .ly-body {
+      max-height: 185px;
+      min-height: 78px;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+      touch-action: pan-y;
+      padding: 10px 11px;
+      font-size: var(--ly-font);
+      line-height: 1.65;
+      white-space: pre-wrap;
+      word-break: keep-all;
+      user-select: text;
+      -webkit-user-select: text;
+    }
+    .ly-body::-webkit-scrollbar { width: 5px; }
+    .ly-body::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.28); border-radius: 4px; }
+    .ly-sync-line {
+      padding: 2px 5px;
+      border-radius: 5px;
+      opacity: 0.68;
+      transition: opacity 0.18s, background 0.18s, transform 0.18s;
+    }
+    .ly-sync-line.active-line {
+      opacity: 1;
+      font-weight: 800;
+      background: rgba(244, 114, 182, 0.22);
+      color: var(--header-border-color);
+    }
+    .ly-status-msg {
+      text-align: center;
+      padding: 14px 6px;
+      opacity: 0.78;
+      font-size: 11.5px;
+      line-height: 1.5;
+    }
+    .ly-edit-box {
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .ly-edit-textarea {
+      width: 100%;
+      height: 130px;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      background: rgba(0, 0, 0, 0.35);
+      color: inherit;
+      font-size: 12px;
+      line-height: 1.5;
+      resize: none;
+      outline: none;
+    }
+    body.light-skin .ly-edit-textarea {
+      background: #ffffff;
+      border-color: rgba(0, 0, 0, 0.22);
+    }
+    .ly-edit-actions { display: flex; justify-content: flex-end; gap: 6px; }
+    .ly-mini-btn {
+      padding: 4px 10px;
+      border-radius: 5px;
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      background: rgba(255, 255, 255, 0.12);
+      color: inherit;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .ly-mini-btn.primary {
+      background: #f472b6;
+      border-color: #f472b6;
+      color: #111111;
+    }
+    .ly-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 5px;
+      padding: 5px 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(0, 0, 0, 0.18);
+      flex-shrink: 0;
+    }
+    body.light-skin .ly-footer {
+      background: rgba(0, 0, 0, 0.04);
+      border-top-color: rgba(0, 0, 0, 0.12);
+    }
+    .ly-foot-btn {
+      padding: 3px 8px;
+      border-radius: 5px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.08);
+      color: inherit;
+      font-size: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    body.light-skin .ly-foot-btn {
+      background: rgba(0, 0, 0, 0.06);
+      border-color: rgba(0, 0, 0, 0.16);
+    }
+
+    body.tablet-mode #player-lyrics-drawer { --ly-font: 14.5px; border-radius: 11px; }
+    body.tablet-mode .ly-header { padding: 7px 10px; gap: 7px; }
+    body.tablet-mode .ly-title-badge { font-size: 12px; }
+    body.tablet-mode .ly-query-input { height: 30px; font-size: 13px; }
+    body.tablet-mode .ly-icon-btn { height: 30px; padding: 0 9px; font-size: 12px; }
+    body.tablet-mode .ly-body { max-height: 245px; padding: 12px 15px; line-height: 1.72; }
+    body.tablet-mode .ly-foot-btn { padding: 5px 11px; font-size: 12px; }
   </style>
 </head>
 <body>
@@ -3460,6 +3667,10 @@
   <div class="top-header">
     <div class="header-unified-box">
       <svg class="header-dash-svg" preserveAspectRatio="none"><rect id="headerDashRect" x="1.2" y="1.2" width="calc(100% - 2.4px)" height="calc(100% - 2.4px)" rx="9" ry="9" fill="none" stroke="var(--header-border-color)" stroke-width="2.2" stroke-dasharray="4 3" vector-effect="non-scaling-stroke"/></svg>
+      <div class="faith-verse-bar" id="faithVerseBar" title="터치 시 일시정지 / 재개">
+        <span class="fv-badge">✝ <span id="faithBadgeLabel">오늘의 말씀</span></span>
+        <div class="fv-marquee"><div class="fv-track" id="faithVerseTrack"></div></div>
+      </div>
       <div class="skin-deco-bar" id="skinDecoBar"><span class="skin-deco-l" id="skinDecoL"></span><span class="skin-deco-r" id="skinDecoR"></span></div>
       <div class="header-top-row">
         <div class="header-left-slot">
@@ -3578,6 +3789,9 @@
     <div class="modal-bottom-tabs">
       <div class="bottom-drag-spacer" id="bottomDragSpacer"></div>
       <div class="tab-group-right" style="gap: 4px;">
+        <div class="bookmark-tab" id="lyricsToggleTab" onclick="toggleLyricsPanel()" title="가사 보기/닫기">
+          <span>가사</span>
+        </div>
         <div class="bookmark-tab tablet-only-tab" id="tabletInfoToggleTab" onclick="toggleTabletInfoModal()" title="관련 쇼츠 창 열기/닫기">
           <span>쇼츠</span>
         </div>
@@ -3586,6 +3800,31 @@
           <span>✕</span>
           <svg class="tab-close-ear ear-r" viewBox="0 0 8 8" aria-hidden="true"><path d="M 0,0 L 8,0 L 8,8 Q 8,0 0,0 Z"/></svg>
         </div>
+      </div>
+    </div>
+
+    <div id="player-lyrics-drawer">
+      <div class="ly-header">
+        <span class="ly-title-badge" id="lyStatusBadge">🎵 가사</span>
+        <div class="ly-search-row">
+          <input type="text" id="lyQueryInput" class="ly-query-input" placeholder="곡명 · 가수 검색" autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault(); searchLyricsManual();}">
+          <button type="button" class="ly-icon-btn" onclick="searchLyricsManual()" title="가사 재검색">🔍</button>
+          <button type="button" class="ly-icon-btn" onclick="changeLyricsFontSize(-1)" title="글자 작게">가-</button>
+          <button type="button" class="ly-icon-btn" onclick="changeLyricsFontSize(1)" title="글자 크게">가+</button>
+        </div>
+      </div>
+      <div class="ly-body" id="lyBody"></div>
+      <div class="ly-edit-box" id="lyEditBox" style="display:none;">
+        <textarea id="lyEditTextarea" class="ly-edit-textarea" placeholder="가사를 붙여넣거나 직접 입력 후 저장하세요..."></textarea>
+        <div class="ly-edit-actions">
+          <button type="button" class="ly-mini-btn" onclick="cancelEditCustomLyrics()">취소</button>
+          <button type="button" class="ly-mini-btn primary" onclick="saveCustomLyricsForCurrent()">저장</button>
+        </div>
+      </div>
+      <div class="ly-footer">
+        <button type="button" class="ly-foot-btn" onclick="openEditCustomLyrics()">✎ 직접입력</button>
+        <button type="button" class="ly-foot-btn" onclick="openNaverLyricsSearch()">네이버 가사 ↗</button>
+        <button type="button" class="ly-foot-btn" onclick="closeLyricsPanel(true)">닫기</button>
       </div>
     </div>
   </div>
@@ -3677,13 +3916,56 @@
         <div class="manage-list" id="manageTabList"></div>
       </div>
 
-      <!-- 탭 1-1: 스킨 테마 변경 (20+ 확장형 레지스트리 · 모바일/태블릿 분리 저장) -->
+      <!-- 탭 1-1: 30종 스킨 테마 변경 + 절기명 변경 + 성경말씀 슬라이드 설정 -->
       <div class="settings-pane" id="settings-pane-theme">
         <div class="theme-pane-top">
           <div class="theme-pane-status">
-            <span class="theme-device-badge" id="themeDeviceBadge">📱 모바일 전용</span>
-            <span class="theme-active-name" id="themeActiveName">0. 기본 (내 색상)</span>
+            <div class="theme-status-left">
+              <span class="theme-device-badge" id="themeDeviceBadge">📱 모바일</span>
+              <span class="theme-active-name" id="themeActiveName">0. 기본 (내 색상)</span>
+            </div>
+            <button type="button" class="faith-cfg-toggle-btn" id="faithCfgToggleBtn" onclick="toggleFaithConfigDrawer()">📖 말씀·절기▾</button>
           </div>
+
+          <div class="faith-cfg-drawer" id="faithConfigDrawer">
+            <div class="fc-row">
+              <span class="fc-lbl">표시 범위</span>
+              <div class="fc-btns">
+                <button type="button" class="fc-btn" data-fshow="faith" onclick="setFaithShowMode('faith')">신앙테마만</button>
+                <button type="button" class="fc-btn" data-fshow="all" onclick="setFaithShowMode('all')">모든테마 ON</button>
+                <button type="button" class="fc-btn" data-fshow="off" onclick="setFaithShowMode('off')">끄기</button>
+              </div>
+            </div>
+            <div class="fc-row">
+              <span class="fc-lbl">말씀 / 속도</span>
+              <div class="fc-btns">
+                <button type="button" class="fc-btn" data-fvmode="default" onclick="setFaithVerseMode('default')">절기기본</button>
+                <button type="button" class="fc-btn" data-fvmode="custom" onclick="setFaithVerseMode('custom')">내 말씀</button>
+                <span style="opacity:0.4;font-size:10px;">|</span>
+                <button type="button" class="fc-btn" data-fspeed="slow" onclick="setFaithSpeed('slow')">느림</button>
+                <button type="button" class="fc-btn" data-fspeed="normal" onclick="setFaithSpeed('normal')">보통</button>
+                <button type="button" class="fc-btn" data-fspeed="fast" onclick="setFaithSpeed('fast')">빠름</button>
+              </div>
+            </div>
+            <div class="fc-row" style="flex-direction:column; align-items:stretch; gap:4px;">
+              <span class="fc-lbl">🏷 현재 테마 절기(배지) 이름 변경</span>
+              <div class="fc-input-row">
+                <input type="text" id="faithBadgeNameInput" class="fc-input" maxlength="14" placeholder="원하는 절기/배지 이름 입력" autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault(); saveCustomBadgeName();}">
+                <button type="button" class="fc-act-btn" onclick="saveCustomBadgeName()">저장</button>
+                <button type="button" class="fc-act-btn sub" onclick="resetCustomBadgeName()">복원</button>
+              </div>
+            </div>
+            <div class="fc-row" style="flex-direction:column; align-items:stretch; gap:4px;">
+              <span class="fc-lbl">📖 내 성경말씀 추가 (여러 개 저장 시 이어서 슬라이드)</span>
+              <div class="fc-input-row">
+                <input type="text" id="faithVerseInput" class="fc-input" maxlength="160" placeholder="성경 구절 입력 (예: 시편 23:1 여호와는 나의 목자시니...)" autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault(); addFaithCustomVerse();}">
+                <button type="button" class="fc-act-btn" onclick="addFaithCustomVerse()">추가</button>
+              </div>
+              <div class="fc-verses-list" id="faithVersesList"></div>
+              <div class="fc-presets" id="faithPresetBtns"></div>
+            </div>
+          </div>
+
           <div class="theme-cat-filters" id="themeCatFilters"></div>
         </div>
         <div class="theme-cards-grid" id="themeCardsGrid"></div>
@@ -3899,6 +4181,7 @@
     const THEME_STORAGE_KEY = 'mytube_theme_modules_v11';
     const SKIN_STORAGE_KEY = 'mytube_skin_v1';
     const THEME_BACKUP_STORAGE_KEY = 'mytube_theme_custom_backup_v1';
+    const FAITH_CFG_STORAGE_KEY = 'mytube_faith_cfg_v1';
     const UI_OPTS_STORAGE_KEY = 'mytube_ui_opts_v17';
     const FILTERS_STORAGE_PREFIX = 'mytube_filters_v18_';
     const BM_POS_STORAGE_PREFIX = 'mytube_bm_pos_v18_';
@@ -3945,9 +4228,10 @@
         initSavedBookmarkPos();
         if (slideBookmarkVisible) applyBookmarkPosition(dockSide);
         if (manageOverlay && manageOverlay.style.display === 'flex') renderThemeCardsGrid();
+        if (typeof updateLyricsFontUI === 'function') updateLyricsFontUI();
       } else {
         applyUiOptsToDOM();
-        applySkinToDOM();
+        if (typeof applySkinToDOM === 'function') applySkinToDOM();
         if (slideBookmarkVisible) applyBookmarkPosition(dockSide);
       }
       if (changed) {
@@ -4091,6 +4375,7 @@
     let currentSkinId = 'default';
     let currentSkinCategory = 'all';
     let customThemeBackup = null;
+    let faithConfig = { showMode: 'faith', verseMode: 'default', speed: 'normal', verses: [], badgeOverrides: {} };
     const relatedShortsCache = new Map();
     let currentShortsList = [];
     let currentShortsIdx = -1;
@@ -4298,6 +4583,20 @@
         }
       });
       s = dedupWords.join(' ').trim();
+
+      if (/[가-힣]/.test(s)) {
+        const koOnly = s
+          .replace(/\([^)]*[A-Za-z][^가-힣)]*\)/g, ' ')
+          .replace(/\[[^\]]*[A-Za-z][^가-힣\]]*\]/g, ' ')
+          .replace(/[A-Za-z]+(?:['’][A-Za-z]+)*/g, ' ')
+          .replace(/[\(\)\[\]【】《》「」<>]/g, ' ')
+          .replace(/\s+[-–—·|\/,:;~_+]+\s+/g, ' ')
+          .replace(/^\s*[-–—·|\/,:;~_+]+\s*/g, '')
+          .replace(/\s*[-–—·|\/,:;~_+]+\s*$/g, '')
+          .replace(/\s{2,}/g, ' ')
+          .trim();
+        if (/[가-힣]/.test(koOnly)) s = koOnly;
+      }
 
       return s.length >= 2 ? s : String(rawTitle || '').trim();
     }
@@ -4858,19 +5157,50 @@
 
 
     // =========================================================================
-    // 확장형 스킨 레지스트리 (추후 11~30번+ 테마 추가 시 객체 1개 + CSS만 추가!)
+    // 30종 확장형 스킨 레지스트리 (1~10 일반 + 11~20 절기 + 21~30 신앙)
     // =========================================================================
     const SKIN_CATEGORIES = [
       { id: 'all',    label: '전체' },
+      { id: 'season', label: '절기' },
+      { id: 'faith',  label: '신앙' },
       { id: 'retro',  label: '레트로' },
       { id: 'modern', label: '모던' },
       { id: 'cozy',   label: '감성' }
     ];
 
+    const FAITH_PRESET_VERSES = [
+      { tag: '+시23:1', text: '시편 23:1 · 여호와는 나의 목자시니 내게 부족함이 없으리로다' },
+      { tag: '+빌4:13', text: '빌립보서 4:13 · 내게 능력 주시는 자 안에서 내가 모든 것을 할 수 있느니라' },
+      { tag: '+요3:16', text: '요한복음 3:16 · 하나님이 세상을 이처럼 사랑하사 독생자를 주셨으니' },
+      { tag: '+잠3:5',  text: '잠언 3:5-6 · 너는 마음을 다하여 여호와를 신뢰하고 네 명철을 의지하지 말라' },
+      { tag: '+사41:10',text: '이사야 41:10 · 두려워하지 말라 내가 너와 함께 함이라' },
+      { tag: '+살전5:18',text: '데살로니가전서 5:18 · 범사에 감사하라 이것이 그리스도 예수 안에서 너희를 향하신 하나님의 뜻이니라' }
+    ];
+
+    function makeFaithSkin(cfg) {
+      return {
+        id: cfg.id, num: cfg.num, name: cfg.name, cat: cfg.cat, catLabel: cfg.catLabel,
+        desc: cfg.desc, isFaith: true, light: !!cfg.light,
+        defaultBadge: cfg.badge, defaultVerse: cfg.verse,
+        faithStyle: {
+          boxBg: cfg.boxBg, boxBorder: cfg.boxBorder,
+          barBg: cfg.barBg, badgeBg: cfg.badgeBg, badgeFg: cfg.badgeFg,
+          verseFg: cfg.verseFg, inpBd: cfg.inpBd, btnBg: cfg.btnBg
+        },
+        preview: {
+          bg: cfg.boxBg, border: cfg.colors.headerBorder,
+          inp: cfg.colors.searchBg, btn: cfg.btnBg,
+          tabBg: cfg.colors.tabsAreaBg, tabSel: cfg.colors.tabSelectedBg
+        },
+        colors: cfg.colors
+      };
+    }
+
     const SKIN_REGISTRY = [
+      // --- 1~10: 일반 (레트로 · 모던 · 감성) ---
       {
-        id: 'winamp', num: 1, name: '클래식 MP3', cat: 'retro', catLabel: '레트로',
-        desc: '메탈릭 바디 + 형광 연두 LCD',
+        id: 'winamp', num: 1, name: '클래식 MP3', cat: 'retro', catLabel: '레트로', light: false,
+        desc: '메탈릭 바디 + 형광 연두 LCD', defaultBadge: 'MYTUBE',
         tabletL: 'MYTUBE PLAYER v2.95',
         tabletR: '<span class="skin-eq-bars"><span></span><span></span><span></span><span></span></span> 128kbps',
         preview: { bg: '#2b2e38', border: '#72798f', inp: '#000000', btn: '#222630', tabBg: '#1b1f29', tabSel: '#00a832' },
@@ -4883,10 +5213,9 @@
         }
       },
       {
-        id: 'win95', num: 2, name: '윈도우 95', cat: 'retro', catLabel: '레트로',
-        desc: '정겨운 회색 3D 입체 테두리',
-        tabletL: '📁 MYTUBE_SEARCH.EXE',
-        tabletR: '[_] [□] [X]',
+        id: 'win95', num: 2, name: '윈도우 95', cat: 'retro', catLabel: '레트로', light: true,
+        desc: '정겨운 회색 3D 입체 테두리', defaultBadge: 'WIN95',
+        tabletL: '📁 MYTUBE_SEARCH.EXE', tabletR: '[_] [□] [X]',
         preview: { bg: '#c0c0c0', border: '#000080', inp: '#ffffff', btn: '#000080', tabBg: '#dfdfdf', tabSel: '#000080' },
         colors: {
           appBg: '#008080', headerBoxBg: '#c0c0c0', headerBorder: '#000080', headerDivider: '#808080',
@@ -4897,10 +5226,9 @@
         }
       },
       {
-        id: 'glass', num: 3, name: '모던 글래스', cat: 'modern', catLabel: '모던',
-        desc: '반투명 유리 질감 + 캡슐 디자인',
-        tabletL: '✨ MyTube Glass',
-        tabletR: 'HD Streaming Ready',
+        id: 'glass', num: 3, name: '모던 글래스', cat: 'modern', catLabel: '모던', light: false,
+        desc: '반투명 유리 질감 + 캡슐 디자인', defaultBadge: 'GLASS',
+        tabletL: '✨ MyTube Glass', tabletR: 'HD Streaming Ready',
         preview: { bg: 'linear-gradient(135deg,#667eea,#764ba2)', border: '#ddd6fe', inp: 'rgba(255,255,255,0.3)', btn: '#7c3aed', tabBg: 'rgba(255,255,255,0.22)', tabSel: '#ffffff' },
         colors: {
           appBg: '#1e1b4b', headerBoxBg: '#312e81', headerBorder: '#c4b5fd', headerDivider: '#8b5cf6',
@@ -4911,10 +5239,9 @@
         }
       },
       {
-        id: 'cyber', num: 4, name: '사이버펑크 네온', cat: 'modern', catLabel: '모던',
-        desc: '미래형 컷팅 + 시안/핑크 네온',
-        tabletL: '// NET_SEARCH_2077',
-        tabletR: 'STATUS: ONLINE',
+        id: 'cyber', num: 4, name: '사이버펑크 네온', cat: 'modern', catLabel: '모던', light: false,
+        desc: '미래형 컷팅 + 시안/핑크 네온', defaultBadge: 'CYBER',
+        tabletL: '// NET_SEARCH_2077', tabletR: 'STATUS: ONLINE',
         preview: { bg: '#0d0620', border: '#00f3ff', inp: '#180d36', btn: '#ff007f', tabBg: '#180d36', tabSel: '#00f3ff' },
         colors: {
           appBg: '#090514', headerBoxBg: '#110826', headerBorder: '#00f3ff', headerDivider: '#ff007f',
@@ -4925,10 +5252,9 @@
         }
       },
       {
-        id: 'neu', num: 5, name: '소프트 뉴모피즘', cat: 'modern', catLabel: '모던',
-        desc: '부드러운 엠보싱 화이트 그레이',
-        tabletL: 'MyTube Soft UI',
-        tabletR: 'Tactile Mode',
+        id: 'neu', num: 5, name: '소프트 뉴모피즘', cat: 'modern', catLabel: '모던', light: true,
+        desc: '부드러운 엠보싱 화이트 그레이', defaultBadge: 'SOFT',
+        tabletL: 'MyTube Soft UI', tabletR: 'Tactile Mode',
         preview: { bg: '#e6ebf2', border: '#cbd5e1', inp: '#dde3ec', btn: '#2563eb', tabBg: '#dfe5ef', tabSel: '#3b82f6' },
         colors: {
           appBg: '#e6ebf2', headerBoxBg: '#e6ebf2', headerBorder: '#3b82f6', headerDivider: '#94a3b8',
@@ -4939,10 +5265,9 @@
         }
       },
       {
-        id: 'wood', num: 6, name: '빈티지 원목 라디오', cat: 'cozy', catLabel: '감성',
-        desc: '따뜻한 월넛 우드 + 황동 포인트',
-        tabletL: '📻 MYTUBE ANALOG HI-FI',
-        tabletR: 'FM 104.5 MHz',
+        id: 'wood', num: 6, name: '빈티지 원목 라디오', cat: 'cozy', catLabel: '감성', light: false,
+        desc: '따뜻한 월넛 우드 + 황동 포인트', defaultBadge: '라디오',
+        tabletL: '📻 MYTUBE ANALOG HI-FI', tabletR: 'FM 104.5 MHz',
         preview: { bg: '#5a371c', border: '#d4af37', inp: '#fcf4df', btn: '#8c2d19', tabBg: '#3a210f', tabSel: '#d4af37' },
         colors: {
           appBg: '#241912', headerBoxBg: '#4b2d16', headerBorder: '#d4af37', headerDivider: '#b58d46',
@@ -4953,10 +5278,9 @@
         }
       },
       {
-        id: 'brutal', num: 7, name: '팝아트 브루탈', cat: 'modern', catLabel: '모던',
-        desc: '굵은 외곽선 + 쨍한 노랑 원색',
-        tabletL: '⚡ MYTUBE POP!',
-        tabletR: 'BOLD EDITION',
+        id: 'brutal', num: 7, name: '팝아트 브루탈', cat: 'modern', catLabel: '모던', light: true,
+        desc: '굵은 외곽선 + 쨍한 노랑 원색', defaultBadge: 'POP',
+        tabletL: '⚡ MYTUBE POP!', tabletR: 'BOLD EDITION',
         preview: { bg: '#ffd93d', border: '#111111', inp: '#ffffff', btn: '#111111', tabBg: '#ffe885', tabSel: '#ff6b6b' },
         colors: {
           appBg: '#fff5d6', headerBoxBg: '#ffd93d', headerBorder: '#111111', headerDivider: '#111111',
@@ -4967,10 +5291,9 @@
         }
       },
       {
-        id: 'dark', num: 8, name: '미니멀 다크 프로', cat: 'modern', catLabel: '모던',
-        desc: '시크한 딥블랙 + 오로라 포커스',
-        tabletL: 'MyTube Pro',
-        tabletR: 'Focus Mode',
+        id: 'dark', num: 8, name: '미니멀 다크 프로', cat: 'modern', catLabel: '모던', light: false,
+        desc: '시크한 딥블랙 + 오로라 포커스', defaultBadge: 'PRO',
+        tabletL: 'MyTube Pro', tabletR: 'Focus Mode',
         preview: { bg: '#141418', border: '#818cf8', inp: '#1e1e24', btn: '#6366f1', tabBg: '#1e1e24', tabSel: '#6366f1' },
         colors: {
           appBg: '#09090b', headerBoxBg: '#141418', headerBorder: '#818cf8', headerDivider: '#3f3f46',
@@ -4981,10 +5304,9 @@
         }
       },
       {
-        id: 'paper', num: 9, name: '따뜻한 노트 페이퍼', cat: 'cozy', catLabel: '감성',
-        desc: '눈이 편안한 줄노트 종이 감성',
-        tabletL: '✎ 오늘의 영상 기록장',
-        tabletR: 'MyTube Note',
+        id: 'paper', num: 9, name: '따뜻한 노트 페이퍼', cat: 'cozy', catLabel: '감성', light: true,
+        desc: '눈이 편안한 줄노트 종이 감성', defaultBadge: '노트',
+        tabletL: '✎ 오늘의 영상 기록장', tabletR: 'MyTube Note',
         preview: { bg: '#fdfbf7', border: '#8c7356', inp: '#ffffff', btn: '#6b533b', tabBg: '#f5efe2', tabSel: '#7a6348' },
         colors: {
           appBg: '#efe9dc', headerBoxBg: '#fdfbf7', headerBorder: '#7a6348', headerDivider: '#b5a48b',
@@ -4995,10 +5317,9 @@
         }
       },
       {
-        id: 'gameboy', num: 10, name: '8비트 게임보이', cat: 'retro', catLabel: '레트로',
-        desc: '휴대용 게임기 본체 + 올리브 액정',
-        tabletL: '★ MYTUBE-BOY',
-        tabletR: 'BATT ● 8-BIT',
+        id: 'gameboy', num: 10, name: '8비트 게임보이', cat: 'retro', catLabel: '레트로', light: false,
+        desc: '휴대용 게임기 본체 + 올리브 액정', defaultBadge: '8-BIT',
+        tabletL: '★ MYTUBE-BOY', tabletR: 'BATT ● 8-BIT',
         preview: { bg: '#d2d1c8', border: '#4f545c', inp: '#9bbc0f', btn: '#8b1d41', tabBg: '#9bbc0f', tabSel: '#0f380f' },
         colors: {
           appBg: '#232629', headerBoxBg: '#d2d1c8', headerBorder: '#0f380f', headerDivider: '#8a8a80',
@@ -5007,11 +5328,227 @@
           cardTitleBg: '#2e3326', filterBtnBg: '#373a40', filterPanelBg: '#2b2e33', historyPanelBg: '#2b2e33',
           bookmarkBg: '#8b1d41', bookmarkBorder: '#d2d1c8'
         }
-      }
+      },
+
+      // --- 11~20: 교회 절기별 테마 10종 ---
+      makeFaithSkin({
+        id: 'advent', num: 11, name: '대림절', cat: 'season', catLabel: '절기', light: false,
+        desc: '기다림의 보라 + 촛불 골드', badge: '대림절',
+        verse: '이사야 9:6 · 이는 한 아기가 우리에게 났고 한 아들을 우리에게 주신 바 되었는데 그의 이름은 기묘자라 모사라 전능하신 하나님이라',
+        boxBg: 'linear-gradient(135deg,#351854,#210e36)', boxBorder: '2px solid #d4af37',
+        barBg: 'rgba(0,0,0,0.38)', badgeBg: '#d4af37', badgeFg: '#1a0d29', verseFg: '#fde68a', inpBd: '#7c4dff', btnBg: '#b45309',
+        colors: { appBg:'#1a0d29', headerBoxBg:'#2b1345', headerBorder:'#d4af37', headerDivider:'#d4af37', searchBg:'#150824', tabsAreaBg:'#24103b', tabTextColor:'#e9d5ff', tabSelectedBg:'#d4af37', starPinColor:'#fde68a', layoutIconCol:'#d8b4fe', settingsBtnBg:'#3f2063', settingsModalBg:'#210e36', cardTitleBg:'#26123d', filterBtnBg:'#3f2063', filterPanelBg:'#210e36', historyPanelBg:'#210e36', bookmarkBg:'#7c3aed', bookmarkBorder:'#d4af37' }
+      }),
+      makeFaithSkin({
+        id: 'christmas', num: 12, name: '성탄절', cat: 'season', catLabel: '절기', light: false,
+        desc: '전나무 딥그린 + 성탄 레드 + 별빛', badge: '성탄절',
+        verse: '누가복음 2:14 · 지극히 높은 곳에서는 하나님께 영광이요 땅에서는 하나님이 기뻐하신 사람들 중에 평화로다',
+        boxBg: 'linear-gradient(135deg,#123d2c,#0c291e)', boxBorder: '2px solid #ffd86b',
+        barBg: 'rgba(139,30,45,0.68)', badgeBg: '#ffd86b', badgeFg: '#5c0e18', verseFg: '#fff8dc', inpBd: '#ffd86b', btnBg: '#b91c1c',
+        colors: { appBg:'#0a2219', headerBoxBg:'#123d2c', headerBorder:'#ffd86b', headerDivider:'#ffd86b', searchBg:'#091f16', tabsAreaBg:'#103325', tabTextColor:'#d1fae5', tabSelectedBg:'#b91c1c', starPinColor:'#ffd86b', layoutIconCol:'#a7f3d0', settingsBtnBg:'#7f1d1d', settingsModalBg:'#0e2e22', cardTitleBg:'#103325', filterBtnBg:'#7f1d1d', filterPanelBg:'#0e2e22', historyPanelBg:'#0e2e22', bookmarkBg:'#b91c1c', bookmarkBorder:'#ffd86b' }
+      }),
+      makeFaithSkin({
+        id: 'newyear', num: 13, name: '신년감사', cat: 'season', catLabel: '절기', light: false,
+        desc: '새벽 하늘 네이비 + 첫 해돋이 금빛', badge: '신년감사',
+        verse: '예레미야 29:11 · 너희를 향한 나의 생각을 내가 아나니 평안이요 재앙이 아니니라 너희에게 미래와 희망을 주는 것이니라',
+        boxBg: 'linear-gradient(180deg,#1b3966,#132747)', boxBorder: '2px solid #ffcf70',
+        barBg: 'rgba(255,207,112,0.18)', badgeBg: '#ffcf70', badgeFg: '#132747', verseFg: '#ffefc2', inpBd: '#60a5fa', btnBg: '#d97706',
+        colors: { appBg:'#0d1c33', headerBoxBg:'#173157', headerBorder:'#ffcf70', headerDivider:'#ffcf70', searchBg:'#0f203b', tabsAreaBg:'#102340', tabTextColor:'#bae6fd', tabSelectedBg:'#d97706', starPinColor:'#ffcf70', layoutIconCol:'#93c5fd', settingsBtnBg:'#21447a', settingsModalBg:'#112442', cardTitleBg:'#13294a', filterBtnBg:'#21447a', filterPanelBg:'#112442', historyPanelBg:'#112442', bookmarkBg:'#2563eb', bookmarkBorder:'#ffcf70' }
+      }),
+      makeFaithSkin({
+        id: 'lent', num: 14, name: '사순절', cat: 'season', catLabel: '절기', light: false,
+        desc: '겸손과 묵상의 재빛 보라 톤', badge: '사순절',
+        verse: '시편 51:10 · 하나님이여 내 속에 정한 마음을 창조하시고 내 안에 정직한 영을 새롭게 하소서',
+        boxBg: 'linear-gradient(180deg,#362d40,#26202e)', boxBorder: '1.5px solid #a89bb5',
+        barBg: 'rgba(0,0,0,0.3)', badgeBg: '#a89bb5', badgeFg: '#1e1924', verseFg: '#e8e0ef', inpBd: '#6e617d', btnBg: '#5b4b6b',
+        colors: { appBg:'#1e1924', headerBoxBg:'#302838', headerBorder:'#a89bb5', headerDivider:'#7a6d8a', searchBg:'#1d1824', tabsAreaBg:'#241e2b', tabTextColor:'#d6cbe0', tabSelectedBg:'#7c6990', starPinColor:'#d6cbe0', layoutIconCol:'#b9adc7', settingsBtnBg:'#41364d', settingsModalBg:'#251f2d', cardTitleBg:'#282230', filterBtnBg:'#41364d', filterPanelBg:'#251f2d', historyPanelBg:'#251f2d', bookmarkBg:'#6d5b80', bookmarkBorder:'#d6cbe0' }
+      }),
+      makeFaithSkin({
+        id: 'passion', num: 15, name: '고난주간', cat: 'season', catLabel: '절기', light: false,
+        desc: '엄숙한 크림슨 + 십자가 엔틱 골드', badge: '고난주간',
+        verse: '이사야 53:5 · 그가 찔림은 우리의 허물 때문이요 그가 상함은 우리의 죄악 때문이라 그가 채찍에 맞으므로 우리는 나음을 받았도다',
+        boxBg: 'linear-gradient(180deg,#3d1118,#240a0e)', boxBorder: '2px solid #c9974c',
+        barBg: 'rgba(0,0,0,0.44)', badgeBg: '#c9974c', badgeFg: '#240a0e', verseFg: '#f5deb3', inpBd: '#8c3340', btnBg: '#7f1d1d',
+        colors: { appBg:'#1a090c', headerBoxBg:'#330e14', headerBorder:'#c9974c', headerDivider:'#c9974c', searchBg:'#1c070b', tabsAreaBg:'#260b10', tabTextColor:'#f3d1d6', tabSelectedBg:'#b8843b', starPinColor:'#f5deb3', layoutIconCol:'#d9a8b0', settingsBtnBg:'#4d1821', settingsModalBg:'#240a0e', cardTitleBg:'#290c11', filterBtnBg:'#4d1821', filterPanelBg:'#240a0e', historyPanelBg:'#240a0e', bookmarkBg:'#7f1d1d', bookmarkBorder:'#c9974c' }
+      }),
+      makeFaithSkin({
+        id: 'easter', num: 16, name: '부활절', cat: 'season', catLabel: '절기', light: true,
+        desc: '순백 백합 아이보리 + 찬란한 금빛', badge: '부활절',
+        verse: '요한복음 11:25 · 예수께서 이르시되 나는 부활이요 생명이니 나를 믿는 자는 죽어도 살겠고',
+        boxBg: 'linear-gradient(180deg,#ffffff,#faf5e8)', boxBorder: '2px solid #d4a02c',
+        barBg: '#fdf6e3', badgeBg: '#d4a02c', badgeFg: '#ffffff', verseFg: '#6b4e12', inpBd: '#e2c67e', btnBg: '#b8860b',
+        colors: { appBg:'#f3eee2', headerBoxBg:'#faf5e8', headerBorder:'#d4a02c', headerDivider:'#d4a02c', searchBg:'#ffffff', tabsAreaBg:'#f7f0de', tabTextColor:'#5c430e', tabSelectedBg:'#d4a02c', starPinColor:'#d97706', layoutIconCol:'#8c681c', settingsBtnBg:'#f6ebd0', settingsModalBg:'#faf6eb', cardTitleBg:'#ffffff', filterBtnBg:'#f6ebd0', filterPanelBg:'#faf6eb', historyPanelBg:'#faf6eb', bookmarkBg:'#d4a02c', bookmarkBorder:'#ffffff' }
+      }),
+      makeFaithSkin({
+        id: 'pentecost', num: 17, name: '성령강림절', cat: 'season', catLabel: '절기', light: false,
+        desc: '따뜻한 불꽃 앰버 + 타오르는 금빛', badge: '오순절',
+        verse: '사도행전 1:8 · 오직 성령이 너희에게 임하시면 너희가 권능을 받고 예루살렘과 온 유대와 사마리아와 땅 끝까지 이르러 내 증인이 되리라',
+        boxBg: 'linear-gradient(135deg,#4f1a0d,#2e0e07)', boxBorder: '2px solid #fb923c',
+        barBg: 'rgba(249,115,22,0.22)', badgeBg: '#f97316', badgeFg: '#ffffff', verseFg: '#ffedd5', inpBd: '#ea580c', btnBg: '#c2410c',
+        colors: { appBg:'#240d07', headerBoxBg:'#42150a', headerBorder:'#fb923c', headerDivider:'#fb923c', searchBg:'#1f0b05', tabsAreaBg:'#361209', tabTextColor:'#fed7aa', tabSelectedBg:'#ea580c', starPinColor:'#fb923c', layoutIconCol:'#fdba74', settingsBtnBg:'#5e2112', settingsModalBg:'#2e0f07', cardTitleBg:'#331108', filterBtnBg:'#5e2112', filterPanelBg:'#2e0f07', historyPanelBg:'#2e0f07', bookmarkBg:'#ea580c', bookmarkBorder:'#fed7aa' }
+      }),
+      makeFaithSkin({
+        id: 'firstfruits', num: 18, name: '맥추감사절', cat: 'season', catLabel: '절기', light: true,
+        desc: '싱그러운 보리밭 연두 + 햇밀 골드', badge: '맥추감사',
+        verse: '시편 107:1 · 여호와께 감사하라 그는 선하시며 그 인자하심이 영원함이로다',
+        boxBg: 'linear-gradient(180deg,#f7fcf5,#e8f5e2)', boxBorder: '2px solid #4d8b31',
+        barBg: '#dff0d8', badgeBg: '#4d8b31', badgeFg: '#ffffff', verseFg: '#234716', inpBd: '#95c47f', btnBg: '#3d7524',
+        colors: { appBg:'#e4f0df', headerBoxBg:'#eff8eb', headerBorder:'#4d8b31', headerDivider:'#82b56b', searchBg:'#ffffff', tabsAreaBg:'#e2f2dc', tabTextColor:'#234716', tabSelectedBg:'#c28d24', starPinColor:'#ca8a04', layoutIconCol:'#366323', settingsBtnBg:'#d7ebd0', settingsModalBg:'#f3faf0', cardTitleBg:'#ffffff', filterBtnBg:'#d7ebd0', filterPanelBg:'#f3faf0', historyPanelBg:'#f3faf0', bookmarkBg:'#4d8b31', bookmarkBorder:'#ffffff' }
+      }),
+      makeFaithSkin({
+        id: 'thanksgiving', num: 19, name: '추수감사절', cat: 'season', catLabel: '절기', light: false,
+        desc: '풍성한 가을 단풍 + 황금 들판', badge: '추수감사',
+        verse: '데살로니가전서 5:18 · 범사에 감사하라 이것이 그리스도 예수 안에서 너희를 향하신 하나님의 뜻이니라',
+        boxBg: 'linear-gradient(135deg,#522c14,#331a0b)', boxBorder: '2px solid #e5a93c',
+        barBg: 'rgba(229,169,60,0.2)', badgeBg: '#e5a93c', badgeFg: '#26150c', verseFg: '#fef3c7', inpBd: '#d99529', btnBg: '#9a3412',
+        colors: { appBg:'#26150c', headerBoxBg:'#452410', headerBorder:'#e5a93c', headerDivider:'#e5a93c', searchBg:'#fff8eb', tabsAreaBg:'#3d200e', tabTextColor:'#fde68a', tabSelectedBg:'#d97706', starPinColor:'#fbbf24', layoutIconCol:'#f3d082', settingsBtnBg:'#5e3418', settingsModalBg:'#2e190d', cardTitleBg:'#361e10', filterBtnBg:'#5e3418', filterPanelBg:'#2e190d', historyPanelBg:'#2e190d', bookmarkBg:'#d97706', bookmarkBorder:'#fde68a' }
+      }),
+      makeFaithSkin({
+        id: 'watchnight', num: 20, name: '송구영신', cat: 'season', catLabel: '절기', light: false,
+        desc: '고요한 밤하늘 남색 + 은빛 별·촛불', badge: '송구영신',
+        verse: '시편 121:8 · 여호와께서 너의 출입을 지금부터 영원까지 지키시리로다',
+        boxBg: 'linear-gradient(180deg,#121f3d,#0a1226)', boxBorder: '1.5px solid #93c5fd',
+        barBg: 'rgba(147,197,253,0.14)', badgeBg: '#1e3a8a', badgeFg: '#dbeafe', verseFg: '#e0f2fe', inpBd: '#3b82f6', btnBg: '#1d4ed8',
+        colors: { appBg:'#080e1c', headerBoxBg:'#0e1830', headerBorder:'#93c5fd', headerDivider:'#60a5fa', searchBg:'#091021', tabsAreaBg:'#0d1730', tabTextColor:'#bfdbfe', tabSelectedBg:'#f59e0b', starPinColor:'#fde68a', layoutIconCol:'#93c5fd', settingsBtnBg:'#17284d', settingsModalBg:'#0c152b', cardTitleBg:'#0f1a33', filterBtnBg:'#17284d', filterPanelBg:'#0c152b', historyPanelBg:'#0c152b', bookmarkBg:'#1d4ed8', bookmarkBorder:'#bfdbfe' }
+      }),
+
+      // --- 21~30: 신앙 · 성경 모티프 테마 10종 ---
+      makeFaithSkin({
+        id: 'bible', num: 21, name: '가죽 성경책', cat: 'faith', catLabel: '신앙', light: false,
+        desc: '버건디 가죽 스티치 + 금박 테두리', badge: '성경말씀',
+        verse: '시편 119:105 · 주의 말씀은 내 발에 등이요 내 길에 빛이니이다',
+        boxBg: 'linear-gradient(180deg,#4a201d,#301311)', boxBorder: '2px dashed #e6c26e',
+        barBg: 'rgba(0,0,0,0.34)', badgeBg: '#e6c26e', badgeFg: '#301311', verseFg: '#fff5d6', inpBd: '#c9a24b', btnBg: '#7c2d12',
+        colors: { appBg:'#21100f', headerBoxBg:'#3d1a17', headerBorder:'#e6c26e', headerDivider:'#e6c26e', searchBg:'#fdf9ef', tabsAreaBg:'#381715', tabTextColor:'#f5deb3', tabSelectedBg:'#c9a24b', starPinColor:'#f5deb3', layoutIconCol:'#e6c26e', settingsBtnBg:'#592723', settingsModalBg:'#2b1311', cardTitleBg:'#331715', filterBtnBg:'#592723', filterPanelBg:'#2b1311', historyPanelBg:'#2b1311', bookmarkBg:'#991b1b', bookmarkBorder:'#e6c26e' }
+      }),
+      makeFaithSkin({
+        id: 'stained', num: 22, name: '스테인드글라스', cat: 'faith', catLabel: '신앙', light: false,
+        desc: '대성당 보석빛(코발트·루비·골드)', badge: '빛의성전',
+        verse: '요한복음 8:12 · 나는 세상의 빛이니 나를 따르는 자는 어둠에 다니지 아니하고 생명의 빛을 얻으리라',
+        boxBg: 'linear-gradient(125deg,#1e3a8a 0%,#6b21a8 38%,#9f1239 72%,#b45309 100%)', boxBorder: '2.5px solid #fbbf24',
+        barBg: 'rgba(10,12,24,0.58)', badgeBg: '#fbbf24', badgeFg: '#111111', verseFg: '#ffffff', inpBd: 'rgba(255,255,255,0.45)', btnBg: '#1e1b4b',
+        colors: { appBg:'#101324', headerBoxBg:'#1e2240', headerBorder:'#fbbf24', headerDivider:'#fbbf24', searchBg:'#131730', tabsAreaBg:'#191d38', tabTextColor:'#fef3c7', tabSelectedBg:'#fbbf24', starPinColor:'#fbbf24', layoutIconCol:'#fde68a', settingsBtnBg:'#2c2654', settingsModalBg:'#14172b', cardTitleBg:'#181c33', filterBtnBg:'#2c2654', filterPanelBg:'#14172b', historyPanelBg:'#14172b', bookmarkBg:'#7e22ce', bookmarkBorder:'#fbbf24' }
+      }),
+      makeFaithSkin({
+        id: 'galilee', num: 23, name: '갈릴리 호수', cat: 'faith', catLabel: '신앙', light: false,
+        desc: '잔잔한 호수 블루 + 평안의 물결', badge: '갈릴리',
+        verse: '마태복음 11:28 · 수고하고 무거운 짐 진 자들아 다 내게로 오라 내가 너희를 쉬게 하리라',
+        boxBg: 'linear-gradient(180deg,#163e63,#0f2b47)', boxBorder: '1.5px solid #62b0e8',
+        barBg: 'rgba(98,176,232,0.18)', badgeBg: '#38bdf8', badgeFg: '#082f49', verseFg: '#e0f2fe', inpBd: '#38bdf8', btnBg: '#0284c7',
+        colors: { appBg:'#0c2033', headerBoxBg:'#133657', headerBorder:'#62b0e8', headerDivider:'#62b0e8', searchBg:'#0b2238', tabsAreaBg:'#10314f', tabTextColor:'#bae6fd', tabSelectedBg:'#0ea5e9', starPinColor:'#7dd3fc', layoutIconCol:'#7dd3fc', settingsBtnBg:'#1a4973', settingsModalBg:'#0f2942', cardTitleBg:'#12304d', filterBtnBg:'#1a4973', filterPanelBg:'#0f2942', historyPanelBg:'#0f2942', bookmarkBg:'#0284c7', bookmarkBorder:'#bae6fd' }
+      }),
+      makeFaithSkin({
+        id: 'pastures', num: 24, name: '푸른 초장', cat: 'faith', catLabel: '신앙', light: true,
+        desc: '눈이 편안한 시편 23편 목초지', badge: '푸른초장',
+        verse: '시편 23:1-2 · 여호와는 나의 목자시니 내게 부족함이 없으리로다 그가 나를 푸른 풀밭에 누이시며 쉴 만한 물 가로 인도하시는도다',
+        boxBg: 'linear-gradient(180deg,#f7fcf6,#e8f5e6)', boxBorder: '2px solid #2f6b3c',
+        barBg: '#d8eed6', badgeBg: '#2f6b3c', badgeFg: '#ffffff', verseFg: '#1b4223', inpBd: '#7ab887', btnBg: '#2f6b3c',
+        colors: { appBg:'#e6f2e4', headerBoxBg:'#eff9ee', headerBorder:'#2f6b3c', headerDivider:'#6da879', searchBg:'#ffffff', tabsAreaBg:'#deefdc', tabTextColor:'#1b4223', tabSelectedBg:'#2f6b3c', starPinColor:'#15803d', layoutIconCol:'#2f6b3c', settingsBtnBg:'#d4ebd1', settingsModalBg:'#f4fbf3', cardTitleBg:'#ffffff', filterBtnBg:'#d4ebd1', filterPanelBg:'#f4fbf3', historyPanelBg:'#f4fbf3', bookmarkBg:'#2f6b3c', bookmarkBorder:'#ffffff' }
+      }),
+      makeFaithSkin({
+        id: 'waters', num: 25, name: '쉴 만한 물가', cat: 'faith', catLabel: '신앙', light: true,
+        desc: '평온한 아쿠아 민트 + 고요한 안식', badge: '안식',
+        verse: '시편 23:3 · 내 영혼을 소생시키시고 자기 이름을 위하여 의의 길로 인도하시는도다',
+        boxBg: 'linear-gradient(180deg,#f4fbfc,#e3f4f6)', boxBorder: '2px solid #1d6b7a',
+        barBg: '#d3edf0', badgeBg: '#1d6b7a', badgeFg: '#ffffff', verseFg: '#10404a', inpBd: '#6cb5c2', btnBg: '#155e75',
+        colors: { appBg:'#e2f2f4', headerBoxBg:'#ebf8fa', headerBorder:'#1d6b7a', headerDivider:'#6cb5c2', searchBg:'#ffffff', tabsAreaBg:'#d9f0f3', tabTextColor:'#10404a', tabSelectedBg:'#0e7490', starPinColor:'#0891b2', layoutIconCol:'#1d6b7a', settingsBtnBg:'#cfe9ed', settingsModalBg:'#f2fafb', cardTitleBg:'#ffffff', filterBtnBg:'#cfe9ed', filterPanelBg:'#f2fafb', historyPanelBg:'#f2fafb', bookmarkBg:'#0e7490', bookmarkBorder:'#ffffff' }
+      }),
+      makeFaithSkin({
+        id: 'cloud', num: 26, name: '광야의 구름기둥', cat: 'faith', catLabel: '신앙', light: true,
+        desc: '따뜻한 사막 모래빛 + 테라코타', badge: '구름기둥',
+        verse: '출애굽기 13:21 · 여호와께서 그들 앞에서 가시며 낮에는 구름 기둥으로 그들의 길을 인도하시고 밤에는 불 기둥을 그들에게 비추사',
+        boxBg: 'linear-gradient(180deg,#fbf6ec,#f0e4cc)', boxBorder: '2px solid #9c5b34',
+        barBg: '#e8d6b7', badgeBg: '#9c5b34', badgeFg: '#ffffff', verseFg: '#4d2a15', inpBd: '#cca67e', btnBg: '#8c4a27',
+        colors: { appBg:'#efe4cf', headerBoxBg:'#f6edd9', headerBorder:'#9c5b34', headerDivider:'#b58c63', searchBg:'#ffffff', tabsAreaBg:'#ebdac0', tabTextColor:'#4d2a15', tabSelectedBg:'#9c5b34', starPinColor:'#c2410c', layoutIconCol:'#7c4626', settingsBtnBg:'#e6d2b3', settingsModalBg:'#faf4e8', cardTitleBg:'#ffffff', filterBtnBg:'#e6d2b3', filterPanelBg:'#faf4e8', historyPanelBg:'#faf4e8', bookmarkBg:'#9c5b34', bookmarkBorder:'#ffffff' }
+      }),
+      makeFaithSkin({
+        id: 'dawn', num: 27, name: '감람산 새벽기도', cat: 'faith', catLabel: '신앙', light: false,
+        desc: '새벽 여명 보라 + 은은한 복숭아빛', badge: '새벽기도',
+        verse: '마가복음 1:35 · 새벽 아직도 밝기 전에 예수께서 일어나 나가 한적한 곳으로 가사 거기서 기도하시더니',
+        boxBg: 'linear-gradient(135deg,#252d54 0%,#4f3b61 65%,#7a4f66 100%)', boxBorder: '1.5px solid #f4b89a',
+        barBg: 'rgba(15,18,36,0.44)', badgeBg: '#f4b89a', badgeFg: '#251a2e', verseFg: '#ffece0', inpBd: 'rgba(244,184,154,0.6)', btnBg: '#9d4edd',
+        colors: { appBg:'#171a30', headerBoxBg:'#2d2c4f', headerBorder:'#f4b89a', headerDivider:'#f4b89a', searchBg:'#1a1d36', tabsAreaBg:'#242342', tabTextColor:'#ffd8c2', tabSelectedBg:'#f4b89a', starPinColor:'#f4b89a', layoutIconCol:'#f4b89a', settingsBtnBg:'#3b3154', settingsModalBg:'#1e2038', cardTitleBg:'#232542', filterBtnBg:'#3b3154', filterPanelBg:'#1e2038', historyPanelBg:'#1e2038', bookmarkBg:'#7e4a6b', bookmarkBorder:'#f4b89a' }
+      }),
+      makeFaithSkin({
+        id: 'praise', num: 28, name: '찬양과 경배', cat: 'faith', catLabel: '신앙', light: false,
+        desc: '예배당 딥 인디고 + 금빛 스포트라이트', badge: '찬양경배',
+        verse: '시편 150:6 · 호흡이 있는 자마다 여호와를 찬양할지어다 할렐루야',
+        boxBg: 'radial-gradient(circle at top center,#3b2f6e,#181533 75%)', boxBorder: '1.5px solid #facc15',
+        barBg: 'rgba(250,204,21,0.16)', badgeBg: '#facc15', badgeFg: '#181533', verseFg: '#fef08a', inpBd: '#6366f1', btnBg: '#7c3aed',
+        colors: { appBg:'#110f24', headerBoxBg:'#1d193d', headerBorder:'#facc15', headerDivider:'#facc15', searchBg:'#121029', tabsAreaBg:'#1a1738', tabTextColor:'#e0e7ff', tabSelectedBg:'#eab308', starPinColor:'#facc15', layoutIconCol:'#c7d2fe', settingsBtnBg:'#272252', settingsModalBg:'#16132e', cardTitleBg:'#191636', filterBtnBg:'#272252', filterPanelBg:'#16132e', historyPanelBg:'#16132e', bookmarkBg:'#6d28d9', bookmarkBorder:'#facc15' }
+      }),
+      makeFaithSkin({
+        id: 'shepherd', num: 29, name: '선한 목자', cat: 'faith', catLabel: '신앙', light: true,
+        desc: '포근한 양털 크림 + 따뜻한 카라멜', badge: '선한목자',
+        verse: '요한복음 10:11 · 나는 선한 목자라 선한 목자는 양들을 위하여 목숨을 버리거니와',
+        boxBg: 'linear-gradient(180deg,#fffdf9,#f7f0e4)', boxBorder: '2px solid #8a6240',
+        barBg: '#efe5d5', badgeBg: '#8a6240', badgeFg: '#ffffff', verseFg: '#4a3320', inpBd: '#cbb296', btnBg: '#785233',
+        colors: { appBg:'#f4efe6', headerBoxBg:'#faf5ec', headerBorder:'#8a6240', headerDivider:'#bfa386', searchBg:'#ffffff', tabsAreaBg:'#f2e8d9', tabTextColor:'#4a3320', tabSelectedBg:'#8a6240', starPinColor:'#b45309', layoutIconCol:'#6e4c30', settingsBtnBg:'#ebe0ce', settingsModalBg:'#fcf8f2', cardTitleBg:'#ffffff', filterBtnBg:'#ebe0ce', filterPanelBg:'#fcf8f2', historyPanelBg:'#fcf8f2', bookmarkBg:'#8a6240', bookmarkBorder:'#ffffff' }
+      }),
+      makeFaithSkin({
+        id: 'pearly', num: 30, name: '천국의 진주문', cat: 'faith', catLabel: '신앙', light: true,
+        desc: '영롱한 진주 화이트 + 샴페인 골드', badge: '진주문',
+        verse: '요한계시록 21:4 · 모든 눈물을 그 눈에서 닦아 주시니 다시는 사망이 없고 애통하는 것이나 곡하는 것이나 아픈 것이 다시 있지 아니하리니',
+        boxBg: 'linear-gradient(135deg,#ffffff 0%,#f5f2fb 55%,#fdf8ec 100%)', boxBorder: '2px solid #c9a44c',
+        barBg: 'rgba(201,164,76,0.16)', badgeBg: '#c9a44c', badgeFg: '#ffffff', verseFg: '#5e4a1b', inpBd: '#dcd3e8', btnBg: '#8c6d23',
+        colors: { appBg:'#eef0f7', headerBoxBg:'#f7f5fc', headerBorder:'#c9a44c', headerDivider:'#d8be7a', searchBg:'#ffffff', tabsAreaBg:'#f7f4fb', tabTextColor:'#4a3f5c', tabSelectedBg:'#c9a44c', starPinColor:'#b45309', layoutIconCol:'#6d5d85', settingsBtnBg:'#f2eef9', settingsModalBg:'#faf9fd', cardTitleBg:'#ffffff', filterBtnBg:'#f2eef9', filterPanelBg:'#faf9fd', historyPanelBg:'#faf9fd', bookmarkBg:'#c9a44c', bookmarkBorder:'#ffffff' }
+      })
     ];
+
+    function getDefaultFaithConfig() {
+      return {
+        showMode: 'faith',   // 'faith' (신앙테마만) | 'all' (모든테마 ON) | 'off' (끄기)
+        verseMode: 'default',// 'default' (절기 기본) | 'custom' (내 저장 말씀)
+        speed: 'normal',     // 'slow' | 'normal' | 'fast'
+        verses: [],
+        badgeOverrides: {}   // { [skinId]: '사용자 지정 절기/배지 이름' }
+      };
+    }
 
     function getSkinEntryById(skinId) {
       return SKIN_REGISTRY.find(s => s.id === skinId) || null;
+    }
+
+    function getEffectiveBadgeName(skinId) {
+      const id = skinId || currentSkinId || 'default';
+      if (faithConfig && faithConfig.badgeOverrides && faithConfig.badgeOverrides[id]) {
+        return String(faithConfig.badgeOverrides[id]).trim();
+      }
+      const entry = getSkinEntryById(id);
+      if (entry && entry.defaultBadge) return entry.defaultBadge;
+      return '오늘의 말씀';
+    }
+
+    function applyFaithVerseBarToDOM() {
+      const entry = getSkinEntryById(currentSkinId);
+      const isFaithTheme = !!(entry && entry.isFaith);
+      const showMode = (faithConfig && faithConfig.showMode) || 'faith';
+      const shouldShow = (showMode === 'all') || (showMode === 'faith' && isFaithTheme);
+
+      document.body.classList.toggle('faith-bar-on', shouldShow);
+
+      const speedMap = { slow: '28s', normal: '18s', fast: '10.5s' };
+      document.documentElement.style.setProperty('--faith-verse-dur', speedMap[faithConfig.speed] || '18s');
+
+      const badgeLbl = document.getElementById('faithBadgeLabel');
+      const trackEl = document.getElementById('faithVerseTrack');
+      if (badgeLbl) badgeLbl.textContent = getEffectiveBadgeName(currentSkinId);
+
+      if (trackEl) {
+        let verseStr = '';
+        const userVerses = Array.isArray(faithConfig.verses) ? faithConfig.verses.filter(Boolean) : [];
+        if (faithConfig.verseMode === 'custom' && userVerses.length > 0) {
+          verseStr = userVerses.join('   ✦   ');
+        } else if (entry && entry.defaultVerse) {
+          verseStr = entry.defaultVerse;
+        } else if (userVerses.length > 0) {
+          verseStr = userVerses.join('   ✦   ');
+        } else {
+          verseStr = FAITH_PRESET_VERSES[0].text;
+        }
+        const safeEsc = verseStr.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        trackEl.innerHTML = '<span class="fv-text">' + safeEsc + '</span><span class="fv-text">' + safeEsc + '</span>';
+      }
     }
 
     function applySkinToDOM() {
@@ -5019,10 +5556,28 @@
       const safeId = entry ? entry.id : 'default';
       currentSkinId = safeId;
       document.body.setAttribute('data-skin', safeId);
+      document.body.classList.toggle('faith-skin', !!(entry && entry.isFaith));
+      document.body.classList.toggle('light-skin', !!(entry && entry.light));
+
+      const root = document.documentElement;
+      const fs = entry && entry.faithStyle;
+      if (fs) {
+        root.style.setProperty('--faith-box-bg', fs.boxBg);
+        root.style.setProperty('--faith-box-border', fs.boxBorder);
+        root.style.setProperty('--faith-bar-bg', fs.barBg);
+        root.style.setProperty('--faith-badge-bg', fs.badgeBg);
+        root.style.setProperty('--faith-badge-fg', fs.badgeFg);
+        root.style.setProperty('--faith-verse-fg', fs.verseFg);
+        root.style.setProperty('--faith-inp-bd', fs.inpBd);
+        root.style.setProperty('--faith-btn-bg', fs.btnBg);
+      } else {
+        ['--faith-box-bg','--faith-box-border','--faith-bar-bg','--faith-badge-bg','--faith-badge-fg','--faith-verse-fg','--faith-inp-bd','--faith-btn-bg']
+          .forEach(v => root.style.removeProperty(v));
+      }
 
       const decoL = document.getElementById('skinDecoL');
       const decoR = document.getElementById('skinDecoR');
-      if (entry) {
+      if (entry && !entry.isFaith) {
         if (decoL) decoL.textContent = entry.tabletL || ('myTube · ' + entry.name);
         if (decoR) decoR.innerHTML = entry.tabletR || '';
       } else {
@@ -5030,10 +5585,19 @@
         if (decoR) decoR.innerHTML = '';
       }
 
+      applyFaithVerseBarToDOM();
+
       const devBadge = document.getElementById('themeDeviceBadge');
       const actName = document.getElementById('themeActiveName');
-      if (devBadge) devBadge.textContent = isTabletMode ? '📟 태블릿 전용' : '📱 모바일 전용';
-      if (actName) actName.textContent = entry ? (entry.num + '. ' + entry.name) : '0. 기본 (내 색상)';
+      if (devBadge) devBadge.textContent = isTabletMode ? '📟 태블릿' : '📱 모바일';
+      if (actName) {
+        if (entry) {
+          const customB = faithConfig && faithConfig.badgeOverrides && faithConfig.badgeOverrides[entry.id];
+          actName.textContent = entry.num + '. ' + (customB ? customB : entry.name);
+        } else {
+          actName.textContent = '0. 기본 (내 색상)';
+        }
+      }
     }
 
     function persistSkinId(saveToCloud = true) {
@@ -5052,6 +5616,34 @@
         else localStorage.removeItem(key);
       } catch (e) {}
       if (saveToCloud) saveUserProfileDocToCloud();
+    }
+
+    function persistFaithConfig(saveToCloud = true) {
+      if (!currentUser) return;
+      try {
+        localStorage.setItem(FAITH_CFG_STORAGE_KEY + '_' + getUid(), JSON.stringify(faithConfig));
+      } catch (e) {}
+      if (saveToCloud) saveUserProfileDocToCloud();
+    }
+
+    function initSavedFaithConfig() {
+      faithConfig = getDefaultFaithConfig();
+      if (currentUser) {
+        try {
+          const raw = localStorage.getItem(FAITH_CFG_STORAGE_KEY + '_' + getUid());
+          if (raw) {
+            const p = JSON.parse(raw);
+            if (p && typeof p === 'object') {
+              if (['faith', 'all', 'off'].includes(p.showMode)) faithConfig.showMode = p.showMode;
+              if (['default', 'custom'].includes(p.verseMode)) faithConfig.verseMode = p.verseMode;
+              if (['slow', 'normal', 'fast'].includes(p.speed)) faithConfig.speed = p.speed;
+              if (Array.isArray(p.verses)) faithConfig.verses = p.verses.map(v => String(v || '').trim()).filter(Boolean).slice(0, 15);
+              if (p.badgeOverrides && typeof p.badgeOverrides === 'object') faithConfig.badgeOverrides = { ...p.badgeOverrides };
+            }
+          }
+        } catch (e) {}
+      }
+      applyFaithVerseBarToDOM();
     }
 
     function selectAppSkin(skinId, saveToCloud = true) {
@@ -5089,6 +5681,149 @@
       persistThemeColors(false);
       persistSkinId(saveToCloud);
       renderThemeCardsGrid();
+      renderFaithConfigUI();
+    }
+
+    function toggleFaithConfigDrawer() {
+      const dr = document.getElementById('faithConfigDrawer');
+      const btn = document.getElementById('faithCfgToggleBtn');
+      if (!dr) return;
+      const open = dr.classList.toggle('open');
+      if (btn) btn.classList.toggle('open', open);
+      if (open) renderFaithConfigUI();
+    }
+
+    function setFaithShowMode(mode) {
+      if (!['faith', 'all', 'off'].includes(mode)) return;
+      faithConfig.showMode = mode;
+      applyFaithVerseBarToDOM();
+      persistFaithConfig(true);
+      renderFaithConfigUI();
+    }
+
+    function setFaithVerseMode(mode) {
+      if (!['default', 'custom'].includes(mode)) return;
+      faithConfig.verseMode = mode;
+      applyFaithVerseBarToDOM();
+      persistFaithConfig(true);
+      renderFaithConfigUI();
+    }
+
+    function setFaithSpeed(sp) {
+      if (!['slow', 'normal', 'fast'].includes(sp)) return;
+      faithConfig.speed = sp;
+      applyFaithVerseBarToDOM();
+      persistFaithConfig(true);
+      renderFaithConfigUI();
+    }
+
+    function saveCustomBadgeName() {
+      const inp = document.getElementById('faithBadgeNameInput');
+      if (!inp) return;
+      const val = inp.value.trim().slice(0, 14);
+      if (!faithConfig.badgeOverrides) faithConfig.badgeOverrides = {};
+      if (val) {
+        faithConfig.badgeOverrides[currentSkinId || 'default'] = val;
+      } else {
+        delete faithConfig.badgeOverrides[currentSkinId || 'default'];
+      }
+      applySkinToDOM();
+      persistFaithConfig(true);
+      renderThemeCardsGrid();
+      renderFaithConfigUI();
+    }
+
+    function resetCustomBadgeName() {
+      if (faithConfig.badgeOverrides) {
+        delete faithConfig.badgeOverrides[currentSkinId || 'default'];
+      }
+      applySkinToDOM();
+      persistFaithConfig(true);
+      renderThemeCardsGrid();
+      renderFaithConfigUI();
+    }
+
+    function addFaithCustomVerse(presetText) {
+      const inp = document.getElementById('faithVerseInput');
+      const raw = typeof presetText === 'string' ? presetText : (inp ? inp.value : '');
+      const val = String(raw || '').trim().slice(0, 160);
+      if (!val) return;
+      if (!Array.isArray(faithConfig.verses)) faithConfig.verses = [];
+      if (!faithConfig.verses.includes(val)) {
+        faithConfig.verses.unshift(val);
+        faithConfig.verses = faithConfig.verses.slice(0, 15);
+      }
+      faithConfig.verseMode = 'custom';
+      if (inp && typeof presetText !== 'string') inp.value = '';
+      applyFaithVerseBarToDOM();
+      persistFaithConfig(true);
+      renderFaithConfigUI();
+    }
+
+    function removeFaithCustomVerse(idx) {
+      if (!Array.isArray(faithConfig.verses)) return;
+      faithConfig.verses.splice(idx, 1);
+      applyFaithVerseBarToDOM();
+      persistFaithConfig(true);
+      renderFaithConfigUI();
+    }
+
+    function renderFaithConfigUI() {
+      document.querySelectorAll('.fc-btn[data-fshow]').forEach(b => {
+        b.classList.toggle('active', b.getAttribute('data-fshow') === faithConfig.showMode);
+      });
+      document.querySelectorAll('.fc-btn[data-fvmode]').forEach(b => {
+        b.classList.toggle('active', b.getAttribute('data-fvmode') === faithConfig.verseMode);
+      });
+      document.querySelectorAll('.fc-btn[data-fspeed]').forEach(b => {
+        b.classList.toggle('active', b.getAttribute('data-fspeed') === faithConfig.speed);
+      });
+
+      const badgeInp = document.getElementById('faithBadgeNameInput');
+      if (badgeInp && document.activeElement !== badgeInp) {
+        badgeInp.value = (faithConfig.badgeOverrides && faithConfig.badgeOverrides[currentSkinId || 'default']) || '';
+        const entry = getSkinEntryById(currentSkinId);
+        badgeInp.placeholder = '현재 기본: ' + ((entry && entry.defaultBadge) || '오늘의 말씀');
+      }
+
+      const listEl = document.getElementById('faithVersesList');
+      if (listEl) {
+        listEl.innerHTML = '';
+        const verses = Array.isArray(faithConfig.verses) ? faithConfig.verses : [];
+        if (verses.length === 0) {
+          listEl.innerHTML = '<div style="font-size:10px;opacity:0.65;padding:2px 4px;">저장된 내 말씀이 없습니다 (비어 있으면 절기 기본 말씀이 흐릅니다)</div>';
+        } else {
+          verses.forEach((v, idx) => {
+            const row = document.createElement('div');
+            row.className = 'fc-verse-item';
+            const txt = document.createElement('span');
+            txt.className = 'fc-verse-txt';
+            txt.textContent = '✝ ' + v;
+            txt.title = v;
+            const del = document.createElement('button');
+            del.type = 'button';
+            del.className = 'fc-verse-del';
+            del.textContent = '✕';
+            del.onclick = () => removeFaithCustomVerse(idx);
+            row.appendChild(txt);
+            row.appendChild(del);
+            listEl.appendChild(row);
+          });
+        }
+      }
+
+      const preBox = document.getElementById('faithPresetBtns');
+      if (preBox && preBox.childElementCount === 0) {
+        FAITH_PRESET_VERSES.forEach(p => {
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'fc-preset-btn';
+          b.textContent = p.tag;
+          b.title = p.text;
+          b.onclick = () => addFaithCustomVerse(p.text);
+          preBox.appendChild(b);
+        });
+      }
     }
 
     function setSkinCategoryFilter(catId) {
@@ -5098,6 +5833,7 @@
 
     function renderThemeCardsGrid() {
       applySkinToDOM();
+      renderFaithConfigUI();
       const catBox = document.getElementById('themeCatFilters');
       const grid = document.getElementById('themeCardsGrid');
       if (!grid) return;
@@ -5146,7 +5882,8 @@
         info.className = 'theme-card-info';
         const title = document.createElement('span');
         title.className = 'theme-card-title';
-        title.textContent = isDefault ? '0. 기본 모드' : (item.num + '. ' + item.name);
+        const customOverride = !isDefault && faithConfig && faithConfig.badgeOverrides && faithConfig.badgeOverrides[item.id];
+        title.textContent = isDefault ? '0. 기본 모드' : (item.num + '. ' + (customOverride || item.name));
         const tag = document.createElement('span');
         tag.className = 'theme-card-tag';
         tag.textContent = item.catLabel;
@@ -5186,6 +5923,348 @@
       grid.innerHTML = '';
       grid.appendChild(frag);
     }
+
+    // =========================================================================
+    // 모바일 · 태블릿 재생창 하단 [가사] 하이브리드 엔진
+    // =========================================================================
+    const LYRICS_CUSTOM_PREFIX = 'mytube_lyrics_custom_v1_';
+    const lyricsMemoryCache = new Map();
+    let lyricsPanelOpen = false;
+    let lyricsFetchSeq = 0;
+    let currentSyncedLines = [];
+    let activeSyncedIdx = -1;
+    let currentPlainLyricsText = '';
+    let lyricsFontStep = 0; // -2 ~ +4
+
+    function cleanLyricsSearchQuery(rawTitle) {
+      let q = String(rawTitle || '')
+        .replace(/\[[^\]]*\]|\([^)]*\)|【[^】]*】|《[^》]*》/g, ' ')
+        .replace(/\b(official|m\/v|mv|lyrics|lyric|audio|hd|4k|live|ver\.?|version|cover|full|mr|inst|ccm)\b/gi, ' ')
+        .replace(/(가사|자막|모음|연속듣기|1시간|노래방|풀버전|공식|뮤직비디오|라이브|반주|찬양)/g, ' ')
+        .replace(/[★☆♥♡♪♫♬|\/·•~_]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+      return q.slice(0, 60) || simplifyTitle(rawTitle || '');
+    }
+
+    function parseLrcText(lrc) {
+      const out = [];
+      const lines = String(lrc || '').split(/\r?\n/);
+      const re = /\[(\d{1,2}):(\d{2})(?:\.(\d{1,3}))?\]/g;
+      lines.forEach(line => {
+        const times = [];
+        let m;
+        re.lastIndex = 0;
+        while ((m = re.exec(line)) !== null) {
+          const min = parseInt(m[1], 10);
+          const sec = parseInt(m[2], 10);
+          const ms = m[3] ? parseInt(m[3].padEnd(3, '0'), 10) : 0;
+          times.push(min * 60 + sec + ms / 1000);
+        }
+        const text = line.replace(re, '').trim();
+        if (times.length > 0 && text) {
+          times.forEach(t => out.push({ time: t, text }));
+        }
+      });
+      out.sort((a, b) => a.time - b.time);
+      return out;
+    }
+
+    function parseVttToPlain(vtt) {
+      const lines = String(vtt || '').split(/\r?\n/);
+      const out = [];
+      let prev = '';
+      for (const raw of lines) {
+        const s = raw.replace(/<[^>]+>/g, '').trim();
+        if (!s || /^WEBVTT/i.test(s) || /^NOTE/i.test(s) || /^\d+$/.test(s) || /-->/.test(s)) continue;
+        if (s !== prev) {
+          out.push(s);
+          prev = s;
+        }
+      }
+      return out.join('\n');
+    }
+
+    function extractLyricsFromDescription(desc) {
+      const clean = String(desc || '')
+        .replace(/<br\s*\/?>/gi, '\n')
+        .replace(/<[^>]+>/g, '')
+        .replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+      const lines = clean.split(/\r?\n/)
+        .map(l => l.trim())
+        .filter(l => l && !/^https?:\/\//i.test(l) && !/^#/.test(l) && !/(구독|좋아요|알림|인스타|유튜브|copyright|문의|이메일)/i.test(l));
+      if (lines.length < 4) return '';
+      return lines.slice(0, 120).join('\n');
+    }
+
+    function updateLyricsFontUI() {
+      const dr = document.getElementById('player-lyrics-drawer');
+      if (!dr) return;
+      const base = isTabletMode ? 14.5 : 12.5;
+      const px = Math.max(10.5, Math.min(22, base + lyricsFontStep * 1.5));
+      dr.style.setProperty('--ly-font', px + 'px');
+    }
+
+    function changeLyricsFontSize(delta) {
+      lyricsFontStep = Math.max(-2, Math.min(5, lyricsFontStep + delta));
+      updateLyricsFontUI();
+    }
+
+    function renderLyricsResult(res) {
+      const bodyEl = document.getElementById('lyBody');
+      const badgeEl = document.getElementById('lyStatusBadge');
+      const editBox = document.getElementById('lyEditBox');
+      if (editBox) editBox.style.display = 'none';
+      if (!bodyEl) return;
+      bodyEl.style.display = 'block';
+      currentSyncedLines = [];
+      activeSyncedIdx = -1;
+      currentPlainLyricsText = '';
+
+      if (!res || (!res.plain && (!res.synced || res.synced.length === 0))) {
+        if (badgeEl) badgeEl.textContent = '🎵 가사';
+        bodyEl.innerHTML = '<div class="ly-status-msg">자동으로 가사를 찾지 못했습니다.<br>상단 검색창에 <b>곡명만 간단히</b> 입력해 🔍 재검색하거나<br>아래 <b>[네이버 가사]</b> · <b>[✎ 직접입력]</b>을 이용해 보세요.</div>';
+        return;
+      }
+
+      if (badgeEl) badgeEl.textContent = res.sourceLabel || '🎵 가사';
+      currentPlainLyricsText = res.plain || (res.synced ? res.synced.map(x => x.text).join('\n') : '');
+
+      if (Array.isArray(res.synced) && res.synced.length > 0) {
+        currentSyncedLines = res.synced;
+        bodyEl.innerHTML = '';
+        const frag = document.createDocumentFragment();
+        res.synced.forEach((line, i) => {
+          const div = document.createElement('div');
+          div.className = 'ly-sync-line';
+          div.dataset.lidx = String(i);
+          div.textContent = line.text;
+          frag.appendChild(div);
+        });
+        bodyEl.appendChild(frag);
+        syncLyricsHighlight(lastKnownPlaySec);
+      } else {
+        bodyEl.textContent = currentPlainLyricsText;
+      }
+      bodyEl.scrollTop = 0;
+    }
+
+    function syncLyricsHighlight(sec) {
+      if (!lyricsPanelOpen || currentSyncedLines.length === 0) return;
+      const t = Number(sec || 0);
+      let idx = -1;
+      for (let i = 0; i < currentSyncedLines.length; i++) {
+        if (currentSyncedLines[i].time <= t + 0.35) idx = i;
+        else break;
+      }
+      if (idx === activeSyncedIdx) return;
+      activeSyncedIdx = idx;
+      const bodyEl = document.getElementById('lyBody');
+      if (!bodyEl) return;
+      bodyEl.querySelectorAll('.ly-sync-line.active-line').forEach(el => el.classList.remove('active-line'));
+      if (idx >= 0) {
+        const target = bodyEl.querySelector('.ly-sync-line[data-lidx="' + idx + '"]');
+        if (target) {
+          target.classList.add('active-line');
+          const topOff = target.offsetTop - bodyEl.clientHeight * 0.38;
+          if (topOff >= 0) bodyEl.scrollTo({ top: topOff, behavior: 'smooth' });
+        }
+      }
+    }
+
+    async function fetchLyricsForVideo(videoId, rawTitle, manualQuery = '') {
+      if (!videoId) return;
+      const mySeq = ++lyricsFetchSeq;
+      const bodyEl = document.getElementById('lyBody');
+      const badgeEl = document.getElementById('lyStatusBadge');
+      const qInp = document.getElementById('lyQueryInput');
+      const queryStr = (manualQuery || cleanLyricsSearchQuery(rawTitle)).trim();
+      if (qInp && !manualQuery) qInp.value = queryStr;
+
+      // 0단계: 사용자가 직접 저장한 가사 우선 확인
+      if (!manualQuery) {
+        try {
+          const saved = localStorage.getItem(LYRICS_CUSTOM_PREFIX + videoId);
+          if (saved && saved.trim()) {
+            renderLyricsResult({ plain: saved, sourceLabel: '✎ 저장가사' });
+            return;
+          }
+        } catch (e) {}
+        if (lyricsMemoryCache.has(videoId)) {
+          renderLyricsResult(lyricsMemoryCache.get(videoId));
+          return;
+        }
+      }
+
+      if (badgeEl) badgeEl.textContent = '🎵 검색중';
+      if (bodyEl) {
+        bodyEl.style.display = 'block';
+        bodyEl.innerHTML = '<div class="ly-status-msg">가사를 찾는 중입니다...</div>';
+      }
+
+      // 1단계: LRCLIB 공개 가사 DB (싱크 가사 + 일반 가사)
+      if (queryStr) {
+        try {
+          const data = await fetchJsonWithTimeout('https://lrclib.net/api/search?q=' + encodeURIComponent(queryStr), 5500);
+          if (mySeq !== lyricsFetchSeq) return;
+          if (Array.isArray(data) && data.length > 0) {
+            const best = data.find(d => d && d.syncedLyrics) || data.find(d => d && d.plainLyrics);
+            if (best) {
+              const synced = best.syncedLyrics ? parseLrcText(best.syncedLyrics) : [];
+              const resObj = {
+                plain: best.plainLyrics || '',
+                synced: synced,
+                sourceLabel: synced.length > 0 ? '🎵 싱크가사' : '🎵 가사'
+              };
+              lyricsMemoryCache.set(videoId, resObj);
+              renderLyricsResult(resObj);
+              return;
+            }
+          }
+        } catch (e) {}
+      }
+
+      if (mySeq !== lyricsFetchSeq) return;
+
+      // 2단계: Piped 서버에서 영상 자막(ko) 또는 설명란 가사 추출
+      if (!manualQuery) {
+        try {
+          const tasks = STREAM_PIPED_SERVERS.slice(0, 3).map(srv => async () => {
+            const d = await fetchJsonWithTimeout(srv + '/streams/' + videoId, 5000);
+            if (d && (d.description || (Array.isArray(d.subtitles) && d.subtitles.length > 0))) return [d];
+            return [];
+          });
+          const raced = await raceFirstNonEmpty(tasks);
+          if (mySeq !== lyricsFetchSeq) return;
+          const info = raced && raced[0];
+          if (info) {
+            if (Array.isArray(info.subtitles)) {
+              const koSub = info.subtitles.find(s => s && s.url && /^ko/i.test(String(s.code || '')));
+              if (koSub) {
+                try {
+                  const subRes = await fetch(koSub.url);
+                  if (subRes.ok) {
+                    const vtt = await subRes.text();
+                    const plain = parseVttToPlain(vtt);
+                    if (plain && plain.length >= 25 && mySeq === lyricsFetchSeq) {
+                      const resObj = { plain, sourceLabel: 'CC 자막' };
+                      lyricsMemoryCache.set(videoId, resObj);
+                      renderLyricsResult(resObj);
+                      return;
+                    }
+                  }
+                } catch (err) {}
+              }
+            }
+            if (info.description) {
+              const extracted = extractLyricsFromDescription(info.description);
+              if (extracted && mySeq === lyricsFetchSeq) {
+                const resObj = { plain: extracted, sourceLabel: '📄 영상설명' };
+                lyricsMemoryCache.set(videoId, resObj);
+                renderLyricsResult(resObj);
+                return;
+              }
+            }
+          }
+        } catch (e) {}
+      }
+
+      if (mySeq !== lyricsFetchSeq) return;
+      renderLyricsResult(null);
+    }
+
+    function toggleLyricsPanel() {
+      if (!currentVideoId) return;
+      const dr = document.getElementById('player-lyrics-drawer');
+      const tab = document.getElementById('lyricsToggleTab');
+      if (!dr) return;
+      lyricsPanelOpen = !lyricsPanelOpen;
+      dr.classList.toggle('open', lyricsPanelOpen);
+      if (tab) tab.classList.toggle('lyrics-active', lyricsPanelOpen);
+      if (lyricsPanelOpen) {
+        updateLyricsFontUI();
+        fetchLyricsForVideo(currentVideoId, currentVideoTitle, '');
+      }
+    }
+
+    function closeLyricsPanel(resetFlag = true) {
+      const dr = document.getElementById('player-lyrics-drawer');
+      const tab = document.getElementById('lyricsToggleTab');
+      if (dr) dr.classList.remove('open');
+      if (tab) tab.classList.remove('lyrics-active');
+      if (resetFlag) lyricsPanelOpen = false;
+    }
+
+    function onLyricsTrackChanged(videoId, title) {
+      if (!lyricsPanelOpen) return;
+      const dr = document.getElementById('player-lyrics-drawer');
+      const tab = document.getElementById('lyricsToggleTab');
+      if (dr) dr.classList.add('open');
+      if (tab) tab.classList.add('lyrics-active');
+      updateLyricsFontUI();
+      fetchLyricsForVideo(videoId, title, '');
+    }
+
+    function searchLyricsManual() {
+      const inp = document.getElementById('lyQueryInput');
+      if (inp) inp.blur();
+      const q = inp ? inp.value.trim() : '';
+      if (!q || !currentVideoId) return;
+      fetchLyricsForVideo(currentVideoId, currentVideoTitle, q);
+    }
+
+    function openEditCustomLyrics() {
+      const bodyEl = document.getElementById('lyBody');
+      const editBox = document.getElementById('lyEditBox');
+      const ta = document.getElementById('lyEditTextarea');
+      if (!editBox || !ta) return;
+      if (bodyEl) bodyEl.style.display = 'none';
+      editBox.style.display = 'flex';
+      ta.value = currentPlainLyricsText || '';
+      setTimeout(() => ta.focus(), 50);
+    }
+
+    function cancelEditCustomLyrics() {
+      const bodyEl = document.getElementById('lyBody');
+      const editBox = document.getElementById('lyEditBox');
+      if (editBox) editBox.style.display = 'none';
+      if (bodyEl) bodyEl.style.display = 'block';
+    }
+
+    function saveCustomLyricsForCurrent() {
+      if (!currentVideoId) return;
+      const ta = document.getElementById('lyEditTextarea');
+      const txt = ta ? ta.value.trim() : '';
+      try {
+        if (txt) localStorage.setItem(LYRICS_CUSTOM_PREFIX + currentVideoId, txt);
+        else localStorage.removeItem(LYRICS_CUSTOM_PREFIX + currentVideoId);
+      } catch (e) {}
+      if (txt) {
+        renderLyricsResult({ plain: txt, sourceLabel: '✎ 저장가사' });
+      } else {
+        lyricsMemoryCache.delete(currentVideoId);
+        fetchLyricsForVideo(currentVideoId, currentVideoTitle, '');
+      }
+    }
+
+    function openNaverLyricsSearch() {
+      const inp = document.getElementById('lyQueryInput');
+      const q = (inp && inp.value.trim()) || cleanLyricsSearchQuery(currentVideoTitle);
+      if (!q) return;
+      window.open('https://search.naver.com/search.naver?query=' + encodeURIComponent(q + ' 가사'), '_blank', 'noopener,noreferrer');
+    }
+
+    (function bindLyricsAndFaithBarGuards() {
+      const dr = document.getElementById('player-lyrics-drawer');
+      if (dr) {
+        dr.addEventListener('pointerdown', (e) => { e.stopPropagation(); });
+        dr.addEventListener('touchstart', (e) => { e.stopPropagation(); }, { passive: true });
+      }
+      const fBar = document.getElementById('faithVerseBar');
+      if (fBar) {
+        fBar.addEventListener('click', () => { fBar.classList.toggle('fv-paused'); });
+      }
+    })();
 
     function resetAllThemeColors() {
       currentSkinId = 'default';
@@ -5269,6 +6348,7 @@
           }
         } catch (e) {}
       }
+      initSavedFaithConfig();
       applyThemeColorsToDOM();
       applySkinToDOM();
       initSavedUiOpts();
@@ -6862,6 +7942,7 @@
       recordUserPlay(item.id, item.t);
       updatePlayingCardHighlight(false);
       updateActiveShortCardHighlight(false);
+      onLyricsTrackChanged(item.id, item.t);
 
       // 끝자락 3개 이내에 도달하면 다음 쇼츠 미리 무한 로드
       if (idx >= currentShortsList.length - 3) {
@@ -7140,6 +8221,7 @@
       prefetchPromise = prefetchBgAudio(videoId);
       recordUserPlay(videoId, title);
       updatePlayingCardHighlight(true);
+      onLyricsTrackChanged(videoId, title);
 
       activePlayingShortId = '';
       if (isTabletMode && shortsPanelOpen) {
@@ -7772,6 +8854,8 @@
       currentGridCols = isTabletMode ? 3 : 2;
       currentSkinId = 'default';
       customThemeBackup = null;
+      faithConfig = getDefaultFaithConfig();
+      closeLyricsPanel(true);
       currentThemeColors = getDefaultThemeColors();
       currentUiOpts = getDefaultUiOpts();
       applyThemeColorsToDOM();
@@ -7830,6 +8914,8 @@
         if (tab.bookmark) packedItems.push({ id: '__bookmark_tablet__', side: tab.bookmark.side, pos: tab.bookmark.pos });
       }
 
+      packedItems.push({ id: '__faith_cfg__', data: faithConfig });
+
       packedItems.push({ id: '__filters__', order: activeFilterOrder });
       if (customStreamApiUrl) {
         packedItems.push({ id: '__stream_api__', url: customStreamApiUrl });
@@ -7869,6 +8955,7 @@
           const tabSkin = list.find(it => it && it.id === '__skin_tablet__' && typeof it.skin === 'string');
           const mobBackup = list.find(it => it && it.id === '__theme_backup__' && it.data);
           const tabBackup = list.find(it => it && it.id === '__theme_backup_tablet__' && it.data);
+          const faithCfgEntry = list.find(it => it && it.id === '__faith_cfg__' && it.data);
           const mobUiOpts = list.find(it => it && it.id === '__ui_opts__' && it.data);
           const tabUiOpts = list.find(it => it && it.id === '__ui_opts_tablet__' && it.data);
           const mobLayout = list.find(it => it && it.id === '__layout__');
@@ -7900,6 +8987,16 @@
             };
           }
 
+          if (faithCfgEntry && faithCfgEntry.data) {
+            const fc = faithCfgEntry.data;
+            if (['faith', 'all', 'off'].includes(fc.showMode)) faithConfig.showMode = fc.showMode;
+            if (['default', 'custom'].includes(fc.verseMode)) faithConfig.verseMode = fc.verseMode;
+            if (['slow', 'normal', 'fast'].includes(fc.speed)) faithConfig.speed = fc.speed;
+            if (Array.isArray(fc.verses)) faithConfig.verses = fc.verses.map(v => String(v || '').trim()).filter(Boolean).slice(0, 15);
+            if (fc.badgeOverrides && typeof fc.badgeOverrides === 'object') faithConfig.badgeOverrides = { ...fc.badgeOverrides };
+            persistFaithConfig(false);
+          }
+
           const activeUiOptsEntry = isTabletMode ? (tabUiOpts || mobUiOpts) : mobUiOpts;
           const activeLayoutEntry = isTabletMode ? tabLayout : mobLayout;
           const activeBmEntry = isTabletMode ? tabBm : mobBm;
@@ -7926,7 +9023,6 @@
 
           if (activeSkinEntry && typeof activeSkinEntry.skin === 'string') {
             currentSkinId = getSkinEntryById(activeSkinEntry.skin) ? activeSkinEntry.skin : 'default';
-            applySkinToDOM();
             persistSkinId(false);
           }
 
@@ -7939,6 +9035,7 @@
             applyThemeColorsToDOM();
             persistThemeColors(false);
           }
+          applySkinToDOM();
 
           if (activeLayoutEntry) {
             if (activeLayoutEntry.mode === 'list' || activeLayoutEntry.mode === 'grid') currentFeedMode = activeLayoutEntry.mode;
@@ -9081,6 +10178,7 @@
       }
       ytFrameReady = false;
       hideTabletInfoModal(false);
+      closeLyricsPanel(false);
       stopBgAudioClean();
       isYtVideoPlaying = false;
       hideYtPauseMask();
@@ -9273,6 +10371,7 @@
           }
           if (typeof msg.info.currentTime === 'number') {
             lastKnownPlaySec = msg.info.currentTime;
+            syncLyricsHighlight(lastKnownPlaySec);
           }
           if (typeof msg.info.playerState === 'number') {
             if (msg.info.playerState === 1) {
@@ -9357,6 +10456,7 @@
     bgAudio.addEventListener('timeupdate', () => {
       if (!isBgAudioPlaying || bgAudio.src === SILENT_WAV_URI) return;
       lastKnownPlaySec = bgAudio.currentTime || lastKnownPlaySec;
+      syncLyricsHighlight(lastKnownPlaySec);
       if (bgTimeText) {
         bgTimeText.textContent = `${formatSec(bgAudio.currentTime)} / ${formatSec(bgAudio.duration)}`;
       }
@@ -9762,6 +10862,7 @@
 
       modal.classList.add('docked-hidden');
       hideTabletInfoModal(false);
+      closeLyricsPanel(false);
       showSlideBookmark(dockSide);
       updateBgModeUI();
 
