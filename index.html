@@ -3498,6 +3498,13 @@
     body.tablet-mode #floating-player-modal.app-mini-pip #player-lyrics-drawer.lyrics-pop-up {
       width: min(88vw, 490px) !important;
     }
+    .bookmark-tab.cc-on-active {
+      opacity: 1 !important;
+      box-shadow: 0 0 0 1.5px #4ade80;
+    }
+    .bookmark-tab.pip-ready {
+      opacity: 0.94;
+    }
     .ly-custom-search-wrap {
       flex: 1;
       min-width: 0;
@@ -3623,9 +3630,14 @@
       background: #000000;
       object-fit: contain;
       z-index: 14;
-      display: none;
+      display: block;
+      opacity: 0.001;
+      pointer-events: none;
     }
-    #pipVideoPlayer.active { display: block; }
+    #pipVideoPlayer.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
     #floating-player-modal.app-mini-pip {
       transition: left 0.24s cubic-bezier(0.22, 1, 0.36, 1), top 0.24s cubic-bezier(0.22, 1, 0.36, 1), transform 0.24s ease, opacity 0.22s ease;
     }
@@ -3751,16 +3763,18 @@
       border-left: none;
       z-index: 1;
     }
-    .tab-group-right.overlap-tabs #pipToggleTab { z-index: 2; }
-    .tab-group-right.overlap-tabs #tabletInfoToggleTab { z-index: 3; }
+    .tab-group-right.overlap-tabs #ccToggleTab { z-index: 2; }
+    .tab-group-right.overlap-tabs #pipToggleTab { z-index: 3; }
+    .tab-group-right.overlap-tabs #tabletInfoToggleTab { z-index: 4; }
     .tab-group-right.overlap-tabs .bookmark-tab.tab-close {
-      z-index: 4;
+      z-index: 5;
       padding: 2px 10px 2.5px 12px;
     }
     .tab-group-right.overlap-tabs .bookmark-tab.tab-close .ear-l { display: none; }
     .tab-group-right.overlap-tabs .bookmark-tab.lyrics-active,
+    .tab-group-right.overlap-tabs .bookmark-tab.cc-on-active,
     .tab-group-right.overlap-tabs .bookmark-tab.pip-active {
-      z-index: 6;
+      z-index: 7;
       opacity: 1 !important;
     }
     body.tablet-mode .tab-group-right.overlap-tabs .bookmark-tab {
@@ -4018,7 +4032,10 @@
           <svg class="tab-close-ear ear-l" viewBox="0 0 8 8" aria-hidden="true"><path d="M 0,0 L 8,0 L 8,8 Q 8,0 0,0 Z"/></svg>
           <span>관련정보</span>
         </div>
-        <div class="bookmark-tab" id="pipToggleTab" onclick="togglePipMode()" title="PiP 미니창 (우측 하단 · 오른쪽 밀면 < 숨김)">
+        <div class="bookmark-tab" id="ccToggleTab" onclick="toggleCcMode()" title="자막 끄기/켜기 (기본: CC OFF)">
+          <span id="ccToggleLabel">CC OFF</span>
+        </div>
+        <div class="bookmark-tab" id="pipToggleTab" onclick="togglePipMode()" title="즉시 네이티브 멀티태스킹 PiP 실행 (옆으로 밀면 < 숨김)">
           <span>PiP</span>
         </div>
         <div class="bookmark-tab tablet-only-tab" id="tabletInfoToggleTab" onclick="toggleTabletInfoModal()" title="관련 쇼츠 창 열기/닫기">
@@ -6402,7 +6419,6 @@
       updateLyricsFontUI();
     }
 
-    // 오직 PiP 상태(isAppMiniPip === true)일 때만 위로 배치하고, 일반 재생창이 위에 있을 때는 무조건 밑으로 배치!
     function updateLyricsDrawerDirection() {
       const dr = document.getElementById('player-lyrics-drawer');
       if (!dr) return;
@@ -6597,7 +6613,6 @@
       return txt.value;
     }
 
-    // 유튜브 영상 '더보기'에 나오는 모든 항목(전체 제목, 채널/구독자수, 조회수, 좋아요, 게시일, 카테고리, 해시태그/태그, 챕터, 설명글 원문 100%) 추출
     async function fetchYoutubeVideoDetails(videoId) {
       if (!videoId) return null;
       if (videoMetaMemoryCache.has(videoId)) return videoMetaMemoryCache.get(videoId);
@@ -6852,17 +6867,13 @@
       return null;
     }
 
-    // 처음 불러올 때는 유튜브 '더보기'에 나오는 모든 내용(100% 원문 전체)을 최우선으로 보여주고,
-    // 검색어를 입력해 [확인]을 눌렀을 때는 제미나이 검색 결과 + 유튜브 더보기 전체를 함께 구성
     function assembleFullCompactRelatedInfo(rawTitle, ytMeta, lrcObj, geminiText = '', wikiText = '', customUserQuery = '') {
       const sections = [];
       const feedItem = currentFeedItems.find(it => it && it.id === currentVideoId);
 
-      // 1) 상단 콤팩트 유튜브 더보기 기본정보 (제목·채널·구독자·조회수·좋아요·길이·게시일)
       sections.push(buildCompactBasicHeader(rawTitle, ytMeta, lrcObj));
 
       if (customUserQuery) {
-        // 사용자가 검색창에 직접 키워드를 입력하고 [확인]을 누른 경우: 검색 결과를 상단에 배치
         if (geminiText && geminiText.trim()) {
           sections.push('🔍 [' + customUserQuery + ' · 제미나이 상세 검색 결과]\n' + normalizeCompactInfoText(geminiText));
         }
@@ -6874,24 +6885,20 @@
         }
       }
 
-      // 2) 유튜브 영상 '더보기' 설명글 원본 전체 (단 한 글자도 자르지 않고 100% 무삭제 출력!)
       if (ytMeta && ytMeta.description && ytMeta.description.trim().length > 0) {
         sections.push('📋 유튜브 더보기 설명글 전체\n' + ytMeta.description.trim());
       } else if (feedItem && feedItem._sd) {
         sections.push('📋 유튜브 더보기 설명\n' + feedItem._sd.trim());
       }
 
-      // 3) 유튜브 영상 챕터 / 타임라인 전체 (있을 경우)
       if (ytMeta && ytMeta.chapters && ytMeta.chapters.length > 0) {
         sections.push('⏱️ 유튜브 더보기 챕터 · 구간 안내\n' + ytMeta.chapters);
       }
 
-      // 4) 유튜브 영상 등록 태그 / 해시태그 전체 (있을 경우)
       if (ytMeta && ytMeta.tags && ytMeta.tags.length > 0) {
         sections.push('🏷️ 유튜브 더보기 태그\n' + ytMeta.tags);
       }
 
-      // 5) 초기 로드(!customUserQuery)일 때도 가사/제미나이/위키 추가 정보가 있으면 더보기 밑에 이어서 풍부하게 제공
       if (!customUserQuery) {
         if (lrcObj && lrcObj.lyrics) {
           sections.push('🎤 음원 가사\n' + normalizeCompactInfoText(lrcObj.lyrics));
@@ -6947,8 +6954,6 @@
           (activeCustomQ ? '제미나이 심층 검색 결과를 불러오는 중...' : '유튜브 더보기 전체 정보를 불러오는 중...') + '</div>';
       }
 
-      // 1단계: 사용자가 검색어를 직접 입력하지 않은 초기 로드(!activeCustomQ)일 때는
-      // 유튜브 '더보기'의 모든 내용을 최우선으로 즉시 화면에 렌더링!
       if (!activeCustomQ) {
         const [ytMeta, lrcObj] = await Promise.all([
           fetchYoutubeVideoDetails(vid),
@@ -6966,7 +6971,6 @@
           }
         }
 
-        // 만약 유튜브 영상 자체의 더보기 설명글이 거의 비어있는 영상(50자 미만)이거나 강제 새로고침(✦ 관련정보 클릭)을 누른 경우 제미나이 정보도 자동 보강
         const hasRichYoutubeMore = !!(ytMeta && ytMeta.description && ytMeta.description.trim().length >= 50);
         if (hasRichYoutubeMore && !forceRefresh) {
           return;
@@ -7002,7 +7006,6 @@
         return;
       }
 
-      // 2단계: 검색창에 문자를 넣고 [확인]/엔터/체크(✓)를 누른 경우 → 제미나이 심층 검색 + 위키 + 더보기 전문 출력
       if (!sharedGeminiApiKey && fbReady && db) {
         try { await loadAuthConfigFromCloud(); } catch (e) {}
       }
@@ -8164,6 +8167,7 @@
       updateSlideBookmarkPlayUI();
       setupMediaSession(item.t, item.id);
       prefetchPromise = prefetchBgAudio(item.id);
+      if (typeof prewarmPipVideoStream === 'function') prewarmPipVideoStream(item.id);
       recordUserPlay(item.id, item.t);
     }
 
@@ -8420,6 +8424,33 @@
     }
 
     let ytFrameReady = false;
+    let isCcEnabled = false;
+
+    function enforceYtCcState() {
+      if (!isCcEnabled) {
+        sendYtCommand('unloadModule', ['captions']);
+        sendYtCommand('unloadModule', ['cc']);
+      } else {
+        sendYtCommand('loadModule', ['captions']);
+        sendYtCommand('setOption', ['captions', 'track', { languageCode: 'ko' }]);
+      }
+    }
+
+    function updateCcTabUI() {
+      const tab = document.getElementById('ccToggleTab');
+      const lbl = document.getElementById('ccToggleLabel');
+      if (tab) tab.classList.toggle('cc-on-active', isCcEnabled);
+      if (lbl) lbl.textContent = isCcEnabled ? 'CC ON' : 'CC OFF';
+    }
+
+    function toggleCcMode() {
+      if (!currentVideoId) return;
+      isCcEnabled = !isCcEnabled;
+      updateCcTabUI();
+      enforceYtCcState();
+      mountYoutubeEmbed(currentVideoId, false, lastKnownPlaySec);
+      showTempBgStatus(isCcEnabled ? '💬 자막 켜짐 (CC ON)' : '💬 자막 꺼짐 (CC OFF)', 2000);
+    }
 
     function getRelatedShortsKeyword(title) {
       const cleaned = simplifyTitle(title || currentVideoTitle || '')
@@ -8665,11 +8696,13 @@
       if (reuseExisting && existingFrame && ytFrameReady && resumeAt === 0) {
         sendYtCommand('loadVideoById', [videoId]);
         sendYtCommand('playVideo');
+        setTimeout(enforceYtCcState, 350);
+        setTimeout(enforceYtCcState, 1200);
       } else {
         ytFrameReady = false;
         const originParam = (location.protocol === 'http:' || location.protocol === 'https:') ? ('&origin=' + encodeURIComponent(location.origin)) : '';
         const startParam = resumeAt > 0 ? ('&start=' + resumeAt) : '';
-        const ccParam = '&cc_load_policy=0&cc_lang_pref=ko';
+        const ccParam = isCcEnabled ? '&cc_load_policy=1&cc_lang_pref=ko' : '&cc_load_policy=0';
         ytHolder.innerHTML = '<iframe id="ytPlayerFrame" src="https://www.youtube-nocookie.com/embed/' + videoId + '?autoplay=1&controls=1&fs=1&enablejsapi=1&modestbranding=1&rel=0&playsinline=1&iv_load_policy=3' + ccParam + '&disablekb=1' + startParam + originParam + '" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>';
 
         const frame = document.getElementById('ytPlayerFrame');
@@ -8681,10 +8714,13 @@
               frame.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'addEventListener', args: ['onError'] }), '*');
               frame.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'addEventListener', args: ['onStateChange'] }), '*');
               frame.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'playVideo', args: [] }), '*');
+              setTimeout(enforceYtCcState, 300);
+              setTimeout(enforceYtCcState, 1100);
             } catch (e) {}
           });
         }
       }
+      updateCcTabUI();
     }
 
     function updateShortsHeaderCount() {
@@ -9153,6 +9189,7 @@
       updateSlideBookmarkPlayUI();
       setupMediaSession(title, videoId);
       prefetchPromise = prefetchBgAudio(videoId);
+      if (typeof prewarmPipVideoStream === 'function') prewarmPipVideoStream(videoId);
       recordUserPlay(videoId, title);
       updatePlayingCardHighlight(true);
       updateLyricsDrawerDirection();
@@ -11401,6 +11438,7 @@
           if (typeof msg.info.playerState === 'number') {
             if (msg.info.playerState === 1) {
               isYtVideoPlaying = true;
+              enforceYtCcState();
               hideYtPauseMask();
               updateSearchBtnState();
               updateSlideBookmarkPlayUI();
@@ -11526,6 +11564,7 @@
           updateBgModeUI();
         }
       } else if (document.visibilityState === 'hidden' && currentVideoId) {
+        if (isPipActive) return;
         if (bgAudio.src && bgAudio.src !== SILENT_WAV_URI && lastKnownPlaySec > 0) {
           try {
             if (Math.abs((bgAudio.currentTime || 0) - lastKnownPlaySec) > 2) {
@@ -12131,7 +12170,7 @@
       }
     }
 
-    // ==================== [v25.4] 2단 하이브리드 PiP + 우측 하단 + '<' 꺾기 숨김 엔진 ====================
+    // ==================== [v26.4] 즉시 발동 네이티브 멀티태스킹 PiP + '<' 숨김 엔진 ====================
     const pipVideoEl = document.getElementById('pipVideoPlayer');
     const pipEdgeChevron = document.getElementById('pip-edge-chevron');
 
@@ -12140,6 +12179,9 @@
     let isPipEdgeHidden = false;
     let pipSavedRect = null;
     let pipVideoCandidates = [];
+    let pipPrewarmedVideoId = '';
+    let pipPrewarmReady = false;
+    let pipPrewarmPromise = null;
     let pipCandIdx = 0;
     let pipPendingSeekSec = 0;
 
@@ -12150,7 +12192,10 @@
 
     function updatePipTabUI() {
       const tab = document.getElementById('pipToggleTab');
-      if (tab) tab.classList.toggle('pip-active', isPipActive || isAppMiniPip || isPipEdgeHidden);
+      if (tab) {
+        tab.classList.toggle('pip-active', isPipActive || isAppMiniPip || isPipEdgeHidden);
+        tab.classList.toggle('pip-ready', pipPrewarmReady && pipPrewarmedVideoId === currentVideoId);
+      }
       if (pipEdgeChevron) pipEdgeChevron.classList.toggle('visible', isPipEdgeHidden && !!currentVideoId);
     }
 
@@ -12184,24 +12229,63 @@
 
     async function fetchPipStreamCandidates(videoId) {
       const preferHls = isIosWebkit();
-      if (customStreamApiUrls.length > 0 || customStreamApiUrl) {
-        const custom = await fetchCustomStreamCandidates(videoId);
-        if (custom.length > 0) return custom;
-      }
       const tasks = [
         ...STREAM_PIPED_SERVERS.map(srv => async () => {
-          const d = await fetchJsonWithTimeout(srv + '/streams/' + videoId, 5000);
+          const d = await fetchJsonWithTimeout(srv + '/streams/' + videoId, 4800);
           return parsePipStreamUrls(d, srv, videoId, preferHls);
         }),
         ...STREAM_INVIDIOUS_SERVERS.map(inv => async () => {
-          const d = await fetchJsonWithTimeout(inv + '/api/v1/videos/' + videoId + '?fields=formatStreams', 5000);
+          const d = await fetchJsonWithTimeout(inv + '/api/v1/videos/' + videoId + '?fields=formatStreams', 4800);
           return parsePipStreamUrls(d, inv, videoId, preferHls);
         })
       ];
       return await raceFirstNonEmpty(tasks);
     }
 
-    function stopNativePipVideoClean() {
+    // [핵심] 영상을 여는 순간 백그라운드에서 PiP 비디오 스트림을 미리 장전하여,
+    // 웹앱 메인화면에서 처음부터 [PiP]를 누르는 즉시(0초 대기) 사용자 터치 제스처 안에서 OS 네이티브 PiP가 발동되도록 함!
+    async function prewarmPipVideoStream(videoId) {
+      if (!pipVideoEl || !videoId) return [];
+      pipPrewarmReady = false;
+      pipPrewarmedVideoId = '';
+      pipVideoCandidates = [];
+      updatePipTabUI();
+
+      const p = (async () => {
+        const cands = await fetchPipStreamCandidates(videoId);
+        if (currentVideoId !== videoId || !Array.isArray(cands) || cands.length === 0) return [];
+        pipVideoCandidates = cands;
+        pipPrewarmedVideoId = videoId;
+        pipCandIdx = 0;
+
+        if (!isPipActive) {
+          try {
+            pipVideoEl.preload = 'auto';
+            pipVideoEl.muted = true;
+            if (pipVideoEl.src !== cands[0]) {
+              pipVideoEl.src = cands[0];
+              pipVideoEl.load();
+            }
+            const markReady = () => {
+              pipVideoEl.removeEventListener('loadedmetadata', markReady);
+              pipVideoEl.removeEventListener('canplay', markReady);
+              if (currentVideoId === videoId) {
+                pipPrewarmReady = true;
+                updatePipTabUI();
+              }
+            };
+            pipVideoEl.addEventListener('loadedmetadata', markReady);
+            pipVideoEl.addEventListener('canplay', markReady);
+          } catch (e) {}
+        }
+        return cands;
+      })();
+
+      pipPrewarmPromise = p;
+      return p;
+    }
+
+    function stopNativePipVideoClean(keepPrewarm = false) {
       if (!pipVideoEl) return;
       try {
         if (document.pictureInPictureElement === pipVideoEl && document.exitPictureInPicture) {
@@ -12212,8 +12296,14 @@
       } catch (e) {}
       try {
         pipVideoEl.pause();
-        pipVideoEl.removeAttribute('src');
-        pipVideoEl.load();
+        if (!keepPrewarm) {
+          pipVideoEl.removeAttribute('src');
+          pipVideoEl.load();
+          pipPrewarmReady = false;
+          pipPrewarmedVideoId = '';
+        } else {
+          pipVideoEl.muted = true;
+        }
       } catch (e) {}
       pipVideoEl.classList.remove('active');
       isPipActive = false;
@@ -12291,29 +12381,85 @@
     }
 
     function cleanupPipState(resetAll = true) {
-      stopNativePipVideoClean();
+      stopNativePipVideoClean(!resetAll);
       isAppMiniPip = false;
       isPipEdgeHidden = false;
       modal.classList.remove('app-mini-pip', 'pip-edge-hidden');
       if (resetAll) pipSavedRect = null;
+      updateLyricsDrawerDirection();
       updatePipTabUI();
     }
 
-    async function tryStartNativePip(videoId, startSec) {
-      if (!pipVideoEl || !videoId) return false;
+    function requestOsPipNow() {
+      if (!pipVideoEl) return false;
       const canWebkitPip = typeof pipVideoEl.webkitSupportsPresentationMode === 'function' &&
         pipVideoEl.webkitSupportsPresentationMode('picture-in-picture');
       const canStdPip = !!(document.pictureInPictureEnabled && typeof pipVideoEl.requestPictureInPicture === 'function');
-      if (!canWebkitPip && !canStdPip) return false;
+      const canIosFullscreenPip = typeof pipVideoEl.webkitEnterFullscreen === 'function';
 
-      const cands = await fetchPipStreamCandidates(videoId);
-      if (currentVideoId !== videoId || (!isAppMiniPip && !isPipEdgeHidden) || cands.length === 0) {
+      try {
+        if (canWebkitPip) {
+          pipVideoEl.webkitSetPresentationMode('picture-in-picture');
+          return true;
+        }
+        if (canStdPip) {
+          pipVideoEl.requestPictureInPicture().catch(() => {});
+          return true;
+        }
+        if (canIosFullscreenPip) {
+          // iPhone iOS WebKit에서 webkitEnterFullscreen 진입 시 스와이프하면 즉시 iOS 네이티브 PiP(< 화살표 숨김 지원)로 전환됨!
+          pipVideoEl.webkitEnterFullscreen();
+          return true;
+        }
+      } catch (e) {}
+      return false;
+    }
+
+    async function launchNativePipImmediate(videoId, startSec) {
+      if (!pipVideoEl || !videoId) return false;
+      const targetSec = Math.max(0, Math.floor(startSec || 0));
+
+      // 케이스 1: 이미 prewarmPipVideoStream으로 스트림이 장전되어 있는 경우 → 사용자 클릭 제스처 안에서 0.0초 만에 즉시 네이티브 PiP 실행!
+      if (pipPrewarmedVideoId === videoId && pipVideoEl.src && pipVideoEl.readyState >= 1) {
+        try {
+          pipVideoEl.classList.add('active');
+          pipVideoEl.muted = false;
+          if (targetSec > 0 && isFinite(pipVideoEl.duration) && targetSec < pipVideoEl.duration) {
+            pipVideoEl.currentTime = targetSec;
+          }
+          sendYtCommand('pauseVideo');
+          hideYtPauseMask();
+          isPipActive = true;
+          updatePipTabUI();
+          const playP = pipVideoEl.play();
+          const triggered = requestOsPipNow();
+          if (playP && typeof playP.then === 'function') {
+            playP.then(() => {
+              if (!triggered) requestOsPipNow();
+            }).catch(() => {});
+          }
+          showTempBgStatus('📺 멀티태스킹 PiP 실행 (홈 스와이프 · 옆으로 밀면 < 숨김)', 3200);
+          return true;
+        } catch (e) {}
+      }
+
+      // 케이스 2: 영상을 켜자마자 0.5초 만에 [PiP]를 눌러 아직 스트림 로드 중인 경우 → 클릭 제스처 안에서 재생 권한을 즉시 확보 후 연결 즉시 네이티브 PiP 발동!
+      pipVideoEl.classList.add('active');
+      pipVideoEl.muted = false;
+      showTempBgStatus('📺 멀티태스킹 PiP 즉시 연결 중...', 2500);
+
+      let cands = (pipPrewarmedVideoId === videoId && pipVideoCandidates.length > 0) ? pipVideoCandidates : [];
+      if (cands.length === 0) {
+        cands = pipPrewarmPromise ? await pipPrewarmPromise : await fetchPipStreamCandidates(videoId);
+      }
+      if (currentVideoId !== videoId || !Array.isArray(cands) || cands.length === 0) {
+        pipVideoEl.classList.remove('active');
         return false;
       }
 
       pipVideoCandidates = cands;
-      pipCandIdx = 0;
-      pipPendingSeekSec = Math.max(0, Math.floor(startSec || 0));
+      pipPrewarmedVideoId = videoId;
+      pipPendingSeekSec = targetSec;
 
       return new Promise((resolve) => {
         let settled = false;
@@ -12321,13 +12467,15 @@
 
         const tryIdx = (idx) => {
           if (idx >= pipVideoCandidates.length || currentVideoId !== videoId) {
-            stopNativePipVideoClean();
+            stopNativePipVideoClean(false);
             done(false);
             return;
           }
           pipCandIdx = idx;
           pipVideoEl.muted = false;
-          pipVideoEl.src = pipVideoCandidates[idx];
+          if (pipVideoEl.src !== pipVideoCandidates[idx]) {
+            pipVideoEl.src = pipVideoCandidates[idx];
+          }
           pipVideoEl.classList.add('active');
 
           const onLoaded = () => {
@@ -12339,15 +12487,13 @@
           const onPlaying = () => {
             pipVideoEl.removeEventListener('playing', onPlaying);
             pipVideoEl.removeEventListener('error', onErr);
+            pipPrewarmReady = true;
             sendYtCommand('pauseVideo');
             hideYtPauseMask();
             isPipActive = true;
             updatePipTabUI();
-            try {
-              if (canWebkitPip) pipVideoEl.webkitSetPresentationMode('picture-in-picture');
-              else if (canStdPip) pipVideoEl.requestPictureInPicture().catch(() => {});
-            } catch (e) {}
-            showTempBgStatus('📺 PiP 활성화 (홈으로 나가도 재생 · 오른쪽 밀면 < 숨김)', 3200);
+            requestOsPipNow();
+            showTempBgStatus('📺 멀티태스킹 PiP 활성화 (홈으로 나가거나 옆으로 밀면 < 숨김)', 3200);
             done(true);
           };
           const onErr = () => {
@@ -12373,8 +12519,8 @@
       if (isPipEdgeHidden) { restoreMiniPipFromEdge(); return; }
       if (isPipActive) {
         const resumeAt = pipVideoEl && isFinite(pipVideoEl.currentTime) ? pipVideoEl.currentTime : lastKnownPlaySec;
-        stopNativePipVideoClean();
-        exitAppMiniPip();
+        stopNativePipVideoClean(true);
+        if (isAppMiniPip) exitAppMiniPip();
         if (currentVideoId) {
           sendYtCommand('seekTo', [Math.floor(resumeAt), true]);
           sendYtCommand('playVideo');
@@ -12383,9 +12529,10 @@
       }
       if (isAppMiniPip) { exitAppMiniPip(); return; }
 
+      // 웹앱 메인화면에서 처음부터 [PiP]를 누르면 즉시 OS 네이티브 멀티태스킹 PiP를 최우선 발동하고,
+      // साथ에 앱 화면도 우측 하단 미니창으로 깔끔하게 정돈하여 안팎 어디서든 멀티태스킹이 가능하게 함!
       enterAppMiniPip();
-      showTempBgStatus('📺 우측 하단 PiP (오른쪽으로 밀면 < 숨김)', 2600);
-      tryStartNativePip(currentVideoId, lastKnownPlaySec);
+      await launchNativePipImmediate(currentVideoId, lastKnownPlaySec);
     }
 
     if (pipVideoEl) {
@@ -12398,13 +12545,15 @@
         if (!isPipActive) return;
         const sec = isFinite(pipVideoEl.currentTime) ? pipVideoEl.currentTime : lastKnownPlaySec;
         const wasPaused = pipVideoEl.paused;
-        stopNativePipVideoClean();
+        stopNativePipVideoClean(true);
+        if (isAppMiniPip) exitAppMiniPip();
         if (currentVideoId && !wasPaused) {
           sendYtCommand('seekTo', [Math.floor(sec), true]);
           sendYtCommand('playVideo');
         }
       };
       pipVideoEl.addEventListener('leavepictureinpicture', onLeaveNativePip);
+      pipVideoEl.addEventListener('webkitendfullscreen', onLeaveNativePip);
       pipVideoEl.addEventListener('webkitpresentationmodechanged', () => {
         if (pipVideoEl.webkitPresentationMode === 'inline' && isPipActive) onLeaveNativePip();
       });
