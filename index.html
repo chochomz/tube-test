@@ -1844,7 +1844,6 @@
       margin-bottom: 6px;
       flex-shrink: 0;
     }
-    .stream-api-head { font-size: 10px; font-weight: 700; color: #bbbbbb; }
     .feed-scroll-sentinel {
       width: 100%;
       height: 28px;
@@ -2753,7 +2752,6 @@
     body.tablet-mode .auth-form-input { font-size: 14px; padding: 9px 11px; }
     body.tablet-mode .auth-form-btn { font-size: 14px; padding: 9px 14px; }
     body.tablet-mode .db-diag-bar { font-size: 13px; padding: 8px 11px; }
-    body.tablet-mode .stream-api-head { font-size: 12.5px; }
     body.tablet-mode .manage-close-btn { padding: 11px; font-size: 15px; border-radius: 10px; }
 
     body.tablet-mode .mp3-modal-box { max-width: 440px; padding: 24px; border-radius: 16px; }
@@ -3499,36 +3497,6 @@
       background: rgba(0, 0, 0, 0.05);
       border-bottom-color: rgba(0, 0, 0, 0.12);
     }
-    .ly-title-badge {
-      font-size: 10px;
-      font-weight: 800;
-      white-space: nowrap;
-      opacity: 0.9;
-      flex-shrink: 0;
-    }
-    .ly-search-row {
-      flex: 1;
-      min-width: 0;
-      display: flex;
-      align-items: center;
-      gap: 3px;
-    }
-    .ly-query-input {
-      flex: 1;
-      min-width: 0;
-      height: 24px;
-      padding: 0 7px;
-      border-radius: 5px;
-      border: 1px solid rgba(255, 255, 255, 0.22);
-      background: rgba(0, 0, 0, 0.35);
-      color: inherit;
-      font-size: 11px;
-      outline: none;
-    }
-    body.light-skin .ly-query-input {
-      background: #ffffff;
-      border-color: rgba(0, 0, 0, 0.22);
-    }
     .ly-icon-btn {
       height: 24px;
       padding: 0 6px;
@@ -3563,18 +3531,6 @@
     }
     .ly-body::-webkit-scrollbar { width: 5px; }
     .ly-body::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.28); border-radius: 4px; }
-    .ly-sync-line {
-      padding: 2px 5px;
-      border-radius: 5px;
-      opacity: 0.68;
-      transition: opacity 0.18s, background 0.18s, transform 0.18s;
-    }
-    .ly-sync-line.active-line {
-      opacity: 1;
-      font-weight: 800;
-      background: rgba(244, 114, 182, 0.22);
-      color: var(--header-border-color);
-    }
     .ly-status-msg {
       text-align: center;
       padding: 14px 6px;
@@ -3582,82 +3538,11 @@
       font-size: 11.5px;
       line-height: 1.5;
     }
-    .ly-edit-box {
-      padding: 8px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .ly-edit-textarea {
-      width: 100%;
-      height: 130px;
-      padding: 8px;
-      border-radius: 6px;
-      border: 1px solid rgba(255, 255, 255, 0.24);
-      background: rgba(0, 0, 0, 0.35);
-      color: inherit;
-      font-size: 12px;
-      line-height: 1.5;
-      resize: none;
-      outline: none;
-    }
-    body.light-skin .ly-edit-textarea {
-      background: #ffffff;
-      border-color: rgba(0, 0, 0, 0.22);
-    }
-    .ly-edit-actions { display: flex; justify-content: flex-end; gap: 6px; }
-    .ly-mini-btn {
-      padding: 4px 10px;
-      border-radius: 5px;
-      border: 1px solid rgba(255, 255, 255, 0.24);
-      background: rgba(255, 255, 255, 0.12);
-      color: inherit;
-      font-size: 11px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-    .ly-mini-btn.primary {
-      background: #f472b6;
-      border-color: #f472b6;
-      color: #111111;
-    }
-    .ly-footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 5px;
-      padding: 5px 8px;
-      border-top: 1px solid rgba(255, 255, 255, 0.12);
-      background: rgba(0, 0, 0, 0.18);
-      flex-shrink: 0;
-    }
-    body.light-skin .ly-footer {
-      background: rgba(0, 0, 0, 0.04);
-      border-top-color: rgba(0, 0, 0, 0.12);
-    }
-    .ly-foot-btn {
-      padding: 3px 8px;
-      border-radius: 5px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      background: rgba(255, 255, 255, 0.08);
-      color: inherit;
-      font-size: 10px;
-      font-weight: 700;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-    body.light-skin .ly-foot-btn {
-      background: rgba(0, 0, 0, 0.06);
-      border-color: rgba(0, 0, 0, 0.16);
-    }
 
     body.tablet-mode #player-lyrics-drawer { --ly-font: 14.5px; border-radius: 11px; }
     body.tablet-mode .ly-header { padding: 7px 10px; gap: 7px; }
-    body.tablet-mode .ly-title-badge { font-size: 12px; }
-    body.tablet-mode .ly-query-input { height: 30px; font-size: 13px; }
     body.tablet-mode .ly-icon-btn { height: 30px; padding: 0 9px; font-size: 12px; }
     body.tablet-mode .ly-body { max-height: 245px; padding: 12px 15px; line-height: 1.72; }
-    body.tablet-mode .ly-foot-btn { padding: 5px 11px; font-size: 12px; }
     /* ---------------- [v25] PiP 전용 비디오 · 우측 하단 미니 PiP · '<' 꺾기 숨김 탭 ---------------- */
     .bookmark-tab.pip-active {
       opacity: 1 !important;
@@ -3736,28 +3621,46 @@
     body.blackout-active #pip-edge-chevron {
       display: none !important;
     }
-    .ly-cc-badge-btn {
-      height: 24px;
-      padding: 0 6px;
-      border-radius: 5px;
-      border: 1px solid rgba(255, 255, 255, 0.24);
-      background: rgba(56, 189, 248, 0.16);
-      color: #7dd3fc;
-      font-size: 10px;
-      font-weight: 800;
+    .blur-cfg-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+    .blur-cfg-item {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 7px 8px;
+      border-radius: 7px;
+      background: #1a1a20;
+      border: 1px solid #32323a;
+      color: #d4d4d8;
+      font-size: 11.5px;
+      font-weight: 700;
       cursor: pointer;
-      white-space: nowrap;
-      flex-shrink: 0;
+      user-select: none;
     }
-    .ly-cc-badge-btn.cc-on {
-      background: #38bdf8;
-      border-color: #38bdf8;
-      color: #082f49;
+    .blur-cfg-item input[type="checkbox"] {
+      accent-color: #111111;
+      width: 14px;
+      height: 14px;
+      margin: 0;
+      cursor: pointer;
     }
-    body.tablet-mode .ly-cc-badge-btn {
-      height: 30px;
-      padding: 0 9px;
-      font-size: 12px;
+    .blur-cfg-item.checked {
+      background: #ffffff;
+      border-color: #ffffff;
+      color: #111111;
+    }
+    body.tablet-mode .blur-cfg-item {
+      padding: 9px 10px;
+      font-size: 13.5px;
+      gap: 8px;
+    }
+    body.tablet-mode .blur-cfg-item input[type="checkbox"] {
+      width: 17px;
+      height: 17px;
     }
 
     /* ---------------- [v25.3] 겹침 탭 · 초미니멀 제미나이 가사창 · 닫기 안정화 · 길게당겨 새로고침 ---------------- */
@@ -4392,9 +4295,27 @@
               <input type="password" id="geminiApiKeyInput" class="auth-form-input" placeholder="AQ.... 또는 AIza... 키 입력" autocomplete="off">
             </div>
             <div class="auth-form-row" style="margin-bottom:0;">
-              <input type="text" id="geminiProjectIdInput" class="auth-form-input" placeholder="프로젝트 ID (AQ.키용: gen-lang-...)" autocomplete="off">
+              <input type="text" id="geminiProjectIdInput" class="auth-form-input" placeholder="프로젝트 ID (선택 · Vertex용: gen-lang-...)" autocomplete="off">
               <button type="button" class="auth-form-btn" onclick="saveGeminiApiKey()">저장</button>
               <button type="button" class="auth-form-btn" style="background:#38bdf8;color:#082f49;" onclick="testGeminiApiKey()">테스트</button>
+            </div>
+          </div>
+
+          <div class="settings-sec-title" style="margin-top:4px;">화면 보안 블러 적용 기기 (관리자 전용 · 공용)</div>
+          <div class="stream-api-box" id="securityBlurCfgBox" style="margin-bottom:6px;">
+            <div class="blur-cfg-row">
+              <label class="blur-cfg-item" id="blurLbl-mobile">
+                <input type="checkbox" id="blurChk-mobile" onchange="onSecurityBlurToggle('mobile', this.checked)">
+                <span>모바일</span>
+              </label>
+              <label class="blur-cfg-item" id="blurLbl-tablet">
+                <input type="checkbox" id="blurChk-tablet" onchange="onSecurityBlurToggle('tablet', this.checked)">
+                <span>태블릿</span>
+              </label>
+              <label class="blur-cfg-item" id="blurLbl-pc">
+                <input type="checkbox" id="blurChk-pc" onchange="onSecurityBlurToggle('pc', this.checked)">
+                <span>PC</span>
+              </label>
             </div>
           </div>
           <div class="admin-save-notice" id="adminSaveNotice"></div>
@@ -4455,11 +4376,13 @@
     const GEMINI_API_LOCAL_KEY = 'mytube_gemini_api_v25';
     const GEMINI_PROJECT_LOCAL_KEY = 'mytube_gemini_project_v254';
     const SHARED_STREAM_APIS_LOCAL_KEY = 'mytube_shared_stream_apis_v251';
+    const BLUR_CFG_LOCAL_KEY = 'mytube_blur_cfg_v255';
     let sharedGeminiApiKey = '';
     let localGeminiApiKey = '';
     let sharedGeminiProjectId = '';
     let localGeminiProjectId = '';
     let customStreamApiUrls = [];
+    let securityBlurConfig = { mobile: false, tablet: false, pc: false };
 
     function saveRememberedCred(name, code) {
       const n = _normName(name);
@@ -4536,7 +4459,7 @@
     function getDeviceProfileKey() { return isTabletMode ? 'tablet' : 'mobile'; }
     function getDeviceStorageSuffix() { return isTabletMode ? '_tablet' : ''; }
     function detectAutoTabletMode() {
-      return Math.min(window.innerWidth, window.innerHeight) >= 600;
+      return Math.min(window.innerWidth, window.innerHeight) >= 600 || window.innerWidth >= 900;
     }
 
     function updateViewModeButtonsUI() {
@@ -4642,17 +4565,94 @@
           e.preventDefault();e.stopPropagation();return false;
         }
       },true);
-      const _isTouchMobile=/Mobi|Android|iPhone|iPad|iPod|Tablet|Silk/i.test(navigator.userAgent||'')
-        ||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1)
-        ||(/Linux/i.test(navigator.platform||'')&&navigator.maxTouchPoints>1)
-        ||(window.matchMedia&&window.matchMedia('(pointer: coarse)').matches);
-      if(!_isTouchMobile){
-        setInterval(()=>{
-          const dt=(window.outerWidth-window.innerWidth>175)||(window.outerHeight-window.innerHeight>175);
-          document.documentElement.style.filter=dt?'blur(10px)':'';
-        },1400);
-      }
+      setInterval(evaluateSecurityBlurNow, 1400);
     })();
+
+    function detectCurrentBlurDeviceType() {
+      const ua = navigator.userAgent || '';
+      const isTouch = /Mobi|Android|iPhone|iPad|iPod|Tablet|Silk/i.test(ua)
+        || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+        || (/Linux/i.test(navigator.platform || '') && navigator.maxTouchPoints > 1)
+        || (window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+      if (!isTouch) return 'pc';
+      const isTab = /iPad|Tablet|PlayBook|Silk/i.test(ua)
+        || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+        || (/Android/i.test(ua) && !/Mobile/i.test(ua))
+        || Math.min(window.innerWidth, window.innerHeight) >= 600;
+      return isTab ? 'tablet' : 'mobile';
+    }
+
+    function evaluateSecurityBlurNow() {
+      const devType = detectCurrentBlurDeviceType();
+      const enabled = !!(securityBlurConfig && securityBlurConfig[devType]);
+      if (!enabled) {
+        if (document.documentElement.style.filter) {
+          document.documentElement.style.filter = '';
+        }
+        return;
+      }
+      if (devType === 'pc') {
+        const dt = (window.outerWidth - window.innerWidth > 175) || (window.outerHeight - window.innerHeight > 175);
+        document.documentElement.style.filter = dt ? 'blur(10px)' : '';
+      } else {
+        document.documentElement.style.filter = 'blur(10px)';
+      }
+    }
+
+    function normalizeBlurConfig(raw) {
+      const obj = (raw && typeof raw === 'object') ? raw : {};
+      return {
+        mobile: !!obj.mobile,
+        tablet: !!obj.tablet,
+        pc: !!obj.pc
+      };
+    }
+
+    function initSavedBlurConfig() {
+      try {
+        const raw = localStorage.getItem(BLUR_CFG_LOCAL_KEY);
+        if (raw) {
+          securityBlurConfig = normalizeBlurConfig(JSON.parse(raw));
+        }
+      } catch (e) {}
+      evaluateSecurityBlurNow();
+    }
+
+    function renderSecurityBlurConfigUI() {
+      ['mobile', 'tablet', 'pc'].forEach(k => {
+        const chk = document.getElementById('blurChk-' + k);
+        const lbl = document.getElementById('blurLbl-' + k);
+        const on = !!(securityBlurConfig && securityBlurConfig[k]);
+        if (chk) chk.checked = on;
+        if (lbl) lbl.classList.toggle('checked', on);
+      });
+    }
+
+    async function onSecurityBlurToggle(deviceKey, isChecked) {
+      if (!hasSettingsAdminAccess()) {
+        renderSecurityBlurConfigUI();
+        return;
+      }
+      if (!['mobile', 'tablet', 'pc'].includes(deviceKey)) return;
+      securityBlurConfig = normalizeBlurConfig({
+        ...securityBlurConfig,
+        [deviceKey]: !!isChecked
+      });
+      renderSecurityBlurConfigUI();
+      evaluateSecurityBlurNow();
+      try {
+        localStorage.setItem(BLUR_CFG_LOCAL_KEY, JSON.stringify(securityBlurConfig));
+      } catch (e) {}
+      authData.updatedAt = Date.now();
+      setPendingAuthSync(true);
+      const res = await saveAuthConfigToCloud();
+      const labelMap = { mobile: '모바일', tablet: '태블릿', pc: 'PC' };
+      showAdminSaveNotice(
+        '✓ ' + labelMap[deviceKey] + ' 보안 블러 ' + (isChecked ? 'ON' : 'OFF') + (res.ok ? ' (공용 저장됨)' : ' (로컬 적용 · DB 대기)'),
+        false,
+        3500
+      );
+    }
 
     const THEME_MODULES = {
       appBg:           { label: '전체배경',    cssVar: '--app-bg',               def: '#0d0d0d' },
@@ -6348,8 +6348,6 @@
       updateLyricsFontUI();
     }
 
-    function syncLyricsHighlight() {}
-
     function getEffectiveGeminiApiKey() {
       return String(sharedGeminiApiKey || localGeminiApiKey || '').trim();
     }
@@ -6507,43 +6505,57 @@
         ? '애국가 1절 첫 한 줄만 답해줘.'
         : '노래 제목: "' + queryStr + '"\n이 노래의 전체 가사를 불필요한 인사말, 설명, 마크다운 기호 없이 가사 본문만 줄바꿈하여 깔끔하게 알려줘. 원문 언어 그대로 작성하고, 가사를 정확히 알 수 없으면 추측하지 말고 정확히 "NO_LYRICS" 라고만 답해줘.';
 
-      const targets = [];
+      // 1단계: AQ. 신형 무료키 및 AIza 키 모두 Gemini API(generativelanguage) 최우선 호출 (무료 티어 RPM 최적화 순서)
+      const aiModels = ['gemini-2.5-flash-lite', 'gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.0-flash-lite'];
+      let lastErr = '';
+      let stopAiStudio = false;
+
+      for (const m of aiModels) {
+        const tag = 'GeminiAPI/' + m;
+        const url = 'https://generativelanguage.googleapis.com/v1beta/models/' + m + ':generateContent?key=' + encodeURIComponent(cleanKey);
+        const r = await callSingleGeminiEndpoint(url, promptText);
+        if (r.ok && r.text) return { text: r.text, error: '', usedPath: tag };
+        if (r.error) lastErr = tag + ' → ' + r.error;
+        if (r.status === 401 || r.status === 403 || r.status === 429) {
+          stopAiStudio = true;
+          break;
+        }
+      }
+
+      // 2단계: 모델명 변경 대비 자동 탐색 (AQ. 및 AIza 공통)
+      if (!stopAiStudio) {
+        const discovered = await discoverAiStudioModels(cleanKey);
+        for (const m of discovered) {
+          if (aiModels.includes(m)) continue;
+          const tag = 'GeminiAPI/' + m;
+          const ep = 'https://generativelanguage.googleapis.com/v1beta/models/' + m + ':generateContent?key=' + encodeURIComponent(cleanKey);
+          const r = await callSingleGeminiEndpoint(ep, promptText);
+          if (r.ok && r.text) return { text: r.text, error: '', usedPath: tag };
+          if (r.error) lastErr = tag + ' → ' + r.error;
+          if (r.status === 401 || r.status === 403 || r.status === 429) break;
+        }
+      }
+
+      // 3단계: AQ. 키이면서 Gemini API가 거부되었을 때 Vertex AI / Express 엔드포인트 보조 시도
       if (isAqKey) {
-        const vxModels = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.0-flash-001'];
+        const vxTargets = [];
+        const vxModels = ['gemini-2.5-flash-lite', 'gemini-2.5-flash', 'gemini-2.0-flash-001'];
         if (cleanPid) {
           const encPid = encodeURIComponent(cleanPid);
           vxModels.forEach(m => {
-            targets.push({ tag: 'Vertex-global/' + m, url: 'https://aiplatform.googleapis.com/v1/projects/' + encPid + '/locations/global/publishers/google/models/' + m + ':generateContent?key=' + encodeURIComponent(cleanKey) });
-            targets.push({ tag: 'Vertex-us/' + m, url: 'https://us-central1-aiplatform.googleapis.com/v1/projects/' + encPid + '/locations/us-central1/publishers/google/models/' + m + ':generateContent?key=' + encodeURIComponent(cleanKey) });
-            targets.push({ tag: 'Vertex-kr/' + m, url: 'https://asia-northeast3-aiplatform.googleapis.com/v1/projects/' + encPid + '/locations/asia-northeast3/publishers/google/models/' + m + ':generateContent?key=' + encodeURIComponent(cleanKey) });
+            vxTargets.push({ tag: 'Vertex-global/' + m, url: 'https://aiplatform.googleapis.com/v1/projects/' + encPid + '/locations/global/publishers/google/models/' + m + ':generateContent?key=' + encodeURIComponent(cleanKey) });
+            vxTargets.push({ tag: 'Vertex-us/' + m, url: 'https://us-central1-aiplatform.googleapis.com/v1/projects/' + encPid + '/locations/us-central1/publishers/google/models/' + m + ':generateContent?key=' + encodeURIComponent(cleanKey) });
           });
         }
         vxModels.forEach(m => {
-          targets.push({ tag: 'Express-v1/' + m, url: 'https://aiplatform.googleapis.com/v1/publishers/google/models/' + m + ':generateContent?key=' + encodeURIComponent(cleanKey) });
-          targets.push({ tag: 'Express-v1beta1/' + m, url: 'https://aiplatform.googleapis.com/v1beta1/publishers/google/models/' + m + ':generateContent?key=' + encodeURIComponent(cleanKey) });
+          vxTargets.push({ tag: 'Express-v1/' + m, url: 'https://aiplatform.googleapis.com/v1/publishers/google/models/' + m + ':generateContent?key=' + encodeURIComponent(cleanKey) });
         });
-      } else {
-        const aiModels = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.0-flash', 'gemini-2.0-flash-lite'];
-        aiModels.forEach(m => {
-          targets.push({ tag: 'AIStudio/' + m, url: 'https://generativelanguage.googleapis.com/v1beta/models/' + m + ':generateContent?key=' + encodeURIComponent(cleanKey) });
-        });
-      }
 
-      let lastErr = '';
-      for (const t of targets) {
-        const r = await callSingleGeminiEndpoint(t.url, promptText);
-        if (r.ok && r.text) return { text: r.text, error: '', usedPath: t.tag };
-        if (r.error) lastErr = t.tag + ' → ' + r.error;
-        if (!isAqKey && (r.status === 401 || r.status === 403)) break;
-      }
-
-      if (!isAqKey) {
-        const discovered = await discoverAiStudioModels(cleanKey);
-        for (const m of discovered) {
-          const ep = 'https://generativelanguage.googleapis.com/v1beta/models/' + m + ':generateContent?key=' + encodeURIComponent(cleanKey);
-          const r = await callSingleGeminiEndpoint(ep, promptText);
-          if (r.ok && r.text) return { text: r.text, error: '', usedPath: 'AIStudio/' + m };
-          if (r.error) lastErr = 'AIStudio/' + m + ' → ' + r.error;
+        for (const t of vxTargets) {
+          const r = await callSingleGeminiEndpoint(t.url, promptText);
+          if (r.ok && r.text) return { text: r.text, error: '', usedPath: t.tag };
+          if (r.error) lastErr = t.tag + ' → ' + r.error;
+          if (r.status === 429) break;
         }
       }
 
@@ -6618,9 +6630,7 @@
         return;
       }
 
-      const needPidTip = (apiKey && apiKey.startsWith('AQ.') && !projectId)
-        ? '<br><br>※ <b>설정 &gt; 로그인 (관리자)</b>에 <b>프로젝트 ID</b>를 함께 입력한 뒤 <b>[테스트]</b>로 연결을 확인해 주세요.'
-        : '<br><br>※ <b>설정 &gt; 로그인 (관리자)</b>에서 키·프로젝트 ID를 확인하고 <b>[테스트]</b> 버튼으로 점검해 주세요.';
+      const needPidTip = '<br><br>※ <b>설정 &gt; 로그인 (관리자)</b>에서 제미나이 API 키를 확인하고 <b>[테스트]</b> 버튼으로 점검해 주세요.';
 
       if (bodyEl) {
         bodyEl.innerHTML = '<div class="ly-status-msg">가사를 불러오지 못했습니다.<br><span style="opacity:0.78;">(' + apiErrorMsg.replace(/</g, '&lt;') + ')</span>' + needPidTip + '</div>';
@@ -7488,7 +7498,6 @@
         false
       );
     }
-    const saveCustomStreamApiUrl = saveCustomStreamApiUrls;
 
         function parseAudioUrlsFromGenericData(data, baseOrigin, videoId) {
       const out = [];
@@ -8799,8 +8808,14 @@
           customStreamApiUrls = normalizeStreamApiList(s0.urls);
           customStreamApiUrl = customStreamApiUrls[0] || '';
         }
+        const b0 = d.items.find(it => it && it.id === '__blur_cfg__' && it.cfg);
+        if (b0) {
+          securityBlurConfig = normalizeBlurConfig(b0.cfg);
+          try { localStorage.setItem(BLUR_CFG_LOCAL_KEY, JSON.stringify(securityBlurConfig)); } catch (e) {}
+          evaluateSecurityBlurNow();
+        }
         const u0 = d.items
-          .filter(it => it && it.id && it.id !== '__admin__' && it.id !== '__gemini_key__' && it.id !== '__stream_apis__' && it.code)
+          .filter(it => it && it.id && it.id !== '__admin__' && it.id !== '__gemini_key__' && it.id !== '__stream_apis__' && it.id !== '__blur_cfg__' && it.code)
           .map(u => ({
             id: String(u.id),
             name: _normName(u.name || ''),
@@ -8933,6 +8948,7 @@
           { id: '__admin__', code: enc },
           ...((sharedGeminiApiKey || sharedGeminiProjectId) ? [{ id: '__gemini_key__', key: sharedGeminiApiKey ? _p4(sharedGeminiApiKey) : '', pid: sharedGeminiProjectId || '' }] : []),
           ...(customStreamApiUrls.length > 0 ? [{ id: '__stream_apis__', urls: customStreamApiUrls }] : []),
+          { id: '__blur_cfg__', cfg: normalizeBlurConfig(securityBlurConfig) },
           ...authData.users.map(u => ({
             id: u.id,
             name: u.name,
@@ -9408,9 +9424,6 @@
       packedItems.push({ id: '__faith_cfg__', data: faithConfig });
 
       packedItems.push({ id: '__filters__', order: activeFilterOrder });
-      if (customStreamApiUrl) {
-        packedItems.push({ id: '__stream_api__', url: customStreamApiUrl });
-      }
       if (lastViewedFeed && lastViewedFeed.docId) {
         packedItems.push({
           id: '__last_feed__',
@@ -9454,7 +9467,6 @@
           const mobBm = list.find(it => it && it.id === '__bookmark__');
           const tabBm = list.find(it => it && it.id === '__bookmark_tablet__');
           const filtersEntry = list.find(it => it && it.id === '__filters__' && Array.isArray(it.order));
-          const streamApiEntry = list.find(it => it && it.id === '__stream_api__' && typeof it.url === 'string');
           const lastFeedEntry = list.find(it => it && it.id === '__last_feed__' && it.docId);
 
           if (mobUiOpts || mobLayout || mobBm || mobTheme || mobSkin || mobBackup) {
@@ -9549,11 +9561,6 @@
             }
             persistBookmarkPos(false);
             applyBookmarkPosition(dockSide);
-          }
-
-          if (streamApiEntry) {
-            customStreamApiUrl = streamApiEntry.url.trim();
-            persistCustomStreamApi(false);
           }
 
           if (lastFeedEntry && lastFeedEntry.docId) {
@@ -10348,8 +10355,9 @@
       if (gemHead) {
         gemHead.textContent = sharedGeminiApiKey
           ? '제미나이 가사 API 키 (✓ 공용 연동됨 · 관리자 전용)'
-          : '제미나이 가사 API 키 (관리자 전용 · AQ.+프로젝트ID / AIza)';
+          : '제미나이 가사 API 키 (관리자 전용 · AQ. / AIza 공용)';
       }
+      renderSecurityBlurConfigUI();
       updateDbDiagUI();
     }
 
@@ -10715,6 +10723,7 @@
       initFeedLayoutMode();
       initFeedScrollObserver();
       updateSearchBtnState();
+      initSavedBlurConfig();
       initFirebaseAlways();
       initSavedGeminiApiKey();
       await loadAuthConfigFromCloud();
@@ -10927,7 +10936,6 @@
           }
           if (typeof msg.info.currentTime === 'number') {
             lastKnownPlaySec = msg.info.currentTime;
-            syncLyricsHighlight(lastKnownPlaySec);
           }
           if (typeof msg.info.playerState === 'number') {
             if (msg.info.playerState === 1) {
@@ -11012,7 +11020,6 @@
     bgAudio.addEventListener('timeupdate', () => {
       if (!isBgAudioPlaying || bgAudio.src === SILENT_WAV_URI) return;
       lastKnownPlaySec = bgAudio.currentTime || lastKnownPlaySec;
-      syncLyricsHighlight(lastKnownPlaySec);
       if (bgTimeText) {
         bgTimeText.textContent = `${formatSec(bgAudio.currentTime)} / ${formatSec(bgAudio.duration)}`;
       }
