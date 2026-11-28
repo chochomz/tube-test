@@ -3475,20 +3475,28 @@
       background: rgba(0, 0, 0, 0.05);
       border-bottom-color: rgba(0, 0, 0, 0.12);
     }
+    #floating-player-modal:not(.app-mini-pip) #player-lyrics-drawer {
+      position: static !important;
+      width: 100% !important;
+      margin-top: 4px !important;
+      bottom: auto !important;
+      right: auto !important;
+      left: auto !important;
+    }
     #floating-player-modal.app-mini-pip #player-lyrics-drawer,
-    #player-lyrics-drawer.lyrics-pop-up {
-      position: absolute;
-      bottom: calc(100% + 6px);
-      right: 0;
-      left: auto;
-      width: min(94vw, 370px);
-      margin-top: 0;
+    #floating-player-modal.app-mini-pip #player-lyrics-drawer.lyrics-pop-up {
+      position: absolute !important;
+      bottom: calc(100% + 6px) !important;
+      right: 0 !important;
+      left: auto !important;
+      width: min(94vw, 370px) !important;
+      margin-top: 0 !important;
       z-index: 35;
       box-shadow: 0 -10px 32px rgba(0, 0, 0, 0.88);
     }
     body.tablet-mode #floating-player-modal.app-mini-pip #player-lyrics-drawer,
-    body.tablet-mode #player-lyrics-drawer.lyrics-pop-up {
-      width: min(88vw, 490px);
+    body.tablet-mode #floating-player-modal.app-mini-pip #player-lyrics-drawer.lyrics-pop-up {
+      width: min(88vw, 490px) !important;
     }
     .ly-custom-search-wrap {
       flex: 1;
@@ -4025,7 +4033,7 @@
 
     <div id="player-lyrics-drawer">
       <div class="ly-header">
-        <button type="button" class="ly-gemini-main-btn" id="lyGeminiBtn" onclick="openGeminiLyricsSearch(true, '')" title="현재 영상 전체 관련정보 새로고침">✦ 관련정보</button>
+        <button type="button" class="ly-gemini-main-btn" id="lyGeminiBtn" onclick="openGeminiLyricsSearch(true, '')" title="현재 영상 유튜브 더보기 전체 새로고침">✦ 관련정보</button>
         <form class="ly-custom-search-wrap" action="javascript:void(0)" onsubmit="event.preventDefault(); submitCustomLyricsQuery(); return false;">
           <input type="search" id="lyCustomQueryInput" class="ly-custom-input" value="" enterkeyhint="search" placeholder="무엇이든 검색 (터치 시 비움)" autocomplete="off" onfocus="this.value=''" onclick="this.value=''" onkeydown="if(event.key==='Enter'||event.keyCode===13){event.preventDefault(); submitCustomLyricsQuery();}">
           <button type="submit" class="ly-confirm-btn">확인</button>
@@ -6394,13 +6402,11 @@
       updateLyricsFontUI();
     }
 
+    // 오직 PiP 상태(isAppMiniPip === true)일 때만 위로 배치하고, 일반 재생창이 위에 있을 때는 무조건 밑으로 배치!
     function updateLyricsDrawerDirection() {
       const dr = document.getElementById('player-lyrics-drawer');
-      if (!dr || !modal) return;
-      const rect = modal.getBoundingClientRect();
-      const isBottomHalf = rect.bottom > (window.innerHeight * 0.62);
-      const shouldPopUp = isAppMiniPip || isBottomHalf;
-      dr.classList.toggle('lyrics-pop-up', shouldPopUp);
+      if (!dr) return;
+      dr.classList.toggle('lyrics-pop-up', !!isAppMiniPip);
     }
 
     function getEffectiveGeminiApiKey() {
@@ -6585,47 +6591,63 @@
       }
     }
 
+    function decodeHtmlEntities(str) {
+      const txt = document.createElement('textarea');
+      txt.innerHTML = String(str || '');
+      return txt.value;
+    }
+
+    // 유튜브 영상 '더보기'에 나오는 모든 항목(전체 제목, 채널/구독자수, 조회수, 좋아요, 게시일, 카테고리, 해시태그/태그, 챕터, 설명글 원문 100%) 추출
     async function fetchYoutubeVideoDetails(videoId) {
       if (!videoId) return null;
       if (videoMetaMemoryCache.has(videoId)) return videoMetaMemoryCache.get(videoId);
 
       const tasks = [
-        ...STREAM_PIPED_SERVERS.slice(0, 4).map(srv => async () => {
-          const d = await fetchJsonWithTimeout(srv + '/streams/' + videoId, 5000);
+        ...STREAM_PIPED_SERVERS.map(srv => async () => {
+          const d = await fetchJsonWithTimeout(srv + '/streams/' + videoId, 5500);
           if (!d || (!d.description && !d.title)) return [];
-          const chapters = Array.isArray(d.chapters)
-            ? d.chapters.map(c => formatDuration(c.start || 0) + ' ' + String(c.title || '')).join('\n')
+          const chapters = Array.isArray(d.chapters) && d.chapters.length > 0
+            ? d.chapters.map(c => formatDuration(c.start || 0) + '  ' + String(c.title || '')).join('\n')
             : '';
+          const tags = Array.isArray(d.tags) && d.tags.length > 0
+            ? d.tags.map(t => '#' + String(t).replace(/^#+/, '').trim()).join(' ')
+            : '';
+          const rawDesc = String(d.description || '')
+            .replace(/<br\s*\/?>/gi, '\n')
+            .replace(/<\/p>/gi, '\n')
+            .replace(/<[^>]+>/g, '');
           return [{
             title: String(d.title || ''),
             uploader: String(d.uploader || ''),
+            subCount: Number(d.uploaderSubscriberCount || 0),
             uploadDate: String(d.uploadDate || ''),
             views: Number(d.views || 0),
             likes: Number(d.likes || 0),
             duration: Number(d.duration || 0),
             category: String(d.category || ''),
+            tags: tags,
             chapters: chapters,
-            description: String(d.description || '')
-              .replace(/<br\s*\/?>/gi, '\n')
-              .replace(/<\/p>/gi, '\n')
-              .replace(/<[^>]+>/g, '')
-              .replace(/\n{3,}/g, '\n\n')
-              .trim()
+            description: decodeHtmlEntities(rawDesc).replace(/\r\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim()
           }];
         }),
-        ...STREAM_INVIDIOUS_SERVERS.slice(0, 2).map(inv => async () => {
-          const d = await fetchJsonWithTimeout(inv + '/api/v1/videos/' + videoId + '?fields=title,description,author,viewCount,likeCount,lengthSeconds,publishedText,genre', 5000);
+        ...STREAM_INVIDIOUS_SERVERS.map(inv => async () => {
+          const d = await fetchJsonWithTimeout(inv + '/api/v1/videos/' + videoId + '?fields=title,description,author,subCountText,viewCount,likeCount,lengthSeconds,publishedText,genre,keywords', 5500);
           if (!d || (!d.description && !d.title)) return [];
+          const tags = Array.isArray(d.keywords) && d.keywords.length > 0
+            ? d.keywords.map(t => '#' + String(t).replace(/^#+/, '').trim()).join(' ')
+            : '';
           return [{
             title: String(d.title || ''),
             uploader: String(d.author || ''),
+            subCountText: String(d.subCountText || ''),
             uploadDate: String(d.publishedText || ''),
             views: Number(d.viewCount || 0),
             likes: Number(d.likeCount || 0),
             duration: Number(d.lengthSeconds || 0),
             category: String(d.genre || ''),
+            tags: tags,
             chapters: '',
-            description: String(d.description || '').replace(/\n{3,}/g, '\n\n').trim()
+            description: String(d.description || '').replace(/\r\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim()
           }];
         })
       ];
@@ -6640,7 +6662,6 @@
       return null;
     }
 
-    // 무엇을 검색하든 풍부한 백과사전/지식 정보를 보강해 주는 위키백과 장문 검색 폴백 (무료·무제한)
     async function fetchWikiKnowledgeFallback(queryStr) {
       const q = String(queryStr || '').trim();
       if (!q) return '';
@@ -6657,7 +6678,7 @@
           const eData = await fetchJsonWithTimeout(extUrl, 4500);
           const pages = eData && eData.query && eData.query.pages ? Object.values(eData.query.pages) : [];
           if (pages[0] && pages[0].extract) {
-            outBlocks.push('📚 [' + t + ' 상세 백과 정보]\n' + String(pages[0].extract).trim().slice(0, 5000));
+            outBlocks.push('📚 [' + t + ' 상세 백과 정보]\n' + String(pages[0].extract).trim());
           }
         }
         return outBlocks.join('\n────────────────────────────────────\n');
@@ -6679,18 +6700,29 @@
 
     function buildCompactBasicHeader(rawTitle, ytMeta, lrcObj) {
       const feedItem = currentFeedItems.find(it => it && it.id === currentVideoId);
-      const lines = ['📌 영상 기본 정보'];
-      lines.push('• 제목: ' + simplifyTitle(rawTitle));
+      const lines = ['📌 유튜브 더보기 기본 정보'];
+      const fullTitle = (ytMeta && ytMeta.title) ? ytMeta.title : rawTitle;
+      lines.push('• 제목: ' + fullTitle);
 
-      const metaParts = [];
+      const chParts = [];
       const uploader = (ytMeta && ytMeta.uploader) || (feedItem && feedItem._up) || '';
-      if (uploader) metaParts.push('채널: ' + uploader);
+      if (uploader) {
+        let chStr = '채널: ' + uploader;
+        if (ytMeta && ytMeta.subCount > 0) chStr += ' (구독자 ' + formatKoreanViews(ytMeta.subCount) + '명)';
+        else if (ytMeta && ytMeta.subCountText) chStr += ' (' + ytMeta.subCountText + ')';
+        chParts.push(chStr);
+      }
+      if (ytMeta && ytMeta.category) chParts.push('분류: ' + ytMeta.category);
+      if (chParts.length > 0) lines.push('• ' + chParts.join('  ·  '));
+
+      const statParts = [];
       const views = (ytMeta && ytMeta.views) || (feedItem && feedItem.v) || 0;
-      if (views > 0) metaParts.push('조회수: ' + formatKoreanViews(views) + '회');
+      if (views > 0) statParts.push('조회수: ' + views.toLocaleString() + '회 (' + formatKoreanViews(views) + ')');
+      if (ytMeta && ytMeta.likes > 0) statParts.push('좋아요: ' + ytMeta.likes.toLocaleString() + '개');
       const dur = (ytMeta && ytMeta.duration) || (feedItem && feedItem.d) || 0;
-      if (dur > 0) metaParts.push('길이: ' + formatDuration(dur));
-      if (ytMeta && ytMeta.uploadDate) metaParts.push('게시: ' + ytMeta.uploadDate.slice(0, 10));
-      if (metaParts.length > 0) lines.push('• ' + metaParts.join('  ·  '));
+      if (dur > 0) statParts.push('길이: ' + formatDuration(dur));
+      if (ytMeta && ytMeta.uploadDate) statParts.push('게시일: ' + ytMeta.uploadDate.slice(0, 10));
+      if (statParts.length > 0) lines.push('• ' + statParts.join('  ·  '));
 
       if (lrcObj && (lrcObj.artistName || lrcObj.albumName)) {
         const albumParts = [];
@@ -6703,15 +6735,15 @@
 
     function buildSmartRichInfoPrompt(rawTitle, cleanedQuery, ytMeta, lrclibLyrics, customUserQuery = '') {
       const descSnippet = ytMeta && ytMeta.description
-        ? ytMeta.description.slice(0, 5000)
+        ? ytMeta.description.slice(0, 6000)
         : '';
       const uploaderInfo = ytMeta && ytMeta.uploader ? ('채널/업로더: ' + ytMeta.uploader + '\n') : '';
-      const lrcHint = lrclibLyrics ? ('\n[참고용 가사 DB 데이터]\n' + lrclibLyrics.slice(0, 2800) + '\n') : '';
+      const lrcHint = lrclibLyrics ? ('\n[참고용 가사 DB 데이터]\n' + lrclibLyrics.slice(0, 3000) + '\n') : '';
 
       if (customUserQuery) {
         return '사용자가 검색창에 직접 입력한 주제/질문: "' + customUserQuery + '"\n' +
           '(현재 시청 중인 참고 영상: "' + rawTitle + '" / ' + uploaderInfo.trim() + ')\n' +
-          (descSnippet ? ('[영상 더보기 참고 텍스트]\n' + descSnippet.slice(0, 2500) + '\n') : '') +
+          (descSnippet ? ('[영상 더보기 참고 텍스트]\n' + descSnippet.slice(0, 3000) + '\n') : '') +
           '\n--- 작성 규칙 ---\n' +
           '• 사용자가 입력한 "' + customUserQuery + '"에 대해 최소 2,000자 이상으로 아주 깊이 있고 풍부하며 상세한 정보를 한국어로 작성해줘.\n' +
           '• 인사말이나 마크다운 ** 기호 없이, 핵심 개요, 상세 내용(재료/레시피/가사/음반/역사/원리/방법 등 주제에 맞는 모든 세부 항목), 실용적인 팁과 관련 배경지식까지 빠짐없이 정리해줘.';
@@ -6820,40 +6852,55 @@
       return null;
     }
 
+    // 처음 불러올 때는 유튜브 '더보기'에 나오는 모든 내용(100% 원문 전체)을 최우선으로 보여주고,
+    // 검색어를 입력해 [확인]을 눌렀을 때는 제미나이 검색 결과 + 유튜브 더보기 전체를 함께 구성
     function assembleFullCompactRelatedInfo(rawTitle, ytMeta, lrcObj, geminiText = '', wikiText = '', customUserQuery = '') {
       const sections = [];
+      const feedItem = currentFeedItems.find(it => it && it.id === currentVideoId);
 
-      // 1) 상단 콤팩트 기본정보 (문자 바로 밑 구분선 밀착)
+      // 1) 상단 콤팩트 유튜브 더보기 기본정보 (제목·채널·구독자·조회수·좋아요·길이·게시일)
       sections.push(buildCompactBasicHeader(rawTitle, ytMeta, lrcObj));
 
-      // 2) 사용자 검색어 또는 제미나이 심층 분석 본문
-      if (geminiText && geminiText.trim()) {
-        const prefix = customUserQuery ? ('🔍 [' + customUserQuery + ' 검색 결과]\n') : '';
-        sections.push(prefix + normalizeCompactInfoText(geminiText));
-      } else if (lrcObj && lrcObj.lyrics) {
-        sections.push('🎤 가사\n' + normalizeCompactInfoText(lrcObj.lyrics));
+      if (customUserQuery) {
+        // 사용자가 검색창에 직접 키워드를 입력하고 [확인]을 누른 경우: 검색 결과를 상단에 배치
+        if (geminiText && geminiText.trim()) {
+          sections.push('🔍 [' + customUserQuery + ' · 제미나이 상세 검색 결과]\n' + normalizeCompactInfoText(geminiText));
+        }
+        if (wikiText && wikiText.trim()) {
+          sections.push(normalizeCompactInfoText(wikiText));
+        }
+        if (lrcObj && lrcObj.lyrics && !geminiText) {
+          sections.push('🎤 가사\n' + normalizeCompactInfoText(lrcObj.lyrics));
+        }
       }
 
-      // 3) 위키백과 상세 지식 보강 (제미나이가 짧거나 쿼터 초과 시 1,500자 이상 풍부한 텍스트 보장)
-      if (wikiText && wikiText.trim()) {
-        sections.push(normalizeCompactInfoText(wikiText));
-      }
-
-      // 4) 타임라인/챕터 목록
-      if (ytMeta && ytMeta.chapters && ytMeta.chapters.length > 5) {
-        sections.push('⏱️ 영상 챕터 · 구간 안내\n' + ytMeta.chapters);
-      }
-
-      // 5) 유튜브 영상 '더보기' 원본 전문 (최대 15,000자 무삭제 전체 표시)
-      const feedItem = currentFeedItems.find(it => it && it.id === currentVideoId);
-      if (ytMeta && ytMeta.description && ytMeta.description.length > 5) {
-        const isCooking = /(재료|레시피|양념|큰술|작은술|스푼|조리|만드는\s*법|만들기|요리|식용유|간장|설탕|마늘|소금|후추|g\b|ml\b|컵)/i.test(rawTitle + ' ' + ytMeta.description);
-        const descTitle = isCooking
-          ? '📋 영상 더보기 전문 (원본 재료 · 레시피 · 상세 안내)'
-          : '📋 영상 더보기 전문 (원본 상세 설명 · 수록 정보)';
-        sections.push(descTitle + '\n' + normalizeCompactInfoText(ytMeta.description.slice(0, 15000)));
+      // 2) 유튜브 영상 '더보기' 설명글 원본 전체 (단 한 글자도 자르지 않고 100% 무삭제 출력!)
+      if (ytMeta && ytMeta.description && ytMeta.description.trim().length > 0) {
+        sections.push('📋 유튜브 더보기 설명글 전체\n' + ytMeta.description.trim());
       } else if (feedItem && feedItem._sd) {
-        sections.push('📋 영상 더보기 요약\n' + normalizeCompactInfoText(feedItem._sd));
+        sections.push('📋 유튜브 더보기 설명\n' + feedItem._sd.trim());
+      }
+
+      // 3) 유튜브 영상 챕터 / 타임라인 전체 (있을 경우)
+      if (ytMeta && ytMeta.chapters && ytMeta.chapters.length > 0) {
+        sections.push('⏱️ 유튜브 더보기 챕터 · 구간 안내\n' + ytMeta.chapters);
+      }
+
+      // 4) 유튜브 영상 등록 태그 / 해시태그 전체 (있을 경우)
+      if (ytMeta && ytMeta.tags && ytMeta.tags.length > 0) {
+        sections.push('🏷️ 유튜브 더보기 태그\n' + ytMeta.tags);
+      }
+
+      // 5) 초기 로드(!customUserQuery)일 때도 가사/제미나이/위키 추가 정보가 있으면 더보기 밑에 이어서 풍부하게 제공
+      if (!customUserQuery) {
+        if (lrcObj && lrcObj.lyrics) {
+          sections.push('🎤 음원 가사\n' + normalizeCompactInfoText(lrcObj.lyrics));
+        }
+        if (geminiText && geminiText.trim()) {
+          sections.push('✦ 제미나이 AI 추가 분석 정보\n' + normalizeCompactInfoText(geminiText));
+        } else if (wikiText && wikiText.trim() && (!ytMeta || !ytMeta.description || ytMeta.description.length < 200)) {
+          sections.push(normalizeCompactInfoText(wikiText));
+        }
       }
 
       return sections.filter(Boolean).join(COMPACT_DIVIDER);
@@ -6877,7 +6924,6 @@
       const rawTitle = currentVideoTitle || '제목 없음';
       const defaultCleanQ = cleanLyricsSearchQuery(rawTitle);
 
-      // 직접 검색이 아닌 기본 관련정보 로드 시 검색 입력창은 항상 깨끗한 빈칸('')으로 유지
       const activeCustomQ = String(customUserQuery || '').trim();
       if (inpEl && !activeCustomQ && document.activeElement !== inpEl) {
         inpEl.value = '';
@@ -6894,22 +6940,78 @@
       }
 
       const mySeq = ++lyricsFetchSeq;
-      if (btnEl) btnEl.textContent = '✦ 분석 중...';
+      if (btnEl) btnEl.textContent = activeCustomQ ? '✦ 검색 중...' : '✦ 로딩 중...';
       if (bodyEl) {
         const targetLabel = activeCustomQ || simplifyTitle(rawTitle);
-        bodyEl.innerHTML = '<div class="ly-status-msg">✦ "' + targetLabel.replace(/</g, '&lt;') + '"<br>대용량 관련정보 + 영상 더보기 전문을 불러오는 중...</div>';
+        bodyEl.innerHTML = '<div class="ly-status-msg">✦ "' + targetLabel.replace(/</g, '&lt;') + '"<br>' +
+          (activeCustomQ ? '제미나이 심층 검색 결과를 불러오는 중...' : '유튜브 더보기 전체 정보를 불러오는 중...') + '</div>';
       }
 
+      // 1단계: 사용자가 검색어를 직접 입력하지 않은 초기 로드(!activeCustomQ)일 때는
+      // 유튜브 '더보기'의 모든 내용을 최우선으로 즉시 화면에 렌더링!
+      if (!activeCustomQ) {
+        const [ytMeta, lrcObj] = await Promise.all([
+          fetchYoutubeVideoDetails(vid),
+          fetchLyricsFallbackInWindow(defaultCleanQ)
+        ]);
+        if (mySeq !== lyricsFetchSeq) return;
+
+        const immediateMoreText = assembleFullCompactRelatedInfo(rawTitle, ytMeta, lrcObj, '', '', '');
+        if (immediateMoreText && immediateMoreText.trim().length > 0) {
+          lyricsMemoryCache.set(cacheKey, immediateMoreText);
+          if (btnEl) btnEl.textContent = '✦ 관련정보';
+          if (bodyEl) {
+            bodyEl.textContent = immediateMoreText;
+            bodyEl.scrollTop = 0;
+          }
+        }
+
+        // 만약 유튜브 영상 자체의 더보기 설명글이 거의 비어있는 영상(50자 미만)이거나 강제 새로고침(✦ 관련정보 클릭)을 누른 경우 제미나이 정보도 자동 보강
+        const hasRichYoutubeMore = !!(ytMeta && ytMeta.description && ytMeta.description.trim().length >= 50);
+        if (hasRichYoutubeMore && !forceRefresh) {
+          return;
+        }
+
+        if (!sharedGeminiApiKey && fbReady && db) {
+          try { await loadAuthConfigFromCloud(); } catch (e) {}
+        }
+        if (mySeq !== lyricsFetchSeq) return;
+        const apiKey = getEffectiveGeminiApiKey();
+        if (apiKey) {
+          if (btnEl) btnEl.textContent = '✦ AI 보강 중...';
+          const gemRes = await fetchRichInfoFromGeminiApi(
+            rawTitle,
+            ytMeta,
+            apiKey,
+            getEffectiveGeminiProjectId(),
+            false,
+            lrcObj && lrcObj.lyrics ? lrcObj.lyrics : '',
+            ''
+          );
+          if (mySeq !== lyricsFetchSeq) return;
+          if (btnEl) btnEl.textContent = '✦ 관련정보';
+          if (gemRes && gemRes.text) {
+            const enrichedText = assembleFullCompactRelatedInfo(rawTitle, ytMeta, lrcObj, gemRes.text, '', '');
+            lyricsMemoryCache.set(cacheKey, enrichedText);
+            if (bodyEl) {
+              bodyEl.textContent = enrichedText;
+              bodyEl.scrollTop = 0;
+            }
+          }
+        }
+        return;
+      }
+
+      // 2단계: 검색창에 문자를 넣고 [확인]/엔터/체크(✓)를 누른 경우 → 제미나이 심층 검색 + 위키 + 더보기 전문 출력
       if (!sharedGeminiApiKey && fbReady && db) {
         try { await loadAuthConfigFromCloud(); } catch (e) {}
       }
       if (mySeq !== lyricsFetchSeq) return;
 
-      const searchQ = activeCustomQ || defaultCleanQ;
       const [ytMeta, lrcObj, wikiText] = await Promise.all([
         fetchYoutubeVideoDetails(vid),
-        fetchLyricsFallbackInWindow(searchQ),
-        fetchWikiKnowledgeFallback(searchQ)
+        fetchLyricsFallbackInWindow(activeCustomQ),
+        fetchWikiKnowledgeFallback(activeCustomQ)
       ]);
       if (mySeq !== lyricsFetchSeq) return;
 
@@ -8140,7 +8242,6 @@
         });
         navigator.mediaSession.setActionHandler('play', async () => {
           userPausedBg = false;
-          // 아이폰 홈 스와이프 후 iOS 자체 플레이어(제어센터/잠금화면)의 삼각형(▶) 플레이 버튼을 누른 경우 즉시 백그라운드 오디오 재생!
           if (document.visibilityState === 'hidden' || isDockedToBookmark || isBgAudioPlaying || (bgAudio.src && bgAudio.src !== SILENT_WAV_URI)) {
             if (bgAudio.src && bgAudio.src !== SILENT_WAV_URI) {
               if (lastKnownPlaySec > 0 && Math.abs((bgAudio.currentTime || 0) - lastKnownPlaySec) > 3) {
@@ -8171,7 +8272,6 @@
       } catch (e) {}
     }
 
-    // 아이폰(iOS)에서 스와이프해 나갔을 때 시스템 미디어 창의 삼각형(▶) 버튼이 작동하도록 오디오 스트림을 사전 장전
     function prearmBgAudioForIos(videoId, candidates) {
       if (!videoId || !Array.isArray(candidates) || candidates.length === 0) return;
       if (isBgAudioPlaying) return;
@@ -9055,6 +9155,7 @@
       prefetchPromise = prefetchBgAudio(videoId);
       recordUserPlay(videoId, title);
       updatePlayingCardHighlight(true);
+      updateLyricsDrawerDirection();
       onLyricsTrackChanged(videoId, title);
 
       activePlayingShortId = '';
@@ -11422,11 +11523,9 @@
             else if (!isBgAudioPlaying && !isYtVideoPlaying) sendYtCommand('playVideo');
           }
         } else if (isBgAudioPlaying && currentVideoId && !isDockedToBookmark) {
-          // 백그라운드에서 아이폰 ▶ 버튼으로 듣다가 다시 화면으로 돌아오면 자연스럽게 상태 유지
           updateBgModeUI();
         }
       } else if (document.visibilityState === 'hidden' && currentVideoId) {
-        // 아이폰/모바일에서 홈으로 스와이프해 나가는 순간 재생 위치를 백그라운드 오디오에 즉시 인계
         if (bgAudio.src && bgAudio.src !== SILENT_WAV_URI && lastKnownPlaySec > 0) {
           try {
             if (Math.abs((bgAudio.currentTime || 0) - lastKnownPlaySec) > 2) {
