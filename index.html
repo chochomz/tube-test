@@ -2702,20 +2702,6 @@
       gap: 9px;
       border-radius: 8px;
     }
-    .fv-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 3px;
-      font-size: 10px;
-      font-weight: 800;
-      padding: 1.5px 6px;
-      border-radius: 4px;
-      white-space: nowrap;
-      flex-shrink: 0;
-      background: var(--faith-badge-bg, var(--header-border-color));
-      color: var(--faith-badge-fg, var(--header-border-fg));
-    }
-    body.tablet-mode .fv-badge { font-size: 11.5px; padding: 2px 8px; }
     .fv-marquee {
       flex: 1;
       min-width: 0;
@@ -3626,6 +3612,59 @@
       font-size: 13.5px;
       padding: 8px 18px;
     }
+  
+    .ly-sec-block {
+      display: block;
+      white-space: pre-wrap;
+      word-break: keep-all;
+      overflow-wrap: break-word;
+    }
+    .ly-one-line-divider {
+      display: block;
+      width: 100%;
+      height: 1px;
+      margin: 8px 0;
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.12));
+      border: none;
+      flex-shrink: 0;
+    }
+    body.light-skin .ly-one-line-divider {
+      background: linear-gradient(90deg, rgba(0, 0, 0, 0.26), rgba(0, 0, 0, 0.08));
+    }
+    body.tablet-mode .ly-one-line-divider {
+      height: 1.5px;
+      margin: 11px 0;
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.14));
+    }
+    body.tablet-mode.light-skin .ly-one-line-divider {
+      background: linear-gradient(90deg, rgba(0, 0, 0, 0.32), rgba(0, 0, 0, 0.1));
+    }
+    .ly-more-expand-btn {
+      display: block;
+      width: 100%;
+      margin-top: 10px;
+      padding: 8px 12px;
+      border-radius: 7px;
+      border: 1px solid rgba(244, 114, 182, 0.6);
+      background: rgba(244, 114, 182, 0.16);
+      color: inherit;
+      font-size: 11.5px;
+      font-weight: 800;
+      text-align: center;
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .ly-more-expand-btn:active {
+      transform: scale(0.98);
+      background: rgba(244, 114, 182, 0.28);
+    }
+    body.tablet-mode .ly-more-expand-btn {
+      margin-top: 12px;
+      padding: 10px 14px;
+      font-size: 13.5px;
+      border-radius: 9px;
+    }
   </style>
 </head>
 <body>
@@ -3659,7 +3698,6 @@
     <div class="header-unified-box">
       <svg class="header-dash-svg" preserveAspectRatio="none"><rect id="headerDashRect" x="1.2" y="1.2" width="calc(100% - 2.4px)" height="calc(100% - 2.4px)" rx="9" ry="9" fill="none" stroke="var(--header-border-color)" stroke-width="2.2" stroke-dasharray="4 3" vector-effect="non-scaling-stroke"/></svg>
       <div class="faith-verse-bar" id="faithVerseBar" title="터치 시 일시정지 / 재개">
-        <span class="fv-badge">✝ <span id="faithBadgeLabel">오늘의 말씀</span></span>
         <div class="fv-marquee"><div class="fv-track" id="faithVerseTrack"></div></div>
       </div>
       <div class="skin-deco-bar" id="skinDecoBar"><span class="skin-deco-l" id="skinDecoL"></span><span class="skin-deco-r" id="skinDecoR"></span></div>
@@ -3897,11 +3935,8 @@
               </div>
             </div>
             <div class="fc-row">
-              <span class="fc-lbl">말씀 / 속도</span>
+              <span class="fc-lbl">슬라이드 속도</span>
               <div class="fc-btns">
-                <button type="button" class="fc-btn" data-fvmode="default" onclick="setFaithVerseMode('default')">절기기본</button>
-                <button type="button" class="fc-btn" data-fvmode="custom" onclick="setFaithVerseMode('custom')">내 말씀</button>
-                <span style="opacity:0.4;font-size:10px;">|</span>
                 <button type="button" class="fc-btn" data-fspeed="slow" onclick="setFaithSpeed('slow')">느림</button>
                 <button type="button" class="fc-btn" data-fspeed="normal" onclick="setFaithSpeed('normal')">보통</button>
                 <button type="button" class="fc-btn" data-fspeed="fast" onclick="setFaithSpeed('fast')">빠름</button>
@@ -5622,22 +5657,16 @@
       return SKIN_REGISTRY.find(s => s.id === skinId) || null;
     }
 
-    function getEffectiveBadgeName(skinId) {
-      const id = skinId || currentSkinId || 'default';
-      if (faithConfig && faithConfig.badgeOverrides && faithConfig.badgeOverrides[id]) {
-        return String(faithConfig.badgeOverrides[id]).trim();
-      }
-      const entry = getSkinEntryById(id);
-      if (entry && entry.defaultBadge) return entry.defaultBadge;
-      return '오늘의 말씀';
-    }
-
     function applyFaithVerseBarToDOM() {
       const entry = getSkinEntryById(currentSkinId);
       const isFaithTheme = !!(entry && entry.isFaith);
       const showMode = (faithConfig && faithConfig.showMode) || 'faith';
-      const shouldShow = (showMode === 'all') || (showMode === 'faith' && isFaithTheme);
+      const userVerses = Array.isArray(faithConfig.verses)
+        ? faithConfig.verses.map(v => String(v || '').trim()).filter(Boolean)
+        : [];
 
+      // 오직 사용자가 입력한 글이 있을 때만 슬라이드 바 표시 (내장 절기문구나 +십자가 배지 완전 배제)
+      const shouldShow = userVerses.length > 0 && ((showMode === 'all') || (showMode === 'faith' && isFaithTheme));
       document.body.classList.toggle('faith-bar-on', shouldShow);
 
       const szKey = ['small', 'normal', 'large'].includes(faithConfig.fontSize) ? faithConfig.fontSize : 'normal';
@@ -5646,51 +5675,43 @@
         : { small: '10px', normal: '12px', large: '14.5px' };
       document.documentElement.style.setProperty('--faith-verse-size', sizePxMap[szKey] || '12px');
 
-      const badgeLbl = document.getElementById('faithBadgeLabel');
       const trackEl = document.getElementById('faithVerseTrack');
-      if (badgeLbl) badgeLbl.textContent = getEffectiveBadgeName(currentSkinId);
+      if (!trackEl) return;
 
-      if (trackEl) {
-        let verseStr = '';
-        const userVerses = Array.isArray(faithConfig.verses) ? faithConfig.verses.filter(Boolean) : [];
-        if (faithConfig.verseMode === 'custom' && userVerses.length > 0) {
-          verseStr = userVerses.join('   ✦   ');
-        } else if (entry && entry.defaultVerse) {
-          verseStr = entry.defaultVerse;
-        } else if (userVerses.length > 0) {
-          verseStr = userVerses.join('   ✦   ');
-        } else {
-          verseStr = '설정 > 테마변경 > [📖 말씀·절기▾]에서 나만의 성경말씀(최대 20개)을 추가해 보세요';
-        }
-        const safeEsc = verseStr.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        const pxPerSecMap = { slow: 14, normal: 34, fast: 62 };
-        const pxPerSec = pxPerSecMap[faithConfig.speed] || 34;
-
-        // 1단계: 단일 문구 실제 폭 측정 -> 화면 너비보다 넓어지도록 자동 복제(빈틈 0% 무한 루프)
-        trackEl.innerHTML = '<span class="fv-half"><span class="fv-text">' + safeEsc + '</span></span>';
-        requestAnimationFrame(() => {
-          const marqueeEl = trackEl.parentElement;
-          const viewW = (marqueeEl && marqueeEl.clientWidth) ? marqueeEl.clientWidth : (isTabletMode ? 580 : 260);
-          const firstSpan = trackEl.querySelector('.fv-text');
-          const unitW = firstSpan ? Math.max(40, firstSpan.getBoundingClientRect().width) : 240;
-          const repeatCnt = Math.min(10, Math.max(1, Math.ceil((viewW + 80) / unitW)));
-
-          let oneHalf = '';
-          for (let i = 0; i < repeatCnt; i++) {
-            oneHalf += '<span class="fv-text">' + safeEsc + '</span>';
-          }
-          trackEl.innerHTML = '<span class="fv-half">' + oneHalf + '</span><span class="fv-half">' + oneHalf + '</span>';
-
-          const halfEl = trackEl.firstElementChild;
-          const halfW = halfEl ? Math.max(160, halfEl.getBoundingClientRect().width) : (unitW * repeatCnt);
-          const durSec = Math.max(8, halfW / pxPerSec);
-
-          document.documentElement.style.setProperty('--faith-verse-dur', durSec.toFixed(2) + 's');
-          trackEl.style.animation = 'none';
-          void trackEl.offsetWidth;
-          trackEl.style.animation = '';
-        });
+      if (userVerses.length === 0) {
+        trackEl.innerHTML = '';
+        return;
       }
+
+      // 순수하게 사용자가 입력한 글만 공백으로 연결하여 슬라이드
+      const verseStr = userVerses.join('        ');
+      const safeEsc = verseStr.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const pxPerSecMap = { slow: 14, normal: 34, fast: 62 };
+      const pxPerSec = pxPerSecMap[faithConfig.speed] || 34;
+
+      trackEl.innerHTML = '<span class="fv-half"><span class="fv-text">' + safeEsc + '</span></span>';
+      requestAnimationFrame(() => {
+        const marqueeEl = trackEl.parentElement;
+        const viewW = (marqueeEl && marqueeEl.clientWidth) ? marqueeEl.clientWidth : (isTabletMode ? 580 : 260);
+        const firstSpan = trackEl.querySelector('.fv-text');
+        const unitW = firstSpan ? Math.max(40, firstSpan.getBoundingClientRect().width) : 240;
+        const repeatCnt = Math.min(10, Math.max(1, Math.ceil((viewW + 80) / unitW)));
+
+        let oneHalf = '';
+        for (let i = 0; i < repeatCnt; i++) {
+          oneHalf += '<span class="fv-text">' + safeEsc + '</span>';
+        }
+        trackEl.innerHTML = '<span class="fv-half">' + oneHalf + '</span><span class="fv-half">' + oneHalf + '</span>';
+
+        const halfEl = trackEl.firstElementChild;
+        const halfW = halfEl ? Math.max(160, halfEl.getBoundingClientRect().width) : (unitW * repeatCnt);
+        const durSec = Math.max(8, halfW / pxPerSec);
+
+        document.documentElement.style.setProperty('--faith-verse-dur', durSec.toFixed(2) + 's');
+        trackEl.style.animation = 'none';
+        void trackEl.offsetWidth;
+        trackEl.style.animation = '';
+      });
     }
 
     function applySkinToDOM() {
@@ -5733,12 +5754,7 @@
       const actName = document.getElementById('themeActiveName');
       if (devBadge) devBadge.textContent = isTabletMode ? '📟 태블릿' : '📱 모바일';
       if (actName) {
-        if (entry) {
-          const customB = faithConfig && faithConfig.badgeOverrides && faithConfig.badgeOverrides[entry.id];
-          actName.textContent = entry.num + '. ' + (customB ? customB : entry.name);
-        } else {
-          actName.textContent = '0. 기본 (내 색상)';
-        }
+        actName.textContent = entry ? (entry.num + '. ' + entry.name) : '0. 기본 (내 색상)';
       }
     }
 
@@ -5770,6 +5786,7 @@
 
     function initSavedFaithConfig() {
       faithConfig = getDefaultFaithConfig();
+      faithConfig.verseMode = 'custom';
       if (currentUser) {
         try {
           const raw = localStorage.getItem(FAITH_CFG_STORAGE_KEY + '_' + getUid());
@@ -5777,11 +5794,10 @@
             const p = JSON.parse(raw);
             if (p && typeof p === 'object') {
               if (['faith', 'all', 'off'].includes(p.showMode)) faithConfig.showMode = p.showMode;
-              if (['default', 'custom'].includes(p.verseMode)) faithConfig.verseMode = p.verseMode;
+              faithConfig.verseMode = 'custom';
               if (['slow', 'normal', 'fast'].includes(p.speed)) faithConfig.speed = p.speed;
               if (['small', 'normal', 'large'].includes(p.fontSize)) faithConfig.fontSize = p.fontSize;
               if (Array.isArray(p.verses)) faithConfig.verses = p.verses.map(v => String(v || '').trim()).filter(Boolean).slice(0, MAX_FAITH_VERSES);
-              if (p.badgeOverrides && typeof p.badgeOverrides === 'object') faithConfig.badgeOverrides = { ...p.badgeOverrides };
             }
           }
         } catch (e) {}
@@ -5845,8 +5861,7 @@
     }
 
     function setFaithVerseMode(mode) {
-      if (!['default', 'custom'].includes(mode)) return;
-      faithConfig.verseMode = mode;
+      faithConfig.verseMode = 'custom';
       applyFaithVerseBarToDOM();
       persistFaithConfig(true);
       renderFaithConfigUI();
@@ -5860,7 +5875,7 @@
       renderFaithConfigUI();
     }
 
-            function setFaithFontSize(sz) {
+    function setFaithFontSize(sz) {
       if (!['small', 'normal', 'large'].includes(sz)) return;
       faithConfig.fontSize = sz;
       applyFaithVerseBarToDOM();
@@ -5878,12 +5893,15 @@
         return;
       }
       if (faithConfig.verses.length >= MAX_FAITH_VERSES) {
-        alert('성경말씀은 사용자별 최대 ' + MAX_FAITH_VERSES + '개까지 저장할 수 있습니다. 기존 말씀을 삭제한 뒤 추가해 주세요.');
+        alert('슬라이드 문구는 사용자별 최대 ' + MAX_FAITH_VERSES + '개까지 저장할 수 있습니다. 기존 문구를 삭제한 뒤 추가해 주세요.');
         return;
       }
       faithConfig.verses.unshift(val);
       faithConfig.verses = faithConfig.verses.slice(0, MAX_FAITH_VERSES);
       faithConfig.verseMode = 'custom';
+      if (typeof faithConfig.showMode === 'string' && faithConfig.showMode === 'off') {
+        faithConfig.showMode = 'all';
+      }
       if (inp) {
         inp.value = '';
         inp.blur();
@@ -5905,9 +5923,6 @@
       document.querySelectorAll('.fc-btn[data-fshow]').forEach(b => {
         b.classList.toggle('active', b.getAttribute('data-fshow') === faithConfig.showMode);
       });
-      document.querySelectorAll('.fc-btn[data-fvmode]').forEach(b => {
-        b.classList.toggle('active', b.getAttribute('data-fvmode') === faithConfig.verseMode);
-      });
       document.querySelectorAll('.fc-btn[data-fspeed]').forEach(b => {
         b.classList.toggle('active', b.getAttribute('data-fspeed') === faithConfig.speed);
       });
@@ -5918,21 +5933,21 @@
       const verses = Array.isArray(faithConfig.verses) ? faithConfig.verses : [];
       const cntLbl = document.getElementById('faithVerseCountLbl');
       if (cntLbl) {
-        cntLbl.textContent = '📖 내 성경말씀 추가 (' + verses.length + '/' + MAX_FAITH_VERSES + ' · 각자 저장 및 연속 슬라이드)';
+        cntLbl.textContent = '📖 슬라이드 문구 추가 (' + verses.length + '/' + MAX_FAITH_VERSES + ' · 입력한 순수 문구만 슬라이드)';
       }
 
       const listEl = document.getElementById('faithVersesList');
       if (listEl) {
         listEl.innerHTML = '';
         if (verses.length === 0) {
-          listEl.innerHTML = '<div style="font-size:10px;opacity:0.65;padding:2px 4px;">저장된 내 말씀이 없습니다 (최대 ' + MAX_FAITH_VERSES + '개까지 직접 입력해 저장할 수 있습니다)</div>';
+          listEl.innerHTML = '<div style="font-size:10px;opacity:0.65;padding:2px 4px;">저장된 슬라이드 문구가 없습니다 (최대 ' + MAX_FAITH_VERSES + '개까지 직접 입력해 저장할 수 있습니다)</div>';
         } else {
           verses.forEach((v, idx) => {
             const row = document.createElement('div');
             row.className = 'fc-verse-item';
             const txt = document.createElement('span');
             txt.className = 'fc-verse-txt';
-            txt.textContent = (idx + 1) + '. ✝ ' + v;
+            txt.textContent = (idx + 1) + '. ' + v;
             txt.title = v;
             const del = document.createElement('button');
             del.type = 'button';
@@ -6003,8 +6018,7 @@
         info.className = 'theme-card-info';
         const title = document.createElement('span');
         title.className = 'theme-card-title';
-        const customOverride = !isDefault && faithConfig && faithConfig.badgeOverrides && faithConfig.badgeOverrides[item.id];
-        title.textContent = isDefault ? '0. 기본 모드' : (item.num + '. ' + (customOverride || item.name));
+        title.textContent = isDefault ? '0. 기본 모드' : (item.num + '. ' + item.name);
         const tag = document.createElement('span');
         tag.className = 'theme-card-tag';
         tag.textContent = item.catLabel;
@@ -6046,7 +6060,7 @@
     }
 
     // =========================================================================
-    // [v27.1] 재생창 관련정보 엔진 (1차: 유튜브 더보기 원문 / 2차: Gemini AI 맞춤 검색)
+    // [v27.2] 재생창 관련정보 엔진 (1줄 구분선 + 1,000자 [▼ 더보기] 펼침 + AI 검색)
     // =========================================================================
     const lyricsMemoryCache = new Map();
     const videoMetaMemoryCache = new Map();
@@ -6092,20 +6106,27 @@
       updateLyricsFontUI();
     }
 
+    // 새로고침 직후 설정창을 열지 않은 상태에서도 로컬/공용 API 키가 항상 작동하도록 보장
     function getEffectiveGeminiApiKey() {
-      return String(sharedGeminiApiKey || (hasSettingsAdminAccess() ? localGeminiApiKey : '') || '').trim();
+      return String(sharedGeminiApiKey || localGeminiApiKey || '').trim();
     }
 
     function getEffectiveGeminiProjectId() {
-      return String(sharedGeminiProjectId || (hasSettingsAdminAccess() ? localGeminiProjectId : '') || '').trim();
+      return String(sharedGeminiProjectId || localGeminiProjectId || '').trim();
     }
 
     function initSavedGeminiApiKey() {
-      localGeminiApiKey = '';
-      localGeminiProjectId = '';
       try {
-        localGeminiApiKey = String(localStorage.getItem(GEMINI_API_LOCAL_KEY) || '').trim();
-        localGeminiProjectId = String(localStorage.getItem(GEMINI_PROJECT_LOCAL_KEY) || '').trim();
+        const savedKey = String(localStorage.getItem(GEMINI_API_LOCAL_KEY) || '').trim();
+        const savedPid = String(localStorage.getItem(GEMINI_PROJECT_LOCAL_KEY) || '').trim();
+        if (savedKey) {
+          localGeminiApiKey = savedKey;
+          if (!sharedGeminiApiKey) sharedGeminiApiKey = savedKey;
+        }
+        if (savedPid) {
+          localGeminiProjectId = savedPid;
+          if (!sharedGeminiProjectId) sharedGeminiProjectId = savedPid;
+        }
       } catch (e) {}
     }
 
@@ -6137,6 +6158,7 @@
         else localStorage.removeItem(GEMINI_PROJECT_LOCAL_KEY);
       } catch (e) {}
       authData.updatedAt = Date.now();
+      saveLocalAuthCache();
       setPendingAuthSync(true);
       showAdminSaveNotice('DB에 공용 키 저장 중...', false);
       const res = await saveAuthConfigToCloud();
@@ -6144,7 +6166,7 @@
       const keyType = val.startsWith('AQ.') ? 'AQ. 키' : 'AIza 키';
       showAdminSaveNotice(
         val
-          ? (res.ok ? '✓ ' + keyType + ' DB 저장 완료! (모든 가족 사용자에게 공용 적용됨)' : '✓ ' + keyType + ' 로컬 저장 완료 (DB 동기화 대기)')
+          ? (res.ok ? '✓ ' + keyType + ' DB 저장 완료! (새로고침해도 영구 유지됩니다)' : '✓ ' + keyType + ' 로컬 저장 완료 (DB 동기화 대기)')
           : '✓ 공용 제미나이 API 키가 해제되었습니다.',
         false
       );
@@ -6278,7 +6300,10 @@
       return txt.value;
     }
 
-    // [1차 목적 핵심] 실제 더보기 설명글(description)이 존재하는 응답을 최우선으로 확보하는 고정밀 파서
+    function stripTrailingEllipsis(str) {
+      return String(str || '').replace(/(?:\s*\.\.\.|\s*…)+\s*$/g, '').trim();
+    }
+
     async function fetchYoutubeVideoDetails(videoId) {
       if (!videoId) return null;
       const cached = videoMetaMemoryCache.get(videoId);
@@ -6308,7 +6333,7 @@
           category: String(d.category || ''),
           tags: tags,
           chapters: chapters,
-          description: decodeHtmlEntities(rawDesc).replace(/\r\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim()
+          description: stripTrailingEllipsis(decodeHtmlEntities(rawDesc).replace(/\r\n/g, '\n').replace(/\n{3,}/g, '\n\n'))
         };
       };
 
@@ -6332,7 +6357,7 @@
           category: String(d.genre || ''),
           tags: tags,
           chapters: '',
-          description: decodeHtmlEntities(rawDesc).replace(/\r\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim()
+          description: stripTrailingEllipsis(decodeHtmlEntities(rawDesc).replace(/\r\n/g, '\n').replace(/\n{3,}/g, '\n\n'))
         };
       };
 
@@ -6340,14 +6365,14 @@
 
       const richTasks = [
         ...STREAM_PIPED_SERVERS.map(srv => async () => {
-          const d = await fetchJsonWithTimeout(srv + '/streams/' + videoId, 5800);
+          const d = await fetchJsonWithTimeout(srv + '/streams/' + videoId, 6500);
           const m = parsePipedMeta(d);
           if (!m) return [];
           if (!fallbackMeta) fallbackMeta = m;
           return (m.description.length > 0 || m.chapters.length > 0) ? [m] : [];
         }),
         ...STREAM_INVIDIOUS_SERVERS.map(inv => async () => {
-          const d = await fetchJsonWithTimeout(inv + '/api/v1/videos/' + videoId + '?fields=title,description,descriptionHtml,author,subCountText,viewCount,likeCount,lengthSeconds,publishedText,genre,keywords', 5800);
+          const d = await fetchJsonWithTimeout(inv + '/api/v1/videos/' + videoId + '?fields=title,description,descriptionHtml,author,subCountText,viewCount,likeCount,lengthSeconds,publishedText,genre,keywords', 6500);
           const m = parseInvMeta(d);
           if (!m) return [];
           if (!fallbackMeta) fallbackMeta = m;
@@ -6370,15 +6395,14 @@
       return null;
     }
 
-    const COMPACT_DIVIDER = '\n────────────────────────────────────\n';
-
     function normalizeCompactInfoText(txt) {
-      return String(txt || '')
-        .replace(/\*\*/g, '')
-        .replace(/^#{1,4}\s*/gm, '')
-        .replace(/[ \t]+\n/g, '\n')
-        .replace(/\n{3,}/g, '\n\n')
-        .trim();
+      return stripTrailingEllipsis(
+        String(txt || '')
+          .replace(/\*\*/g, '')
+          .replace(/^#{1,4}\s*/gm, '')
+          .replace(/[ \t]+\n/g, '\n')
+          .replace(/\n{3,}/g, '\n\n')
+      );
     }
 
     function buildCompactBasicHeader(rawTitle, ytMeta, lrcObj) {
@@ -6537,53 +6561,112 @@
       return null;
     }
 
-    function assembleFullCompactRelatedInfo(rawTitle, ytMeta, lrcObj, geminiText = '', customUserQuery = '', aiStatusNote = '') {
-      const sections = [];
+    // 섹션 배열로 조립하여 각 섹션 사이에 1줄 CSS 실선(.ly-one-line-divider)과 1,000자 [더보기] 버튼을 렌더링
+    function buildRelatedInfoSections(rawTitle, ytMeta, lrcObj, geminiText = '', customUserQuery = '', aiStatusNote = '') {
+      const headerText = buildCompactBasicHeader(rawTitle, ytMeta, lrcObj);
+      const bodyBlocks = [];
       const feedItem = currentFeedItems.find(it => it && it.id === currentVideoId);
 
-      // [2차 목적] 사용자가 검색창에 키워드/질문을 입력한 경우: AI 답변을 최상단 1순위로 배치!
       if (customUserQuery) {
         if (geminiText && geminiText.trim()) {
-          sections.push('🤖 [AI 맞춤 검색 결과 · "' + customUserQuery + '"]\n' + normalizeCompactInfoText(geminiText));
+          bodyBlocks.push('🤖 [AI 맞춤 검색 결과 · "' + customUserQuery + '"]\n' + normalizeCompactInfoText(geminiText));
         } else if (aiStatusNote) {
-          sections.push('⚠️ [AI 검색 안내 · "' + customUserQuery + '"]\n' + aiStatusNote);
+          bodyBlocks.push('⚠️ [AI 검색 안내 · "' + customUserQuery + '"]\n' + aiStatusNote);
         }
         if (lrcObj && lrcObj.lyrics && !geminiText) {
-          sections.push('🎤 관련 음원 가사\n' + normalizeCompactInfoText(lrcObj.lyrics));
+          bodyBlocks.push('🎤 관련 음원 가사\n' + normalizeCompactInfoText(lrcObj.lyrics));
         }
       }
 
-      // [1차 목적] 해당 영상의 유튜브 더보기 원문 정보
-      sections.push(buildCompactBasicHeader(rawTitle, ytMeta, lrcObj));
-
       const rawDesc = (ytMeta && ytMeta.description && ytMeta.description.trim())
-        ? ytMeta.description.trim()
-        : ((feedItem && feedItem._sd && feedItem._sd.trim()) ? feedItem._sd.trim() : '');
+        ? stripTrailingEllipsis(ytMeta.description)
+        : ((feedItem && feedItem._sd && feedItem._sd.trim()) ? stripTrailingEllipsis(feedItem._sd) : '');
 
       if (rawDesc) {
-        sections.push('📋 유튜브 더보기 설명글 원문\n' + rawDesc);
+        bodyBlocks.push('📋 관련내용 더보기\n' + rawDesc);
       } else if (!customUserQuery && !geminiText) {
-        sections.push('📋 유튜브 더보기 설명글\n(이 영상은 업로더가 작성한 더보기 설명글이 없습니다.)');
+        bodyBlocks.push('📋 관련내용 더보기\n(이 영상은 업로더가 작성한 더보기 설명글이 없습니다.)');
       }
 
       if (ytMeta && ytMeta.chapters && ytMeta.chapters.length > 0) {
-        sections.push('⏱️ 타임라인 · 챕터 구간\n' + ytMeta.chapters);
+        bodyBlocks.push('⏱️ 타임라인 · 챕터 구간\n' + ytMeta.chapters);
       }
 
       if (ytMeta && ytMeta.tags && ytMeta.tags.length > 0) {
-        sections.push('🏷️ 영상 태그\n' + ytMeta.tags);
+        bodyBlocks.push('🏷️ 영상 태그\n' + ytMeta.tags);
       }
 
       if (!customUserQuery) {
         if (lrcObj && lrcObj.lyrics) {
-          sections.push('🎤 음원 가사\n' + normalizeCompactInfoText(lrcObj.lyrics));
+          bodyBlocks.push('🎤 음원 가사\n' + normalizeCompactInfoText(lrcObj.lyrics));
         }
         if (geminiText && geminiText.trim()) {
-          sections.push('🤖 Gemini AI 관련정보 상세 분석\n' + normalizeCompactInfoText(geminiText));
+          bodyBlocks.push('🤖 Gemini AI 관련정보 상세 분석\n' + normalizeCompactInfoText(geminiText));
         }
       }
 
-      return sections.filter(Boolean).join(COMPACT_DIVIDER);
+      return {
+        headerText: headerText,
+        fullBodyText: bodyBlocks.filter(Boolean).join('\n\n')
+      };
+    }
+
+    // 조회수 밑 1줄 구분선(모바일/태블릿 자동 대응) + '...' 없이 1,000자 출력 후 [▼ 더보기] 버튼으로 전체 펼침
+    function renderRelatedInfoToDOM(infoObj, resetScroll = true) {
+      const bodyEl = document.getElementById('lyBody');
+      if (!bodyEl || !infoObj) return;
+      bodyEl.innerHTML = '';
+
+      // 1) 상단 기본 정보 (제목 ~ 조회수/게시일)
+      const headDiv = document.createElement('div');
+      headDiv.className = 'ly-sec-block';
+      headDiv.textContent = infoObj.headerText || '';
+      bodyEl.appendChild(headDiv);
+
+      // 2) 조회수 밑 모바일/태블릿 맞춤 1줄 실선 구분선 (절대 2줄로 꺾이지 않음!)
+      const divLine = document.createElement('div');
+      divLine.className = 'ly-one-line-divider';
+      bodyEl.appendChild(divLine);
+
+      // 3) 관련내용 더보기 본문 (1,000자 기준 '...' 없이 노출 + 초과 시 [▼ 더보기] 버튼 제공)
+      const fullTxt = String(infoObj.fullBodyText || '').trim();
+      const contentDiv = document.createElement('div');
+      contentDiv.className = 'ly-sec-block';
+
+      const LIMIT_CHARS = 1000;
+      if (fullTxt.length <= LIMIT_CHARS) {
+        contentDiv.textContent = fullTxt;
+        bodyEl.appendChild(contentDiv);
+      } else {
+        // 1,000자 부근의 자연스러운 줄바꿈 또는 공백 위치에서 '...' 없이 깔끔하게 1차 커팅
+        let cutIdx = LIMIT_CHARS;
+        const nearNewline = fullTxt.lastIndexOf('\n', LIMIT_CHARS + 60);
+        const nearSpace = fullTxt.lastIndexOf(' ', LIMIT_CHARS + 40);
+        if (nearNewline >= LIMIT_CHARS - 120) cutIdx = nearNewline;
+        else if (nearSpace >= LIMIT_CHARS - 80) cutIdx = nearSpace;
+
+        const firstPart = stripTrailingEllipsis(fullTxt.slice(0, cutIdx));
+        contentDiv.textContent = firstPart;
+        bodyEl.appendChild(contentDiv);
+
+        const moreBtn = document.createElement('button');
+        moreBtn.type = 'button';
+        moreBtn.className = 'ly-more-expand-btn';
+        const remainCount = fullTxt.length - firstPart.length;
+        moreBtn.textContent = '▼ 더보기 (+' + remainCount.toLocaleString() + '자 전체 펼쳐보기)';
+        moreBtn.onclick = (e) => {
+          e.stopPropagation();
+          const prevScroll = bodyEl.scrollTop;
+          contentDiv.textContent = fullTxt;
+          moreBtn.remove();
+          bodyEl.scrollTop = prevScroll;
+        };
+        bodyEl.appendChild(moreBtn);
+      }
+
+      if (resetScroll) {
+        bodyEl.scrollTop = 0;
+      }
     }
 
     function submitCustomLyricsQuery() {
@@ -6615,10 +6698,7 @@
       const cacheKey = activeCustomQ ? (vid + '::AI::' + activeCustomQ) : (vid + '::MORE');
 
       if (!forceRefresh && lyricsMemoryCache.has(cacheKey)) {
-        if (bodyEl) {
-          bodyEl.textContent = lyricsMemoryCache.get(cacheKey);
-          bodyEl.scrollTop = 0;
-        }
+        renderRelatedInfoToDOM(lyricsMemoryCache.get(cacheKey), true);
         return;
       }
 
@@ -6637,13 +6717,10 @@
         ]);
         if (mySeq !== lyricsFetchSeq) return;
 
-        const immediateMoreText = assembleFullCompactRelatedInfo(rawTitle, ytMeta, lrcObj, '', '', '');
-        lyricsMemoryCache.set(cacheKey, immediateMoreText);
+        const immediateInfoObj = buildRelatedInfoSections(rawTitle, ytMeta, lrcObj, '', '', '');
+        lyricsMemoryCache.set(cacheKey, immediateInfoObj);
         if (btnEl) btnEl.textContent = '✦ 관련정보';
-        if (bodyEl) {
-          bodyEl.textContent = immediateMoreText;
-          bodyEl.scrollTop = 0;
-        }
+        renderRelatedInfoToDOM(immediateInfoObj, true);
 
         const hasDesc = !!(ytMeta && ytMeta.description && ytMeta.description.trim().length >= 40);
         const hasLrc = !!(lrcObj && lrcObj.lyrics && lrcObj.lyrics.length >= 40);
@@ -6651,7 +6728,7 @@
           return;
         }
 
-        if (!sharedGeminiApiKey && fbReady && db) {
+        if (!getEffectiveGeminiApiKey() && fbReady && db) {
           try { await loadAuthConfigFromCloud(); } catch (e) {}
         }
         if (mySeq !== lyricsFetchSeq) return;
@@ -6670,12 +6747,9 @@
           if (mySeq !== lyricsFetchSeq) return;
           if (btnEl) btnEl.textContent = '✦ 관련정보';
           if (gemRes && gemRes.text) {
-            const enrichedText = assembleFullCompactRelatedInfo(rawTitle, ytMeta, lrcObj, gemRes.text, '', '');
-            lyricsMemoryCache.set(cacheKey, enrichedText);
-            if (bodyEl) {
-              bodyEl.textContent = enrichedText;
-              bodyEl.scrollTop = 0;
-            }
+            const enrichedObj = buildRelatedInfoSections(rawTitle, ytMeta, lrcObj, gemRes.text, '', '');
+            lyricsMemoryCache.set(cacheKey, enrichedObj);
+            renderRelatedInfoToDOM(enrichedObj, true);
           }
         }
         return;
@@ -6687,7 +6761,7 @@
         bodyEl.innerHTML = '<div class="ly-status-msg">🤖 "' + activeCustomQ.replace(/</g, '&lt;') + '"<br>AI가 영상 맥락과 관련정보를 심층 검색하고 있습니다...</div>';
       }
 
-      if (!sharedGeminiApiKey && fbReady && db) {
+      if (!getEffectiveGeminiApiKey() && fbReady && db) {
         try { await loadAuthConfigFromCloud(); } catch (e) {}
       }
       if (mySeq !== lyricsFetchSeq) return;
@@ -6724,12 +6798,9 @@
       }
 
       if (btnEl) btnEl.textContent = '✦ 관련정보';
-      const finalOutput = assembleFullCompactRelatedInfo(rawTitle, ytMeta, lrcObj, geminiText, activeCustomQ, aiStatusNote);
-      lyricsMemoryCache.set(cacheKey, finalOutput);
-      if (bodyEl) {
-        bodyEl.textContent = finalOutput;
-        bodyEl.scrollTop = 0;
-      }
+      const finalInfoObj = buildRelatedInfoSections(rawTitle, ytMeta, lrcObj, geminiText, activeCustomQ, aiStatusNote);
+      lyricsMemoryCache.set(cacheKey, finalInfoObj);
+      renderRelatedInfoToDOM(finalInfoObj, true);
     }
 
     function toggleLyricsPanel() {
@@ -6795,7 +6866,6 @@
           lyTouchStartY = curY;
           lyTouchStartX = curX;
 
-          // 1) 본문(#lyBody) 바깥(상단 헤더 등)에서 위아래 드래그 시 뒤쪽 피드 스크롤 차단
           const inBody = lyBody && (e.target === lyBody || lyBody.contains(e.target));
           if (!inBody) {
             if (Math.abs(dy) > Math.abs(dx) && e.cancelable) {
@@ -6804,7 +6874,6 @@
             return;
           }
 
-          // 2) 본문(#lyBody) 내부일 때: 맨 위/맨 아래 경계선 도달 시 뒤쪽 피드 레이어로 스크롤이 넘어가는 현상(Scroll Chaining) 완벽 차단
           const maxScroll = lyBody.scrollHeight - lyBody.clientHeight;
           if (maxScroll <= 1) {
             if (e.cancelable) e.preventDefault();
@@ -8848,18 +8917,32 @@
       if (!d) return false;
       const cloudUpdatedAt = Number(d.updatedAt || 0);
       const localUpdatedAt = Number(authData.updatedAt || 0);
-      if (hasPendingAuthSync() || (localUpdatedAt > 0 && localUpdatedAt > cloudUpdatedAt)) {
-        return false;
-      }
+
+      // ★ [방어벽 1] 타임스탬프 비교로 return false 되기 전에, DB에 저장된 API 키·서버·블러 설정을 무조건 먼저 구출(Rescue)
       if (Array.isArray(d.items)) {
-        const a0 = d.items.find(it => it && it.id === '__admin__');
         const g0 = d.items.find(it => it && it.id === '__gemini_key__');
-        sharedGeminiApiKey = (g0 && g0.key) ? _u4(g0.key) : '';
-        sharedGeminiProjectId = (g0 && g0.pid) ? String(g0.pid).trim() : '';
+        const cloudKey = (g0 && g0.key) ? _u4(g0.key) : '';
+        const cloudPid = (g0 && g0.pid) ? String(g0.pid).trim() : '';
+        if (cloudKey) {
+          sharedGeminiApiKey = cloudKey;
+          localGeminiApiKey = cloudKey;
+          try { localStorage.setItem(GEMINI_API_LOCAL_KEY, cloudKey); } catch (e) {}
+        } else if (localGeminiApiKey && !sharedGeminiApiKey) {
+          sharedGeminiApiKey = localGeminiApiKey;
+        }
+        if (cloudPid) {
+          sharedGeminiProjectId = cloudPid;
+          localGeminiProjectId = cloudPid;
+          try { localStorage.setItem(GEMINI_PROJECT_LOCAL_KEY, cloudPid); } catch (e) {}
+        } else if (localGeminiProjectId && !sharedGeminiProjectId) {
+          sharedGeminiProjectId = localGeminiProjectId;
+        }
+
         const s0 = d.items.find(it => it && it.id === '__stream_apis__' && Array.isArray(it.urls));
-        if (s0) {
+        if (s0 && s0.urls.length > 0) {
           customStreamApiUrls = normalizeStreamApiList(s0.urls);
           customStreamApiUrl = customStreamApiUrls[0] || '';
+          try { localStorage.setItem(SHARED_STREAM_APIS_LOCAL_KEY, JSON.stringify(customStreamApiUrls)); } catch (e) {}
         }
         const b0 = d.items.find(it => it && it.id === '__blur_cfg__' && it.cfg);
         if (b0) {
@@ -8867,6 +8950,15 @@
           try { localStorage.setItem(BLUR_CFG_LOCAL_KEY, JSON.stringify(securityBlurConfig)); } catch (e) {}
           evaluateSecurityBlurNow();
         }
+      }
+
+      if (hasPendingAuthSync() || (localUpdatedAt > 0 && localUpdatedAt > cloudUpdatedAt)) {
+        saveLocalAuthCache();
+        return false;
+      }
+
+      if (Array.isArray(d.items)) {
+        const a0 = d.items.find(it => it && it.id === '__admin__');
         const u0 = d.items
           .filter(it => it && it.id && it.id !== '__admin__' && it.id !== '__gemini_key__' && it.id !== '__stream_apis__' && it.id !== '__blur_cfg__' && it.code)
           .map(u => ({
@@ -8933,6 +9025,7 @@
     }
 
     function loadLocalAuthCache() {
+      initSavedGeminiApiKey();
       try {
         const raw = localStorage.getItem(AUTH_CACHE_KEY);
         if (raw) {
@@ -8948,13 +9041,32 @@
               })) : [],
               updatedAt: Number(parsed.updatedAt || 0)
             };
+            // ★ [방어벽 2] AUTH_CACHE_KEY에서도 API 키와 프로젝트 ID를 복원
+            if (parsed.geminiKey && !sharedGeminiApiKey) {
+              const k = _u4(parsed.geminiKey);
+              if (k) {
+                sharedGeminiApiKey = k;
+                localGeminiApiKey = k;
+              }
+            }
+            if (parsed.geminiPid && !sharedGeminiProjectId) {
+              sharedGeminiProjectId = String(parsed.geminiPid).trim();
+              localGeminiProjectId = sharedGeminiProjectId;
+            }
           }
         }
       } catch (e) {}
     }
 
     function saveLocalAuthCache() {
-      try { localStorage.setItem(AUTH_CACHE_KEY, JSON.stringify(authData)); } catch (e) {}
+      const effKey = getEffectiveGeminiApiKey();
+      const effPid = getEffectiveGeminiProjectId();
+      const payload = {
+        ...authData,
+        geminiKey: effKey ? _p4(effKey) : '',
+        geminiPid: effPid || ''
+      };
+      try { localStorage.setItem(AUTH_CACHE_KEY, JSON.stringify(payload)); } catch (e) {}
     }
 
     async function loadAuthConfigFromCloud() {
@@ -8991,6 +9103,13 @@
         code: _p4(u.code || ''),
         createdAt: Number(u.createdAt || 0)
       }));
+
+      // ★ [방어벽 3] 저장 직전 메모리의 sharedGeminiApiKey가 비어있더라도 localGeminiApiKey가 있으면 절대 빈 값으로 덮어쓰지 않도록 복구!
+      const effKey = getEffectiveGeminiApiKey();
+      const effPid = getEffectiveGeminiProjectId();
+      if (effKey && !sharedGeminiApiKey) sharedGeminiApiKey = effKey;
+      if (effPid && !sharedGeminiProjectId) sharedGeminiProjectId = effPid;
+
       saveLocalAuthCache();
       if (!fbReady || !db) {
         setPendingAuthSync(true);
@@ -8999,7 +9118,7 @@
       try {
         const itemsPayload = [
           { id: '__admin__', code: enc },
-          ...((sharedGeminiApiKey || sharedGeminiProjectId) ? [{ id: '__gemini_key__', key: sharedGeminiApiKey ? _p4(sharedGeminiApiKey) : '', pid: sharedGeminiProjectId || '' }] : []),
+          ...((effKey || effPid) ? [{ id: '__gemini_key__', key: effKey ? _p4(effKey) : '', pid: effPid || '' }] : []),
           ...(customStreamApiUrls.length > 0 ? [{ id: '__stream_apis__', urls: customStreamApiUrls }] : []),
           { id: '__blur_cfg__', cfg: normalizeBlurConfig(securityBlurConfig) },
           ...authData.users.map(u => ({
