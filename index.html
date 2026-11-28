@@ -6161,28 +6161,7 @@
       renderFaithConfigUI();
     }
 
-    function saveCustomBadgeName() {
-      const inp = document.getElementById('faithBadgeNameInput');
-      if (!inp) return;
-      inp.blur();
-      const val = inp.value.trim().slice(0, 14);
-      if (!faithConfig.badgeOverrides) faithConfig.badgeOverrides = {};
-      if (val) {
-        faithConfig.badgeOverrides[currentSkinId || 'default'] = val;
-      } else {
-        delete faithConfig.badgeOverrides[currentSkinId || 'default'];
-      }
-      applySkinToDOM();
-      persistFaithConfig(true);
-      renderThemeCardsGrid();
-      renderFaithConfigUI();
-    }
-
-    function resetCustomBadgeName() {
-      if (faithConfig.badgeOverrides) {
-        delete faithConfig.badgeOverrides[currentSkinId || 'default'];
-      }
-      applySkinToDOM();
+          applySkinToDOM();
       persistFaithConfig(true);
       renderThemeCardsGrid();
       renderFaithConfigUI();
@@ -6234,14 +6213,6 @@
       document.querySelectorAll('.fc-btn[data-ffsize]').forEach(b => {
         b.classList.toggle('active', b.getAttribute('data-ffsize') === (faithConfig.fontSize || 'normal'));
       });
-
-      const badgeInp = document.getElementById('faithBadgeNameInput');
-      if (badgeInp && document.activeElement !== badgeInp) {
-        badgeInp.value = (faithConfig.badgeOverrides && faithConfig.badgeOverrides[currentSkinId || 'default']) || '';
-        const entry = getSkinEntryById(currentSkinId);
-        badgeInp.placeholder = '현재 기본: ' + ((entry && entry.defaultBadge) || '오늘의 말씀');
-      }
-
       const verses = Array.isArray(faithConfig.verses) ? faithConfig.verses : [];
       const cntLbl = document.getElementById('faithVerseCountLbl');
       if (cntLbl) {
@@ -7095,11 +7066,71 @@
 
     (function bindLyricsAndFaithBarGuards() {
       const dr = document.getElementById('player-lyrics-drawer');
+      const lyBody = document.getElementById('lyBody');
       if (dr) {
+        let lyTouchStartY = 0;
+        let lyTouchStartX = 0;
+
         dr.addEventListener('pointerdown', (e) => { e.stopPropagation(); });
-        dr.addEventListener('touchstart', (e) => { e.stopPropagation(); }, { passive: true });
-        dr.addEventListener('touchmove', (e) => { e.stopPropagation(); }, { passive: true });
-        dr.addEventListener('wheel', (e) => { e.stopPropagation(); }, { passive: true });
+
+        dr.addEventListener('touchstart', (e) => {
+          e.stopPropagation();
+          if (e.touches && e.touches.length === 1) {
+            lyTouchStartY = e.touches[0].clientY;
+            lyTouchStartX = e.touches[0].clientX;
+          }
+        }, { passive: true });
+
+        dr.addEventListener('touchmove', (e) => {
+          e.stopPropagation();
+          if (!e.touches || e.touches.length !== 1) return;
+          const curY = e.touches[0].clientY;
+          const curX = e.touches[0].clientX;
+          const dy = curY - lyTouchStartY;
+          const dx = curX - lyTouchStartX;
+          lyTouchStartY = curY;
+          lyTouchStartX = curX;
+
+          // 1) 본문(#lyBody) 바깥(헤더 등)에서 위아래로 터치 드래그 시 뒤쪽 피드 스크롤 즉시 차단
+          const inBody = lyBody && (e.target === lyBody || lyBody.contains(e.target));
+          if (!inBody) {
+            if (Math.abs(dy) > Math.abs(dx) && e.cancelable) {
+              e.preventDefault();
+            }
+            return;
+          }
+
+          // 2) 본문(#lyBody) 내부일 때: 스크롤할 내용이 없거나 맨 위/맨 아래 경계선 도달 시 뒤쪽 피드로 스크롤이 넘어가는 현상(Scroll Chaining) 완벽 차단
+          const maxScroll = lyBody.scrollHeight - lyBody.clientHeight;
+          if (maxScroll <= 1) {
+            if (e.cancelable) e.preventDefault();
+            return;
+          }
+          const atTop = lyBody.scrollTop <= 0;
+          const atBottom = (lyBody.scrollTop + lyBody.clientHeight) >= (lyBody.scrollHeight - 1);
+          if ((atTop && dy > 0) || (atBottom && dy < 0)) {
+            if (e.cancelable) e.preventDefault();
+          }
+        }, { passive: false });
+
+        dr.addEventListener('wheel', (e) => {
+          e.stopPropagation();
+          const inBody = lyBody && (e.target === lyBody || lyBody.contains(e.target));
+          if (!inBody) {
+            if (e.cancelable) e.preventDefault();
+            return;
+          }
+          const maxScroll = lyBody.scrollHeight - lyBody.clientHeight;
+          if (maxScroll <= 1) {
+            if (e.cancelable) e.preventDefault();
+            return;
+          }
+          const atTop = lyBody.scrollTop <= 0;
+          const atBottom = (lyBody.scrollTop + lyBody.clientHeight) >= (lyBody.scrollHeight - 1);
+          if ((atTop && e.deltaY < 0) || (atBottom && e.deltaY > 0)) {
+            if (e.cancelable) e.preventDefault();
+          }
+        }, { passive: false });
       }
       const inp = document.getElementById('lyCustomQueryInput');
       if (inp) {
@@ -8911,7 +8942,7 @@
       recordUserPlay(item.id, item.t);
       updatePlayingCardHighlight(false);
       updateActiveShortCardHighlight(false);
-      onLyricsTrackChanged(item.id, item.t);
+      onLyricsTrackChanged();
 
       // 끝자락 3개 이내에 도달하면 다음 쇼츠 미리 무한 로드
       if (idx >= currentShortsList.length - 3) {
@@ -9193,7 +9224,7 @@
       recordUserPlay(videoId, title);
       updatePlayingCardHighlight(true);
       updateLyricsDrawerDirection();
-      onLyricsTrackChanged(videoId, title);
+      onLyricsTrackChanged();
 
       activePlayingShortId = '';
       if (isTabletMode && shortsPanelOpen) {
@@ -12170,7 +12201,7 @@
       }
     }
 
-    // ==================== [v26.4] 즉시 발동 네이티브 멀티태스킹 PiP + '<' 숨김 엔진 ====================
+    // ==================== [v26.5] 완전 독립 멀티태스킹 OS PiP + 캔버스 브릿지 + '<' 숨김 엔진 ====================
     const pipVideoEl = document.getElementById('pipVideoPlayer');
     const pipEdgeChevron = document.getElementById('pip-edge-chevron');
 
@@ -12184,6 +12215,9 @@
     let pipPrewarmPromise = null;
     let pipCandIdx = 0;
     let pipPendingSeekSec = 0;
+    let pipPlaceholderCanvas = null;
+    let pipPlaceholderStream = null;
+    let pipUsingPlaceholder = false;
 
     function isIosWebkit() {
       return /iPhone|iPad|iPod/i.test(navigator.userAgent || '') ||
@@ -12205,21 +12239,24 @@
       if (!data || typeof data !== 'object') return out;
       if (preferHls && typeof data.hls === 'string') add(data.hls);
 
+      if (typeof data.videoUrl === 'string') add(data.videoUrl);
+      if (typeof data.url === 'string' && /mp4|m3u8/i.test(data.url)) add(data.url);
+
       if (Array.isArray(data.videoStreams)) {
         const muxed = data.videoStreams
-          .filter(s => s && s.url && !s.videoOnly && /mp4/i.test(s.mimeType || ''))
-          .sort((a, b) => (Number(a.height || 480) - Number(b.height || 480)));
+          .filter(s => s && s.url && !s.videoOnly && /mp4/i.test(s.mimeType || s.format || ''))
+          .sort((a, b) => (Number(b.height || 480) - Number(a.height || 480)));
         const mid = muxed.filter(s => Number(s.height || 360) >= 360 && Number(s.height || 360) <= 720);
         mid.forEach(s => add(s.url));
         muxed.forEach(s => add(s.url));
       }
 
-      if (Array.isArray(data.formatStreams) && baseOrigin) {
+      if (Array.isArray(data.formatStreams)) {
         data.formatStreams
-          .filter(f => /video\/mp4/i.test(f.type || ''))
+          .filter(f => f && (/video\/mp4/i.test(f.type || '') || f.url))
           .forEach(f => {
-            if (f.itag) add(baseOrigin + '/latest_version?id=' + videoId + '&itag=' + f.itag + '&local=true');
-            else if (f.url) add(f.url);
+            if (f.url) add(f.url);
+            if (f.itag && baseOrigin) add(baseOrigin + '/latest_version?id=' + videoId + '&itag=' + f.itag + '&local=true');
           });
       }
 
@@ -12227,23 +12264,120 @@
       return out;
     }
 
+    async function fetchCustomPipStreamCandidates(videoId) {
+      const list = customStreamApiUrls.length > 0
+        ? customStreamApiUrls
+        : (customStreamApiUrl ? [customStreamApiUrl] : []);
+      if (list.length === 0) return [];
+      const preferHls = isIosWebkit();
+      for (let i = 0; i < list.length; i++) {
+        const raw = String(list[i] || '').trim().replace(/\/+$/, '');
+        if (!raw || raw.includes('{id}')) continue;
+        try {
+          const d1 = await fetchJsonWithTimeout(raw + '/streams/' + videoId, 4500);
+          const u1 = parsePipStreamUrls(d1, raw, videoId, preferHls);
+          if (u1.length > 0) return u1;
+        } catch (e) {}
+        try {
+          const d2 = await fetchJsonWithTimeout(raw + '/api/v1/videos/' + videoId + '?fields=formatStreams', 4500);
+          const u2 = parsePipStreamUrls(d2, raw, videoId, preferHls);
+          if (u2.length > 0) return u2;
+        } catch (e) {}
+      }
+      return [];
+    }
+
     async function fetchPipStreamCandidates(videoId) {
       const preferHls = isIosWebkit();
+      if (customStreamApiUrls.length > 0 || customStreamApiUrl) {
+        const customCands = await fetchCustomPipStreamCandidates(videoId);
+        if (customCands.length > 0) return customCands;
+      }
       const tasks = [
         ...STREAM_PIPED_SERVERS.map(srv => async () => {
-          const d = await fetchJsonWithTimeout(srv + '/streams/' + videoId, 4800);
+          const d = await fetchJsonWithTimeout(srv + '/streams/' + videoId, 5200);
           return parsePipStreamUrls(d, srv, videoId, preferHls);
         }),
         ...STREAM_INVIDIOUS_SERVERS.map(inv => async () => {
-          const d = await fetchJsonWithTimeout(inv + '/api/v1/videos/' + videoId + '?fields=formatStreams', 4800);
+          const d = await fetchJsonWithTimeout(inv + '/api/v1/videos/' + videoId + '?fields=formatStreams', 5200);
           return parsePipStreamUrls(d, inv, videoId, preferHls);
         })
       ];
       return await raceFirstNonEmpty(tasks);
     }
 
-    // [핵심] 영상을 여는 순간 백그라운드에서 PiP 비디오 스트림을 미리 장전하여,
-    // 웹앱 메인화면에서 처음부터 [PiP]를 누르는 즉시(0초 대기) 사용자 터치 제스처 안에서 OS 네이티브 PiP가 발동되도록 함!
+    function stopPipPlaceholderStream() {
+      pipUsingPlaceholder = false;
+      if (pipVideoEl && pipVideoEl.srcObject) {
+        try { pipVideoEl.srcObject = null; } catch (e) {}
+      }
+      if (pipPlaceholderStream) {
+        try { pipPlaceholderStream.getTracks().forEach(t => t.stop()); } catch (e) {}
+        pipPlaceholderStream = null;
+      }
+    }
+
+    function createPipBridgeStream(titleText) {
+      try {
+        if (!pipPlaceholderCanvas) {
+          pipPlaceholderCanvas = document.createElement('canvas');
+          pipPlaceholderCanvas.width = 640;
+          pipPlaceholderCanvas.height = 360;
+        }
+        const ctx = pipPlaceholderCanvas.getContext('2d');
+        if (ctx) {
+          const grad = ctx.createLinearGradient(0, 0, 640, 360);
+          grad.addColorStop(0, '#161224');
+          grad.addColorStop(1, '#0d0d14');
+          ctx.fillStyle = grad;
+          ctx.fillRect(0, 0, 640, 360);
+          ctx.strokeStyle = '#f472b6';
+          ctx.lineWidth = 4;
+          ctx.strokeRect(8, 8, 624, 344);
+          ctx.fillStyle = '#f9a8d4';
+          ctx.font = 'bold 24px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('📺 myTube 멀티태스킹 PiP 연결 중...', 320, 160);
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 20px sans-serif';
+          const cleanT = simplifyTitle(titleText || currentVideoTitle || '').slice(0, 26);
+          ctx.fillText(cleanT, 320, 208);
+        }
+        if (typeof pipPlaceholderCanvas.captureStream === 'function') {
+          return pipPlaceholderCanvas.captureStream(15);
+        }
+      } catch (e) {}
+      return null;
+    }
+
+    function setupPipMediaSession(title, videoId) {
+      if (!('mediaSession' in navigator)) return;
+      try {
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: simplifyTitle(title || currentVideoTitle),
+          artist: 'myTube PiP',
+          album: 'myTube Multitasking',
+          artwork: [
+            { src: 'https://i.ytimg.com/vi/' + videoId + '/hqdefault.jpg', sizes: '480x360', type: 'image/jpeg' }
+          ]
+        });
+        navigator.mediaSession.setActionHandler('play', () => {
+          if (isPipActive && pipVideoEl) pipVideoEl.play().catch(() => {});
+        });
+        navigator.mediaSession.setActionHandler('pause', () => {
+          if (isPipActive && pipVideoEl) pipVideoEl.pause();
+        });
+        navigator.mediaSession.setActionHandler('seekbackward', () => {
+          if (isPipActive && pipVideoEl) pipVideoEl.currentTime = Math.max(0, (pipVideoEl.currentTime || 0) - 10);
+        });
+        navigator.mediaSession.setActionHandler('seekforward', () => {
+          if (isPipActive && pipVideoEl && isFinite(pipVideoEl.duration)) {
+            pipVideoEl.currentTime = Math.min(pipVideoEl.duration, (pipVideoEl.currentTime || 0) + 10);
+          }
+        });
+      } catch (e) {}
+    }
+
     async function prewarmPipVideoStream(videoId) {
       if (!pipVideoEl || !videoId) return [];
       pipPrewarmReady = false;
@@ -12260,6 +12394,7 @@
 
         if (!isPipActive) {
           try {
+            stopPipPlaceholderStream();
             pipVideoEl.preload = 'auto';
             pipVideoEl.muted = true;
             if (pipVideoEl.src !== cands[0]) {
@@ -12268,6 +12403,7 @@
             }
             const markReady = () => {
               pipVideoEl.removeEventListener('loadedmetadata', markReady);
+              pipVideoEl.removeEventListener('loadeddata', markReady);
               pipVideoEl.removeEventListener('canplay', markReady);
               if (currentVideoId === videoId) {
                 pipPrewarmReady = true;
@@ -12275,6 +12411,7 @@
               }
             };
             pipVideoEl.addEventListener('loadedmetadata', markReady);
+            pipVideoEl.addEventListener('loadeddata', markReady);
             pipVideoEl.addEventListener('canplay', markReady);
           } catch (e) {}
         }
@@ -12285,8 +12422,16 @@
       return p;
     }
 
+    function isOsPipCurrentlyOpen() {
+      if (!pipVideoEl) return false;
+      if (document.pictureInPictureElement === pipVideoEl) return true;
+      if (typeof pipVideoEl.webkitPresentationMode === 'string' && pipVideoEl.webkitPresentationMode === 'picture-in-picture') return true;
+      return false;
+    }
+
     function stopNativePipVideoClean(keepPrewarm = false) {
       if (!pipVideoEl) return;
+      stopPipPlaceholderStream();
       try {
         if (document.pictureInPictureElement === pipVideoEl && document.exitPictureInPicture) {
           document.exitPictureInPicture().catch(() => {});
@@ -12390,7 +12535,7 @@
       updatePipTabUI();
     }
 
-    function requestOsPipNow() {
+    async function requestOsPipWindowImmediate() {
       if (!pipVideoEl) return false;
       const canWebkitPip = typeof pipVideoEl.webkitSupportsPresentationMode === 'function' &&
         pipVideoEl.webkitSupportsPresentationMode('picture-in-picture');
@@ -12403,11 +12548,10 @@
           return true;
         }
         if (canStdPip) {
-          pipVideoEl.requestPictureInPicture().catch(() => {});
+          await pipVideoEl.requestPictureInPicture();
           return true;
         }
         if (canIosFullscreenPip) {
-          // iPhone iOS WebKit에서 webkitEnterFullscreen 진입 시 스와이프하면 즉시 iOS 네이티브 PiP(< 화살표 숨김 지원)로 전환됨!
           pipVideoEl.webkitEnterFullscreen();
           return true;
         }
@@ -12415,85 +12559,42 @@
       return false;
     }
 
-    async function launchNativePipImmediate(videoId, startSec) {
-      if (!pipVideoEl || !videoId) return false;
-      const targetSec = Math.max(0, Math.floor(startSec || 0));
-
-      // 케이스 1: 이미 prewarmPipVideoStream으로 스트림이 장전되어 있는 경우 → 사용자 클릭 제스처 안에서 0.0초 만에 즉시 네이티브 PiP 실행!
-      if (pipPrewarmedVideoId === videoId && pipVideoEl.src && pipVideoEl.readyState >= 1) {
-        try {
-          pipVideoEl.classList.add('active');
-          pipVideoEl.muted = false;
-          if (targetSec > 0 && isFinite(pipVideoEl.duration) && targetSec < pipVideoEl.duration) {
-            pipVideoEl.currentTime = targetSec;
-          }
-          sendYtCommand('pauseVideo');
-          hideYtPauseMask();
-          isPipActive = true;
-          updatePipTabUI();
-          const playP = pipVideoEl.play();
-          const triggered = requestOsPipNow();
-          if (playP && typeof playP.then === 'function') {
-            playP.then(() => {
-              if (!triggered) requestOsPipNow();
-            }).catch(() => {});
-          }
-          showTempBgStatus('📺 멀티태스킹 PiP 실행 (홈 스와이프 · 옆으로 밀면 < 숨김)', 3200);
-          return true;
-        } catch (e) {}
-      }
-
-      // 케이스 2: 영상을 켜자마자 0.5초 만에 [PiP]를 눌러 아직 스트림 로드 중인 경우 → 클릭 제스처 안에서 재생 권한을 즉시 확보 후 연결 즉시 네이티브 PiP 발동!
-      pipVideoEl.classList.add('active');
-      pipVideoEl.muted = false;
-      showTempBgStatus('📺 멀티태스킹 PiP 즉시 연결 중...', 2500);
-
-      let cands = (pipPrewarmedVideoId === videoId && pipVideoCandidates.length > 0) ? pipVideoCandidates : [];
-      if (cands.length === 0) {
-        cands = pipPrewarmPromise ? await pipPrewarmPromise : await fetchPipStreamCandidates(videoId);
-      }
-      if (currentVideoId !== videoId || !Array.isArray(cands) || cands.length === 0) {
-        pipVideoEl.classList.remove('active');
-        return false;
-      }
-
-      pipVideoCandidates = cands;
-      pipPrewarmedVideoId = videoId;
-      pipPendingSeekSec = targetSec;
-
+    function swapPipStreamInOpenWindow(candidates, videoId, targetSec) {
       return new Promise((resolve) => {
         let settled = false;
         const done = (ok) => { if (!settled) { settled = true; resolve(ok); } };
 
         const tryIdx = (idx) => {
-          if (idx >= pipVideoCandidates.length || currentVideoId !== videoId) {
-            stopNativePipVideoClean(false);
+          if (idx >= candidates.length || currentVideoId !== videoId) {
             done(false);
             return;
           }
           pipCandIdx = idx;
+          stopPipPlaceholderStream();
           pipVideoEl.muted = false;
-          if (pipVideoEl.src !== pipVideoCandidates[idx]) {
-            pipVideoEl.src = pipVideoCandidates[idx];
+          if (pipVideoEl.src !== candidates[idx]) {
+            pipVideoEl.src = candidates[idx];
           }
           pipVideoEl.classList.add('active');
 
           const onLoaded = () => {
             pipVideoEl.removeEventListener('loadedmetadata', onLoaded);
-            if (pipPendingSeekSec > 0 && isFinite(pipVideoEl.duration) && pipPendingSeekSec < pipVideoEl.duration) {
-              try { pipVideoEl.currentTime = pipPendingSeekSec; } catch (e) {}
+            if (targetSec > 0 && isFinite(pipVideoEl.duration) && targetSec < pipVideoEl.duration) {
+              try { pipVideoEl.currentTime = targetSec; } catch (e) {}
             }
           };
           const onPlaying = () => {
             pipVideoEl.removeEventListener('playing', onPlaying);
             pipVideoEl.removeEventListener('error', onErr);
             pipPrewarmReady = true;
+            isPipActive = true;
             sendYtCommand('pauseVideo');
             hideYtPauseMask();
-            isPipActive = true;
+            setupPipMediaSession(currentVideoTitle, videoId);
             updatePipTabUI();
-            requestOsPipNow();
-            showTempBgStatus('📺 멀티태스킹 PiP 활성화 (홈으로 나가거나 옆으로 밀면 < 숨김)', 3200);
+            if (!isOsPipCurrentlyOpen()) {
+              requestOsPipWindowImmediate();
+            }
             done(true);
           };
           const onErr = () => {
@@ -12514,11 +12615,88 @@
       });
     }
 
+    async function launchNativePipImmediate(videoId, startSec) {
+      if (!pipVideoEl || !videoId) return false;
+      const targetSec = Math.max(0, Math.floor(startSec || 0));
+
+      // [경로 1] 스트림이 이미 프리웜(readyState >= 1)된 경우: 사용자 터치 제스처 안에서 0.0초 만에 즉시 앱 밖 OS PiP 창으로 분리!
+      if (pipPrewarmedVideoId === videoId && pipVideoEl.src && !pipUsingPlaceholder && pipVideoEl.readyState >= 1) {
+        try {
+          pipVideoEl.classList.add('active');
+          pipVideoEl.muted = false;
+          if (targetSec > 0 && isFinite(pipVideoEl.duration) && targetSec < pipVideoEl.duration) {
+            try { pipVideoEl.currentTime = targetSec; } catch (e) {}
+          }
+          sendYtCommand('pauseVideo');
+          hideYtPauseMask();
+          isPipActive = true;
+          setupPipMediaSession(currentVideoTitle, videoId);
+          updatePipTabUI();
+
+          const playP = pipVideoEl.play();
+          let opened = await requestOsPipWindowImmediate();
+          if (!opened && playP && typeof playP.then === 'function') {
+            await playP.catch(() => {});
+            opened = await requestOsPipWindowImmediate();
+          }
+          if (opened || isOsPipCurrentlyOpen()) {
+            showTempBgStatus('📺 앱 밖 멀티태스킹 PiP 실행됨 (홈 화면 · 다른 앱 사용 가능)', 3400);
+            return true;
+          }
+        } catch (e) {}
+      }
+
+      // [경로 2] 스트림을 아직 불러오는 중인 경우: User Gesture가 소멸되지 않도록 캔버스 브릿지 스트림으로 즉시 OS PiP 창을 앱 밖으로 먼저 띄움!
+      let bridgeOpened = false;
+      const bridgeStream = createPipBridgeStream(currentVideoTitle);
+      if (bridgeStream) {
+        try {
+          pipPlaceholderStream = bridgeStream;
+          pipUsingPlaceholder = true;
+          pipVideoEl.classList.add('active');
+          pipVideoEl.muted = true;
+          pipVideoEl.srcObject = bridgeStream;
+          await pipVideoEl.play().catch(() => {});
+          bridgeOpened = await requestOsPipWindowImmediate();
+          if (bridgeOpened) {
+            isPipActive = true;
+            sendYtCommand('pauseVideo');
+            hideYtPauseMask();
+            updatePipTabUI();
+          }
+        } catch (e) {}
+      }
+
+      showTempBgStatus('📺 멀티태스킹 PiP 스트림 연결 중...', 2800);
+
+      let cands = (pipPrewarmedVideoId === videoId && pipVideoCandidates.length > 0) ? pipVideoCandidates : [];
+      if (cands.length === 0) {
+        cands = pipPrewarmPromise ? await pipPrewarmPromise : await fetchPipStreamCandidates(videoId);
+      }
+      if (currentVideoId !== videoId || !Array.isArray(cands) || cands.length === 0) {
+        stopNativePipVideoClean(false);
+        return false;
+      }
+
+      pipVideoCandidates = cands;
+      pipPrewarmedVideoId = videoId;
+      pipPendingSeekSec = targetSec;
+
+      const swapped = await swapPipStreamInOpenWindow(cands, videoId, targetSec);
+      if (swapped) {
+        showTempBgStatus('📺 앱 밖 멀티태스킹 PiP 활성화 (홈/다른 앱 위에서 계속 재생)', 3400);
+        return true;
+      }
+
+      stopNativePipVideoClean(false);
+      return false;
+    }
+
     async function togglePipMode() {
       if (!currentVideoId) return;
       if (isPipEdgeHidden) { restoreMiniPipFromEdge(); return; }
-      if (isPipActive) {
-        const resumeAt = pipVideoEl && isFinite(pipVideoEl.currentTime) ? pipVideoEl.currentTime : lastKnownPlaySec;
+      if (isPipActive || isOsPipCurrentlyOpen()) {
+        const resumeAt = pipVideoEl && !pipUsingPlaceholder && isFinite(pipVideoEl.currentTime) ? pipVideoEl.currentTime : lastKnownPlaySec;
         stopNativePipVideoClean(true);
         if (isAppMiniPip) exitAppMiniPip();
         if (currentVideoId) {
@@ -12529,21 +12707,24 @@
       }
       if (isAppMiniPip) { exitAppMiniPip(); return; }
 
-      // 웹앱 메인화면에서 처음부터 [PiP]를 누르면 즉시 OS 네이티브 멀티태스킹 PiP를 최우선 발동하고,
-      // साथ에 앱 화면도 우측 하단 미니창으로 깔끔하게 정돈하여 안팎 어디서든 멀티태스킹이 가능하게 함!
-      enterAppMiniPip();
-      await launchNativePipImmediate(currentVideoId, lastKnownPlaySec);
+      // 1순위: 앱 밖으로 완전히 빠져나가는 OS 네이티브 멀티태스킹 PiP 즉시 실행
+      const nativeOk = await launchNativePipImmediate(currentVideoId, lastKnownPlaySec);
+      if (!nativeOk) {
+        // 2순위 백업: 기기/인앱 브라우저에서 OS PiP를 차단한 경우에만 앱 내 우측 하단 미니 PiP(< 숨김 지원)로 전환
+        enterAppMiniPip();
+        showTempBgStatus('📺 미니 PiP 모드 (우측으로 밀면 < 탭으로 숨김)', 3000);
+      }
     }
 
     if (pipVideoEl) {
       pipVideoEl.addEventListener('timeupdate', () => {
-        if (isPipActive && isFinite(pipVideoEl.currentTime)) {
+        if (isPipActive && !pipUsingPlaceholder && isFinite(pipVideoEl.currentTime) && pipVideoEl.currentTime > 0) {
           lastKnownPlaySec = pipVideoEl.currentTime;
         }
       });
       const onLeaveNativePip = () => {
-        if (!isPipActive) return;
-        const sec = isFinite(pipVideoEl.currentTime) ? pipVideoEl.currentTime : lastKnownPlaySec;
+        if (!isPipActive || pipUsingPlaceholder) return;
+        const sec = (!pipUsingPlaceholder && isFinite(pipVideoEl.currentTime)) ? pipVideoEl.currentTime : lastKnownPlaySec;
         const wasPaused = pipVideoEl.paused;
         stopNativePipVideoClean(true);
         if (isAppMiniPip) exitAppMiniPip();
@@ -12555,7 +12736,7 @@
       pipVideoEl.addEventListener('leavepictureinpicture', onLeaveNativePip);
       pipVideoEl.addEventListener('webkitendfullscreen', onLeaveNativePip);
       pipVideoEl.addEventListener('webkitpresentationmodechanged', () => {
-        if (pipVideoEl.webkitPresentationMode === 'inline' && isPipActive) onLeaveNativePip();
+        if (pipVideoEl.webkitPresentationMode === 'inline' && isPipActive && !pipUsingPlaceholder) onLeaveNativePip();
       });
     }
 
