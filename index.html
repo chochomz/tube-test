@@ -1467,8 +1467,7 @@
     body.blackout-active .feed-scroll-sentinel,
     body.blackout-active #slide-bookmark,
     body.blackout-active #manage-modal-overlay,
-    body.blackout-active #settings-auth-overlay,
-    body.blackout-active #tablet-info-modal { visibility: hidden !important; }
+    body.blackout-active #settings-auth-overlay { visibility: hidden !important; }
     #battery-blackout-overlay {
       position: fixed;
       top: -120px;
@@ -1493,325 +1492,7 @@
     /* 태블릿 전용 큰 테두리 6~8 및 플레이어 보조 탭 (모바일 쇼츠 미사용) */
     .tablet-only-bwidth { display: none; }
     body.tablet-mode .tablet-only-bwidth { display: inline-flex; }
-    .tablet-only-tab { display: none; }
-    body.tablet-mode .tablet-only-tab { display: inline-flex; align-items: center; }
 
-
-
-    /* 태블릿 전용 독립 우측 '더보기 · 내용' 자유 이동/리사이즈/비례 스케일 창 */
-    #tablet-info-modal {
-      position: fixed;
-      z-index: 9001;
-      display: none;
-      flex-direction: column;
-      background: var(--settings-modal-bg);
-      color: var(--settings-modal-fg);
-      border: 1.5px solid var(--header-border-color);
-      border-radius: 10px;
-      box-shadow: 0 12px 34px rgba(0, 0, 0, 0.82);
-      overflow: hidden;
-      --ti-scale: 1;
-      touch-action: none;
-    }
-    body:not(.tablet-mode) #tablet-info-modal { display: none !important; }
-    #tablet-info-modal.ti-interacting { user-select: none; -webkit-user-select: none; }
-    .ti-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 6px;
-      padding: calc(7px * var(--ti-scale)) calc(10px * var(--ti-scale));
-      background: rgba(255, 255, 255, 0.06);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.14);
-      cursor: grab;
-      touch-action: none;
-      flex-shrink: 0;
-    }
-    .ti-header:active { cursor: grabbing; }
-    .ti-header-label {
-      font-size: calc(12px * var(--ti-scale));
-      font-weight: 800;
-      opacity: 0.9;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .ti-header-actions {
-      display: inline-flex;
-      align-items: center;
-      gap: calc(5px * var(--ti-scale));
-      flex-shrink: 0;
-    }
-    .ti-refresh-btn,
-    .ti-close-btn {
-      width: calc(24px * var(--ti-scale));
-      height: calc(24px * var(--ti-scale));
-      min-width: 20px;
-      min-height: 20px;
-      border-radius: 6px;
-      border: 1px solid rgba(255, 255, 255, 0.24);
-      background: rgba(0, 0, 0, 0.35);
-      color: inherit;
-      font-size: calc(12px * var(--ti-scale));
-      font-weight: 700;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      flex-shrink: 0;
-    }
-    .ti-header-left {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      min-width: 0;
-      flex: 1;
-    }
-    .ti-auto-btn {
-      height: 24px;
-      padding: 0 8px;
-      border-radius: 6px;
-      border: 1px solid rgba(255, 255, 255, 0.24);
-      background: rgba(0, 0, 0, 0.35);
-      color: #a1a1aa;
-      font-size: 11px;
-      font-weight: 800;
-      cursor: pointer;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-    .ti-auto-btn.on {
-      background: rgba(217, 56, 106, 0.85);
-      border-color: var(--header-border-color);
-      color: #ffffff;
-    }
-    .ti-body {
-      flex: 1;
-      min-height: 0;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      padding: 0;
-    }
-    /* 창 확대/축소에 맞춰 카드 비율 유지 + 1~3열 및 세로 갯수 자동 확장 그리드 */
-    .shorts-list-view {
-      flex: 1;
-      min-height: 0;
-      height: 100%;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      touch-action: pan-y;
-      overscroll-behavior: contain;
-      padding: 6px 6px 16px 6px;
-      display: grid;
-      grid-template-columns: repeat(var(--shorts-cols, 1), minmax(0, 1fr));
-      grid-auto-rows: var(--shorts-card-h, 114px);
-      gap: 6px;
-      align-content: start;
-    }
-    .shorts-list-view::-webkit-scrollbar { width: 5px; }
-    .shorts-list-view::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.28); border-radius: 4px; }
-    .shorts-status-msg {
-      grid-column: 1 / -1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 24px 12px;
-      font-size: 13px;
-      opacity: 0.78;
-      line-height: 1.5;
-    }
-    .shorts-card {
-      position: relative;
-      height: 100%;
-      display: flex;
-      align-items: stretch;
-      gap: calc(8px * var(--ti-scale));
-      padding: calc(5px * var(--ti-scale));
-      border-radius: 8px;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1.5px solid rgba(255, 255, 255, 0.12);
-      cursor: pointer;
-      transition: background 0.14s, border-color 0.14s;
-      overflow: hidden;
-    }
-    .shorts-card:active {
-      background: rgba(255, 255, 255, 0.15);
-      border-color: var(--header-border-color);
-    }
-    .shorts-card.active-short {
-      border-color: var(--header-border-color);
-      background: rgba(217, 56, 106, 0.22);
-      box-shadow: inset 0 0 0 1px var(--header-border-color);
-    }
-    .shorts-thumb-box {
-      position: relative;
-      height: 100%;
-      aspect-ratio: 9 / 11;
-      max-width: 42%;
-      border-radius: 6px;
-      overflow: hidden;
-      background: #111;
-      flex-shrink: 0;
-    }
-    .shorts-thumb-box img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-    .shorts-play-badge {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(0, 0, 0, 0.2);
-      color: #ffffff;
-      font-size: calc(15px * var(--ti-scale));
-      text-shadow: 0 1px 6px rgba(0, 0, 0, 0.85);
-      pointer-events: none;
-    }
-    .shorts-dur-tag {
-      position: absolute;
-      right: 3px;
-      bottom: 3px;
-      padding: 1px 4px;
-      border-radius: 4px;
-      background: rgba(0, 0, 0, 0.78);
-      color: #ffffff;
-      font-size: calc(9.5px * var(--ti-scale));
-      font-weight: 700;
-      font-variant-numeric: tabular-nums;
-      pointer-events: none;
-    }
-    .shorts-card-info {
-      flex: 1;
-      min-width: 0;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      gap: calc(4px * var(--ti-scale));
-      padding-right: 18px;
-    }
-    .shorts-card-title {
-      font-size: calc(12.5px * var(--ti-scale));
-      font-weight: 700;
-      line-height: 1.32;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      word-break: break-word;
-    }
-    .shorts-card-meta {
-      font-size: calc(10px * var(--ti-scale));
-      opacity: 0.68;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      font-variant-numeric: tabular-nums;
-    }
-    .shorts-star-btn {
-      position: absolute;
-      top: 4px;
-      right: 4px;
-      z-index: 3;
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      border: 1px solid rgba(255, 255, 255, 0.28);
-      background: rgba(0, 0, 0, 0.48);
-      color: rgba(255, 255, 255, 0.75);
-      font-size: 12px;
-      line-height: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      padding: 0;
-    }
-    .shorts-star-btn.pinned {
-      border-color: var(--star-pin-color);
-      color: var(--star-pin-color);
-      text-shadow: 0 0 6px var(--star-pin-color);
-    }
-    .shorts-sentinel {
-      grid-column: 1 / -1;
-      height: 36px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 11.5px;
-      opacity: 0.7;
-    }
-    .ti-resizer {
-      position: absolute;
-      width: 22px;
-      height: 22px;
-      z-index: 25;
-      touch-action: none;
-    }
-    .ti-resizer::after {
-      content: "";
-      position: absolute;
-      width: 10px;
-      height: 10px;
-      box-sizing: border-box;
-      opacity: 0.65;
-      pointer-events: none;
-    }
-    .ti-resizer.tl { top: 0; left: 0; cursor: nwse-resize; }
-    .ti-resizer.tl::after { top: 1px; left: 1px; border-top: 2px solid var(--header-border-color); border-left: 2px solid var(--header-border-color); }
-    .ti-resizer.tr { top: 0; right: 0; cursor: nesw-resize; }
-    .ti-resizer.tr::after { top: 1px; right: 1px; border-top: 2px solid var(--header-border-color); border-right: 2px solid var(--header-border-color); }
-    .ti-resizer.bl { bottom: 0; left: 0; cursor: nesw-resize; }
-    .ti-resizer.bl::after { bottom: 1px; left: 1px; border-bottom: 2px solid var(--header-border-color); border-left: 2px solid var(--header-border-color); }
-    .ti-resizer.br { bottom: 0; right: 0; cursor: nwse-resize; }
-    .ti-resizer.br::after { bottom: 1px; right: 1px; border-bottom: 2px solid var(--header-border-color); border-right: 2px solid var(--header-border-color); }
-    .ti-edge-b {
-      position: absolute;
-      left: 22px;
-      right: 22px;
-      bottom: 0;
-      height: 13px;
-      z-index: 24;
-      cursor: ns-resize;
-      touch-action: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .ti-edge-b::after {
-      content: "";
-      width: 38px;
-      height: 3.5px;
-      border-radius: 3px;
-      background: var(--header-border-color);
-      opacity: 0.55;
-      pointer-events: none;
-    }
-    .ti-edge-r {
-      position: absolute;
-      top: 22px;
-      bottom: 22px;
-      right: 0;
-      width: 10px;
-      z-index: 23;
-      cursor: ew-resize;
-      touch-action: none;
-    }
-    .ti-edge-l {
-      position: absolute;
-      top: 22px;
-      bottom: 22px;
-      left: 0;
-      width: 10px;
-      z-index: 23;
-      cursor: ew-resize;
-      touch-action: none;
-    }
     .db-diag-bar {
       display: flex;
       align-items: center;
@@ -3438,12 +3119,28 @@
       line-height: 1.42;
     }
 
-    body.tablet-mode #player-lyrics-drawer { --ly-font: 14.5px; border-radius: 11px; }
+    body.tablet-mode #player-lyrics-drawer {
+      --ly-font: 14.5px;
+      border-radius: 11px;
+      position: fixed;
+      margin-top: 0;
+      z-index: 9001;
+      box-sizing: border-box;
+    }
+    body.tablet-mode #player-lyrics-drawer .ly-body {
+      flex: 1;
+      min-height: 0;
+      max-height: none;
+      padding: 9px 14px 20px 14px;
+      line-height: 1.42;
+    }
     body.tablet-mode .ly-header { padding: 7px 10px; gap: 6px; }
     body.tablet-mode .ly-custom-input { height: 32px; font-size: 13px; padding: 0 10px; }
     body.tablet-mode .ly-confirm-btn { height: 32px; font-size: 12.5px; padding: 0 12px; }
     body.tablet-mode .ly-icon-btn { height: 32px; min-width: 32px; padding: 0 8px; font-size: 14px; }
-    body.tablet-mode .ly-body { max-height: min(56dvh, 420px); padding: 9px 14px 20px 14px; line-height: 1.42; }
+    #floating-player-modal.lyrics-shift-anim {
+      transition: top 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+    }
     .blur-cfg-row {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -3507,7 +3204,6 @@
       border-left: none;
       z-index: 1;
     }
-    .tab-group-right.overlap-tabs #tabletInfoToggleTab { z-index: 4; }
     .tab-group-right.overlap-tabs .bookmark-tab.tab-close {
       z-index: 5;
       padding: 2px 10px 2.5px 12px;
@@ -3822,9 +3518,6 @@
           <svg class="tab-close-ear ear-l" viewBox="0 0 8 8" aria-hidden="true"><path d="M 0,0 L 8,0 L 8,8 Q 8,0 0,0 Z"/></svg>
           <span>관련정보</span>
         </div>
-        <div class="bookmark-tab tablet-only-tab" id="tabletInfoToggleTab" onclick="toggleTabletInfoModal()" title="관련 쇼츠 창 열기/닫기">
-          <span>쇼츠</span>
-        </div>
         <div class="bookmark-tab tab-close" onclick="closePlayerModal()" title="닫기">
           <span>✕</span>
           <svg class="tab-close-ear ear-r" viewBox="0 0 8 8" aria-hidden="true"><path d="M 0,0 L 8,0 L 8,8 Q 8,0 0,0 Z"/></svg>
@@ -3848,29 +3541,6 @@
     </div>
   </div>
 
-  <!-- 3-1b. 태블릿 전용 독립 우측 '더보기 · 내용' 스크롤 창 -->
-  <div id="tablet-info-modal" style="--ti-scale: 1;">
-    <div class="ti-header" id="tiDragBar" title="드래그하여 자유 배치">
-      <div class="ti-header-left">
-        <span class="ti-header-label" id="shortsHeaderLabel">▶ 관련 쇼츠</span>
-      </div>
-      <div class="ti-header-actions">
-        <button type="button" class="ti-auto-btn on" id="shortsAutoNextBtn" onclick="toggleShortsAutoNext()" title="쇼츠 종료 시 다음 쇼츠 자동 연속 재생">연속</button>
-        <button type="button" class="ti-refresh-btn" onclick="reloadRelatedShorts()" title="관련 쇼츠 다시 검색">↻</button>
-        <button type="button" class="ti-close-btn" onclick="hideTabletInfoModal(true)" title="닫기">✕</button>
-      </div>
-    </div>
-    <div class="ti-body" id="tiBody">
-      <div class="shorts-list-view" id="shortsListView"></div>
-    </div>
-    <div class="ti-resizer tl" data-tidir="tl"></div>
-    <div class="ti-resizer tr" data-tidir="tr"></div>
-    <div class="ti-resizer bl" data-tidir="bl"></div>
-    <div class="ti-resizer br" data-tidir="br"></div>
-    <div class="ti-edge-b" data-tidir="b" title="아래로 당겨 더 많은 내용 보기"></div>
-    <div class="ti-edge-r" data-tidir="r"></div>
-    <div class="ti-edge-l" data-tidir="l"></div>
-  </div>
 
   <!-- 3-2. 슬라이드 책갈피 -->
   <div id="slide-bookmark" class="dock-right sb-size-1">
@@ -4311,14 +3981,9 @@
         if (slideBookmarkVisible) applyBookmarkPosition(dockSide);
       }
       if (changed) {
-        tiUserCustomized = false;
-        if (!isTabletMode) {
-          hideTabletInfoModal(false);
-        }
-      }
-      if (currentVideoId && !isDockedToBookmark && !isInlinePlaying) {
-        const tiEl = document.getElementById('tablet-info-modal');
-        if (tiEl && tiEl.style.display === 'flex') clampTabletInfoModalToViewport();
+        savedMobileTopBeforeLyrics = null;
+        mobileUserDraggedWhileLyricsOpen = false;
+        if (typeof resetLyricsDrawerInlineStyles === 'function') resetLyricsDrawerInlineStyles();
       }
 
       // 열려 있는 부유창이 화면 회전/모드 전환 후 화면 밖으로 벗어나지 않게 보정
@@ -4328,7 +3993,8 @@
         const dims = apply16by9Scale(targetW);
         if (changed) {
           lastPlayerWidth = dims.width;
-          modal.style.left = Math.max(6, Math.round((window.innerWidth - dims.width) / 2)) + 'px';
+          const leftPos = isTabletMode ? 14 : Math.max(6, Math.round((window.innerWidth - dims.width) / 2));
+          modal.style.left = leftPos + 'px';
           modal.style.top = topPos + 'px';
         } else {
           const curL = modal.offsetLeft;
@@ -4337,6 +4003,9 @@
           const maxT = Math.max(4, window.innerHeight - dims.height - 32);
           modal.style.left = Math.max(6, Math.min(maxL, curL)) + 'px';
           modal.style.top = Math.max(4, Math.min(maxT, curT)) + 'px';
+        }
+        if (lyricsPanelOpen && typeof syncLyricsDrawerLayout === 'function') {
+          syncLyricsDrawerLayout(true);
         }
       }
     }
@@ -4529,17 +4198,8 @@
     let currentSkinCategory = 'all';
     let customThemeBackup = null;
     let faithConfig = { showMode: 'faith', verseMode: 'default', speed: 'normal', fontSize: 'normal', verses: [], badgeOverrides: {} };
-    const relatedShortsCache = new Map();
-    let currentShortsList = [];
-    let currentShortsIdx = -1;
-    let shortsFetchSeq = 0;
-    let currentShortsQueryKey = '';
-    let shortsSession = null;
-    let shortsScrollObserver = null;
-    let tiUserCustomized = false;
-    let shortsPanelOpen = false;
-    let shortsAutoNext = true;
-    let activePlayingShortId = '';
+    let savedMobileTopBeforeLyrics = null;
+    let mobileUserDraggedWhileLyricsOpen = false;
     let blackoutWakeLock = null;
     let blackoutWatchdogTimer = null;
     let blackoutWantPlaying = false;
@@ -4550,7 +4210,6 @@
     let isInlinePlaying = false;
     let inlineVideoId = '';
     let activeDrawerDocId = '';
-    let customStreamApiUrl = '';
 
     function isAdminUser() { return !!(currentUser && currentUser.role === 'admin'); }
     function getUid() { return currentUser ? currentUser.id : 'guest'; }
@@ -4647,7 +4306,7 @@
     let currentVideoId = '';
     let currentVideoTitle = '';
 
-    // 1. 16:9 비율 완벽 유지 + 모바일/태블릿 모두 초소형 임베드 뷰포트(384x216) 스케일링으로 유튜브 인스트림 광고 최소화
+    // 1. 16:9 비율 유지 · 태블릿 HD 고화질(960x540 / 저DPR 1280x720) + 창 크기 비례 문자 스케일 · 모바일 384x216 보존
     function apply16by9Scale(newWidth) {
       const minW = isTabletMode ? 280 : MIN_PLAYER_WIDTH;
       const maxW = Math.max(minW, window.innerWidth - (isTabletMode ? 24 : 12));
@@ -4657,9 +4316,13 @@
       modal.style.width = `${clampedW}px`;
       modalWindow.style.height = `${exactH}px`;
 
-      // 유튜브 임베드 서버가 '초소형 위젯 플레이어'로 판정하여 프리롤/중간 광고를 억제하도록 384x216 기준 스케일링 적용
-      const stageBaseW = 384;
-      const stageBaseH = 216;
+      let stageBaseW = 384;
+      let stageBaseH = 216;
+      if (isTabletMode) {
+        const dpr = window.devicePixelRatio || 1;
+        stageBaseW = dpr >= 1.5 ? 960 : 1280;
+        stageBaseH = dpr >= 1.5 ? 540 : 720;
+      }
       scaleStage.style.width = `${stageBaseW}px`;
       scaleStage.style.height = `${stageBaseH}px`;
       const scaleRatio = clampedW / stageBaseW;
@@ -6128,15 +5791,6 @@
       return sanitizeGeminiKeyString(_u4(s));
     }
 
-    // AQ. 시작 키와 AIza 시작 키 모두 길이 제한 없이 유연하게 통과
-    function isValidGeminiKeyFormat(k) {
-      const clean = sanitizeGeminiKeyString(k);
-      if (!clean || clean.length < 15) return false;
-      if (clean.startsWith('AQ.')) return true;
-      if (clean.startsWith('AIza')) return true;
-      return clean.length >= 20;
-    }
-
     function showAdminSaveNotice(msg, isError = false, holdMs = 5500) {
       const el = document.getElementById('adminSaveNotice');
       if (!el) return;
@@ -6882,6 +6536,132 @@
       renderRelatedInfoToDOM(finalInfoObj, true);
     }
 
+    function resetLyricsDrawerInlineStyles() {
+      const dr = document.getElementById('player-lyrics-drawer');
+      const bodyEl = document.getElementById('lyBody');
+      if (dr) {
+        dr.style.left = '';
+        dr.style.top = '';
+        dr.style.width = '';
+        dr.style.height = '';
+        dr.style.maxHeight = '';
+      }
+      if (bodyEl) bodyEl.style.maxHeight = '';
+    }
+
+    function getSafeViewportMetrics() {
+      const vv = window.visualViewport;
+      const vw = vv ? Math.round(vv.width) : window.innerWidth;
+      const vh = vv ? Math.round(vv.height) : window.innerHeight;
+      return { vw, vh };
+    }
+
+    function syncTabletLyricsSideLayout() {
+      const dr = document.getElementById('player-lyrics-drawer');
+      const bodyEl = document.getElementById('lyBody');
+      if (!dr || !lyricsPanelOpen || !isTabletMode || isDockedToBookmark || modal.style.display === 'none') return;
+
+      const { vw, vh } = getSafeViewportMetrics();
+      const playerRect = modalWindow.getBoundingClientRect();
+      if (playerRect.width <= 0 || playerRect.height <= 0) return;
+
+      const gap = 10;
+      const rightMargin = 12;
+      const bottomMargin = 14;
+      const minW = 230;
+      const maxW = 480;
+
+      const rightAvail = vw - playerRect.right - gap - rightMargin;
+      let targetW;
+      let targetLeft;
+      if (rightAvail >= minW) {
+        targetW = Math.min(maxW, Math.round(rightAvail));
+        targetLeft = Math.round(playerRect.right + gap);
+      } else {
+        targetW = Math.min(maxW, Math.max(minW, Math.round(vw * 0.34)));
+        targetLeft = Math.max(8, Math.round(vw - targetW - rightMargin));
+      }
+
+      const targetTop = Math.max(6, Math.min(vh - 180, Math.round(playerRect.top)));
+      const maxAvailH = Math.max(160, vh - targetTop - bottomMargin);
+      const targetH = Math.min(maxAvailH, Math.max(Math.round(playerRect.height), Math.min(maxAvailH, 420)));
+
+      dr.style.left = targetLeft + 'px';
+      dr.style.top = targetTop + 'px';
+      dr.style.width = targetW + 'px';
+      dr.style.height = targetH + 'px';
+      dr.style.maxHeight = maxAvailH + 'px';
+      if (bodyEl) bodyEl.style.maxHeight = '';
+    }
+
+    function adjustMobileLyricsPosition(allowShiftUp = true) {
+      const dr = document.getElementById('player-lyrics-drawer');
+      const bodyEl = document.getElementById('lyBody');
+      if (!dr || !lyricsPanelOpen || isTabletMode || isDockedToBookmark || modal.style.display === 'none') return;
+
+      dr.style.left = '';
+      dr.style.top = '';
+      dr.style.width = '';
+      dr.style.height = '';
+      dr.style.maxHeight = '';
+
+      const { vh } = getSafeViewportMetrics();
+      const topMin = 8;
+      const bottomSafe = 14;
+      const headerEl = dr.querySelector('.ly-header');
+      const lyHeaderH = headerEl ? Math.max(36, Math.round(headerEl.getBoundingClientRect().height)) : 40;
+      const playerH = modalWindow.offsetHeight || Math.round((modal.offsetWidth || 320) * (9 / 16));
+      const tabsEl = modal.querySelector('.modal-bottom-tabs');
+      const tabsH = tabsEl ? Math.round(tabsEl.getBoundingClientRect().height) : 20;
+      const desiredBodyH = Math.min(Math.round(vh * 0.5), 320);
+      const desiredTotalH = playerH + tabsH + 4 + lyHeaderH + desiredBodyH;
+
+      let curTop = modal.offsetTop;
+      if (allowShiftUp && !mobileUserDraggedWhileLyricsOpen) {
+        const overflow = (curTop + desiredTotalH + bottomSafe) - vh;
+        if (overflow > 0) {
+          if (savedMobileTopBeforeLyrics === null) {
+            savedMobileTopBeforeLyrics = curTop;
+          }
+          const nextTop = Math.max(topMin, Math.round(curTop - overflow));
+          if (nextTop !== curTop) {
+            modal.classList.add('lyrics-shift-anim');
+            modal.style.top = nextTop + 'px';
+            curTop = nextTop;
+            setTimeout(() => modal.classList.remove('lyrics-shift-anim'), 230);
+          }
+        }
+      }
+
+      const drawerStartY = curTop + playerH + tabsH + 4;
+      const availForDrawer = Math.max(130, vh - drawerStartY - bottomSafe);
+      const maxBodyH = Math.max(96, availForDrawer - lyHeaderH - 4);
+      if (bodyEl) {
+        bodyEl.style.maxHeight = maxBodyH + 'px';
+      }
+    }
+
+    function restoreMobileTopAfterLyrics() {
+      if (!isTabletMode && savedMobileTopBeforeLyrics !== null && !mobileUserDraggedWhileLyricsOpen && modal.style.display !== 'none' && !isDockedToBookmark) {
+        const { topPos } = getDefaultFullPlayerMetrics();
+        const restoreTop = Math.max(6, Math.min(window.innerHeight - modalWindow.offsetHeight - 36, savedMobileTopBeforeLyrics || topPos));
+        modal.classList.add('lyrics-shift-anim');
+        modal.style.top = restoreTop + 'px';
+        setTimeout(() => modal.classList.remove('lyrics-shift-anim'), 230);
+      }
+      savedMobileTopBeforeLyrics = null;
+      mobileUserDraggedWhileLyricsOpen = false;
+    }
+
+    function syncLyricsDrawerLayout(allowMobileShift = true) {
+      if (!lyricsPanelOpen || !currentVideoId || isDockedToBookmark || modal.style.display === 'none') return;
+      if (isTabletMode) {
+        syncTabletLyricsSideLayout();
+      } else {
+        adjustMobileLyricsPosition(allowMobileShift);
+      }
+    }
+
     function toggleLyricsPanel() {
       if (!currentVideoId) return;
       const dr = document.getElementById('player-lyrics-drawer');
@@ -6891,10 +6671,16 @@
       dr.classList.toggle('open', lyricsPanelOpen);
       if (tab) tab.classList.toggle('lyrics-active', lyricsPanelOpen);
       if (lyricsPanelOpen) {
+        mobileUserDraggedWhileLyricsOpen = false;
         const inpEl = document.getElementById('lyCustomQueryInput');
         if (inpEl) inpEl.value = '';
         updateLyricsFontUI();
+        syncLyricsDrawerLayout(true);
+        requestAnimationFrame(() => syncLyricsDrawerLayout(true));
         openGeminiLyricsSearch(false, '');
+      } else {
+        resetLyricsDrawerInlineStyles();
+        restoreMobileTopAfterLyrics();
       }
     }
 
@@ -6903,7 +6689,12 @@
       const tab = document.getElementById('lyricsToggleTab');
       if (dr) dr.classList.remove('open');
       if (tab) tab.classList.remove('lyrics-active');
-      if (resetFlag) lyricsPanelOpen = false;
+      resetLyricsDrawerInlineStyles();
+      if (resetFlag) {
+        lyricsPanelOpen = false;
+        savedMobileTopBeforeLyrics = null;
+        mobileUserDraggedWhileLyricsOpen = false;
+      }
     }
 
     function onLyricsTrackChanged() {
@@ -6915,7 +6706,17 @@
       if (dr) dr.classList.add('open');
       if (tab) tab.classList.add('lyrics-active');
       updateLyricsFontUI();
+      syncLyricsDrawerLayout(true);
+      requestAnimationFrame(() => syncLyricsDrawerLayout(true));
       openGeminiLyricsSearch(false, '');
+    }
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', () => {
+        if (lyricsPanelOpen && currentVideoId && !isDockedToBookmark && !isInlinePlaying) {
+          syncLyricsDrawerLayout(true);
+        }
+      });
     }
 
     (function bindLyricsAndFaithBarGuards() {
@@ -7139,7 +6940,6 @@
       }
       savePinsToCloud();
       renderSortedFeed();
-      if (typeof updateShortsStarUI === 'function') updateShortsStarUI();
     }
 
     // 3. 50개 단위 고속 검색 수집
@@ -7759,7 +7559,6 @@
       if (loaded.length > 0) {
         customStreamApiUrls = loaded;
       }
-      customStreamApiUrl = customStreamApiUrls[0] || '';
     }
 
     async function saveCustomStreamApiUrls() {
@@ -7780,7 +7579,6 @@
         }
       }
       customStreamApiUrls = normalizeStreamApiList(rawList);
-      customStreamApiUrl = customStreamApiUrls[0] || '';
       try {
         if (customStreamApiUrls.length > 0) {
           localStorage.setItem(SHARED_STREAM_APIS_LOCAL_KEY, JSON.stringify(customStreamApiUrls));
@@ -7880,9 +7678,7 @@
     }
 
     async function fetchCustomStreamCandidates(videoId) {
-      const list = customStreamApiUrls.length > 0
-        ? customStreamApiUrls
-        : (customStreamApiUrl ? [customStreamApiUrl] : []);
+      const list = customStreamApiUrls.length > 0 ? customStreamApiUrls : [];
       if (list.length === 0) return [];
       for (let i = 0; i < list.length; i++) {
         const found = await fetchSingleCustomStreamCandidates(list[i], videoId);
@@ -8149,7 +7945,7 @@
 
       let candidates = [];
 
-      if (customStreamApiUrls.length > 0 || customStreamApiUrl) {
+      if (customStreamApiUrls.length > 0) {
         const customUrls = await fetchCustomStreamCandidates(videoId);
         if (currentVideoId !== videoId) return [];
         if (customUrls.length > 0) candidates = customUrls;
@@ -8257,243 +8053,7 @@
     }
 
     let ytFrameReady = false;
-    function getRelatedShortsKeyword(title) {
-      const cleaned = simplifyTitle(title || currentVideoTitle || '')
-        .replace(/[^가-힣a-zA-Z0-9\s]/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim();
-      if (cleaned && cleaned.length >= 2) {
-        return cleaned.split(' ').slice(0, 3).join(' ');
-      }
-      if (activeTabKeyword && activeTabKeyword.trim()) {
-        return activeTabKeyword.trim();
-      }
-      return '인기';
-    }
-
-    function isKoreanShortItem(item) {
-      const text = String((item && item.t) || '') + ' ' + String((item && item.up) || '');
-      return /[가-힣]/.test(text);
-    }
-
-    function sortShortsKoreanRecent(list) {
-      return [...(list || [])].sort((a, b) => {
-        const aKo = isKoreanShortItem(a) ? 1 : 0;
-        const bKo = isKoreanShortItem(b) ? 1 : 0;
-        if (aKo !== bKo) return bKo - aKo;
-        const aU = Number(a.u || 0);
-        const bU = Number(b.u || 0);
-        if (aU !== bU) return bU - aU;
-        return Number(b.v || 0) - Number(a.v || 0);
-      });
-    }
-
-    function extractShortBatchFromRaw(rawItems, seenIds) {
-      const primary = [];
-      const fallback = [];
-      for (const raw of (rawItems || [])) {
-        if (!raw || isLikelyAdVideo(raw) || !isKoreanVideoItem(raw)) continue;
-        const vid = extractVideoId(raw);
-        if (!vid || seenIds.has(vid)) continue;
-        seenIds.add(vid);
-        const rawTitle = String(raw.title || '제목 없음');
-        const dur = Number(raw.duration || 0) || 0;
-        const views = Number(raw.views || 0) || 0;
-        const uploaded = Number(raw.uploaded || 0) || 0;
-        const up = String(raw.uploaderName || raw.author || '').trim();
-        const obj = { id: vid, t: simplifyTitle(rawTitle), d: dur, v: views, u: uploaded, up };
-
-        const isShortItem = (raw.isShort === true) ||
-          /\/shorts\//i.test(String(raw.url || '')) ||
-          (dur > 0 && dur <= 65) ||
-          /#shorts|쇼츠/i.test(rawTitle);
-
-        if (isShortItem) primary.push(obj);
-        else if (dur <= 210) fallback.push(obj);
-      }
-      return { primary, fallback };
-    }
-
-    function collectLocalSeedShorts(excludeVideoId) {
-      const seen = new Set();
-      if (excludeVideoId) seen.add(excludeVideoId);
-      const out = [];
-      const sources = [...currentFeedItems, ...dbFeedPool];
-      for (const it of sources) {
-        if (!it || !it.id || seen.has(it.id)) continue;
-        const dur = Number(it.d || 0);
-        const title = String(it.t || '');
-        if ((dur > 0 && dur <= 65) || /#shorts|쇼츠/i.test(title)) {
-          seen.add(it.id);
-          out.push({
-            id: it.id,
-            t: simplifyTitle(title),
-            d: dur,
-            v: Number(it.v || 0) || 0,
-            u: Number(it.u || 0) || 0,
-            up: String(it._up || '').trim()
-          });
-        }
-      }
-      return sortShortsKoreanRecent(out).slice(0, 12);
-    }
-
-    async function initRelatedShortsFeed(keyword, excludeVideoId, forceRefresh = false) {
-      const kw = String(keyword || '').trim() || '인기';
-      const cacheKey = (kw + '::' + String(excludeVideoId || '')).toLowerCase();
-      currentShortsQueryKey = kw;
-      const mySeq = ++shortsFetchSeq;
-
-      const seenIds = new Set();
-      if (excludeVideoId) seenIds.add(excludeVideoId);
-
-      // 캐시가 있고 강제 새로고침이 아니면 즉시 표시 + 기존 세션 복원
-      if (!forceRefresh && relatedShortsCache.has(cacheKey)) {
-        const cached = relatedShortsCache.get(cacheKey);
-        currentShortsList = cached.items.filter(s => s && s.id !== excludeVideoId);
-        shortsSession = {
-          keyword: kw,
-          cacheKey,
-          query: cached.query,
-          server: cached.server,
-          nextpage: cached.nextpage,
-          exhausted: cached.exhausted,
-          loading: false,
-          altIdx: cached.altIdx || 0,
-          seenIds: new Set([...seenIds, ...currentShortsList.map(s => s.id)])
-        };
-        renderShortsListView(currentShortsList, false);
-        return;
-      }
-
-      const localSeeds = collectLocalSeedShorts(excludeVideoId);
-      localSeeds.forEach(s => seenIds.add(s.id));
-      currentShortsList = localSeeds;
-      renderShortsListView(localSeeds, true);
-
-      const queryList = [kw + ' 쇼츠', kw + ' 한국 쇼츠', kw + ' #쇼츠'];
-      shortsSession = {
-        keyword: kw,
-        cacheKey,
-        queries: queryList,
-        altIdx: 0,
-        query: queryList[0],
-        server: '',
-        nextpage: null,
-        exhausted: false,
-        loading: true,
-        seenIds
-      };
-
-      try {
-        const { data, server } = await smartFetch('/search?q=' + encodeURIComponent(shortsSession.query) + '&filter=videos');
-        if (mySeq !== shortsFetchSeq || !shortsSession) return;
-        shortsSession.server = server;
-        shortsSession.nextpage = data && data.nextpage ? data.nextpage : null;
-
-        const { primary, fallback } = extractShortBatchFromRaw(data && data.items, shortsSession.seenIds);
-        let firstBatch = primary.length >= 3 ? primary : [...primary, ...fallback];
-
-        // 초기 스크롤 감각 확보를 위해 6개 미만이면 nextpage 1회 선제 로드
-        if (firstBatch.length < 6 && shortsSession.nextpage) {
-          try {
-            const npRes = await fetch(server + '/nextpage/search?nextpage=' + encodeURIComponent(shortsSession.nextpage) + '&q=' + encodeURIComponent(shortsSession.query) + '&filter=videos');
-            const npData = await npRes.json();
-            if (mySeq !== shortsFetchSeq || !shortsSession) return;
-            shortsSession.nextpage = npData && npData.nextpage ? npData.nextpage : null;
-            const extra = extractShortBatchFromRaw(npData && npData.items, shortsSession.seenIds);
-            firstBatch = [...firstBatch, ...(extra.primary.length > 0 ? extra.primary : extra.fallback)];
-          } catch (e) {}
-        }
-
-        const merged = sortShortsKoreanRecent([...localSeeds, ...firstBatch]);
-        currentShortsList = merged;
-        shortsSession.loading = false;
-        saveShortsCacheSnapshot();
-        renderShortsListView(currentShortsList, false);
-      } catch (err) {
-        if (mySeq !== shortsFetchSeq || !shortsSession) return;
-        shortsSession.loading = false;
-        renderShortsListView(currentShortsList, false);
-      }
-    }
-
-    function saveShortsCacheSnapshot() {
-      if (!shortsSession || !shortsSession.cacheKey) return;
-      if (relatedShortsCache.size >= 25) {
-        const firstKey = relatedShortsCache.keys().next().value;
-        relatedShortsCache.delete(firstKey);
-      }
-      relatedShortsCache.set(shortsSession.cacheKey, {
-        items: [...currentShortsList],
-        query: shortsSession.query,
-        server: shortsSession.server,
-        nextpage: shortsSession.nextpage,
-        exhausted: shortsSession.exhausted,
-        altIdx: shortsSession.altIdx
-      });
-    }
-
-    async function loadMoreRelatedShorts() {
-      if (!isTabletMode || !shortsPanelOpen || !shortsSession || shortsSession.loading || shortsSession.exhausted) return;
-      const mySeq = shortsFetchSeq;
-      shortsSession.loading = true;
-      updateShortsSentinelText('관련 쇼츠 불러오는 중...');
-
-      try {
-        let added = [];
-        let attempts = 0;
-
-        while (added.length < 3 && attempts < 3) {
-          attempts++;
-          if (shortsSession.nextpage && shortsSession.server) {
-            const nextPath = '/nextpage/search?nextpage=' + encodeURIComponent(shortsSession.nextpage) + '&q=' + encodeURIComponent(shortsSession.query) + '&filter=videos';
-            const res = await fetch(shortsSession.server + nextPath);
-            if (!res.ok) throw new Error('nextpage failed');
-            const data = await res.json();
-            if (mySeq !== shortsFetchSeq || !shortsSession) return;
-            shortsSession.nextpage = data && data.nextpage ? data.nextpage : null;
-            const batch = extractShortBatchFromRaw(data && data.items, shortsSession.seenIds);
-            const picked = batch.primary.length > 0 ? batch.primary : batch.fallback;
-            added = [...added, ...picked];
-          } else {
-            // 현재 쿼리 nextpage 소진 시 다음 쇼츠 쿼리로 자연스럽게 이어 무한 로드
-            const queries = shortsSession.queries || [shortsSession.keyword + ' 쇼츠 #shorts', shortsSession.keyword + ' #shorts', shortsSession.keyword + ' shorts'];
-            shortsSession.altIdx = (shortsSession.altIdx || 0) + 1;
-            if (shortsSession.altIdx >= queries.length) {
-              shortsSession.exhausted = true;
-              break;
-            }
-            shortsSession.query = queries[shortsSession.altIdx];
-            const { data, server } = await smartFetch('/search?q=' + encodeURIComponent(shortsSession.query) + '&filter=videos');
-            if (mySeq !== shortsFetchSeq || !shortsSession) return;
-            shortsSession.server = server;
-            shortsSession.nextpage = data && data.nextpage ? data.nextpage : null;
-            const batch = extractShortBatchFromRaw(data && data.items, shortsSession.seenIds);
-            const picked = batch.primary.length > 0 ? batch.primary : batch.fallback;
-            added = [...added, ...picked];
-          }
-        }
-
-        if (mySeq !== shortsFetchSeq || !shortsSession) return;
-
-        if (added.length > 0) {
-          const sortedAdded = sortShortsKoreanRecent(added);
-          const startIdx = currentShortsList.length;
-          currentShortsList = [...currentShortsList, ...sortedAdded];
-          appendShortsCardsToDOM(sortedAdded, startIdx);
-          updateShortsHeaderCount();
-          saveShortsCacheSnapshot();
-        }
-      } catch (e) {
-        if (shortsSession) shortsSession.nextpage = null;
-      } finally {
-        if (shortsSession) shortsSession.loading = false;
-        updateShortsSentinelText(shortsSession && shortsSession.exhausted ? '모든 관련 쇼츠를 불러왔습니다' : '▼ 스크롤하여 쇼츠 더 보기');
-      }
-    }
-
-    function mountYoutubeEmbed(videoId, reuseExisting = false, startSec = 0) {
+    function mountYoutubeEmbed(videoId, startSec = 0) {
       apply16by9Scale(modal.offsetWidth || lastPlayerWidth || getDefaultFullPlayerMetrics().fitWidth);
 
       // 연속 영상 클릭 시 유튜브 iframe 내부에 광고 세션(Ad Pod)이 누적되는 것을 막기 위해 매번 쿠키 격리된 클린 youtube-nocookie 세션으로 마운트
@@ -8501,7 +8061,8 @@
       ytFrameReady = false;
       const originParam = (location.protocol === 'http:' || location.protocol === 'https:') ? ('&origin=' + encodeURIComponent(location.origin) + '&widget_referrer=' + encodeURIComponent(location.origin)) : '';
       const startParam = resumeAt > 0 ? ('&start=' + resumeAt) : '';
-      ytHolder.innerHTML = '<iframe id="ytPlayerFrame" referrerpolicy="strict-origin-when-cross-origin" src="https://www.youtube-nocookie.com/embed/' + videoId + '?autoplay=1&controls=1&fs=1&enablejsapi=1&modestbranding=1&rel=0&playsinline=1&iv_load_policy=3&cc_load_policy=0&disablekb=1&hl=ko' + startParam + originParam + '" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>';
+      const hqParam = isTabletMode ? '&vq=hd1080' : '';
+      ytHolder.innerHTML = '<iframe id="ytPlayerFrame" referrerpolicy="strict-origin-when-cross-origin" src="https://www.youtube-nocookie.com/embed/' + videoId + '?autoplay=1&controls=1&fs=1&enablejsapi=1&modestbranding=1&rel=0&playsinline=1&iv_load_policy=3&cc_load_policy=0&disablekb=1&hl=ko' + hqParam + startParam + originParam + '" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>';
 
       const frame = document.getElementById('ytPlayerFrame');
       if (frame) {
@@ -8511,415 +8072,17 @@
             frame.contentWindow.postMessage(JSON.stringify({ event: 'listening', id: 1 }), '*');
             frame.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'addEventListener', args: ['onError'] }), '*');
             frame.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'addEventListener', args: ['onStateChange'] }), '*');
+            if (isTabletMode) {
+              frame.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'setPlaybackQualityRange', args: ['hd720', 'hd1080'] }), '*');
+              frame.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'setPlaybackQuality', args: ['hd1080'] }), '*');
+            }
             frame.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'playVideo', args: [] }), '*');
           } catch (e) {}
         });
       }
     }
 
-    function updateShortsHeaderCount() {
-      const hdrLbl = document.getElementById('shortsHeaderLabel');
-      if (!hdrLbl) return;
-      const cnt = currentShortsList.length > 0 ? (' (' + currentShortsList.length + ')') : '';
-      hdrLbl.textContent = (currentShortsQueryKey ? ('▶ ' + currentShortsQueryKey + ' 쇼츠') : '▶ 관련 쇼츠') + cnt;
-    }
-
-    function updateShortsSentinelText(msg) {
-      const el = document.getElementById('shortsScrollSentinel');
-      if (el) el.textContent = msg;
-    }
-
-    function updateActiveShortCardHighlight(scrollIntoView = false) {
-      const lv = document.getElementById('shortsListView');
-      if (!lv) return;
-      let activeEl = null;
-      lv.querySelectorAll('.shorts-card').forEach(card => {
-        const isAct = !!(activePlayingShortId && card.dataset.sid === activePlayingShortId);
-        card.classList.toggle('active-short', isAct);
-        if (isAct) activeEl = card;
-      });
-      if (scrollIntoView && activeEl && activeEl.scrollIntoView) {
-        activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }
-    }
-
-    function updateShortsStarUI() {
-      const lv = document.getElementById('shortsListView');
-      if (!lv) return;
-      lv.querySelectorAll('.shorts-star-btn').forEach(btn => {
-        const vid = btn.dataset.vid;
-        const isPin = !!(vid && pinnedVideoIds.has(vid));
-        btn.classList.toggle('pinned', isPin);
-        btn.textContent = isPin ? '★' : '☆';
-      });
-    }
-
-    function createShortCardElement(item, idx) {
-      const isPin = pinnedVideoIds.has(item.id);
-      const isAct = !!(activePlayingShortId && activePlayingShortId === item.id);
-      const card = document.createElement('div');
-      card.className = 'shorts-card' + (isAct ? ' active-short' : '');
-      card.dataset.sid = item.id;
-      card.onclick = () => playShortInLeftPlayer(item, idx);
-
-      const thumbBox = document.createElement('div');
-      thumbBox.className = 'shorts-thumb-box';
-      const img = document.createElement('img');
-      img.src = getFastThumbUrl(item.id);
-      img.loading = 'lazy';
-      img.decoding = 'async';
-      img.onerror = function() { this.onerror = null; this.src = FALLBACK_THUMB; };
-      thumbBox.appendChild(img);
-
-      const playBadge = document.createElement('div');
-      playBadge.className = 'shorts-play-badge';
-      playBadge.textContent = '▶';
-      thumbBox.appendChild(playBadge);
-
-      if (item.d > 0) {
-        const durTag = document.createElement('span');
-        durTag.className = 'shorts-dur-tag';
-        durTag.textContent = formatSec(item.d);
-        thumbBox.appendChild(durTag);
-      }
-
-      const info = document.createElement('div');
-      info.className = 'shorts-card-info';
-      const titleEl = document.createElement('div');
-      titleEl.className = 'shorts-card-title';
-      titleEl.textContent = item.t;
-      const metaEl = document.createElement('div');
-      metaEl.className = 'shorts-card-meta';
-      const metaParts = [];
-      if (item.up) metaParts.push(item.up);
-      metaParts.push(formatFeedMeta(item.u, item.v));
-      metaEl.textContent = metaParts.join(' · ');
-      info.appendChild(titleEl);
-      info.appendChild(metaEl);
-
-      const starBtn = document.createElement('button');
-      starBtn.type = 'button';
-      starBtn.className = 'shorts-star-btn' + (isPin ? ' pinned' : '');
-      starBtn.dataset.vid = item.id;
-      starBtn.textContent = isPin ? '★' : '☆';
-      starBtn.title = isPin ? '상단 고정 해제' : '별표 고정';
-      starBtn.onclick = (e) => {
-        e.stopPropagation();
-        togglePinVideo(item.id);
-      };
-
-      card.appendChild(thumbBox);
-      card.appendChild(info);
-      card.appendChild(starBtn);
-      return card;
-    }
-
-    function bindShortsInfiniteObserver() {
-      const lv = document.getElementById('shortsListView');
-      const sentinel = document.getElementById('shortsScrollSentinel');
-      if (shortsScrollObserver) {
-        shortsScrollObserver.disconnect();
-        shortsScrollObserver = null;
-      }
-      if (!lv || !sentinel || typeof IntersectionObserver === 'undefined') return;
-      shortsScrollObserver = new IntersectionObserver((entries) => {
-        if (entries.some(e => e.isIntersecting)) {
-          loadMoreRelatedShorts();
-        }
-      }, { root: lv, rootMargin: '160px' });
-      shortsScrollObserver.observe(sentinel);
-    }
-
-    function appendShortsCardsToDOM(items, startIdx) {
-      const lv = document.getElementById('shortsListView');
-      const sentinel = document.getElementById('shortsScrollSentinel');
-      if (!lv || !items || items.length === 0) return;
-      const frag = document.createDocumentFragment();
-      items.forEach((item, offset) => {
-        frag.appendChild(createShortCardElement(item, startIdx + offset));
-      });
-      if (sentinel && sentinel.parentNode === lv) {
-        lv.insertBefore(frag, sentinel);
-      } else {
-        lv.appendChild(frag);
-      }
-    }
-
-    function renderShortsListView(list, isLoadingInitial = false) {
-      const lv = document.getElementById('shortsListView');
-      if (!lv) return;
-      updateShortsHeaderCount();
-      lv.innerHTML = '';
-
-      if (isLoadingInitial && (!list || list.length === 0)) {
-        lv.innerHTML = '<div class="shorts-status-msg">한국·최신 관련 쇼츠 검색 중...</div>';
-        return;
-      }
-      if (!list || list.length === 0) {
-        lv.innerHTML = '<div class="shorts-status-msg">관련 쇼츠를 찾지 못했습니다.<br>우측 상단 ↻ 버튼으로 다시 검색해 보세요.</div>';
-        return;
-      }
-
-      const frag = document.createDocumentFragment();
-      list.forEach((item, idx) => {
-        frag.appendChild(createShortCardElement(item, idx));
-      });
-      const sentinel = document.createElement('div');
-      sentinel.id = 'shortsScrollSentinel';
-      sentinel.className = 'shorts-sentinel';
-      sentinel.textContent = isLoadingInitial ? '추가 쇼츠 불러오는 중...' : (shortsSession && shortsSession.exhausted ? '모든 관련 쇼츠를 불러왔습니다' : '▼ 스크롤하여 쇼츠 더 보기');
-      frag.appendChild(sentinel);
-      lv.appendChild(frag);
-      bindShortsInfiniteObserver();
-    }
-
-    // 우측 쇼츠 클릭 -> 오른쪽 목록·스크롤 100% 유지 + 왼쪽 재생창에서만 즉시 재생!
-    function playShortInLeftPlayer(item, idx) {
-      if (!item || !item.id) return;
-      const qEl = document.getElementById('query');
-      if (qEl && document.activeElement !== qEl) qEl.value = '';
-      unlockIosAudioOnce();
-      stopBgAudioClean();
-
-      currentVideoId = item.id;
-      currentVideoTitle = item.t;
-      activePlayingShortId = item.id;
-      currentShortsIdx = idx;
-      isYtVideoPlaying = false;
-      lastKnownPlaySec = 0;
-
-      if (isDockedToBookmark || modal.style.display === 'none' || modal.classList.contains('docked-hidden')) {
-        isDockedToBookmark = false;
-        modal.classList.remove('docked-hidden', 'interacting');
-        modal.style.display = 'block';
-        document.body.classList.add('player-open');
-      }
-
-      mountYoutubeEmbed(item.id, true, 0);
-      hideYtPauseMask();
-      updateSearchBtnState();
-      updateBgModeUI();
-      updateSlideBookmarkPlayUI();
-      setupMediaSession(item.t, item.id);
-      prefetchPromise = prefetchBgAudio(item.id);
-      recordUserPlay(item.id, item.t);
-      updatePlayingCardHighlight(false);
-      updateActiveShortCardHighlight(false);
-      onLyricsTrackChanged();
-
-      // 끝자락 3개 이내에 도달하면 다음 쇼츠 미리 무한 로드
-      if (idx >= currentShortsList.length - 3) {
-        loadMoreRelatedShorts();
-      }
-    }
-
-    function toggleShortsAutoNext() {
-      shortsAutoNext = !shortsAutoNext;
-      const btn = document.getElementById('shortsAutoNextBtn');
-      if (btn) btn.classList.toggle('on', shortsAutoNext);
-    }
-
-    function reloadRelatedShorts() {
-      if (!isTabletMode || !currentVideoId) return;
-      const kw = getRelatedShortsKeyword(currentVideoTitle);
-      relatedShortsCache.delete((kw + '::' + String(currentVideoId || '')).toLowerCase());
-      initRelatedShortsFeed(kw, currentVideoId, true);
-    }
-
-    // 태블릿 전용 우측 쇼츠창 리사이즈: 창 확대/축소 시 카드 비율 유지 + 1~3열 및 세로 표시 갯수 자동 확장
-    function applyTabletInfoDimensions(w, h) {
-      const tiModal = document.getElementById('tablet-info-modal');
-      if (!tiModal) return { width: 320, height: 400 };
-      const minW = 200;
-      const maxW = Math.max(minW, window.innerWidth - 20);
-      const minH = 180;
-      const maxH = Math.max(minH, window.innerHeight - 24);
-      const clampedW = Math.max(minW, Math.min(maxW, Math.round(w)));
-      const clampedH = Math.max(minH, Math.min(maxH, Math.round(h)));
-
-      const cols = clampedW >= 660 ? 3 : (clampedW >= 430 ? 2 : 1);
-      const bodyH = Math.max(120, clampedH - 52);
-      let cardH = 114;
-      if (cols === 1) {
-        if (clampedW < 250) {
-          cardH = Math.max(82, Math.round(clampedW * 0.44));
-        } else if (bodyH <= 440) {
-          // 기본 화면 높이에서는 정확히 3개가 딱 들어맞게 계산
-          cardH = Math.max(88, Math.min(134, Math.floor((bodyH - 18) / 3)));
-        } else {
-          // 하단을 크게 늘리면 카드 비율(118px) 유지하며 4, 5, 6...개로 세로 갯수 자동 증가!
-          cardH = 118;
-        }
-      } else {
-        // 2열·3열 확대 시 카드 비율 유지하며 가로·세로 갯수 동시 증가!
-        cardH = Math.max(102, Math.min(136, Math.round((clampedW / cols) * 0.46)));
-      }
-      const scale = Math.max(0.76, Math.min(1.12, (clampedW / cols) / 310));
-
-      tiModal.style.width = clampedW + 'px';
-      tiModal.style.height = clampedH + 'px';
-      tiModal.style.setProperty('--shorts-cols', String(cols));
-      tiModal.style.setProperty('--shorts-card-h', cardH + 'px');
-      tiModal.style.setProperty('--ti-scale', scale.toFixed(3));
-      return { width: clampedW, height: clampedH };
-    }
-
-    function clampTabletInfoModalToViewport() {
-      const tiModal = document.getElementById('tablet-info-modal');
-      if (!tiModal || tiModal.style.display === 'none') return;
-      const curW = tiModal.offsetWidth || 320;
-      const curH = tiModal.offsetHeight || 400;
-      const dims = applyTabletInfoDimensions(curW, curH);
-      const maxL = Math.max(8, window.innerWidth - dims.width - 8);
-      const maxT = Math.max(8, window.innerHeight - dims.height - 8);
-      tiModal.style.left = Math.max(8, Math.min(maxL, tiModal.offsetLeft)) + 'px';
-      tiModal.style.top = Math.max(8, Math.min(maxT, tiModal.offsetTop)) + 'px';
-    }
-
-    function hideTabletInfoModal(byUser = false) {
-      if (shortsScrollObserver) {
-        shortsScrollObserver.disconnect();
-        shortsScrollObserver = null;
-      }
-      const tiModal = document.getElementById('tablet-info-modal');
-      if (tiModal) tiModal.style.display = 'none';
-      if (byUser) shortsPanelOpen = false;
-    }
-
-    function toggleTabletInfoModal() {
-      if (!isTabletMode || !currentVideoId) return;
-      const tiModal = document.getElementById('tablet-info-modal');
-      if (!tiModal) return;
-      if (tiModal.style.display === 'flex') {
-        hideTabletInfoModal(true);
-      } else {
-        shortsPanelOpen = true;
-        openTabletInfoModal(currentVideoId, currentVideoTitle, false);
-      }
-    }
-
-    function openTabletInfoModal(videoId, title, forceRefresh = false) {
-      if (!isTabletMode) {
-        hideTabletInfoModal(false);
-        return;
-      }
-      const tiModal = document.getElementById('tablet-info-modal');
-      if (!tiModal) return;
-
-      shortsPanelOpen = true;
-      tiModal.style.display = 'flex';
-
-      if (!tiUserCustomized) {
-        const playerRect = modal.getBoundingClientRect();
-        const gap = 10;
-        const rightMargin = 14;
-        const rightAvail = window.innerWidth - playerRect.right - gap - rightMargin;
-        const initW = rightAvail >= 200
-          ? Math.min(480, rightAvail)
-          : Math.min(340, Math.max(210, Math.round(window.innerWidth * 0.34)));
-        const maxAvailH = Math.max(260, window.innerHeight - playerRect.top - 16);
-        const initH = Math.min(maxAvailH, Math.max(360, playerRect.height || 380));
-        const dims = applyTabletInfoDimensions(initW, initH);
-        const targetLeft = rightAvail >= 200
-          ? Math.round(playerRect.right + gap)
-          : Math.max(10, window.innerWidth - dims.width - rightMargin);
-        const targetTop = Math.max(6, Math.min(window.innerHeight - dims.height - 10, Math.round(playerRect.top)));
-        tiModal.style.left = targetLeft + 'px';
-        tiModal.style.top = targetTop + 'px';
-      } else {
-        clampTabletInfoModalToViewport();
-      }
-
-      const kw = getRelatedShortsKeyword(title);
-      const lv = document.getElementById('shortsListView');
-      if (lv) lv.scrollTop = 0;
-      initRelatedShortsFeed(kw, videoId, forceRefresh);
-    }
-
-    (function bindTabletInfoInteractions() {
-      const tiModal = document.getElementById('tablet-info-modal');
-      const tiDragBar = document.getElementById('tiDragBar');
-      if (!tiModal || !tiDragBar) return;
-
-      let tiDragging = false;
-      let tiResizing = false;
-      let tiDir = '';
-      let tiStartX = 0, tiStartY = 0, tiInitL = 0, tiInitT = 0, tiInitW = 280, tiInitH = 300;
-
-      tiDragBar.addEventListener('pointerdown', (e) => {
-        if (e.target && e.target.closest && e.target.closest('button, .ti-close-btn, .ti-auto-btn, .ti-refresh-btn')) return;
-        tiDragging = true;
-        tiUserCustomized = true;
-        tiModal.classList.add('ti-interacting');
-        try { tiDragBar.setPointerCapture(e.pointerId); } catch (err) {}
-        tiStartX = e.clientX;
-        tiStartY = e.clientY;
-        tiInitL = tiModal.offsetLeft;
-        tiInitT = tiModal.offsetTop;
-        e.preventDefault();
-        e.stopPropagation();
-      });
-
-      tiModal.querySelectorAll('[data-tidir]').forEach(handle => {
-        handle.addEventListener('pointerdown', (e) => {
-          tiResizing = true;
-          tiUserCustomized = true;
-          tiDir = handle.getAttribute('data-tidir') || 'br';
-          tiModal.classList.add('ti-interacting');
-          try { handle.setPointerCapture(e.pointerId); } catch (err) {}
-          tiStartX = e.clientX;
-          tiStartY = e.clientY;
-          tiInitL = tiModal.offsetLeft;
-          tiInitT = tiModal.offsetTop;
-          tiInitW = tiModal.offsetWidth;
-          tiInitH = tiModal.offsetHeight;
-          e.preventDefault();
-          e.stopPropagation();
-        });
-      });
-
-      window.addEventListener('pointermove', (e) => {
-        if (tiDragging) {
-          const dx = e.clientX - tiStartX;
-          const dy = e.clientY - tiStartY;
-          const maxL = Math.max(4, window.innerWidth - tiModal.offsetWidth - 4);
-          const maxT = Math.max(4, window.innerHeight - tiModal.offsetHeight - 4);
-          tiModal.style.left = Math.max(4, Math.min(maxL, tiInitL + dx)) + 'px';
-          tiModal.style.top = Math.max(4, Math.min(maxT, tiInitT + dy)) + 'px';
-          return;
-        }
-        if (tiResizing) {
-          const dx = e.clientX - tiStartX;
-          const dy = e.clientY - tiStartY;
-          let nextW = tiInitW;
-          let nextH = tiInitH;
-          if (tiDir.includes('r')) nextW = tiInitW + dx;
-          if (tiDir.includes('l')) nextW = tiInitW - dx;
-          if (tiDir.includes('b')) nextH = tiInitH + dy;
-          if (tiDir.includes('t')) nextH = tiInitH - dy;
-
-          const dims = applyTabletInfoDimensions(nextW, nextH);
-          if (tiDir.includes('l')) {
-            tiModal.style.left = Math.max(4, tiInitL + tiInitW - dims.width) + 'px';
-          }
-          if (tiDir.includes('t')) {
-            tiModal.style.top = Math.max(4, tiInitT + tiInitH - dims.height) + 'px';
-          }
-        }
-      });
-
-      const endTiAction = () => {
-        if (tiDragging || tiResizing) {
-          tiDragging = false;
-          tiResizing = false;
-          tiModal.classList.remove('ti-interacting');
-        }
-      };
-      window.addEventListener('pointerup', endTiAction);
-      window.addEventListener('pointercancel', endTiAction);
-    })();
-
-    function getDefaultFullPlayerMetrics() {
+        function getDefaultFullPlayerMetrics() {
       if (isTabletMode) {
         // 상단 중앙 검색 모듈 외곽 테두리 하단 바로 밑부터 시작 + 우측 더보기창 공간 확보
         const headerBox = document.querySelector('.header-unified-box');
@@ -8969,8 +8132,8 @@
       modal.style.top = topPos + 'px';
       modal.style.display = 'block';
 
-      // 안정적 재생 + 광고 최소(youtube-nocookie + 모바일급 소형 뷰포트 스케일)
-      mountYoutubeEmbed(videoId, true);
+      // 안정적 재생 (태블릿 HD 고화질 · 모바일 초소형 스케일)
+      mountYoutubeEmbed(videoId, 0);
 
       closeTabHistoryDrawer();
       closeFilterPanel();
@@ -8983,15 +8146,10 @@
       setupMediaSession(title, videoId);
       prefetchPromise = prefetchBgAudio(videoId);
       recordUserPlay(videoId, title);
+      savedMobileTopBeforeLyrics = null;
+      mobileUserDraggedWhileLyricsOpen = false;
       updatePlayingCardHighlight(true);
       onLyricsTrackChanged();
-
-      activePlayingShortId = '';
-      if (isTabletMode && shortsPanelOpen) {
-        openTabletInfoModal(videoId, title, true);
-      } else {
-        hideTabletInfoModal(false);
-      }
     }
 
     // 5-2. Firebase 연동 · 진단 · 기기별 프로필 분리 동기화
@@ -9101,7 +8259,6 @@
         const s0 = d.items.find(it => it && it.id === '__stream_apis__' && Array.isArray(it.urls));
         if (s0 && s0.urls.length > 0) {
           customStreamApiUrls = normalizeStreamApiList(s0.urls);
-          customStreamApiUrl = customStreamApiUrls[0] || '';
           try { localStorage.setItem(SHARED_STREAM_APIS_LOCAL_KEY, JSON.stringify(customStreamApiUrls)); } catch (e) {}
         }
         const b0 = d.items.find(it => it && it.id === '__blur_cfg__' && it.cfg);
@@ -9629,9 +8786,6 @@
       activeTabKeyword = '';
       selectedTabDocId = '';
       tabArmedDocId = '';
-      shortsPanelOpen = false;
-      tiUserCustomized = false;
-      activePlayingShortId = '';
       currentFeedItems = [];
       dbFeedPool = [];
       activeSearchSession = null;
@@ -9685,7 +8839,6 @@
       selectedTabDocId = '';
       activeFilterOrder = [];
       savedBookmarkPos = null;
-      customStreamApiUrl = '';
       dockSide = 'right';
       lastPlayerWidth = 0;
       currentFeedMode = 'grid';
@@ -10960,7 +10113,7 @@
       function isIgnoredTarget(el) {
         if (!el || !el.closest) return false;
         return !!el.closest(
-          '#floating-player-modal, #tablet-info-modal, #slide-bookmark, #manage-modal-overlay, ' +
+          '#floating-player-modal, #slide-bookmark, #manage-modal-overlay, ' +
           '#settings-auth-overlay, #auth-gate-overlay, #battery-blackout-overlay, ' +
           '#tabHistoryDrawer, #filterSlidePanel, #savedTabsList, input, textarea, select'
         );
@@ -11081,7 +10234,8 @@
         return;
       }
       ytFrameReady = false;
-      hideTabletInfoModal(false);
+      savedMobileTopBeforeLyrics = null;
+      mobileUserDraggedWhileLyricsOpen = false;
       closeLyricsPanel(false);
       stopBgAudioClean();
       isYtVideoPlaying = false;
@@ -11127,27 +10281,11 @@
             if (msg.info.playerState === 1) {
               isYtVideoPlaying = true;
               hideYtPauseMask();
+              if (isTabletMode) sendYtCommand('setPlaybackQuality', ['hd1080']);
               updateSearchBtnState();
               updateSlideBookmarkPlayUI();
             } else if (msg.info.playerState === 2 || msg.info.playerState === 0) {
               isYtVideoPlaying = false;
-              // 우측 쇼츠에서 재생한 영상이 끝나면 '연속' ON 시 자동으로 다음 쇼츠를 왼쪽 재생창에 이어서 재생
-              if (msg.info.playerState === 0 && isTabletMode && shortsAutoNext && activePlayingShortId && currentVideoId === activePlayingShortId && currentShortsList.length > 0) {
-                const nextIdx = currentShortsIdx + 1;
-                if (nextIdx < currentShortsList.length) {
-                  playShortInLeftPlayer(currentShortsList[nextIdx], nextIdx);
-                  updateActiveShortCardHighlight(true);
-                  return;
-                } else if (shortsSession && !shortsSession.exhausted) {
-                  loadMoreRelatedShorts().then(() => {
-                    if (currentShortsList[nextIdx]) {
-                      playShortInLeftPlayer(currentShortsList[nextIdx], nextIdx);
-                      updateActiveShortCardHighlight(true);
-                    }
-                  });
-                  return;
-                }
-              }
               if (msg.info.playerState === 2 && document.body.classList.contains('blackout-active') && blackoutWantPlaying && !userPausedBg && !isBgAudioPlaying && currentVideoId) {
                 setTimeout(() => {
                   if (document.body.classList.contains('blackout-active') && blackoutWantPlaying && !userPausedBg && !isYtVideoPlaying && !isBgAudioPlaying) {
@@ -11610,7 +10748,6 @@
       dockSide = side === 'left' ? 'left' : 'right';
       document.body.classList.remove('player-open');
       modal.classList.add('docked-hidden');
-      hideTabletInfoModal(false);
       closeLyricsPanel(false);
       showSlideBookmark(dockSide);
       updateBgModeUI();
@@ -11639,8 +10776,13 @@
       updatePlayingCardHighlight(true);
       updateBgModeUI();
       updateSlideBookmarkPlayUI();
-      if (isTabletMode && shortsPanelOpen && currentVideoId) {
-        openTabletInfoModal(currentVideoId, currentVideoTitle, false);
+      if (lyricsPanelOpen && currentVideoId) {
+        const dr = document.getElementById('player-lyrics-drawer');
+        const tab = document.getElementById('lyricsToggleTab');
+        if (dr) dr.classList.add('open');
+        if (tab) tab.classList.add('lyrics-active');
+        updateLyricsFontUI();
+        syncLyricsDrawerLayout(true);
       }
     }
 
@@ -11740,6 +10882,7 @@
     function startPlayerDrag(e) {
       if (isResizing) return;
       isDragging = true;
+      if (lyricsPanelOpen && !isTabletMode) mobileUserDraggedWhileLyricsOpen = true;
       modal.classList.add('interacting');
       if (e.currentTarget && e.currentTarget.setPointerCapture) {
         try { e.currentTarget.setPointerCapture(e.pointerId); } catch (err) {}
@@ -11791,6 +10934,7 @@
 
         modal.style.left = `${initLeft + dx}px`;
         modal.style.top = `${Math.max(-30, Math.min(window.innerHeight - 55, initTop + dy))}px`;
+        if (lyricsPanelOpen) syncLyricsDrawerLayout(false);
         return;
       }
 
@@ -11811,6 +10955,7 @@
         if (resizeDir.includes('t')) {
           modal.style.top = `${initTop + startH - dims.height}px`;
         }
+        if (lyricsPanelOpen) syncLyricsDrawerLayout(false);
       }
     });
 
@@ -11827,10 +10972,12 @@
         } else if (rect.top < 0) {
           modal.style.top = '4px';
         }
+        if (lyricsPanelOpen && !isDockedToBookmark) syncLyricsDrawerLayout(false);
       }
       if (isResizing) {
         isResizing = false;
         modal.classList.remove('interacting');
+        if (lyricsPanelOpen && !isDockedToBookmark) syncLyricsDrawerLayout(false);
       }
     }
 
@@ -11851,7 +10998,7 @@
       function isIgnoredArea(el) {
         if (!el || !el.closest) return false;
         return !!el.closest(
-          '#floating-player-modal, #tablet-info-modal, #slide-bookmark, ' +
+          '#floating-player-modal, #slide-bookmark, ' +
           '#manage-modal-overlay, #settings-auth-overlay, #auth-gate-overlay, ' +
           '#battery-blackout-overlay, #tabHistoryDrawer, #filterSlidePanel, #savedTabsList, input, textarea'
         );
