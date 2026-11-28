@@ -3475,33 +3475,94 @@
       background: rgba(0, 0, 0, 0.05);
       border-bottom-color: rgba(0, 0, 0, 0.12);
     }
-    .ly-icon-btn {
-      height: 24px;
-      padding: 0 6px;
-      border-radius: 5px;
-      border: 1px solid rgba(255, 255, 255, 0.22);
-      background: rgba(255, 255, 255, 0.1);
+    .ly-custom-search-wrap {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .ly-custom-input {
+      flex: 1;
+      min-width: 0;
+      height: 26px;
+      padding: 0 8px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      background: rgba(0, 0, 0, 0.38);
       color: inherit;
-      font-size: 10px;
+      font-size: 11px;
+      font-weight: 600;
+      outline: none;
+    }
+    .ly-custom-input:focus {
+      border-color: #f472b6;
+    }
+    .ly-custom-input::placeholder {
+      color: rgba(255, 255, 255, 0.42);
+      font-weight: 500;
+    }
+    body.light-skin .ly-custom-input {
+      background: #ffffff;
+      border-color: rgba(0, 0, 0, 0.22);
+      color: #18181b;
+    }
+    body.light-skin .ly-custom-input::placeholder {
+      color: rgba(0, 0, 0, 0.42);
+    }
+    .ly-confirm-btn {
+      height: 26px;
+      padding: 0 9px;
+      border-radius: 6px;
+      border: 1px solid rgba(56, 189, 248, 0.6);
+      background: rgba(56, 189, 248, 0.22);
+      color: inherit;
+      font-size: 11px;
       font-weight: 800;
       cursor: pointer;
       white-space: nowrap;
       flex-shrink: 0;
+    }
+    .ly-confirm-btn:active {
+      transform: scale(0.95);
+    }
+    body.light-skin .ly-confirm-btn {
+      background: #0284c7;
+      border-color: #0284c7;
+      color: #ffffff;
+    }
+    .ly-icon-btn {
+      height: 26px;
+      min-width: 25px;
+      padding: 0 6px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      background: rgba(255, 255, 255, 0.1);
+      color: inherit;
+      font-size: 12px;
+      font-weight: 900;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
     body.light-skin .ly-icon-btn {
       background: rgba(0, 0, 0, 0.08);
       border-color: rgba(0, 0, 0, 0.18);
     }
     .ly-body {
-      max-height: 185px;
-      min-height: 78px;
+      max-height: 260px;
+      min-height: 82px;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior: contain;
       touch-action: pan-y;
-      padding: 10px 11px;
+      padding: 7px 10px;
       font-size: var(--ly-font);
-      line-height: 1.65;
+      line-height: 1.38;
+      letter-spacing: -0.1px;
       white-space: pre-wrap;
       word-break: keep-all;
       user-select: text;
@@ -3511,16 +3572,18 @@
     .ly-body::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.28); border-radius: 4px; }
     .ly-status-msg {
       text-align: center;
-      padding: 14px 6px;
-      opacity: 0.78;
+      padding: 12px 6px;
+      opacity: 0.82;
       font-size: 11.5px;
-      line-height: 1.5;
+      line-height: 1.42;
     }
 
     body.tablet-mode #player-lyrics-drawer { --ly-font: 14.5px; border-radius: 11px; }
-    body.tablet-mode .ly-header { padding: 7px 10px; gap: 7px; }
-    body.tablet-mode .ly-icon-btn { height: 30px; padding: 0 9px; font-size: 12px; }
-    body.tablet-mode .ly-body { max-height: 245px; padding: 12px 15px; line-height: 1.72; }
+    body.tablet-mode .ly-header { padding: 7px 10px; gap: 6px; }
+    body.tablet-mode .ly-custom-input { height: 32px; font-size: 13px; padding: 0 10px; }
+    body.tablet-mode .ly-confirm-btn { height: 32px; font-size: 12.5px; padding: 0 12px; }
+    body.tablet-mode .ly-icon-btn { height: 32px; min-width: 32px; padding: 0 8px; font-size: 14px; }
+    body.tablet-mode .ly-body { max-height: 340px; padding: 9px 14px; line-height: 1.42; }
     /* ---------------- [v25] PiP 전용 비디오 · 우측 하단 미니 PiP · '<' 꺾기 숨김 탭 ---------------- */
     .bookmark-tab.pip-active {
       opacity: 1 !important;
@@ -3944,10 +4007,14 @@
 
     <div id="player-lyrics-drawer">
       <div class="ly-header">
-        <button type="button" class="ly-gemini-main-btn" id="lyGeminiBtn" onclick="openGeminiLyricsSearch(true)">✦ 관련정보</button>
+        <button type="button" class="ly-gemini-main-btn" id="lyGeminiBtn" onclick="openGeminiLyricsSearch(true)" title="현재 영상 전체 관련정보 새로고침">✦ 관련정보</button>
+        <div class="ly-custom-search-wrap">
+          <input type="text" id="lyCustomQueryInput" class="ly-custom-input" placeholder="관련정보 검색어 · 질문 입력" autocomplete="off" onkeydown="if(event.key==='Enter'||event.keyCode===13){event.preventDefault(); submitCustomLyricsQuery();}">
+          <button type="button" class="ly-confirm-btn" onclick="submitCustomLyricsQuery()">확인</button>
+        </div>
         <div class="ly-size-controls">
-          <button type="button" class="ly-icon-btn" onclick="changeLyricsFontSize(-1)" title="글자 작게">가-</button>
-          <button type="button" class="ly-icon-btn" onclick="changeLyricsFontSize(1)" title="글자 크게">가+</button>
+          <button type="button" class="ly-icon-btn" onclick="changeLyricsFontSize(-1)" title="글자 작게">-</button>
+          <button type="button" class="ly-icon-btn" onclick="changeLyricsFontSize(1)" title="글자 크게">+</button>
         </div>
       </div>
       <div class="ly-body" id="lyBody"></div>
@@ -4088,14 +4155,6 @@
                 <button type="button" class="fc-btn" data-ffsize="small" onclick="setFaithFontSize('small')">작게</button>
                 <button type="button" class="fc-btn" data-ffsize="normal" onclick="setFaithFontSize('normal')">보통</button>
                 <button type="button" class="fc-btn" data-ffsize="large" onclick="setFaithFontSize('large')">크게</button>
-              </div>
-            </div>
-            <div class="fc-row" style="flex-direction:column; align-items:stretch; gap:4px;">
-              <span class="fc-lbl">🏷 현재 테마 절기(배지) 이름 변경</span>
-              <div class="fc-input-row">
-                <input type="text" id="faithBadgeNameInput" class="fc-input" maxlength="14" placeholder="원하는 절기/배지 이름 입력" autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault(); saveCustomBadgeName();}">
-                <button type="button" class="fc-act-btn" onclick="saveCustomBadgeName()">저장</button>
-                <button type="button" class="fc-act-btn sub" onclick="resetCustomBadgeName()">복원</button>
               </div>
             </div>
             <div class="fc-row" style="flex-direction:column; align-items:stretch; gap:4px;">
@@ -4269,7 +4328,7 @@
           <div class="settings-sec-title" style="margin-top:4px;" id="geminiApiHead">제미나이 관련정보 API 키 (관리자 전용 · DB 공용)</div>
           <div class="stream-api-box" id="geminiApiBox" style="margin-bottom:6px;">
             <div class="auth-form-row" style="margin-bottom:4px;">
-              <input type="password" id="geminiApiKeyInput" class="auth-form-input" placeholder="AQ.... 또는 AIza... 무료 키 입력" autocomplete="off">
+              <input type="password" id="geminiApiKeyInput" class="auth-form-input" placeholder="AQ.... 또는 AIza... 키 입력" autocomplete="off">
             </div>
             <div class="auth-form-row" style="margin-bottom:0;">
               <input type="text" id="geminiProjectIdInput" class="auth-form-input" placeholder="비워두세요 (유료 Vertex만 프로젝트ID 입력)" autocomplete="off">
@@ -6318,7 +6377,6 @@
     }
 
     function getEffectiveGeminiApiKey() {
-      // 관리자가 DB(sys_auth)에 저장한 공용 키를 모든 가족 사용자가 최우선으로 함께 사용
       return String(sharedGeminiApiKey || (hasSettingsAdminAccess() ? localGeminiApiKey : '') || '').trim();
     }
 
@@ -6336,9 +6394,7 @@
     }
 
     async function saveGeminiApiKey() {
-      if (!hasSettingsAdminAccess()) {
-        return;
-      }
+      if (!hasSettingsAdminAccess()) return;
       const inp = document.getElementById('geminiApiKeyInput');
       const pidInp = document.getElementById('geminiProjectIdInput');
       if (inp) inp.blur();
@@ -6390,8 +6446,8 @@
         showAdminSaveNotice('테스트할 API 키를 먼저 입력해 주세요.', true);
         return;
       }
-      showAdminSaveNotice('✦ 제미나이 무료 텍스트 모델 연결 테스트 중...', false, 16000);
-      const res = await fetchRichInfoFromGeminiApi('애국가', null, key, pid, true);
+      showAdminSaveNotice('✦ 제미나이 연결 테스트 중...', false, 16000);
+      const res = await fetchRichInfoFromGeminiApi('애국가', null, key, pid, true, '', '');
       if (res && res.text) {
         showAdminSaveNotice('✓ 연결 성공! (' + (res.usedPath || 'Gemini') + ') 응답: ' + res.text.replace(/\s+/g, ' ').slice(0, 42), false, 8000);
       } else {
@@ -6399,12 +6455,12 @@
       }
     }
 
-    // 무료 할당량이 0(Zero-Quota)이어서 429를 유발하는 이미지/실험/프리뷰/프로 모델 원천 차단 필터
-    function isPureFreeTextGeminiModel(name) {
+    // Zero-Quota(-image/-exp/-preview/-audio/-tts/-live)만 차단하고 정식 Flash 및 Pro 텍스트 모델 허용
+    function isPureTextGeminiModel(name) {
       const n = String(name || '').toLowerCase();
       if (!n.startsWith('gemini-')) return false;
-      if (!n.includes('flash')) return false;
-      if (/image|imagen|audio|tts|veo|video|live|exp|preview|thinking|pro|embedding|robotics|computer-use|learnlm|aqa|gemma|medlm|palm/.test(n)) {
+      if (!n.includes('flash') && !n.includes('pro')) return false;
+      if (/image|imagen|audio|tts|veo|video|live|exp|preview|thinking|embedding|robotics|computer-use|learnlm|aqa|gemma|medlm|palm|vision/.test(n)) {
         return false;
       }
       return true;
@@ -6427,17 +6483,17 @@
         const usable = d.models
           .filter(m => m && m.name && Array.isArray(m.supportedGenerationMethods) && m.supportedGenerationMethods.includes('generateContent'))
           .map(m => String(m.name).replace(/^models\//, ''))
-          .filter(isPureFreeTextGeminiModel);
+          .filter(isPureTextGeminiModel);
         usable.sort((a, b) => {
           const score = (n) => (
-            /^gemini-2\.5-flash$/.test(n) ? 20 :
-            /^gemini-2\.5-flash-lite$/.test(n) ? 19 :
-            /^gemini-2\.0-flash$/.test(n) ? 18 :
-            /^gemini-2\.0-flash-lite$/.test(n) ? 17 :
-            /^gemini-1\.5-flash$/.test(n) ? 16 :
-            /^gemini-1\.5-flash-8b$/.test(n) ? 15 :
-            /^gemini-flash-latest$/.test(n) ? 14 :
-            /^gemini-flash-lite-latest$/.test(n) ? 13 : 8
+            /^gemini-2\.5-flash$/.test(n) ? 22 :
+            /^gemini-2\.5-pro$/.test(n) ? 21 :
+            /^gemini-2\.5-flash-lite$/.test(n) ? 20 :
+            /^gemini-2\.0-flash$/.test(n) ? 19 :
+            /^gemini-2\.0-flash-lite$/.test(n) ? 18 :
+            /^gemini-1\.5-flash$/.test(n) ? 17 :
+            /^gemini-1\.5-pro$/.test(n) ? 16 :
+            /^gemini-flash-latest$/.test(n) ? 15 : 10
           );
           return score(b) - score(a);
         });
@@ -6451,7 +6507,7 @@
 
     async function callSingleGeminiEndpoint(ep, promptText, apiKey = '') {
       const ctrl = new AbortController();
-      const timer = setTimeout(() => ctrl.abort(), 14000);
+      const timer = setTimeout(() => ctrl.abort(), 18000);
       try {
         const headers = { 'Content-Type': 'application/json' };
         if (apiKey && ep.includes('generativelanguage.googleapis.com')) {
@@ -6469,7 +6525,8 @@
               { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
               { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' }
             ],
-            generationConfig: { temperature: 0.25, maxOutputTokens: 2048 }
+            // 대용량 8,192 토큰(기존 2,048의 4배)으로 확장하여 요리 레시피·음반정보·전체 가사를 끝까지 풍부하게 수신
+            generationConfig: { temperature: 0.25, maxOutputTokens: 8192 }
           })
         });
         if (!res.ok) {
@@ -6503,38 +6560,48 @@
       }
     }
 
-    // [1차 엔진] 유튜브 영상 원본 메타데이터(설명글 속 요리 재료/레시피/앨범 정보/채널명) 실시간 수집 (무료·무제한)
+    // 유튜브 영상 원본 '더보기' 상세정보(설명글 전체, 챕터, 채널명, 조회수, 업로드일) 실시간 수집
     async function fetchYoutubeVideoDetails(videoId) {
       if (!videoId) return null;
       if (videoMetaMemoryCache.has(videoId)) return videoMetaMemoryCache.get(videoId);
 
       const tasks = [
         ...STREAM_PIPED_SERVERS.slice(0, 4).map(srv => async () => {
-          const d = await fetchJsonWithTimeout(srv + '/streams/' + videoId, 4500);
+          const d = await fetchJsonWithTimeout(srv + '/streams/' + videoId, 5000);
           if (!d || (!d.description && !d.title)) return [];
+          const chapters = Array.isArray(d.chapters)
+            ? d.chapters.map(c => formatDuration(c.start || 0) + ' ' + String(c.title || '')).join('\n')
+            : '';
           return [{
             title: String(d.title || ''),
             uploader: String(d.uploader || ''),
             uploadDate: String(d.uploadDate || ''),
             views: Number(d.views || 0),
+            likes: Number(d.likes || 0),
             duration: Number(d.duration || 0),
+            category: String(d.category || ''),
+            chapters: chapters,
             description: String(d.description || '')
               .replace(/<br\s*\/?>/gi, '\n')
               .replace(/<\/p>/gi, '\n')
               .replace(/<[^>]+>/g, '')
+              .replace(/\n{3,}/g, '\n\n')
               .trim()
           }];
         }),
         ...STREAM_INVIDIOUS_SERVERS.slice(0, 2).map(inv => async () => {
-          const d = await fetchJsonWithTimeout(inv + '/api/v1/videos/' + videoId + '?fields=title,description,author,viewCount,lengthSeconds,publishedText', 4500);
+          const d = await fetchJsonWithTimeout(inv + '/api/v1/videos/' + videoId + '?fields=title,description,author,viewCount,likeCount,lengthSeconds,publishedText,genre', 5000);
           if (!d || (!d.description && !d.title)) return [];
           return [{
             title: String(d.title || ''),
             uploader: String(d.author || ''),
             uploadDate: String(d.publishedText || ''),
             views: Number(d.viewCount || 0),
+            likes: Number(d.likeCount || 0),
             duration: Number(d.lengthSeconds || 0),
-            description: String(d.description || '').trim()
+            category: String(d.genre || ''),
+            chapters: '',
+            description: String(d.description || '').replace(/\n{3,}/g, '\n\n').trim()
           }];
         })
       ];
@@ -6549,60 +6616,100 @@
       return null;
     }
 
-    function buildSmartRichInfoPrompt(rawTitle, cleanedQuery, ytMeta, lrclibLyrics) {
-      const descSnippet = ytMeta && ytMeta.description
-        ? ytMeta.description.slice(0, 1800)
-        : '';
-      const uploaderInfo = ytMeta && ytMeta.uploader ? ('채널/업로더: ' + ytMeta.uploader + '\n') : '';
-      const lrcHint = lrclibLyrics ? ('\n[참고용 가사 DB 데이터]\n' + lrclibLyrics.slice(0, 1500) + '\n') : '';
+    // 상하 글간격을 좁히고 문자 바로 밑에 구분선을 밀착시키는 헬퍼
+    const COMPACT_DIVIDER = '\n────────────────────────────────────\n';
 
-      return '다음 유튜브 영상에 대한 풍부하고 알찬 [관련정보]를 한국어로 깔끔하게 정리해줘.\n' +
-        '영상 제목: "' + rawTitle + '" (핵심 키워드: "' + cleanedQuery + '")\n' +
-        uploaderInfo +
-        (descSnippet ? ('[영상 원본 설명글 참고]\n' + descSnippet + '\n') : '') +
-        lrcHint +
-        '\n--- 작성 규칙 (인사말이나 마크다운 ** 기호 없이 가독성 좋은 이모지 섹션으로 바로 본문만 작성) ---\n' +
-        '1. [요리 / 레시피 / 음식 영상인 경우]\n' +
-        '   🍳 요리 소개 & 특징 (한 줄 요약)\n' +
-        '   🛒 필수 재료 & 양념 계량 (주재료, 부재료, 양념 비율을 보기 쉽게 줄바꿈 나열)\n' +
-        '   👩‍🍳 조리 순서 (1, 2, 3 단계별 핵심 레시피)\n' +
-        '   💡 요리 꿀팁 & 주의사항 (불 조절, 맛 내는 비법, 대체 재료 등)\n\n' +
-        '2. [음악 / 노래 / 찬양 / CCM / 팝송 영상인 경우]\n' +
-        '   💿 음반 & 곡 정보 (아티스트/가수, 수록 앨범명, 발매연도, 작사·작곡, 장르, 곡의 배경/특징 및 대표 수록곡)\n' +
-        '   🎤 전체 가사 (원문 언어 그대로 전체 가사를 빠짐없이 줄바꿈하여 작성)\n\n' +
-        '3. [그 외 일반 / 설교 / 강의 / 정보 영상인 경우]\n' +
-        '   📌 핵심 내용 요약 (주요 포인트 3~5가지)\n' +
-        '   📖 상세 정보 & 배경 지식 (영상에서 다루는 핵심 정보, 인물/주제 해설)';
+    function normalizeCompactInfoText(txt) {
+      return String(txt || '')
+        .replace(/\*\*/g, '')
+        .replace(/^#{1,4}\s*/gm, '')
+        .replace(/[ \t]+\n/g, '\n')
+        .replace(/\n{3,}/g, '\n\n')
+        .trim();
     }
 
-    async function fetchRichInfoFromGeminiApi(rawTitle, ytMeta, apiKey, projectIdOverride, isTestMode = false, lrclibLyrics = '') {
+    function buildCompactBasicHeader(rawTitle, ytMeta, lrcObj) {
+      const feedItem = currentFeedItems.find(it => it && it.id === currentVideoId);
+      const lines = ['📌 영상 기본 정보'];
+      lines.push('• 제목: ' + simplifyTitle(rawTitle));
+
+      const metaParts = [];
+      const uploader = (ytMeta && ytMeta.uploader) || (feedItem && feedItem._up) || '';
+      if (uploader) metaParts.push('채널: ' + uploader);
+      const views = (ytMeta && ytMeta.views) || (feedItem && feedItem.v) || 0;
+      if (views > 0) metaParts.push('조회수: ' + formatKoreanViews(views) + '회');
+      const dur = (ytMeta && ytMeta.duration) || (feedItem && feedItem.d) || 0;
+      if (dur > 0) metaParts.push('길이: ' + formatDuration(dur));
+      if (ytMeta && ytMeta.uploadDate) metaParts.push('게시: ' + ytMeta.uploadDate.slice(0, 10));
+      if (metaParts.length > 0) lines.push('• ' + metaParts.join('  ·  '));
+
+      if (lrcObj && (lrcObj.artistName || lrcObj.albumName)) {
+        const albumParts = [];
+        if (lrcObj.artistName) albumParts.push('아티스트: ' + lrcObj.artistName);
+        if (lrcObj.albumName) albumParts.push('수록앨범: ' + lrcObj.albumName);
+        lines.push('• ' + albumParts.join('  ·  '));
+      }
+      return lines.join('\n');
+    }
+
+    function buildSmartRichInfoPrompt(rawTitle, cleanedQuery, ytMeta, lrclibLyrics, customUserQuery = '') {
+      const descSnippet = ytMeta && ytMeta.description
+        ? ytMeta.description.slice(0, 4500)
+        : '';
+      const uploaderInfo = ytMeta && ytMeta.uploader ? ('채널/업로더: ' + ytMeta.uploader + '\n') : '';
+      const lrcHint = lrclibLyrics ? ('\n[참고용 가사 DB 데이터]\n' + lrclibLyrics.slice(0, 2500) + '\n') : '';
+      const customDirective = customUserQuery
+        ? ('\n★ [사용자 직접 요청 검색어/질문]: "' + customUserQuery + '"\n위 요청사항에 대한 상세하고 풍부한 정보와 아래 영상 관련정보를 모두 빠짐없이 정리해줘.\n')
+        : '';
+
+      return '다음 유튜브 영상에 대한 최대한 풍부하고 상세한 [관련정보]를 한국어로 정리해줘.\n' +
+        '영상 제목: "' + rawTitle + '" (핵심 키워드: "' + cleanedQuery + '")\n' +
+        uploaderInfo +
+        customDirective +
+        (descSnippet ? ('[영상 원본 더보기 설명글 참고]\n' + descSnippet + '\n') : '') +
+        lrcHint +
+        '\n--- 작성 규칙 (인사말이나 마크다운 ** 기호 없이, 불필요한 빈 줄을 줄이고 알찬 정보로 꽉 채워 작성) ---\n' +
+        '1. [요리 / 레시피 / 음식 영상인 경우]\n' +
+        '   🍳 요리 소개 & 핵심 특징\n' +
+        '   🛒 필수 재료 & 양념 계량 (주재료, 부재료, 양념장 비율/스푼/g 단위를 하나도 빠짐없이 상세 나열)\n' +
+        '   👩‍🍳 단계별 조리 순서 (처음부터 끝까지 구체적인 조리 과정과 불 조절/시간)\n' +
+        '   💡 요리 꿀팁 & 실패 없는 비법 & 대체 가능한 재료\n' +
+        '2. [음악 / 노래 / 찬양 / CCM / 팝송 영상인 경우]\n' +
+        '   💿 음반 & 곡 상세 정보 (아티스트, 수록 앨범명, 발매연도, 작사·작곡·편곡, 장르, 곡의 탄생 배경/해설, 앨범 주요 수록곡 목록)\n' +
+        '   🎤 전체 가사 (생략 없이 원문 전체 가사를 끝까지 작성)\n' +
+        '3. [그 외 일반 / 설교 / 강의 / 정보 영상인 경우]\n' +
+        '   📌 핵심 내용 심층 요약 (주요 포인트 5~8가지)\n' +
+        '   📖 상세 정보 & 배경 지식 & 핵심 용어 해설';
+    }
+
+    async function fetchRichInfoFromGeminiApi(rawTitle, ytMeta, apiKey, projectIdOverride, isTestMode = false, lrclibLyrics = '', customUserQuery = '') {
       const cleanKey = String(apiKey || '').trim();
       const cleanPid = String(projectIdOverride !== undefined ? projectIdOverride : getEffectiveGeminiProjectId()).trim();
       const isAqKey = cleanKey.startsWith('AQ.');
       const cleanedQuery = cleanLyricsSearchQuery(rawTitle);
       const promptText = isTestMode
         ? '애국가 1절 첫 한 줄만 답해줘.'
-        : buildSmartRichInfoPrompt(rawTitle, cleanedQuery, ytMeta, lrclibLyrics);
+        : buildSmartRichInfoPrompt(rawTitle, cleanedQuery, ytMeta, lrclibLyrics, customUserQuery);
 
-      // 1순위: 검증된 무료 티어 표준 순수 텍스트 모델 고정 우선 배치 (Zero-Quota 이미지/프리뷰 모델 원천 배제)
-      const coreFreeModels = [
+      // 대용량 8,192 토큰을 지원하는 무료/Pro 순수 텍스트 모델 큐
+      const coreModels = [
         'gemini-2.5-flash',
+        'gemini-2.5-pro',
         'gemini-2.5-flash-lite',
         'gemini-2.0-flash',
         'gemini-2.0-flash-lite',
         'gemini-flash-latest',
-        'gemini-flash-lite-latest',
         'gemini-1.5-flash',
-        'gemini-1.5-flash-8b'
+        'gemini-1.5-pro'
       ];
       const discovered = await discoverAiStudioModels(cleanKey);
 
       const modelQueue = [];
-      if (lastWorkingGeminiModel && isPureFreeTextGeminiModel(lastWorkingGeminiModel)) {
+      if (lastWorkingGeminiModel && isPureTextGeminiModel(lastWorkingGeminiModel)) {
         modelQueue.push(lastWorkingGeminiModel);
       }
-      [...coreFreeModels, ...discovered].forEach(m => {
-        if (m && isPureFreeTextGeminiModel(m) && !modelQueue.includes(m)) {
+      [...coreModels, ...discovered].forEach(m => {
+        if (m && isPureTextGeminiModel(m) && !modelQueue.includes(m)) {
           modelQueue.push(m);
         }
       });
@@ -6618,16 +6725,14 @@
         }
         if (r.error) geminiApiLastErr = tag + ' → ' + r.error;
 
-        // 키 자체가 무효/삭제된 경우에만 조기 중단 (429는 모델마다 쿼터가 별도이므로 끝까지 모든 모델 순회!)
         if (/API_KEY_INVALID|API key not valid|service account.*deleted/i.test(r.error || '')) {
           return { text: '', error: geminiApiLastErr, usedPath: '' };
         }
       }
 
-      // 유료 Vertex 프로젝트 ID가 입력된 경우에만 보조 시도
       if (isAqKey && cleanPid) {
         const encPid = encodeURIComponent(cleanPid);
-        const vxModels = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.0-flash-001'];
+        const vxModels = ['gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-2.0-flash-001'];
         for (const m of vxModels) {
           const tag = 'Vertex-global/' + m;
           const url = 'https://aiplatform.googleapis.com/v1/projects/' + encPid + '/locations/global/publishers/google/models/' + m + ':generateContent?key=' + encodeURIComponent(cleanKey);
@@ -6662,60 +6767,72 @@
       return null;
     }
 
-    // [3차 무중단 폴백 포매터] 제미나이 쿼터가 소진(429)되거나 키가 없어도 절대 에러로 멈추지 않고 풍부한 관련정보 생성
-    function buildNonStopRichFallbackText(rawTitle, ytMeta, lrcObj) {
-      const blocks = [];
+    // 문자 바로 밑에 구분선이 밀착되고 유튜브 '더보기' 전체(15,000자)가 출력되는 통합 포매터
+    function assembleFullCompactRelatedInfo(rawTitle, ytMeta, lrcObj, geminiText = '') {
+      const sections = [];
+
+      // 1) 상단 콤팩트 기본정보 (줄간격 밀착)
+      sections.push(buildCompactBasicHeader(rawTitle, ytMeta, lrcObj));
+
+      // 2) 제미나이 심층 분석 본문 (있을 경우)
+      if (geminiText && geminiText.trim()) {
+        sections.push(normalizeCompactInfoText(geminiText));
+      } else if (lrcObj && lrcObj.lyrics) {
+        // 제미나이 응답이 없을 때 무료 가사 DB 본문 표시
+        sections.push('🎤 가사\n' + normalizeCompactInfoText(lrcObj.lyrics));
+      }
+
+      // 3) 타임라인/챕터 목록 (있을 경우)
+      if (ytMeta && ytMeta.chapters && ytMeta.chapters.length > 5) {
+        sections.push('⏱️ 영상 챕터 · 구간 안내\n' + ytMeta.chapters);
+      }
+
+      // 4) 유튜브 영상 '더보기' 원본 전문 (최대 15,000자 무삭제 전체 표시!)
       const feedItem = currentFeedItems.find(it => it && it.id === currentVideoId);
-
-      // 1) 음반 / 곡 메타데이터가 있는 경우
-      if (lrcObj && (lrcObj.artistName || lrcObj.albumName || lrcObj.trackName)) {
-        const albumLines = ['💿 음반 & 곡 정보'];
-        if (lrcObj.trackName) albumLines.push('• 곡명: ' + lrcObj.trackName);
-        if (lrcObj.artistName) albumLines.push('• 아티스트: ' + lrcObj.artistName);
-        if (lrcObj.albumName) albumLines.push('• 수록 앨범: ' + lrcObj.albumName);
-        if (lrcObj.duration > 0) albumLines.push('• 재생 시간: ' + formatDuration(lrcObj.duration));
-        blocks.push(albumLines.join('\n'));
-      }
-
-      // 2) 영상 기본 정보
-      const infoLines = ['📌 영상 기본 정보'];
-      infoLines.push('• 제목: ' + simplifyTitle(rawTitle));
-      if (ytMeta && ytMeta.uploader) infoLines.push('• 채널: ' + ytMeta.uploader);
-      else if (feedItem && feedItem._up) infoLines.push('• 채널: ' + feedItem._up);
-      const views = (ytMeta && ytMeta.views) || (feedItem && feedItem.v) || 0;
-      if (views > 0) infoLines.push('• 조회수: ' + formatKoreanViews(views) + '회');
-      const dur = (ytMeta && ytMeta.duration) || (feedItem && feedItem.d) || 0;
-      if (dur > 0) infoLines.push('• 길이: ' + formatDuration(dur));
-      blocks.push(infoLines.join('\n'));
-
-      // 3) 가사 본문
-      if (lrcObj && lrcObj.lyrics) {
-        blocks.push('🎤 가사\n' + lrcObj.lyrics);
-      }
-
-      // 4) 유튜브 영상 원본 설명글 (요리 재료·레시피·타임라인·음반 크레딧이 들어있는 핵심 본문)
       if (ytMeta && ytMeta.description && ytMeta.description.length > 5) {
         const isCooking = /(재료|레시피|양념|큰술|작은술|스푼|조리|만드는\s*법|만들기|요리|식용유|간장|설탕|마늘|소금|후추|g\b|ml\b|컵)/i.test(rawTitle + ' ' + ytMeta.description);
-        const headerTitle = isCooking ? '🍳 영상 상세 설명 (재료 · 레시피 · 안내)' : '📖 영상 상세 설명 · 수록 정보';
-        blocks.push(headerTitle + '\n' + ytMeta.description.slice(0, 3500));
+        const descTitle = isCooking
+          ? '📋 영상 더보기 전문 (원본 재료 · 레시피 · 상세 안내)'
+          : '📋 영상 더보기 전문 (원본 상세 설명 · 수록 정보)';
+        sections.push(descTitle + '\n' + normalizeCompactInfoText(ytMeta.description.slice(0, 15000)));
       } else if (feedItem && feedItem._sd) {
-        blocks.push('📖 영상 요약 설명\n' + feedItem._sd);
+        sections.push('📋 영상 더보기 요약\n' + normalizeCompactInfoText(feedItem._sd));
       }
 
-      return blocks.join('\n\n────────────────────\n\n');
+      // 모든 섹션을 빈 줄 여백 없이 문자 바로 밑 구분선(COMPACT_DIVIDER)으로 밀착 연결!
+      return sections.filter(Boolean).join(COMPACT_DIVIDER);
     }
 
-    async function openGeminiLyricsSearch(forceRefresh = false) {
+    function submitCustomLyricsQuery() {
+      const inp = document.getElementById('lyCustomQueryInput');
+      if (!inp) return;
+      inp.blur();
+      const customQ = inp.value.trim();
+      openGeminiLyricsSearch(true, customQ);
+    }
+
+    async function openGeminiLyricsSearch(forceRefresh = false, customUserQuery = '') {
       if (!currentVideoId) return;
       const bodyEl = document.getElementById('lyBody');
       const btnEl = document.getElementById('lyGeminiBtn');
+      const inpEl = document.getElementById('lyCustomQueryInput');
       const vid = currentVideoId;
       const rawTitle = currentVideoTitle || '제목 없음';
-      const q = cleanLyricsSearchQuery(rawTitle);
+      const defaultCleanQ = cleanLyricsSearchQuery(rawTitle);
 
-      if (!forceRefresh && lyricsMemoryCache.has(vid)) {
+      // 입력창이 비어 있거나 영상이 바뀐 경우 현재 영상 제목으로 자동 세팅
+      if (inpEl && (!inpEl.value.trim() || !customUserQuery)) {
+        if (!customUserQuery && document.activeElement !== inpEl) {
+          inpEl.value = defaultCleanQ;
+        }
+      }
+
+      const activeCustomQ = String(customUserQuery || '').trim();
+      const cacheKey = activeCustomQ ? (vid + '::' + activeCustomQ) : vid;
+
+      if (!forceRefresh && lyricsMemoryCache.has(cacheKey)) {
         if (bodyEl) {
-          bodyEl.textContent = lyricsMemoryCache.get(vid);
+          bodyEl.textContent = lyricsMemoryCache.get(cacheKey);
           bodyEl.scrollTop = 0;
         }
         return;
@@ -6724,24 +6841,25 @@
       const mySeq = ++lyricsFetchSeq;
       if (btnEl) btnEl.textContent = '✦ 분석 중...';
       if (bodyEl) {
-        bodyEl.innerHTML = '<div class="ly-status-msg">✦ "' + simplifyTitle(rawTitle).replace(/</g, '&lt;') + '"<br>관련정보(음반·가사 / 요리 재료·레시피 / 상세설명)를 불러오는 중...</div>';
+        const targetLabel = activeCustomQ || simplifyTitle(rawTitle);
+        bodyEl.innerHTML = '<div class="ly-status-msg">✦ "' + targetLabel.replace(/</g, '&lt;') + '"<br>제미나이 심층 정보 + 영상 더보기 전문을 불러오는 중...</div>';
       }
 
-      // 공용 키가 아직 메모리에 없으면 클라우드 DB(sys_auth)에서 즉시 동기화 시도 (일반 가족 사용자 자동 연동 보장)
       if (!sharedGeminiApiKey && fbReady && db) {
         try { await loadAuthConfigFromCloud(); } catch (e) {}
       }
       if (mySeq !== lyricsFetchSeq) return;
 
-      // 유튜브 원본 메타데이터(설명글 속 재료/레시피/앨범정보)와 무료 가사 DB를 병렬로 먼저 빠르게 수집
+      const searchQ = activeCustomQ || defaultCleanQ;
       const [ytMeta, lrcObj] = await Promise.all([
         fetchYoutubeVideoDetails(vid),
-        fetchLyricsFallbackInWindow(q)
+        fetchLyricsFallbackInWindow(searchQ)
       ]);
       if (mySeq !== lyricsFetchSeq) return;
 
       const apiKey = getEffectiveGeminiApiKey();
       const projectId = getEffectiveGeminiProjectId();
+      let geminiText = '';
 
       if (apiKey) {
         const gemRes = await fetchRichInfoFromGeminiApi(
@@ -6750,32 +6868,22 @@
           apiKey,
           projectId,
           false,
-          lrcObj && lrcObj.lyrics ? lrcObj.lyrics : ''
+          lrcObj && lrcObj.lyrics ? lrcObj.lyrics : '',
+          activeCustomQ
         );
         if (mySeq !== lyricsFetchSeq) return;
         if (gemRes && gemRes.text) {
-          let finalOut = gemRes.text.replace(/\*\*/g, '').trim();
-          // 만약 제미나이 응답에 원본 설명글의 세부 링크/타임라인이 생략되었고 원본 설명이 풍부하면 하단에 부록으로 함께 첨부
-          if (ytMeta && ytMeta.description && ytMeta.description.length > 40 && !finalOut.includes(ytMeta.description.slice(0, 30))) {
-            finalOut += '\n\n────────────────────\n📋 [영상 원본 설명글 원문]\n' + ytMeta.description.slice(0, 2500);
-          }
-          lyricsMemoryCache.set(vid, finalOut);
-          if (btnEl) btnEl.textContent = '✦ 관련정보';
-          if (bodyEl) {
-            bodyEl.textContent = finalOut;
-            bodyEl.scrollTop = 0;
-          }
-          return;
+          geminiText = gemRes.text;
         }
       }
 
-      // 제미나이 쿼터 초과(429) 또는 키 미등록 시에도 에러 화면 대신 수집된 음반/가사/원본 재료·레시피 설명글을 즉시 표시!
       if (btnEl) btnEl.textContent = '✦ 관련정보';
-      const richFallback = buildNonStopRichFallbackText(rawTitle, ytMeta, lrcObj);
-      if (richFallback && richFallback.trim().length > 0) {
-        lyricsMemoryCache.set(vid, richFallback);
+      const finalOutput = assembleFullCompactRelatedInfo(rawTitle, ytMeta, lrcObj, geminiText);
+
+      if (finalOutput && finalOutput.trim().length > 0) {
+        lyricsMemoryCache.set(cacheKey, finalOutput);
         if (bodyEl) {
-          bodyEl.textContent = richFallback;
+          bodyEl.textContent = finalOutput;
           bodyEl.scrollTop = 0;
         }
         return;
@@ -6795,6 +6903,8 @@
       dr.classList.toggle('open', lyricsPanelOpen);
       if (tab) tab.classList.toggle('lyrics-active', lyricsPanelOpen);
       if (lyricsPanelOpen) {
+        const inpEl = document.getElementById('lyCustomQueryInput');
+        if (inpEl) inpEl.value = cleanLyricsSearchQuery(currentVideoTitle);
         updateLyricsFontUI();
         openGeminiLyricsSearch(false);
       }
@@ -6809,6 +6919,8 @@
     }
 
     function onLyricsTrackChanged() {
+      const inpEl = document.getElementById('lyCustomQueryInput');
+      if (inpEl) inpEl.value = cleanLyricsSearchQuery(currentVideoTitle);
       if (!lyricsPanelOpen) return;
       const dr = document.getElementById('player-lyrics-drawer');
       const tab = document.getElementById('lyricsToggleTab');
@@ -10496,7 +10608,6 @@
         adminSec.style.display = canAdmin ? 'flex' : 'none';
         if (canAdmin) renderAdminUsersList();
       }
-      // 일반 가족 사용자에게는 API 키 및 프로젝트 ID 항목 자체를 완전히 숨기고 값도 비움
       if (gemHead) {
         gemHead.style.display = canAdmin ? 'block' : 'none';
         if (canAdmin) {
