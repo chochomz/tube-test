@@ -4179,7 +4179,6 @@
 
     const CHUNK_SIZE = 50;
     const MAX_TAB_ITEMS = 300;
-    const BASE_STAGE_WIDTH = 800;
     const FB_COLLECTION = 'tube_search_tabs';
     const FALLBACK_THUMB = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='68' viewBox='0 0 120 68'%3E%3Crect width='120' height='68' fill='%23222'/%3E%3Ctext x='50%25' y='52%25' fill='%23666' font-size='10' text-anchor='middle' dominant-baseline='middle'%3ENo Image%3C/text%3E%3C/svg%3E";
 
@@ -4637,6 +4636,7 @@
     let db = null;
     let fbReady = false;
     let cachedTabsMeta = [];
+    let tabsMetaLoaded = false;
     let activeTabKeyword = '';
     let currentSearchCollected = [];
     let currentFeedItems = [];
@@ -5886,13 +5886,6 @@
     function setFaithShowMode(mode) {
       if (!['faith', 'all', 'off'].includes(mode)) return;
       faithConfig.showMode = mode;
-      applyFaithVerseBarToDOM();
-      persistFaithConfig(true);
-      renderFaithConfigUI();
-    }
-
-    function setFaithVerseMode(mode) {
-      faithConfig.verseMode = 'custom';
       applyFaithVerseBarToDOM();
       persistFaithConfig(true);
       renderFaithConfigUI();
@@ -7729,6 +7722,87 @@
     let activeCandidateIdx = 0;
     let pendingBgSeekSec = 0;
 
+    function normalizeStreamApiList(urls) {
+      if (!Array.isArray(urls)) return [];
+      const out = [];
+      for (const u of urls) {
+        const s = String(u || '').trim();
+        if (s && /^https?:\/\//i.test(s) && !out.includes(s)) {
+          out.push(s);
+        }
+        if (out.length >= 3) break;
+      }
+      return out;
+    }
+
+    function initSavedCustomStreamApi() {
+      let loaded = [];
+      try {
+        const sharedRaw = localStorage.getItem(SHARED_STREAM_APIS_LOCAL_KEY);
+        if (sharedRaw) {
+          const parsed = JSON.parse(sharedRaw);
+          if (Array.isArray(parsed)) loaded = normalizeStreamApiList(parsed);
+        }
+      } catch (e) {}
+      if (loaded.length === 0 && currentUser) {
+        try {
+          const userRaw = localStorage.getItem(STREAM_API_STORAGE_PREFIX + getUid());
+          if (userRaw) {
+            if (userRaw.trim().startsWith('[')) {
+              loaded = normalizeStreamApiList(JSON.parse(userRaw));
+            } else {
+              loaded = normalizeStreamApiList([userRaw]);
+            }
+          }
+        } catch (e) {}
+      }
+      if (loaded.length > 0) {
+        customStreamApiUrls = loaded;
+      }
+      customStreamApiUrl = customStreamApiUrls[0] || '';
+    }
+
+    async function saveCustomStreamApiUrls() {
+      if (!hasSettingsAdminAccess()) return;
+      const rawList = [];
+      for (let i = 1; i <= 3; i++) {
+        const inp = document.getElementById('customStreamApiInput' + i);
+        if (inp) {
+          inp.blur();
+          const val = inp.value.trim();
+          if (val) rawList.push(val);
+        }
+      }
+      for (const u of rawList) {
+        if (!/^https?:\/\//i.test(u)) {
+          showAdminSaveNotice('개인 오디오 서버 주소는 http:// 또는 https:// 로 시작해야 합니다.', true);
+          return;
+        }
+      }
+      customStreamApiUrls = normalizeStreamApiList(rawList);
+      customStreamApiUrl = customStreamApiUrls[0] || '';
+      try {
+        if (customStreamApiUrls.length > 0) {
+          localStorage.setItem(SHARED_STREAM_APIS_LOCAL_KEY, JSON.stringify(customStreamApiUrls));
+          if (currentUser) localStorage.setItem(STREAM_API_STORAGE_PREFIX + getUid(), JSON.stringify(customStreamApiUrls));
+        } else {
+          localStorage.removeItem(SHARED_STREAM_APIS_LOCAL_KEY);
+          if (currentUser) localStorage.removeItem(STREAM_API_STORAGE_PREFIX + getUid());
+        }
+      } catch (e) {}
+      authData.updatedAt = Date.now();
+      setPendingAuthSync(true);
+      const res = await saveAuthConfigToCloud();
+      renderAuthSettingsPane();
+      showAdminSaveNotice(
+        customStreamApiUrls.length > 0
+          ? ('✓ 개인 오디오 서버 ' + customStreamApiUrls.length + '개 저장 완료' + (res.ok ? ' (DB 공용 반영)' : ' (로컬 반영 · DB 대기)'))
+          : '✓ 개인 오디오 서버 설정이 해제되었습니다.',
+        false,
+        5500
+      );
+    }
+
     function parseAudioUrlsFromGenericData(data, baseOrigin, videoId) {
       const out = [];
       const add = (u) => { if (u && typeof u === 'string' && !out.includes(u)) out.push(u); };
@@ -8183,8 +8257,6 @@
     }
 
     let ytFrameReady = false;
-    let isCcEnabled = false;
-
     function getRelatedShortsKeyword(title) {
       const cleaned = simplifyTitle(title || currentVideoTitle || '')
         .replace(/[^가-힣a-zA-Z0-9\s]/g, ' ')
@@ -9550,6 +9622,7 @@
 
     async function enterAppWithUser(user) {
       currentUser = user;
+      tabsMetaLoaded = false;
       cloudDeviceProfiles = { mobile: null, tablet: null };
       document.body.classList.remove('auth-locked');
       window.scrollTo(0, 0);
@@ -9599,6 +9672,7 @@
       closeSettingsAuthModal();
       settingsAdminUnlocked = false;
       currentUser = null;
+      tabsMetaLoaded = false;
       cloudDeviceProfiles = { mobile: null, tablet: null };
       cachedTabsMeta = [];
       currentFeedItems = [];
@@ -9874,6 +9948,7 @@
     }
 
     async function syncTabsIndexToCloud() {
+      if (!tabsMetaLoaded && cachedTabsMeta.length === 0) return false;
       saveLocalMetaBackup(cachedTabsMeta);
       if (!fbReady || !db || !currentUser) return false;
       try {
@@ -9960,7 +10035,7 @@
         markDbHealthy();
 
         let cloudMeta = [];
-        if (idxSnap.exists && Array.isArray(idxSnap.data().items)) {
+        if (idxSnap.exists && Array.isArray(idxSnap.data().items) && idxSnap.data().items.length > 0) {
           cloudMeta = idxSnap.data().items
             .filter(it => it && it.docId && !String(it.docId).startsWith('__') && !String(it.docId).startsWith('sys_'))
             .map(it => ({
@@ -10019,6 +10094,7 @@
         });
 
         cachedTabsMeta = Array.from(mergedMap.values()).sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+        tabsMetaLoaded = true;
         saveLocalMetaBackup(cachedTabsMeta);
         renderSavedTabsBar();
         if (manageOverlay.style.display === 'flex') renderManageList();
