@@ -1876,21 +1876,22 @@
     .yt-pause-logo-img {
       position: relative;
       z-index: 2;
-      width: clamp(58px, 26%, 148px);
+      width: clamp(29px, 13%, 74px);
       height: auto;
-      max-width: 58%;
-      max-height: 62%;
+      max-width: 29%;
+      max-height: 31%;
+      opacity: 0.7;
       object-fit: contain;
       filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.8));
-      transition: transform 0.14s ease;
+      transition: transform 0.14s ease, opacity 0.14s ease;
       pointer-events: none;
       user-select: none;
       -webkit-user-drag: none;
     }
     .yt-pause-mask:active .yt-pause-logo-img { transform: scale(0.93); }
     @keyframes ytLogoLoadPulse {
-      0%, 100% { transform: scale(1); opacity: 0.96; }
-      50% { transform: scale(1.05); opacity: 0.78; }
+      0%, 100% { transform: scale(1); opacity: 0.7; }
+      50% { transform: scale(1.05); opacity: 0.5; }
     }
     .yt-pause-mask.loading-state .yt-pause-logo-img {
       animation: ytLogoLoadPulse 1.35s ease-in-out infinite;
@@ -2286,7 +2287,7 @@
     body.tablet-mode .bookmark-tab { font-size: 12px; padding: 3px 14px 4px 14px; border-radius: 0 0 10px 10px; }
     body.tablet-mode .bookmark-tab.tab-close { padding: 3px 16px 4px 16px; }
     body.tablet-mode .bottom-drag-spacer { height: 24px; }
-    body.tablet-mode .yt-pause-logo-img { width: clamp(78px, 24%, 176px); }
+    body.tablet-mode .yt-pause-logo-img { width: clamp(39px, 12%, 88px); }
     body.tablet-mode .yt-pause-play-fallback { width: 64px; height: 64px; font-size: 26px; }
     body.tablet-mode .bg-overlay-badge { font-size: 13px; padding: 4px 12px; }
     body.tablet-mode .bg-overlay-title { font-size: 16px; }
