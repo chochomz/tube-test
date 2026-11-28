@@ -1837,34 +1837,82 @@
     .resizer.br { bottom: 0; right: 0; cursor: nwse-resize; }
     .resizer.br::after { bottom: 0; right: 0; border-bottom: 2px solid var(--header-border-color); border-right: 2px solid var(--header-border-color); border-bottom-right-radius: 2px; }
 
-    /* 일시정지/종료 시 원터치 재재생 마스크 */
+    /* 최초 로딩 · 일시정지 · 종료 시 mytube_logo.png 원터치 재생 마스크 */
     .yt-pause-mask {
       position: absolute;
       inset: 0;
       z-index: 12;
-      display: none;
+      display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(10, 10, 14, 0.86);
-      backdrop-filter: blur(3px);
-      -webkit-backdrop-filter: blur(3px);
+      background: rgba(10, 10, 14, 0.84);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
       cursor: pointer;
+      overflow: hidden;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.22s ease, visibility 0.22s ease;
     }
-    .yt-pause-mask.active { display: flex; }
-    .yt-pause-play-circle {
-      width: 46px;
-      height: 46px;
+    .yt-pause-mask.active {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+    .yt-pause-bg-thumb {
+      position: absolute;
+      inset: -12px;
+      width: calc(100% + 24px);
+      height: calc(100% + 24px);
+      object-fit: cover;
+      filter: blur(10px) brightness(0.45);
+      transform: scale(1.06);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+    .yt-pause-mask.has-thumb .yt-pause-bg-thumb { opacity: 1; }
+    .yt-pause-logo-img {
+      position: relative;
+      z-index: 2;
+      width: clamp(58px, 26%, 148px);
+      height: auto;
+      max-width: 58%;
+      max-height: 62%;
+      object-fit: contain;
+      filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.8));
+      transition: transform 0.14s ease;
+      pointer-events: none;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+    .yt-pause-mask:active .yt-pause-logo-img { transform: scale(0.93); }
+    @keyframes ytLogoLoadPulse {
+      0%, 100% { transform: scale(1); opacity: 0.96; }
+      50% { transform: scale(1.05); opacity: 0.78; }
+    }
+    .yt-pause-mask.loading-state .yt-pause-logo-img {
+      animation: ytLogoLoadPulse 1.35s ease-in-out infinite;
+    }
+    .yt-pause-play-fallback {
+      position: relative;
+      z-index: 2;
+      width: 48px;
+      height: 48px;
       border-radius: 50%;
       background: rgba(255, 0, 0, 0.88);
       border: 1.5px solid rgba(255, 255, 255, 0.85);
       color: #fff;
       font-size: 18px;
-      display: flex;
+      display: none;
       align-items: center;
       justify-content: center;
       padding-left: 3px;
       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7);
     }
+    .yt-pause-mask.logo-fallback .yt-pause-logo-img { display: none; }
+    .yt-pause-mask.logo-fallback .yt-pause-play-fallback { display: flex; }
 
     /* 4. 하부 초소형 우측 닫기 탭 */
     .modal-bottom-tabs {
@@ -2238,7 +2286,8 @@
     body.tablet-mode .bookmark-tab { font-size: 12px; padding: 3px 14px 4px 14px; border-radius: 0 0 10px 10px; }
     body.tablet-mode .bookmark-tab.tab-close { padding: 3px 16px 4px 16px; }
     body.tablet-mode .bottom-drag-spacer { height: 24px; }
-    body.tablet-mode .yt-pause-play-circle { width: 64px; height: 64px; font-size: 26px; }
+    body.tablet-mode .yt-pause-logo-img { width: clamp(78px, 24%, 176px); }
+    body.tablet-mode .yt-pause-play-fallback { width: 64px; height: 64px; font-size: 26px; }
     body.tablet-mode .bg-overlay-badge { font-size: 13px; padding: 4px 12px; }
     body.tablet-mode .bg-overlay-title { font-size: 16px; }
     body.tablet-mode .bg-play-btn { width: 48px; height: 48px; font-size: 20px; }
@@ -3498,7 +3547,9 @@
       </div>
 
       <div class="yt-pause-mask" id="ytPauseMask" onclick="resumeYtFromMask()">
-        <div class="yt-pause-play-circle">▶</div>
+        <img class="yt-pause-bg-thumb" id="ytPauseBgThumb" alt="" decoding="async">
+        <img class="yt-pause-logo-img" id="ytPauseLogoImg" src="./mytube_logo.png" alt="myTube" onerror="this.parentElement.classList.add('logo-fallback')">
+        <div class="yt-pause-play-fallback">▶</div>
       </div>
 
       <div class="bg-audio-overlay" id="bgAudioOverlay">
@@ -3850,6 +3901,7 @@
     const CHUNK_SIZE = 50;
     const MAX_TAB_ITEMS = 300;
     const FB_COLLECTION = 'tube_search_tabs';
+    const MYTUBE_LOGO_URL = './mytube_logo.png';
     const FALLBACK_THUMB = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='68' viewBox='0 0 120 68'%3E%3Crect width='120' height='68' fill='%23222'/%3E%3Ctext x='50%25' y='52%25' fill='%23666' font-size='10' text-anchor='middle' dominant-baseline='middle'%3ENo Image%3C/text%3E%3C/svg%3E";
 
     const DEFAULT_FIREBASE_CONFIG = {
@@ -4575,19 +4627,38 @@
       updateSearchBtnState();
     }
 
-    function showYtPauseMask() {
+    function showYtPauseMask(isInitialLoading = false) {
       const mask = document.getElementById('ytPauseMask');
-      if (mask) mask.classList.add('active');
+      if (!mask) return;
+      const logoImg = document.getElementById('ytPauseLogoImg');
+      if (logoImg && logoImg.getAttribute('src') !== MYTUBE_LOGO_URL) {
+        mask.classList.remove('logo-fallback');
+        logoImg.src = MYTUBE_LOGO_URL;
+      }
+      const bgThumb = document.getElementById('ytPauseBgThumb');
+      if (bgThumb) {
+        if (currentVideoId) {
+          bgThumb.src = getFastThumbUrl(currentVideoId);
+          mask.classList.add('has-thumb');
+        } else {
+          bgThumb.removeAttribute('src');
+          mask.classList.remove('has-thumb');
+        }
+      }
+      mask.classList.toggle('loading-state', !!isInitialLoading);
+      mask.classList.add('active');
     }
     function hideYtPauseMask() {
       const mask = document.getElementById('ytPauseMask');
-      if (mask) mask.classList.remove('active');
+      if (!mask) return;
+      mask.classList.remove('active', 'loading-state');
     }
     function resumeYtFromMask() {
       hideYtPauseMask();
       sendYtCommand('playVideo');
       isYtVideoPlaying = true;
       updateSearchBtnState();
+      updateSlideBookmarkPlayUI();
     }
 
     function getListModeSvg() {
@@ -8138,7 +8209,7 @@
       closeTabHistoryDrawer();
       closeFilterPanel();
       document.body.classList.add('player-open');
-      hideYtPauseMask();
+      showYtPauseMask(true);
       updateSearchBtnState();
       revealSlideBookmark(SB_IDLE_HIDE_MS);
       updateBgModeUI();
@@ -10697,6 +10768,7 @@
         } else {
           sendYtCommand('pauseVideo');
           isYtVideoPlaying = false;
+          if (!isDockedToBookmark && !isInlinePlaying) showYtPauseMask(false);
         }
       } else {
         userPausedBg = false;
