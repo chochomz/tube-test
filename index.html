@@ -3475,12 +3475,28 @@
       background: rgba(0, 0, 0, 0.05);
       border-bottom-color: rgba(0, 0, 0, 0.12);
     }
+    #floating-player-modal.app-mini-pip #player-lyrics-drawer,
+    #player-lyrics-drawer.lyrics-pop-up {
+      position: absolute;
+      bottom: calc(100% + 6px);
+      right: 0;
+      left: auto;
+      width: min(94vw, 370px);
+      margin-top: 0;
+      z-index: 35;
+      box-shadow: 0 -10px 32px rgba(0, 0, 0, 0.88);
+    }
+    body.tablet-mode #floating-player-modal.app-mini-pip #player-lyrics-drawer,
+    body.tablet-mode #player-lyrics-drawer.lyrics-pop-up {
+      width: min(88vw, 490px);
+    }
     .ly-custom-search-wrap {
       flex: 1;
       min-width: 0;
       display: flex;
       align-items: center;
       gap: 4px;
+      margin: 0;
     }
     .ly-custom-input {
       flex: 1;
@@ -3553,23 +3569,25 @@
       border-color: rgba(0, 0, 0, 0.18);
     }
     .ly-body {
-      max-height: 260px;
-      min-height: 82px;
-      overflow-y: auto;
+      max-height: min(50dvh, 300px);
+      min-height: 90px;
+      overflow-y: scroll;
+      overflow-x: hidden;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior: contain;
-      touch-action: pan-y;
-      padding: 7px 10px;
+      touch-action: pan-y !important;
+      padding: 7px 10px 16px 10px;
       font-size: var(--ly-font);
       line-height: 1.38;
       letter-spacing: -0.1px;
       white-space: pre-wrap;
       word-break: keep-all;
+      overflow-wrap: break-word;
       user-select: text;
       -webkit-user-select: text;
     }
-    .ly-body::-webkit-scrollbar { width: 5px; }
-    .ly-body::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.28); border-radius: 4px; }
+    .ly-body::-webkit-scrollbar { width: 6px; }
+    .ly-body::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.34); border-radius: 4px; }
     .ly-status-msg {
       text-align: center;
       padding: 12px 6px;
@@ -3583,7 +3601,7 @@
     body.tablet-mode .ly-custom-input { height: 32px; font-size: 13px; padding: 0 10px; }
     body.tablet-mode .ly-confirm-btn { height: 32px; font-size: 12.5px; padding: 0 12px; }
     body.tablet-mode .ly-icon-btn { height: 32px; min-width: 32px; padding: 0 8px; font-size: 14px; }
-    body.tablet-mode .ly-body { max-height: 340px; padding: 9px 14px; line-height: 1.42; }
+    body.tablet-mode .ly-body { max-height: min(56dvh, 420px); padding: 9px 14px 20px 14px; line-height: 1.42; }
     /* ---------------- [v25] PiP 전용 비디오 · 우측 하단 미니 PiP · '<' 꺾기 숨김 탭 ---------------- */
     .bookmark-tab.pip-active {
       opacity: 1 !important;
@@ -4007,11 +4025,11 @@
 
     <div id="player-lyrics-drawer">
       <div class="ly-header">
-        <button type="button" class="ly-gemini-main-btn" id="lyGeminiBtn" onclick="openGeminiLyricsSearch(true)" title="현재 영상 전체 관련정보 새로고침">✦ 관련정보</button>
-        <div class="ly-custom-search-wrap">
-          <input type="text" id="lyCustomQueryInput" class="ly-custom-input" placeholder="관련정보 검색어 · 질문 입력" autocomplete="off" onkeydown="if(event.key==='Enter'||event.keyCode===13){event.preventDefault(); submitCustomLyricsQuery();}">
-          <button type="button" class="ly-confirm-btn" onclick="submitCustomLyricsQuery()">확인</button>
-        </div>
+        <button type="button" class="ly-gemini-main-btn" id="lyGeminiBtn" onclick="openGeminiLyricsSearch(true, '')" title="현재 영상 전체 관련정보 새로고침">✦ 관련정보</button>
+        <form class="ly-custom-search-wrap" action="javascript:void(0)" onsubmit="event.preventDefault(); submitCustomLyricsQuery(); return false;">
+          <input type="search" id="lyCustomQueryInput" class="ly-custom-input" value="" enterkeyhint="search" placeholder="무엇이든 검색 (터치 시 비움)" autocomplete="off" onfocus="this.value=''" onclick="this.value=''" onkeydown="if(event.key==='Enter'||event.keyCode===13){event.preventDefault(); submitCustomLyricsQuery();}">
+          <button type="submit" class="ly-confirm-btn">확인</button>
+        </form>
         <div class="ly-size-controls">
           <button type="button" class="ly-icon-btn" onclick="changeLyricsFontSize(-1)" title="글자 작게">-</button>
           <button type="button" class="ly-icon-btn" onclick="changeLyricsFontSize(1)" title="글자 크게">+</button>
@@ -6376,6 +6394,15 @@
       updateLyricsFontUI();
     }
 
+    function updateLyricsDrawerDirection() {
+      const dr = document.getElementById('player-lyrics-drawer');
+      if (!dr || !modal) return;
+      const rect = modal.getBoundingClientRect();
+      const isBottomHalf = rect.bottom > (window.innerHeight * 0.62);
+      const shouldPopUp = isAppMiniPip || isBottomHalf;
+      dr.classList.toggle('lyrics-pop-up', shouldPopUp);
+    }
+
     function getEffectiveGeminiApiKey() {
       return String(sharedGeminiApiKey || (hasSettingsAdminAccess() ? localGeminiApiKey : '') || '').trim();
     }
@@ -6455,7 +6482,6 @@
       }
     }
 
-    // Zero-Quota(-image/-exp/-preview/-audio/-tts/-live)만 차단하고 정식 Flash 및 Pro 텍스트 모델 허용
     function isPureTextGeminiModel(name) {
       const n = String(name || '').toLowerCase();
       if (!n.startsWith('gemini-')) return false;
@@ -6507,7 +6533,7 @@
 
     async function callSingleGeminiEndpoint(ep, promptText, apiKey = '') {
       const ctrl = new AbortController();
-      const timer = setTimeout(() => ctrl.abort(), 18000);
+      const timer = setTimeout(() => ctrl.abort(), 20000);
       try {
         const headers = { 'Content-Type': 'application/json' };
         if (apiKey && ep.includes('generativelanguage.googleapis.com')) {
@@ -6525,8 +6551,7 @@
               { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
               { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' }
             ],
-            // 대용량 8,192 토큰(기존 2,048의 4배)으로 확장하여 요리 레시피·음반정보·전체 가사를 끝까지 풍부하게 수신
-            generationConfig: { temperature: 0.25, maxOutputTokens: 8192 }
+            generationConfig: { temperature: 0.3, maxOutputTokens: 8192 }
           })
         });
         if (!res.ok) {
@@ -6560,7 +6585,6 @@
       }
     }
 
-    // 유튜브 영상 원본 '더보기' 상세정보(설명글 전체, 챕터, 채널명, 조회수, 업로드일) 실시간 수집
     async function fetchYoutubeVideoDetails(videoId) {
       if (!videoId) return null;
       if (videoMetaMemoryCache.has(videoId)) return videoMetaMemoryCache.get(videoId);
@@ -6616,7 +6640,32 @@
       return null;
     }
 
-    // 상하 글간격을 좁히고 문자 바로 밑에 구분선을 밀착시키는 헬퍼
+    // 무엇을 검색하든 풍부한 백과사전/지식 정보를 보강해 주는 위키백과 장문 검색 폴백 (무료·무제한)
+    async function fetchWikiKnowledgeFallback(queryStr) {
+      const q = String(queryStr || '').trim();
+      if (!q) return '';
+      try {
+        const searchUrl = 'https://ko.wikipedia.org/w/api.php?action=query&list=search&srsearch=' + encodeURIComponent(q) + '&utf8=1&format=json&origin=*&srlimit=3';
+        const sData = await fetchJsonWithTimeout(searchUrl, 4500);
+        const hits = sData && sData.query && Array.isArray(sData.query.search) ? sData.query.search : [];
+        if (hits.length === 0) return '';
+
+        const titles = hits.slice(0, 2).map(h => h.title).filter(Boolean);
+        const outBlocks = [];
+        for (const t of titles) {
+          const extUrl = 'https://ko.wikipedia.org/w/api.php?action=query&prop=extracts&explaintext=1&titles=' + encodeURIComponent(t) + '&format=json&origin=*';
+          const eData = await fetchJsonWithTimeout(extUrl, 4500);
+          const pages = eData && eData.query && eData.query.pages ? Object.values(eData.query.pages) : [];
+          if (pages[0] && pages[0].extract) {
+            outBlocks.push('📚 [' + t + ' 상세 백과 정보]\n' + String(pages[0].extract).trim().slice(0, 5000));
+          }
+        }
+        return outBlocks.join('\n────────────────────────────────────\n');
+      } catch (e) {
+        return '';
+      }
+    }
+
     const COMPACT_DIVIDER = '\n────────────────────────────────────\n';
 
     function normalizeCompactInfoText(txt) {
@@ -6654,32 +6703,37 @@
 
     function buildSmartRichInfoPrompt(rawTitle, cleanedQuery, ytMeta, lrclibLyrics, customUserQuery = '') {
       const descSnippet = ytMeta && ytMeta.description
-        ? ytMeta.description.slice(0, 4500)
+        ? ytMeta.description.slice(0, 5000)
         : '';
       const uploaderInfo = ytMeta && ytMeta.uploader ? ('채널/업로더: ' + ytMeta.uploader + '\n') : '';
-      const lrcHint = lrclibLyrics ? ('\n[참고용 가사 DB 데이터]\n' + lrclibLyrics.slice(0, 2500) + '\n') : '';
-      const customDirective = customUserQuery
-        ? ('\n★ [사용자 직접 요청 검색어/질문]: "' + customUserQuery + '"\n위 요청사항에 대한 상세하고 풍부한 정보와 아래 영상 관련정보를 모두 빠짐없이 정리해줘.\n')
-        : '';
+      const lrcHint = lrclibLyrics ? ('\n[참고용 가사 DB 데이터]\n' + lrclibLyrics.slice(0, 2800) + '\n') : '';
 
-      return '다음 유튜브 영상에 대한 최대한 풍부하고 상세한 [관련정보]를 한국어로 정리해줘.\n' +
+      if (customUserQuery) {
+        return '사용자가 검색창에 직접 입력한 주제/질문: "' + customUserQuery + '"\n' +
+          '(현재 시청 중인 참고 영상: "' + rawTitle + '" / ' + uploaderInfo.trim() + ')\n' +
+          (descSnippet ? ('[영상 더보기 참고 텍스트]\n' + descSnippet.slice(0, 2500) + '\n') : '') +
+          '\n--- 작성 규칙 ---\n' +
+          '• 사용자가 입력한 "' + customUserQuery + '"에 대해 최소 2,000자 이상으로 아주 깊이 있고 풍부하며 상세한 정보를 한국어로 작성해줘.\n' +
+          '• 인사말이나 마크다운 ** 기호 없이, 핵심 개요, 상세 내용(재료/레시피/가사/음반/역사/원리/방법 등 주제에 맞는 모든 세부 항목), 실용적인 팁과 관련 배경지식까지 빠짐없이 정리해줘.';
+      }
+
+      return '다음 유튜브 영상에 대한 최대한 풍부하고 상세한 [관련정보]를 최소 2,000자 이상 분량으로 한국어로 자세하게 정리해줘.\n' +
         '영상 제목: "' + rawTitle + '" (핵심 키워드: "' + cleanedQuery + '")\n' +
         uploaderInfo +
-        customDirective +
         (descSnippet ? ('[영상 원본 더보기 설명글 참고]\n' + descSnippet + '\n') : '') +
         lrcHint +
-        '\n--- 작성 규칙 (인사말이나 마크다운 ** 기호 없이, 불필요한 빈 줄을 줄이고 알찬 정보로 꽉 채워 작성) ---\n' +
+        '\n--- 작성 규칙 (인사말이나 마크다운 ** 기호 없이, 불필요한 빈 줄을 줄이고 알찬 정보로 꽉 채워 길게 작성) ---\n' +
         '1. [요리 / 레시피 / 음식 영상인 경우]\n' +
-        '   🍳 요리 소개 & 핵심 특징\n' +
+        '   🍳 요리 소개 & 핵심 특징 & 맛 포인트\n' +
         '   🛒 필수 재료 & 양념 계량 (주재료, 부재료, 양념장 비율/스푼/g 단위를 하나도 빠짐없이 상세 나열)\n' +
-        '   👩‍🍳 단계별 조리 순서 (처음부터 끝까지 구체적인 조리 과정과 불 조절/시간)\n' +
-        '   💡 요리 꿀팁 & 실패 없는 비법 & 대체 가능한 재료\n' +
+        '   👩‍🍳 단계별 조리 순서 (재료 손질부터 완성까지 구체적인 조리 과정과 불 조절/시간)\n' +
+        '   💡 요리 꿀팁 & 실패 없는 비법 & 대체 가능한 재료 & 보관법\n' +
         '2. [음악 / 노래 / 찬양 / CCM / 팝송 영상인 경우]\n' +
-        '   💿 음반 & 곡 상세 정보 (아티스트, 수록 앨범명, 발매연도, 작사·작곡·편곡, 장르, 곡의 탄생 배경/해설, 앨범 주요 수록곡 목록)\n' +
-        '   🎤 전체 가사 (생략 없이 원문 전체 가사를 끝까지 작성)\n' +
+        '   💿 음반 & 곡 상세 정보 (아티스트 소개, 수록 앨범명, 발매연도, 작사·작곡·편곡, 장르, 곡의 탄생 배경/상세 해설, 앨범 주요 수록곡 목록)\n' +
+        '   🎤 전체 가사 (생략 없이 원문 전체 가사를 끝까지 작성하고, 외국어 곡이면 한국어 해석도 함께 수록)\n' +
         '3. [그 외 일반 / 설교 / 강의 / 정보 영상인 경우]\n' +
-        '   📌 핵심 내용 심층 요약 (주요 포인트 5~8가지)\n' +
-        '   📖 상세 정보 & 배경 지식 & 핵심 용어 해설';
+        '   📌 핵심 내용 심층 요약 (주요 포인트 5~10가지)\n' +
+        '   📖 상세 정보 & 배경 지식 & 핵심 용어 해설 & 실전 활용 포인트';
     }
 
     async function fetchRichInfoFromGeminiApi(rawTitle, ytMeta, apiKey, projectIdOverride, isTestMode = false, lrclibLyrics = '', customUserQuery = '') {
@@ -6691,7 +6745,6 @@
         ? '애국가 1절 첫 한 줄만 답해줘.'
         : buildSmartRichInfoPrompt(rawTitle, cleanedQuery, ytMeta, lrclibLyrics, customUserQuery);
 
-      // 대용량 8,192 토큰을 지원하는 무료/Pro 순수 텍스트 모델 큐
       const coreModels = [
         'gemini-2.5-flash',
         'gemini-2.5-pro',
@@ -6767,27 +6820,31 @@
       return null;
     }
 
-    // 문자 바로 밑에 구분선이 밀착되고 유튜브 '더보기' 전체(15,000자)가 출력되는 통합 포매터
-    function assembleFullCompactRelatedInfo(rawTitle, ytMeta, lrcObj, geminiText = '') {
+    function assembleFullCompactRelatedInfo(rawTitle, ytMeta, lrcObj, geminiText = '', wikiText = '', customUserQuery = '') {
       const sections = [];
 
-      // 1) 상단 콤팩트 기본정보 (줄간격 밀착)
+      // 1) 상단 콤팩트 기본정보 (문자 바로 밑 구분선 밀착)
       sections.push(buildCompactBasicHeader(rawTitle, ytMeta, lrcObj));
 
-      // 2) 제미나이 심층 분석 본문 (있을 경우)
+      // 2) 사용자 검색어 또는 제미나이 심층 분석 본문
       if (geminiText && geminiText.trim()) {
-        sections.push(normalizeCompactInfoText(geminiText));
+        const prefix = customUserQuery ? ('🔍 [' + customUserQuery + ' 검색 결과]\n') : '';
+        sections.push(prefix + normalizeCompactInfoText(geminiText));
       } else if (lrcObj && lrcObj.lyrics) {
-        // 제미나이 응답이 없을 때 무료 가사 DB 본문 표시
         sections.push('🎤 가사\n' + normalizeCompactInfoText(lrcObj.lyrics));
       }
 
-      // 3) 타임라인/챕터 목록 (있을 경우)
+      // 3) 위키백과 상세 지식 보강 (제미나이가 짧거나 쿼터 초과 시 1,500자 이상 풍부한 텍스트 보장)
+      if (wikiText && wikiText.trim()) {
+        sections.push(normalizeCompactInfoText(wikiText));
+      }
+
+      // 4) 타임라인/챕터 목록
       if (ytMeta && ytMeta.chapters && ytMeta.chapters.length > 5) {
         sections.push('⏱️ 영상 챕터 · 구간 안내\n' + ytMeta.chapters);
       }
 
-      // 4) 유튜브 영상 '더보기' 원본 전문 (최대 15,000자 무삭제 전체 표시!)
+      // 5) 유튜브 영상 '더보기' 원본 전문 (최대 15,000자 무삭제 전체 표시)
       const feedItem = currentFeedItems.find(it => it && it.id === currentVideoId);
       if (ytMeta && ytMeta.description && ytMeta.description.length > 5) {
         const isCooking = /(재료|레시피|양념|큰술|작은술|스푼|조리|만드는\s*법|만들기|요리|식용유|간장|설탕|마늘|소금|후추|g\b|ml\b|컵)/i.test(rawTitle + ' ' + ytMeta.description);
@@ -6799,20 +6856,20 @@
         sections.push('📋 영상 더보기 요약\n' + normalizeCompactInfoText(feedItem._sd));
       }
 
-      // 모든 섹션을 빈 줄 여백 없이 문자 바로 밑 구분선(COMPACT_DIVIDER)으로 밀착 연결!
       return sections.filter(Boolean).join(COMPACT_DIVIDER);
     }
 
     function submitCustomLyricsQuery() {
       const inp = document.getElementById('lyCustomQueryInput');
       if (!inp) return;
-      inp.blur();
       const customQ = inp.value.trim();
+      inp.blur();
       openGeminiLyricsSearch(true, customQ);
     }
 
     async function openGeminiLyricsSearch(forceRefresh = false, customUserQuery = '') {
       if (!currentVideoId) return;
+      updateLyricsDrawerDirection();
       const bodyEl = document.getElementById('lyBody');
       const btnEl = document.getElementById('lyGeminiBtn');
       const inpEl = document.getElementById('lyCustomQueryInput');
@@ -6820,14 +6877,12 @@
       const rawTitle = currentVideoTitle || '제목 없음';
       const defaultCleanQ = cleanLyricsSearchQuery(rawTitle);
 
-      // 입력창이 비어 있거나 영상이 바뀐 경우 현재 영상 제목으로 자동 세팅
-      if (inpEl && (!inpEl.value.trim() || !customUserQuery)) {
-        if (!customUserQuery && document.activeElement !== inpEl) {
-          inpEl.value = defaultCleanQ;
-        }
+      // 직접 검색이 아닌 기본 관련정보 로드 시 검색 입력창은 항상 깨끗한 빈칸('')으로 유지
+      const activeCustomQ = String(customUserQuery || '').trim();
+      if (inpEl && !activeCustomQ && document.activeElement !== inpEl) {
+        inpEl.value = '';
       }
 
-      const activeCustomQ = String(customUserQuery || '').trim();
       const cacheKey = activeCustomQ ? (vid + '::' + activeCustomQ) : vid;
 
       if (!forceRefresh && lyricsMemoryCache.has(cacheKey)) {
@@ -6842,7 +6897,7 @@
       if (btnEl) btnEl.textContent = '✦ 분석 중...';
       if (bodyEl) {
         const targetLabel = activeCustomQ || simplifyTitle(rawTitle);
-        bodyEl.innerHTML = '<div class="ly-status-msg">✦ "' + targetLabel.replace(/</g, '&lt;') + '"<br>제미나이 심층 정보 + 영상 더보기 전문을 불러오는 중...</div>';
+        bodyEl.innerHTML = '<div class="ly-status-msg">✦ "' + targetLabel.replace(/</g, '&lt;') + '"<br>대용량 관련정보 + 영상 더보기 전문을 불러오는 중...</div>';
       }
 
       if (!sharedGeminiApiKey && fbReady && db) {
@@ -6851,9 +6906,10 @@
       if (mySeq !== lyricsFetchSeq) return;
 
       const searchQ = activeCustomQ || defaultCleanQ;
-      const [ytMeta, lrcObj] = await Promise.all([
+      const [ytMeta, lrcObj, wikiText] = await Promise.all([
         fetchYoutubeVideoDetails(vid),
-        fetchLyricsFallbackInWindow(searchQ)
+        fetchLyricsFallbackInWindow(searchQ),
+        fetchWikiKnowledgeFallback(searchQ)
       ]);
       if (mySeq !== lyricsFetchSeq) return;
 
@@ -6878,7 +6934,7 @@
       }
 
       if (btnEl) btnEl.textContent = '✦ 관련정보';
-      const finalOutput = assembleFullCompactRelatedInfo(rawTitle, ytMeta, lrcObj, geminiText);
+      const finalOutput = assembleFullCompactRelatedInfo(rawTitle, ytMeta, lrcObj, geminiText, wikiText, activeCustomQ);
 
       if (finalOutput && finalOutput.trim().length > 0) {
         lyricsMemoryCache.set(cacheKey, finalOutput);
@@ -6890,7 +6946,7 @@
       }
 
       if (bodyEl) {
-        bodyEl.innerHTML = '<div class="ly-status-msg">이 영상의 추가 설명 데이터가 없습니다.</div>';
+        bodyEl.innerHTML = '<div class="ly-status-msg">이 검색어에 대한 추가 데이터를 찾지 못했습니다.</div>';
       }
     }
 
@@ -6900,13 +6956,14 @@
       const tab = document.getElementById('lyricsToggleTab');
       if (!dr) return;
       lyricsPanelOpen = !lyricsPanelOpen;
+      updateLyricsDrawerDirection();
       dr.classList.toggle('open', lyricsPanelOpen);
       if (tab) tab.classList.toggle('lyrics-active', lyricsPanelOpen);
       if (lyricsPanelOpen) {
         const inpEl = document.getElementById('lyCustomQueryInput');
-        if (inpEl) inpEl.value = cleanLyricsSearchQuery(currentVideoTitle);
+        if (inpEl) inpEl.value = '';
         updateLyricsFontUI();
-        openGeminiLyricsSearch(false);
+        openGeminiLyricsSearch(false, '');
       }
     }
 
@@ -6920,14 +6977,15 @@
 
     function onLyricsTrackChanged() {
       const inpEl = document.getElementById('lyCustomQueryInput');
-      if (inpEl) inpEl.value = cleanLyricsSearchQuery(currentVideoTitle);
+      if (inpEl) inpEl.value = '';
       if (!lyricsPanelOpen) return;
       const dr = document.getElementById('player-lyrics-drawer');
       const tab = document.getElementById('lyricsToggleTab');
+      updateLyricsDrawerDirection();
       if (dr) dr.classList.add('open');
       if (tab) tab.classList.add('lyrics-active');
       updateLyricsFontUI();
-      openGeminiLyricsSearch(false);
+      openGeminiLyricsSearch(false, '');
     }
 
     (function bindLyricsAndFaithBarGuards() {
@@ -6935,6 +6993,13 @@
       if (dr) {
         dr.addEventListener('pointerdown', (e) => { e.stopPropagation(); });
         dr.addEventListener('touchstart', (e) => { e.stopPropagation(); }, { passive: true });
+        dr.addEventListener('touchmove', (e) => { e.stopPropagation(); }, { passive: true });
+        dr.addEventListener('wheel', (e) => { e.stopPropagation(); }, { passive: true });
+      }
+      const inp = document.getElementById('lyCustomQueryInput');
+      if (inp) {
+        inp.addEventListener('pointerdown', () => { inp.value = ''; });
+        inp.addEventListener('focus', () => { inp.value = ''; });
       }
       const fBar = document.getElementById('faithVerseBar');
       if (fBar) {
@@ -8068,15 +8133,24 @@
         navigator.mediaSession.metadata = new MediaMetadata({
           title: simplifyTitle(title),
           artist: 'myTube',
-          album: 'Background Audio',
+          album: 'myTube Audio',
           artwork: [
-            { src: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`, sizes: '480x360', type: 'image/jpeg' }
+            { src: 'https://i.ytimg.com/vi/' + videoId + '/hqdefault.jpg', sizes: '480x360', type: 'image/jpeg' }
           ]
         });
-        navigator.mediaSession.setActionHandler('play', () => {
+        navigator.mediaSession.setActionHandler('play', async () => {
           userPausedBg = false;
-          if (bgAudio.src && (isBgAudioPlaying || isDockedToBookmark)) {
-            bgAudio.play().catch(() => {});
+          // 아이폰 홈 스와이프 후 iOS 자체 플레이어(제어센터/잠금화면)의 삼각형(▶) 플레이 버튼을 누른 경우 즉시 백그라운드 오디오 재생!
+          if (document.visibilityState === 'hidden' || isDockedToBookmark || isBgAudioPlaying || (bgAudio.src && bgAudio.src !== SILENT_WAV_URI)) {
+            if (bgAudio.src && bgAudio.src !== SILENT_WAV_URI) {
+              if (lastKnownPlaySec > 0 && Math.abs((bgAudio.currentTime || 0) - lastKnownPlaySec) > 3) {
+                try { bgAudio.currentTime = Math.floor(lastKnownPlaySec); } catch (e) {}
+              }
+              bgAudio.muted = false;
+              bgAudio.play().catch(() => { activateBgAudioStream(lastKnownPlaySec); });
+            } else {
+              await activateBgAudioStream(lastKnownPlaySec);
+            }
           } else {
             sendYtCommand('playVideo');
           }
@@ -8094,6 +8168,21 @@
             bgAudio.currentTime = Math.min(bgAudio.duration, bgAudio.currentTime + 10);
           }
         });
+      } catch (e) {}
+    }
+
+    // 아이폰(iOS)에서 스와이프해 나갔을 때 시스템 미디어 창의 삼각형(▶) 버튼이 작동하도록 오디오 스트림을 사전 장전
+    function prearmBgAudioForIos(videoId, candidates) {
+      if (!videoId || !Array.isArray(candidates) || candidates.length === 0) return;
+      if (isBgAudioPlaying) return;
+      try {
+        bgAudio.preload = 'metadata';
+        bgAudio.muted = false;
+        if (bgAudio.src !== candidates[0]) {
+          bgAudio.src = candidates[0];
+          bgAudio.load();
+        }
+        setupMediaSession(currentVideoTitle, videoId);
       } catch (e) {}
     }
 
@@ -8149,6 +8238,10 @@
       prefetchedAudioCandidates = candidates;
       prefetchedVideoId = candidates.length > 0 ? videoId : '';
       updateBgModeUI();
+
+      if (candidates.length > 0) {
+        prearmBgAudioForIos(videoId, candidates);
+      }
 
       if ((isDockedToBookmark || document.visibilityState === 'hidden') && !isBgAudioPlaying && !userPausedBg && candidates.length > 0) {
         activateBgAudioStream(lastKnownPlaySec);
@@ -11328,11 +11421,23 @@
             if (isBgAudioPlaying && bgAudio.paused && !bgAudio.ended) bgAudio.play().catch(() => {});
             else if (!isBgAudioPlaying && !isYtVideoPlaying) sendYtCommand('playVideo');
           }
+        } else if (isBgAudioPlaying && currentVideoId && !isDockedToBookmark) {
+          // 백그라운드에서 아이폰 ▶ 버튼으로 듣다가 다시 화면으로 돌아오면 자연스럽게 상태 유지
+          updateBgModeUI();
         }
       } else if (document.visibilityState === 'hidden' && currentVideoId) {
+        // 아이폰/모바일에서 홈으로 스와이프해 나가는 순간 재생 위치를 백그라운드 오디오에 즉시 인계
+        if (bgAudio.src && bgAudio.src !== SILENT_WAV_URI && lastKnownPlaySec > 0) {
+          try {
+            if (Math.abs((bgAudio.currentTime || 0) - lastKnownPlaySec) > 2) {
+              bgAudio.currentTime = Math.floor(lastKnownPlaySec);
+            }
+          } catch (e) {}
+        }
+        setupMediaSession(currentVideoTitle, currentVideoId);
         if (isBgAudioPlaying && bgAudio.paused && !userPausedBg) {
           bgAudio.play().catch(() => {});
-        } else if (!isBgAudioPlaying && !userPausedBg && iosAudioUnlocked && prefetchedVideoId === currentVideoId && prefetchedAudioCandidates.length > 0) {
+        } else if (!isBgAudioPlaying && !userPausedBg && prefetchedVideoId === currentVideoId && prefetchedAudioCandidates.length > 0) {
           activateBgAudioStream(lastKnownPlaySec);
         }
       }
@@ -11918,6 +12023,7 @@
           dockPlayerToBookmark('right');
         } else {
           if (rect.top < 0) modal.style.top = '4px';
+          updateLyricsDrawerDirection();
         }
       }
       if (isResizing) {
@@ -12026,7 +12132,6 @@
       }
       isAppMiniPip = true;
       isPipEdgeHidden = false;
-      closeLyricsPanel(false);
       hideTabletInfoModal(false);
 
       const miniW = isTabletMode
@@ -12041,6 +12146,7 @@
       modal.style.display = 'block';
       modal.style.left = targetLeft + 'px';
       modal.style.top = targetTop + 'px';
+      updateLyricsDrawerDirection();
       updatePipTabUI();
     }
 
@@ -12057,6 +12163,7 @@
         modal.style.top = Math.max(4, Math.min(maxT, pipSavedRect.top)) + 'px';
       }
       pipSavedRect = null;
+      updateLyricsDrawerDirection();
       updatePipTabUI();
     }
 
