@@ -6153,7 +6153,7 @@
       renderFaithConfigUI();
     }
 
-    function setFaithFontSize(sz) {
+        function setFaithFontSize(sz) {
       if (!['small', 'normal', 'large'].includes(sz)) return;
       faithConfig.fontSize = sz;
       applyFaithVerseBarToDOM();
@@ -6161,7 +6161,28 @@
       renderFaithConfigUI();
     }
 
-          applySkinToDOM();
+    function saveCustomBadgeName() {
+      const inp = document.getElementById('faithBadgeNameInput');
+      if (!inp) return;
+      inp.blur();
+      const val = inp.value.trim().slice(0, 14);
+      if (!faithConfig.badgeOverrides) faithConfig.badgeOverrides = {};
+      if (val) {
+        faithConfig.badgeOverrides[currentSkinId || 'default'] = val;
+      } else {
+        delete faithConfig.badgeOverrides[currentSkinId || 'default'];
+      }
+      applySkinToDOM();
+      persistFaithConfig(true);
+      renderThemeCardsGrid();
+      renderFaithConfigUI();
+    }
+
+    function resetCustomBadgeName() {
+      if (faithConfig.badgeOverrides) {
+        delete faithConfig.badgeOverrides[currentSkinId || 'default'];
+      }
+      applySkinToDOM();
       persistFaithConfig(true);
       renderThemeCardsGrid();
       renderFaithConfigUI();
@@ -6213,6 +6234,7 @@
       document.querySelectorAll('.fc-btn[data-ffsize]').forEach(b => {
         b.classList.toggle('active', b.getAttribute('data-ffsize') === (faithConfig.fontSize || 'normal'));
       });
+
       const verses = Array.isArray(faithConfig.verses) ? faithConfig.verses : [];
       const cntLbl = document.getElementById('faithVerseCountLbl');
       if (cntLbl) {
@@ -7091,7 +7113,7 @@
           lyTouchStartY = curY;
           lyTouchStartX = curX;
 
-          // 1) 본문(#lyBody) 바깥(헤더 등)에서 위아래로 터치 드래그 시 뒤쪽 피드 스크롤 즉시 차단
+          // 1) 본문(#lyBody) 바깥(상단 헤더 등)에서 위아래로 드래그 시 뒤쪽 피드 스크롤 차단
           const inBody = lyBody && (e.target === lyBody || lyBody.contains(e.target));
           if (!inBody) {
             if (Math.abs(dy) > Math.abs(dx) && e.cancelable) {
@@ -7100,7 +7122,7 @@
             return;
           }
 
-          // 2) 본문(#lyBody) 내부일 때: 스크롤할 내용이 없거나 맨 위/맨 아래 경계선 도달 시 뒤쪽 피드로 스크롤이 넘어가는 현상(Scroll Chaining) 완벽 차단
+          // 2) 본문(#lyBody) 내부일 때: 맨 위/맨 아래 경계선 도달 시 뒤쪽 피드로 스크롤이 넘어가는 현상(Scroll Chaining) 완벽 차단
           const maxScroll = lyBody.scrollHeight - lyBody.clientHeight;
           if (maxScroll <= 1) {
             if (e.cancelable) e.preventDefault();
@@ -7143,7 +7165,7 @@
       }
     })();
 
-        function resetAllThemeColors() {
+    function resetAllThemeColors() {
       currentSkinId = 'default';
       customThemeBackup = null;
       currentThemeColors = getDefaultThemeColors();
@@ -12201,7 +12223,7 @@
       }
     }
 
-    // ==================== [v26.5] 완전 독립 멀티태스킹 OS PiP + 캔버스 브릿지 + '<' 숨김 엔진 ====================
+    // ==================== [v26.6] 완전 독립 멀티태스킹 OS PiP + 캔버스 브릿지 + '<' 숨김 엔진 ====================
     const pipVideoEl = document.getElementById('pipVideoPlayer');
     const pipEdgeChevron = document.getElementById('pip-edge-chevron');
 
