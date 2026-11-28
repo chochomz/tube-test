@@ -4388,9 +4388,13 @@
 
           <div class="settings-sec-title" style="margin-top:4px;" id="geminiApiHead">제미나이 가사 API 키 (관리자 전용 · 공용)</div>
           <div class="stream-api-box" id="geminiApiBox" style="margin-bottom:6px;">
+            <div class="auth-form-row" style="margin-bottom:4px;">
+              <input type="password" id="geminiApiKeyInput" class="auth-form-input" placeholder="AQ.... 또는 AIza... 키 입력" autocomplete="off">
+            </div>
             <div class="auth-form-row" style="margin-bottom:0;">
-              <input type="password" id="geminiApiKeyInput" class="auth-form-input" placeholder="AIza... 또는 AQ.... (전 사용자 공용)" autocomplete="off">
+              <input type="text" id="geminiProjectIdInput" class="auth-form-input" placeholder="프로젝트 ID (AQ.키용: gen-lang-...)" autocomplete="off">
               <button type="button" class="auth-form-btn" onclick="saveGeminiApiKey()">저장</button>
+              <button type="button" class="auth-form-btn" style="background:#38bdf8;color:#082f49;" onclick="testGeminiApiKey()">테스트</button>
             </div>
           </div>
           <div class="admin-save-notice" id="adminSaveNotice"></div>
@@ -4449,9 +4453,12 @@
     const REMEMBER_NAME_KEY = 'mytube_remember_name_v12';
     const REMEMBER_CRED_KEY = 'mytube_remember_cred_v25';
     const GEMINI_API_LOCAL_KEY = 'mytube_gemini_api_v25';
+    const GEMINI_PROJECT_LOCAL_KEY = 'mytube_gemini_project_v254';
     const SHARED_STREAM_APIS_LOCAL_KEY = 'mytube_shared_stream_apis_v251';
     let sharedGeminiApiKey = '';
     let localGeminiApiKey = '';
+    let sharedGeminiProjectId = '';
+    let localGeminiProjectId = '';
     let customStreamApiUrls = [];
 
     function saveRememberedCred(name, code) {
@@ -6297,7 +6304,7 @@
     }
 
     // =========================================================================
-    // [v25.3] 초미니멀 제미나이 가사 엔진 (글자 크기 + 제미나이 가사 전용 · 창 내부 출력)
+    // [v25.4] 초미니멀 제미나이 가사 엔진 (AQ.+프로젝트ID / AIza 지원 · 창 내부 출력)
     // =========================================================================
     const lyricsMemoryCache = new Map();
     let lyricsPanelOpen = false;
@@ -6305,7 +6312,7 @@
     let lyricsFontStep = 0;
     let adminSaveNoticeTimer = null;
 
-    function showAdminSaveNotice(msg, isError = false) {
+    function showAdminSaveNotice(msg, isError = false, holdMs = 5500) {
       const el = document.getElementById('adminSaveNotice');
       if (!el) return;
       el.textContent = msg;
@@ -6314,7 +6321,7 @@
       clearTimeout(adminSaveNoticeTimer);
       adminSaveNoticeTimer = setTimeout(() => {
         if (el) el.style.display = 'none';
-      }, 4500);
+      }, holdMs);
     }
 
     function cleanLyricsSearchQuery(rawTitle) {
@@ -6347,10 +6354,16 @@
       return String(sharedGeminiApiKey || localGeminiApiKey || '').trim();
     }
 
+    function getEffectiveGeminiProjectId() {
+      return String(sharedGeminiProjectId || localGeminiProjectId || '').trim();
+    }
+
     function initSavedGeminiApiKey() {
       localGeminiApiKey = '';
+      localGeminiProjectId = '';
       try {
         localGeminiApiKey = String(localStorage.getItem(GEMINI_API_LOCAL_KEY) || '').trim();
+        localGeminiProjectId = String(localStorage.getItem(GEMINI_PROJECT_LOCAL_KEY) || '').trim();
       } catch (e) {}
     }
 
@@ -6360,30 +6373,62 @@
         return;
       }
       const inp = document.getElementById('geminiApiKeyInput');
+      const pidInp = document.getElementById('geminiProjectIdInput');
       if (inp) inp.blur();
+      if (pidInp) pidInp.blur();
       const val = inp ? inp.value.trim() : '';
+      const pid = pidInp ? pidInp.value.trim() : '';
       if (val && (val.length < 15 || /\s/.test(val))) {
-        showAdminSaveNotice('올바른 Google Gemini API 키(AIza... 또는 AQ....)를 공백 없이 입력해 주세요.', true);
+        showAdminSaveNotice('올바른 Google Gemini API 키(AQ.... 또는 AIza...)를 공백 없이 입력해 주세요.', true);
+        return;
+      }
+      if (pid && /\s/.test(pid)) {
+        showAdminSaveNotice('프로젝트 ID에는 공백을 넣지 말고 정확히 입력해 주세요. (예: gen-lang-client-1234)', true);
         return;
       }
       sharedGeminiApiKey = val;
       localGeminiApiKey = val;
+      sharedGeminiProjectId = pid;
+      localGeminiProjectId = pid;
       try {
         if (val) localStorage.setItem(GEMINI_API_LOCAL_KEY, val);
         else localStorage.removeItem(GEMINI_API_LOCAL_KEY);
+        if (pid) localStorage.setItem(GEMINI_PROJECT_LOCAL_KEY, pid);
+        else localStorage.removeItem(GEMINI_PROJECT_LOCAL_KEY);
       } catch (e) {}
       authData.updatedAt = Date.now();
       setPendingAuthSync(true);
       showAdminSaveNotice('저장 중...', false);
       const res = await saveAuthConfigToCloud();
       renderAuthSettingsPane();
-      const keyType = val.startsWith('AQ.') ? 'Vertex AI(AQ.)' : 'AI Studio(AIza)';
+      const keyType = val.startsWith('AQ.') ? ('AQ. 키' + (pid ? ' + 프로젝트ID' : '')) : 'AIza 키';
       showAdminSaveNotice(
         val
-          ? (res.ok ? '✓ ' + keyType + ' 키 저장 완료 (모든 사용자 공용 적용)' : '✓ ' + keyType + ' 키 로컬 저장 완료 (DB 동기화 대기)')
+          ? (res.ok ? '✓ ' + keyType + ' 저장 완료 (모든 사용자 공용 적용)' : '✓ ' + keyType + ' 로컬 저장 완료 (DB 동기화 대기)')
           : '✓ 공용 제미나이 API 키가 해제되었습니다.',
         false
       );
+    }
+
+    async function testGeminiApiKey() {
+      if (!hasSettingsAdminAccess()) return;
+      const inp = document.getElementById('geminiApiKeyInput');
+      const pidInp = document.getElementById('geminiProjectIdInput');
+      if (inp) inp.blur();
+      if (pidInp) pidInp.blur();
+      const key = (inp && inp.value.trim()) || getEffectiveGeminiApiKey();
+      const pid = (pidInp && pidInp.value.trim()) || getEffectiveGeminiProjectId();
+      if (!key) {
+        showAdminSaveNotice('테스트할 API 키를 먼저 입력해 주세요.', true);
+        return;
+      }
+      showAdminSaveNotice('✦ 제미나이 연결 테스트 중...', false, 15000);
+      const res = await fetchLyricsFromGeminiApi('애국가', key, pid, true);
+      if (res && res.text) {
+        showAdminSaveNotice('✓ 연결 성공! (' + (res.usedPath || 'Gemini') + ') 응답: ' + res.text.replace(/\s+/g, ' ').slice(0, 38), false, 8000);
+      } else {
+        showAdminSaveNotice('✕ 연결 실패: ' + ((res && res.error) || '응답 없음'), true, 12000);
+      }
     }
 
     async function discoverAiStudioModels(apiKey) {
@@ -6428,7 +6473,7 @@
           try {
             const ej = await res.json();
             if (ej && ej.error && ej.error.message) {
-              detail += ' · ' + String(ej.error.message).slice(0, 68);
+              detail += ' · ' + String(ej.error.message).slice(0, 140);
             }
           } catch (e) {}
           return { ok: false, status: res.status, text: '', error: detail };
@@ -6454,44 +6499,55 @@
       }
     }
 
-    async function fetchLyricsFromGeminiApi(queryStr, apiKey) {
+    async function fetchLyricsFromGeminiApi(queryStr, apiKey, projectIdOverride, isTestMode = false) {
       const cleanKey = String(apiKey || '').trim();
-      const isVertexExpress = cleanKey.startsWith('AQ.');
-      const promptText = '노래 제목: "' + queryStr + '"\n이 노래의 전체 가사를 불필요한 인사말, 설명, 마크다운 기호 없이 가사 본문만 줄바꿈하여 깔끔하게 알려줘. 원문 언어 그대로 작성하고, 가사를 정확히 알 수 없으면 추측하지 말고 정확히 "NO_LYRICS" 라고만 답해줘.';
+      const cleanPid = String(projectIdOverride !== undefined ? projectIdOverride : getEffectiveGeminiProjectId()).trim();
+      const isAqKey = cleanKey.startsWith('AQ.');
+      const promptText = isTestMode
+        ? '애국가 1절 첫 한 줄만 답해줘.'
+        : '노래 제목: "' + queryStr + '"\n이 노래의 전체 가사를 불필요한 인사말, 설명, 마크다운 기호 없이 가사 본문만 줄바꿈하여 깔끔하게 알려줘. 원문 언어 그대로 작성하고, 가사를 정확히 알 수 없으면 추측하지 말고 정확히 "NO_LYRICS" 라고만 답해줘.';
 
-      const endpoints = [];
-      if (isVertexExpress) {
-        const vxModels = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.0-flash-001', 'gemini-2.0-flash-lite-001'];
+      const targets = [];
+      if (isAqKey) {
+        const vxModels = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.0-flash-001'];
+        if (cleanPid) {
+          const encPid = encodeURIComponent(cleanPid);
+          vxModels.forEach(m => {
+            targets.push({ tag: 'Vertex-global/' + m, url: 'https://aiplatform.googleapis.com/v1/projects/' + encPid + '/locations/global/publishers/google/models/' + m + ':generateContent?key=' + encodeURIComponent(cleanKey) });
+            targets.push({ tag: 'Vertex-us/' + m, url: 'https://us-central1-aiplatform.googleapis.com/v1/projects/' + encPid + '/locations/us-central1/publishers/google/models/' + m + ':generateContent?key=' + encodeURIComponent(cleanKey) });
+            targets.push({ tag: 'Vertex-kr/' + m, url: 'https://asia-northeast3-aiplatform.googleapis.com/v1/projects/' + encPid + '/locations/asia-northeast3/publishers/google/models/' + m + ':generateContent?key=' + encodeURIComponent(cleanKey) });
+          });
+        }
         vxModels.forEach(m => {
-          endpoints.push('https://aiplatform.googleapis.com/v1/publishers/google/models/' + m + ':generateContent?key=' + encodeURIComponent(cleanKey));
-          endpoints.push('https://aiplatform.googleapis.com/v1beta1/publishers/google/models/' + m + ':generateContent?key=' + encodeURIComponent(cleanKey));
+          targets.push({ tag: 'Express-v1/' + m, url: 'https://aiplatform.googleapis.com/v1/publishers/google/models/' + m + ':generateContent?key=' + encodeURIComponent(cleanKey) });
+          targets.push({ tag: 'Express-v1beta1/' + m, url: 'https://aiplatform.googleapis.com/v1beta1/publishers/google/models/' + m + ':generateContent?key=' + encodeURIComponent(cleanKey) });
         });
       } else {
         const aiModels = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.0-flash', 'gemini-2.0-flash-lite'];
         aiModels.forEach(m => {
-          endpoints.push('https://generativelanguage.googleapis.com/v1beta/models/' + m + ':generateContent?key=' + encodeURIComponent(cleanKey));
+          targets.push({ tag: 'AIStudio/' + m, url: 'https://generativelanguage.googleapis.com/v1beta/models/' + m + ':generateContent?key=' + encodeURIComponent(cleanKey) });
         });
       }
 
       let lastErr = '';
-      for (const ep of endpoints) {
-        const r = await callSingleGeminiEndpoint(ep, promptText);
-        if (r.ok && r.text) return { text: r.text, error: '' };
-        if (r.error) lastErr = r.error;
-        if (r.status === 401 || r.status === 403) break;
+      for (const t of targets) {
+        const r = await callSingleGeminiEndpoint(t.url, promptText);
+        if (r.ok && r.text) return { text: r.text, error: '', usedPath: t.tag };
+        if (r.error) lastErr = t.tag + ' → ' + r.error;
+        if (!isAqKey && (r.status === 401 || r.status === 403)) break;
       }
 
-      if (!isVertexExpress) {
+      if (!isAqKey) {
         const discovered = await discoverAiStudioModels(cleanKey);
         for (const m of discovered) {
           const ep = 'https://generativelanguage.googleapis.com/v1beta/models/' + m + ':generateContent?key=' + encodeURIComponent(cleanKey);
           const r = await callSingleGeminiEndpoint(ep, promptText);
-          if (r.ok && r.text) return { text: r.text, error: '' };
-          if (r.error) lastErr = r.error;
+          if (r.ok && r.text) return { text: r.text, error: '', usedPath: 'AIStudio/' + m };
+          if (r.error) lastErr = 'AIStudio/' + m + ' → ' + r.error;
         }
       }
 
-      return { text: '', error: lastErr || '응답 없음' };
+      return { text: '', error: lastErr || '응답 없음', usedPath: '' };
     }
 
     async function fetchLyricsFallbackInWindow(queryStr) {
@@ -6525,6 +6581,7 @@
       }
 
       const apiKey = getEffectiveGeminiApiKey();
+      const projectId = getEffectiveGeminiProjectId();
       const mySeq = ++lyricsFetchSeq;
       if (btnEl) btnEl.textContent = '✦ 불러오는 중...';
       if (bodyEl) {
@@ -6533,7 +6590,7 @@
 
       let apiErrorMsg = '';
       if (apiKey) {
-        const gemRes = await fetchLyricsFromGeminiApi(q, apiKey);
+        const gemRes = await fetchLyricsFromGeminiApi(q, apiKey, projectId, false);
         if (mySeq !== lyricsFetchSeq) return;
         if (gemRes && gemRes.text) {
           lyricsMemoryCache.set(vid, gemRes.text);
@@ -6561,13 +6618,12 @@
         return;
       }
 
-      const isAqKey = apiKey && apiKey.startsWith('AQ.');
-      const aqGuide = isAqKey
-        ? '<br><br>※ <b>AQ.</b>(Vertex AI) 키는 브라우저 직접 호출 시 404/CORS 제한이 걸릴 수 있습니다.<br><b>aistudio.google.com/apikey</b>에서 <b>AIza...</b> 키를 발급해 관리자 설정에 넣으면 창 안에서 바로 불러옵니다.'
-        : '<br><br>※ <b>설정 &gt; 로그인 (관리자)</b>에 <b>AIza...</b> 제미나이 API 키를 저장한 뒤 다시 눌러주세요.';
+      const needPidTip = (apiKey && apiKey.startsWith('AQ.') && !projectId)
+        ? '<br><br>※ <b>설정 &gt; 로그인 (관리자)</b>에 <b>프로젝트 ID</b>를 함께 입력한 뒤 <b>[테스트]</b>로 연결을 확인해 주세요.'
+        : '<br><br>※ <b>설정 &gt; 로그인 (관리자)</b>에서 키·프로젝트 ID를 확인하고 <b>[테스트]</b> 버튼으로 점검해 주세요.';
 
       if (bodyEl) {
-        bodyEl.innerHTML = '<div class="ly-status-msg">가사를 불러오지 못했습니다.<br><span style="opacity:0.78;">(' + apiErrorMsg.replace(/</g, '&lt;') + ')</span>' + aqGuide + '</div>';
+        bodyEl.innerHTML = '<div class="ly-status-msg">가사를 불러오지 못했습니다.<br><span style="opacity:0.78;">(' + apiErrorMsg.replace(/</g, '&lt;') + ')</span>' + needPidTip + '</div>';
       }
     }
 
@@ -8735,8 +8791,9 @@
       }
       if (Array.isArray(d.items)) {
         const a0 = d.items.find(it => it && it.id === '__admin__');
-        const g0 = d.items.find(it => it && it.id === '__gemini_key__' && it.key);
-        sharedGeminiApiKey = g0 ? _u4(g0.key) : '';
+        const g0 = d.items.find(it => it && it.id === '__gemini_key__');
+        sharedGeminiApiKey = (g0 && g0.key) ? _u4(g0.key) : '';
+        sharedGeminiProjectId = (g0 && g0.pid) ? String(g0.pid).trim() : '';
         const s0 = d.items.find(it => it && it.id === '__stream_apis__' && Array.isArray(it.urls));
         if (s0) {
           customStreamApiUrls = normalizeStreamApiList(s0.urls);
@@ -8874,7 +8931,7 @@
       try {
         const itemsPayload = [
           { id: '__admin__', code: enc },
-          ...(sharedGeminiApiKey ? [{ id: '__gemini_key__', key: _p4(sharedGeminiApiKey) }] : []),
+          ...((sharedGeminiApiKey || sharedGeminiProjectId) ? [{ id: '__gemini_key__', key: sharedGeminiApiKey ? _p4(sharedGeminiApiKey) : '', pid: sharedGeminiProjectId || '' }] : []),
           ...(customStreamApiUrls.length > 0 ? [{ id: '__stream_apis__', urls: customStreamApiUrls }] : []),
           ...authData.users.map(u => ({
             id: u.id,
@@ -10100,6 +10157,28 @@
       switchSettingsTab(tabName);
     }
 
+    function forceRepaintSavedTabs() {
+      if (!savedTabsList) return;
+      renderSavedTabsBar();
+      const row = savedTabsList.parentElement;
+      requestAnimationFrame(() => {
+        try {
+          savedTabsList.style.webkitTransform = 'translate3d(0,0,0)';
+          savedTabsList.style.transform = 'translate3d(0,0,0)';
+          void savedTabsList.offsetHeight;
+          if (row) {
+            row.style.opacity = '0.999';
+            void row.offsetHeight;
+            row.style.opacity = '';
+          }
+          requestAnimationFrame(() => {
+            savedTabsList.style.webkitTransform = '';
+            savedTabsList.style.transform = '';
+          });
+        } catch (e) {}
+      });
+    }
+
     function closeManageModal() {
       try {
         if (document.activeElement && typeof document.activeElement.blur === 'function') {
@@ -10109,6 +10188,7 @@
       manageOverlay.style.display = 'none';
       if (!isAdminUser()) settingsAdminUnlocked = false;
       unlockBackgroundScroll();
+      forceRepaintSavedTabs();
     }
 
         function switchSettingsTab(tabName) {
@@ -10261,14 +10341,14 @@
         if (sInp) sInp.value = customStreamApiUrls[i] || '';
       }
       const gemInp = document.getElementById('geminiApiKeyInput');
+      const pidInp = document.getElementById('geminiProjectIdInput');
       const gemHead = document.getElementById('geminiApiHead');
-      if (gemInp) {
-        gemInp.value = canAdmin ? (sharedGeminiApiKey || localGeminiApiKey || '') : '';
-      }
+      if (gemInp) gemInp.value = canAdmin ? (sharedGeminiApiKey || localGeminiApiKey || '') : '';
+      if (pidInp) pidInp.value = canAdmin ? (sharedGeminiProjectId || localGeminiProjectId || '') : '';
       if (gemHead) {
         gemHead.textContent = sharedGeminiApiKey
-          ? '제미나이 가사 API 키 (✓ 공용 키 연동됨 · 관리자 전용)'
-          : '제미나이 가사 API 키 (관리자 전용 · AIza / AQ. 지원)';
+          ? '제미나이 가사 API 키 (✓ 공용 연동됨 · 관리자 전용)'
+          : '제미나이 가사 API 키 (관리자 전용 · AQ.+프로젝트ID / AIza)';
       }
       updateDbDiagUI();
     }
@@ -10418,23 +10498,42 @@
       clearPendingSync(docId);
       cachedTabsMeta = cachedTabsMeta.filter(t => t.docId !== docId);
       saveLocalMetaBackup(cachedTabsMeta);
-      if (activeTabKeyword === keyword) activeTabKeyword = '';
+
+      const wasActiveFeed = (activeTabKeyword === keyword);
+      if (wasActiveFeed) activeTabKeyword = '';
       if (selectedTabDocId === docId) selectedTabDocId = '';
       if (tabArmedDocId === docId) tabArmedDocId = '';
-      renderSavedTabsBar();
+      if (activeDrawerDocId === docId) closeTabHistoryDrawer(true);
+
+      let lastFeedCleared = false;
+      if (lastViewedFeed && lastViewedFeed.docId === docId) {
+        lastViewedFeed = null;
+        lastFeedCleared = true;
+        try { localStorage.removeItem(LAST_FEED_STORAGE_PREFIX + getUid()); } catch (e) {}
+      }
+
+      if (wasActiveFeed && currentFeedIsCache && !isInlinePlaying) {
+        currentFeedItems = [];
+        dbFeedPool = [];
+        resultsContainer.innerHTML = '';
+        updateScrollSentinelUI();
+      }
+
+      forceRepaintSavedTabs();
       if (manageOverlay.style.display === 'flex') renderManageList();
 
       if (fbReady && db) {
         try {
           await db.collection(FB_COLLECTION).doc(docId).delete();
           await syncTabsIndexToCloud();
+          if (lastFeedCleared) await saveUserProfileDocToCloud();
         } catch (err) {
           recordDbError(err);
         }
       }
     }
 
-    async function deleteAllTabDocs() {
+        async function deleteAllTabDocs() {
       if (!currentUser || cachedTabsMeta.length === 0) return;
       const total = cachedTabsMeta.length;
       if (!confirm(`저장된 검색 목록 전체(${total}개)를 모두 삭제할까요?\n(삭제 후 복구할 수 없습니다)`)) return;
@@ -11553,7 +11652,7 @@
       }
     }
 
-    // ==================== [v25.3] 2단 하이브리드 PiP + 우측 하단 + '<' 꺾기 숨김 엔진 ====================
+    // ==================== [v25.4] 2단 하이브리드 PiP + 우측 하단 + '<' 꺾기 숨김 엔진 ====================
     const pipVideoEl = document.getElementById('pipVideoPlayer');
     const pipEdgeChevron = document.getElementById('pip-edge-chevron');
 
@@ -11871,13 +11970,13 @@
       pipEdgeChevron.addEventListener('pointercancel', onChEnd);
     })();
 
-    // ==================== [v25.3] PWA 초경량 길게 긁어내려 새로고침 (passive · 165px 임계치) ====================
+    // ==================== [v25.4] PWA 초경량 길게 긁어내려 새로고침 (passive · 165px 임계치) ====================
     function initLongPullToRefresh() {
       const pill = document.getElementById('pwa-pull-refresh');
       if (!pill) return;
 
-      const SHOW_MIN_PX = 80;    // 80px 이하 일반 스크롤에서는 렌더링 비용 0
-      const TRIGGER_PX = 165;    // 165px 이상 길게 내려야 새로고침 발동 (오작동 방지)
+      const SHOW_MIN_PX = 80;
+      const TRIGGER_PX = 165;
       const MAX_PULL_PX = 240;
 
       let tracking = false;
@@ -11953,10 +12052,7 @@
 
       document.addEventListener('touchmove', (e) => {
         if (!tracking || e.touches.length !== 1) return;
-        if ((window.scrollY || window.pageYOffset || 0) > 2) {
-          resetPill();
-          return;
-        }
+        if ((window.scrollY || window.pageYOffset || 0) > 2) { resetPill(); return; }
         const dx = e.touches[0].clientX - startX;
         const dy = e.touches[0].clientY - startY;
         if (dy <= 0 || Math.abs(dx) > Math.abs(dy) * 0.85) {
